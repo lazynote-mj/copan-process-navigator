@@ -1,0 +1,12 @@
+{
+  "id": "offline-pos-sales",
+  "name": "오프라인/POS 판매",
+  "description": "Overview TO-BE — 오프라인 및 POS 판매 프로세스 (데이터 입력 예정)",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

@@ -1,0 +1,6 @@
+[
+  { "id": "e01", "source": "transfer-request-register", "target": "transfer-request", "condition": "", "label": "", "type": "normal" },
+  { "id": "e02", "source": "transfer-request", "target": "wms-transfer-process", "condition": "", "label": "", "type": "system" },
+  { "id": "e03", "source": "wms-transfer-process", "target": "transfer-confirm", "condition": "", "label": "", "type": "normal" },
+  { "id": "e04", "source": "transfer-confirm", "target": "erp-location-reflect", "condition": "", "label": "", "type": "system" }
+]

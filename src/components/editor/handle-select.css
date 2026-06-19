@@ -1,0 +1,44 @@
+.handle-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.handle-select__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+}
+
+.handle-select__group {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.handle-select__btn {
+  padding: 4px 2px;
+  font-size: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+}
+
+.handle-select__btn:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.handle-select__btn--active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.handle-select__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

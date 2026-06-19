@@ -1,0 +1,170 @@
+{
+  "id": "consignment-purchase-receipt",
+  "name": "구매요청 ~ 입고 : 판매대행",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "판매대행(위탁) 구매·입고 프로세스",
+  "overviewNodeId": "purchase-request",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "purchase-request",
+      "name": "구매요청",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "구매요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "consignment-po",
+      "name": "판매대행 발주",
+      "type": "erp",
+      "laneId": "partnership",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "상생협력팀",
+      "description": "판매대행 발주",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "consignment-inbound-info",
+      "name": "입고정보전달",
+      "type": "interface",
+      "laneId": "partnership",
+      "phaseId": "p3",
+      "system": "ERP→WMS API",
+      "owner": "상생협력팀",
+      "description": "입고정보전달",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "consignment-inbound-check",
+      "name": "입고확인",
+      "type": "manual",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "WMS",
+      "owner": "물류센터",
+      "description": "입고확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "consignment-inbound-register",
+      "name": "입고등록",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p5",
+      "system": "WMS",
+      "owner": "물류센터",
+      "description": "입고등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "consignment-inbound-confirm",
+      "name": "입고확정",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p6",
+      "system": "WMS→ERP",
+      "owner": "물류센터",
+      "description": "입고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "consignment-stock-plus",
+      "name": "위탁재고인식(+)",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "위탁재고인식(+)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "purchase-request",
+      "target": "consignment-po",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "consignment-po",
+      "target": "consignment-inbound-info",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e03",
+      "source": "consignment-inbound-info",
+      "target": "consignment-inbound-check",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "consignment-inbound-check",
+      "target": "consignment-inbound-register",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e05",
+      "source": "consignment-inbound-register",
+      "target": "consignment-inbound-confirm",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e06",
+      "source": "consignment-inbound-confirm",
+      "target": "consignment-stock-plus",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

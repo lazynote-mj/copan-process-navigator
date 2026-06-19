@@ -1,0 +1,20 @@
+{
+  "id": "other-issue-process",
+  "name": "기타출고 프로세스",
+  "description": "기타출고 요청·무상증정 품의·WMS 출고·재고차감·회계전표 반영 상세 흐름",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [
+    { "id": "p1", "label": "기타출고요청", "order": 1 },
+    { "id": "p2", "label": "무상증정품의", "order": 2 },
+    { "id": "p3", "label": "승인여부", "order": 3 },
+    { "id": "p4", "label": "출고요청확인", "order": 4 },
+    { "id": "p5", "label": "WMS출고처리", "order": 5 },
+    { "id": "p6", "label": "출고수량입력", "order": 6 },
+    { "id": "p7", "label": "기타출고확정", "order": 7 },
+    { "id": "p8", "label": "재고차감", "order": 8 },
+    { "id": "p9", "label": "회계전표", "order": 9 }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "id": "consignment-settlement",
+  "name": "위탁정산",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "위탁 재고·매출 마감·정산전표",
+  "overviewNodeId": "settlement-posting",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "consignment-stock-status",
+      "name": "위탁재고현황",
+      "type": "erp",
+      "laneId": "partnership",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "상생협력팀",
+      "description": "위탁재고현황",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "consignment-sales-register",
+      "name": "위탁매출마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁매출마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "consignment-sales-close",
+      "name": "위탁매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p3",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "settlement-anomaly-check",
+      "name": "정산 이상여부",
+      "type": "decision",
+      "laneId": "finance",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "정산 이상여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "prepayment-process",
+      "name": "선수금처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "선수금처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "regular-fund-execution",
+      "name": "정기자금집행",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "정기자금집행",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "settlement-posting",
+      "name": "정산전표처리",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "정산전표처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "consignment-stock-status",
+      "target": "consignment-sales-register",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "consignment-sales-register",
+      "target": "consignment-sales-close",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e03",
+      "source": "consignment-sales-close",
+      "target": "settlement-anomaly-check",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e05",
+      "source": "settlement-anomaly-check",
+      "target": "prepayment-process",
+      "condition": "noSettlementAnomaly",
+      "label": "N",
+      "type": "condition"
+    },
+    {
+      "id": "e01",
+      "source": "prepayment-process",
+      "target": "regular-fund-execution",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "regular-fund-execution",
+      "target": "settlement-posting",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

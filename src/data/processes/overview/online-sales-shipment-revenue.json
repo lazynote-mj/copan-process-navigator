@@ -1,0 +1,12 @@
+{
+  "id": "online-sales-shipment-revenue",
+  "name": "온라인 판매·출고·매출",
+  "description": "Overview TO-BE — 온라인 채널 판매, 출고, 매출 인식 프로세스 (데이터 입력 예정)",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

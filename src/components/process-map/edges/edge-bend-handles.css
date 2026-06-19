@@ -1,0 +1,30 @@
+.edge-bend-handles__point {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 2;
+  cursor: grab;
+}
+
+.edge-bend-handles__point:active {
+  cursor: grabbing;
+  fill: #dbeafe;
+}
+
+.edge-bend-handles__anchor {
+  fill: #94a3b8;
+  stroke: #ffffff;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+.edge-bend-handles__anchor--source {
+  fill: #16a34a;
+}
+
+.edge-bend-handles__anchor--target {
+  fill: #dc2626;
+}
+
+.process-edge--selected .react-flow__edge-path {
+  stroke-width: 2.5 !important;
+}

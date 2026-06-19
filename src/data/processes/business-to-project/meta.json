@@ -1,0 +1,21 @@
+{
+  "id": "business-to-project",
+  "name": "사업 시작 ~ 구매요청 ~ 입고 ~ 매입전표",
+  "description": "사업기회 확보부터 계약·프로젝트 등록, 구매요청, 입고·재고인식, 매입마감·회계전표까지",
+  "version": "TO-BE v1.0",
+  "status": "draft",
+  "lastModified": "2026-06-18",
+  "owner": "ERP PMO",
+  "phases": [
+    { "id": "p1", "label": "사업기회", "order": 1 },
+    { "id": "p2", "label": "사업검토", "order": 2 },
+    { "id": "p3", "label": "계약등록", "order": 3 },
+    { "id": "p4", "label": "계약품의", "order": 4 },
+    { "id": "p5", "label": "프로젝트등록", "order": 5 },
+    { "id": "p6", "label": "실행품의", "order": 6 },
+    { "id": "p7", "label": "구매요청", "order": 7 },
+    { "id": "p8", "label": "거래처·발주", "order": 8 },
+    { "id": "p9", "label": "입고", "order": 9 },
+    { "id": "p10", "label": "재고·매입", "order": 10 }
+  ]
+}

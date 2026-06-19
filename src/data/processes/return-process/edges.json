@@ -1,0 +1,31 @@
+[
+  { "id": "e01", "source": "return-order-register", "target": "return-order-confirm", "condition": "", "label": "", "type": "normal" },
+  { "id": "e02", "source": "return-order-confirm", "target": "return-shipment-request", "condition": "", "label": "", "type": "normal" },
+  { "id": "e03", "source": "return-shipment-request", "target": "stock-sync-api-inbound", "condition": "", "label": "", "type": "system" },
+  { "id": "e04", "source": "stock-sync-api-inbound", "target": "inbound-request-check", "condition": "", "label": "", "type": "system" },
+  { "id": "e05", "source": "inbound-request-check", "target": "b2b-return-inbound", "condition": "", "label": "", "type": "normal" },
+  { "id": "e06", "source": "b2b-return-inbound", "target": "inbound-qty-input", "condition": "", "label": "", "type": "normal" },
+  { "id": "e07", "source": "inbound-qty-input", "target": "return-inbound-register", "condition": "", "label": "", "type": "normal" },
+  { "id": "e08", "source": "return-inbound-register", "target": "return-confirm", "condition": "", "label": "", "type": "system" },
+  { "id": "e09", "source": "return-confirm", "target": "consignment-flag-check", "condition": "", "label": "", "type": "normal" },
+  {
+    "id": "e10",
+    "source": "consignment-flag-check",
+    "target": "consignment-stock-status-check",
+    "condition": "consignment",
+    "label": "Y",
+    "type": "condition"
+  },
+  {
+    "id": "e11",
+    "source": "consignment-flag-check",
+    "target": "erp-stock-plus",
+    "condition": "noConsignment",
+    "label": "N",
+    "type": "condition"
+  },
+  { "id": "e12", "source": "consignment-stock-status-check", "target": "erp-stock-plus", "condition": "", "label": "", "type": "normal" },
+  { "id": "e13", "source": "erp-stock-plus", "target": "batch-sales-close-register", "condition": "", "label": "", "type": "normal" },
+  { "id": "e14", "source": "batch-sales-close-register", "target": "sales-close-confirm", "condition": "", "label": "", "type": "normal" },
+  { "id": "e15", "source": "sales-close-confirm", "target": "voucher-pending", "condition": "", "label": "", "type": "normal" }
+]

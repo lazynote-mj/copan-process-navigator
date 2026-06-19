@@ -1,0 +1,24 @@
+{
+  "id": "return-process",
+  "name": "반품 프로세스",
+  "description": "반품주문 등록부터 입고·재고·매출마감·전표생성까지의 상세 흐름",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [
+    { "id": "p1", "label": "반품주문등록", "order": 1 },
+    { "id": "p2", "label": "반품주문확정", "order": 2 },
+    { "id": "p3", "label": "출고반품요청", "order": 3 },
+    { "id": "p4", "label": "재고연동API", "order": 4 },
+    { "id": "p5", "label": "입고요청확인", "order": 5 },
+    { "id": "p6", "label": "B2B반품입고", "order": 6 },
+    { "id": "p7", "label": "입고수량입력", "order": 7 },
+    { "id": "p8", "label": "반품입고등록", "order": 8 },
+    { "id": "p9", "label": "반품확정", "order": 9 },
+    { "id": "p10", "label": "위탁여부", "order": 10 },
+    { "id": "p11", "label": "재고반영", "order": 11 },
+    { "id": "p12", "label": "매출마감", "order": 12 },
+    { "id": "p13", "label": "전표생성", "order": 13 }
+  ]
+}

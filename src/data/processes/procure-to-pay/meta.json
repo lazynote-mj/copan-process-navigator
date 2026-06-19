@@ -1,0 +1,22 @@
+{
+  "id": "procure-to-pay",
+  "name": "구매요청 ~ 입고 ~ 매입",
+  "description": "사업부 구매 요청부터 협력사 발주, 물류 입고, 재무 매입 처리",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [
+    { "id": "p1", "label": "구매요청", "order": 1 },
+    { "id": "p2", "label": "거래처확인", "order": 2 },
+    { "id": "p3", "label": "거래처등록", "order": 3 },
+    { "id": "p4", "label": "발주품의", "order": 4 },
+    { "id": "p5", "label": "발주등록", "order": 5 },
+    { "id": "p6", "label": "입고정보", "order": 6 },
+    { "id": "p7", "label": "입고확인", "order": 7 },
+    { "id": "p8", "label": "입고확정", "order": 8 },
+    { "id": "p9", "label": "재고인식", "order": 9 },
+    { "id": "p10", "label": "매입마감", "order": 10 },
+    { "id": "p11", "label": "회계전표", "order": 11 }
+  ]
+}

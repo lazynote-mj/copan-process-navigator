@@ -1,0 +1,12 @@
+{
+  "id": "royalty-mg-settlement",
+  "name": "로열티/MG 정산",
+  "description": "Overview TO-BE — 로열티 및 MG 정산 프로세스 (데이터 입력 예정)",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

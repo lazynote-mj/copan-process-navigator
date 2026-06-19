@@ -1,0 +1,294 @@
+.process-map-canvas {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.process-map-canvas--overview {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.process-map-canvas--overview .process-map-canvas__scroll {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+.process-map-canvas--panel-open .process-map-canvas__scroll,
+.process-map-canvas--panel-open .process-map-canvas__scroll--detail {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* Panel open — 캔버스 폭 유지, 우측 패널 폭만큼 추가 스크롤 여유 확보 */
+.process-map-canvas--panel-open .process-map-canvas__scroll-content {
+  box-sizing: content-box;
+  padding-right: var(--panel-inset-right, 380px);
+}
+
+.process-map-canvas__scroll-content {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.process-map-canvas--overview .process-map-canvas__scroll-track {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.process-map-canvas--overview .process-map-canvas__flow-sticky {
+  position: sticky;
+  top: 52px;
+  flex-shrink: 0;
+  height: calc(100vh - 44px - 52px);
+  min-height: 280px;
+  overflow: hidden;
+}
+
+.process-map-canvas--overview .react-flow {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.overview-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: grid;
+  flex-shrink: 0;
+  background: rgba(248, 250, 252, 0.98);
+  border-bottom: 1.5px solid #94a3b8;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  pointer-events: none;
+}
+
+.overview-sticky-header--edit {
+  pointer-events: auto;
+}
+
+.overview-sticky-header__corner {
+  flex-shrink: 0;
+  border-right: 1px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+.overview-sticky-header__lane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: none;
+  border-right: 1px solid #e2e8f0;
+  min-height: 52px;
+  box-sizing: border-box;
+  background: #ffffff;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.overview-sticky-header--edit .overview-sticky-header__lane {
+  cursor: pointer;
+}
+
+.overview-sticky-header--edit .overview-sticky-header__lane:hover {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.overview-sticky-header__lane--selected {
+  background: rgba(37, 99, 235, 0.12) !important;
+  box-shadow: inset 0 0 0 2px #2563eb;
+}
+
+.overview-sticky-header__lane:disabled {
+  cursor: default;
+}
+
+.overview-sticky-header__lane-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.overview-sticky-header__lane-dept {
+  font-size: 9px;
+  color: #64748b;
+  text-align: center;
+}
+
+
+.process-map-canvas--detail-vertical {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.process-map-canvas__scroll--detail {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+.process-map-canvas__flow-sticky--detail {
+  position: sticky;
+  top: 52px;
+  flex-shrink: 0;
+  height: calc(100vh - 52px);
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.process-map-canvas--detail-vertical .react-flow {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.process-map-canvas .react-flow {
+  background: #f8fafc;
+}
+
+/* z-index: grid 0 → zone 1 → edge 2 → node 3 → selected 4 */
+.process-map-canvas .swimlane-overlay {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.process-map-canvas .process-zone-overlay {
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+.process-map-canvas .swimlane-overlay__lane-header {
+  pointer-events: none;
+}
+
+.process-map-canvas .swimlane-overlay__lane--inactive {
+  pointer-events: none;
+}
+
+
+.process-map-canvas--edit .swimlane-overlay__lane-header {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.process-map-canvas--edit .swimlane-overlay__zone-label-hit,
+.process-map-canvas--edit .swimlane-overlay__zone-label {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.process-map-canvas .react-flow__panel {
+  z-index: 0 !important;
+}
+
+.process-map-canvas .react-flow__background {
+  z-index: 0 !important;
+}
+
+.process-map-canvas .react-flow__edges {
+  z-index: 2;
+}
+
+.process-map-canvas .react-flow__nodes {
+  z-index: 3;
+}
+
+.process-map-canvas .react-flow__node {
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.process-map-canvas .react-flow__node.process-node-flow--interface-rule {
+  z-index: 3;
+}
+
+.process-map-canvas .react-flow__node.selected {
+  z-index: 4;
+}
+
+.process-map-canvas .react-flow__edge.selected {
+  z-index: 4;
+}
+
+/* Edit Mode — connection handles */
+.process-map-canvas--edit .process-node__handle,
+.process-map-canvas--edit .decision-node__handle {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.process-map-canvas--edit .react-flow__node:hover .process-node__handle,
+.process-map-canvas--edit .react-flow__node:hover .decision-node__handle,
+.process-map-canvas--edit .react-flow__node.connecting .process-node__handle,
+.process-map-canvas--edit .react-flow__node.connecting .decision-node__handle,
+.process-map-canvas--edit .react-flow__handle.connecting,
+.process-map-canvas--edit .react-flow__handle.valid {
+  opacity: 1 !important;
+}
+
+.process-map-canvas:not(.process-map-canvas--edit) .process-edge__label {
+  pointer-events: none !important;
+}
+
+/* Edge labels */
+.process-edge__label {
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.process-edge__label--normal {
+  color: #475569;
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.process-edge__label--condition {
+  color: #6d28d9;
+  background: #ffffff;
+  border-color: #ddd6fe;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.process-edge__label--exception {
+  color: #e11d48;
+  background: #ffffff;
+  border-color: #fecdd3;
+  font-weight: 600;
+}
+
+.process-edge__label--return {
+  color: #64748b;
+  background: #ffffff;
+  border-color: #cbd5e1;
+  font-weight: 500;
+}
+
+.process-edge__label--system {
+  color: #047857;
+  background: #ffffff;
+  border-color: #a7f3d0;
+}

@@ -1,0 +1,12 @@
+{
+  "id": "return-process",
+  "name": "반품 프로세스",
+  "description": "반품주문 등록부터 입고·재고·매출마감·전표생성까지의 상세 흐름",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

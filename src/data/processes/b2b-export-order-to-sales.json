@@ -1,0 +1,170 @@
+{
+  "id": "b2b-export-order-to-sales",
+  "name": "주문등록 ~ 수출출고 ~ 매출전표 : B2B 해외",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "B2B 해외(수출) 주문·수출출고·매출전표",
+  "overviewNodeId": "order-register",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "export-order-register",
+      "name": "수출주문등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "수출주문등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "export-customs-check",
+      "name": "수출통관확인",
+      "type": "erp",
+      "laneId": "partnership",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "상생협력팀",
+      "description": "수출통관확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "export-shipment-request",
+      "name": "수출출고요청",
+      "type": "interface",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "ERP→WMS",
+      "owner": "사업부",
+      "description": "수출출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "export-shipment-confirm",
+      "name": "수출출고확정",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "WMS→ERP",
+      "owner": "물류센터",
+      "description": "수출출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "export-stock-minus",
+      "name": "재고인식(-)",
+      "type": "system",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "물류센터",
+      "description": "재고인식(-)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "export-sales-close",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "export-sales-posting",
+      "name": "매출전표생성",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출전표생성",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "export-order-register",
+      "target": "export-customs-check",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "export-customs-check",
+      "target": "export-shipment-request",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e03",
+      "source": "export-shipment-request",
+      "target": "export-shipment-confirm",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "export-shipment-confirm",
+      "target": "export-stock-minus",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e05",
+      "source": "export-stock-minus",
+      "target": "export-sales-close",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e06",
+      "source": "export-sales-close",
+      "target": "export-sales-posting",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

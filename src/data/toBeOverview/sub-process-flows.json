@@ -1,0 +1,119 @@
+{
+  "groups": [
+    {
+      "id": "sub-returns",
+      "name": "반품",
+      "description": "반품 처리 — Overview 대표 노드에서 상세 프로세스로 이동",
+      "detailProcessId": "b2b-domestic-return",
+      "nodeIds": ["return-handling"],
+      "links": []
+    },
+    {
+      "id": "sub-warehouse-transfer",
+      "name": "재고이동",
+      "description": "창고 간 재고 이동 — Overview 대표 노드에서 상세 프로세스로 이동",
+      "detailProcessId": "stock-transfer",
+      "nodeIds": ["stock-transfer-handling"],
+      "links": []
+    },
+    {
+      "id": "sub-other-outbound",
+      "name": "기타출고",
+      "description": "기타출고·무상증정 — Overview 대표 노드에서 상세 프로세스로 이동",
+      "detailProcessId": "other-issue",
+      "nodeIds": ["other-issue-handling"],
+      "links": []
+    },
+    {
+      "id": "sub-consignment",
+      "name": "위탁정산",
+      "description": "위탁 재고·매출 마감 및 이상 검증",
+      "detailProcessId": "consignment-settlement",
+      "nodeIds": [
+        "stock-minus",
+        "consignment-stock-status",
+        "consignment-sales-register",
+        "consignment-sales-close",
+        "settlement-anomaly-check",
+        "exception-handling",
+        "prepayment-process",
+        "regular-fund-execution",
+        "settlement-posting"
+      ],
+      "links": [
+        { "id": "sub:consignment:00", "source": "stock-minus", "target": "consignment-stock-status", "type": "system" },
+        { "id": "sub:consignment:01", "source": "consignment-stock-status", "target": "consignment-sales-register", "type": "normal" },
+        { "id": "sub:consignment:02", "source": "consignment-sales-register", "target": "consignment-sales-close", "type": "normal" },
+        { "id": "sub:consignment:03", "source": "consignment-sales-close", "target": "settlement-anomaly-check", "type": "normal" },
+        {
+          "id": "sub:consignment:04",
+          "source": "settlement-anomaly-check",
+          "target": "exception-handling",
+          "condition": "settlementAnomaly",
+          "label": "Y",
+          "type": "condition"
+        },
+        {
+          "id": "sub:consignment:05",
+          "source": "settlement-anomaly-check",
+          "target": "prepayment-process",
+          "condition": "noSettlementAnomaly",
+          "label": "N",
+          "type": "condition"
+        },
+        { "id": "sub:consignment:06", "source": "prepayment-process", "target": "regular-fund-execution", "type": "normal" },
+        { "id": "sub:consignment:07", "source": "regular-fund-execution", "target": "settlement-posting", "type": "normal" }
+      ]
+    },
+    {
+      "id": "sub-royalty-mg",
+      "name": "로열티/MG정산",
+      "description": "로열티 매출 집계·MG 상계·정산전표",
+      "detailProcessId": "royalty-mg-settlement",
+      "nodeIds": [
+        "royalty-sales-aggregate",
+        "royalty-sales-close",
+        "mg-deduct-check",
+        "mg-offset-process",
+        "settlement-posting"
+      ],
+      "links": [
+        { "id": "sub:royalty:01", "source": "royalty-sales-aggregate", "target": "royalty-sales-close", "type": "normal" },
+        { "id": "sub:royalty:02", "source": "royalty-sales-close", "target": "mg-deduct-check", "type": "normal" },
+        {
+          "id": "sub:royalty:03",
+          "source": "mg-deduct-check",
+          "target": "mg-offset-process",
+          "condition": "mgDeduct",
+          "label": "Y",
+          "type": "condition"
+        },
+        {
+          "id": "sub:royalty:04",
+          "source": "mg-deduct-check",
+          "target": "settlement-posting",
+          "condition": "noMgDeduct",
+          "label": "N",
+          "type": "condition"
+        },
+        { "id": "sub:royalty:05", "source": "mg-offset-process", "target": "settlement-posting", "type": "normal" }
+      ]
+    },
+    {
+      "id": "sub-b2b-export",
+      "name": "B2B 수출",
+      "description": "B2B 수출 프로세스 (연결선 정의 예정)",
+      "detailProcessId": "b2b-export-order-to-sales",
+      "nodeIds": [],
+      "links": []
+    },
+    {
+      "id": "sub-popup-concert",
+      "name": "팝업/콘서트 재고·매출 동기화",
+      "description": "팝업/콘서트 현장 재고이동 및 매출내역 동기화 — Overview 대표 노드에서 상세 프로세스로 이동",
+      "detailProcessId": "popup-concert-stock-sales-sync",
+      "nodeIds": ["popup-concert-stock-sales-sync"],
+      "links": []
+    }
+  ]
+}

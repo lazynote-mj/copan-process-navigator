@@ -1,0 +1,190 @@
+{
+  "id": "procure-to-pay",
+  "name": "Procure to Pay (구매~지급)",
+  "description": "구매 요청부터 발주, 입고, 검수, 대금 지급까지의 Copan ERP TO-BE 프로세스",
+  "version": "TO-BE v1.0",
+  "status": "review",
+  "lastModified": "2026-06-10",
+  "owner": "구매혁신 TF",
+  "phases": [
+    { "id": "requisition", "label": "구매 요청", "order": 1 },
+    { "id": "sourcing", "label": "소싱", "order": 2 },
+    { "id": "ordering", "label": "발주", "order": 3 },
+    { "id": "receiving", "label": "입고", "order": 4 },
+    { "id": "invoice", "label": "송장 대조", "order": 5 },
+    { "id": "payment", "label": "지급", "order": 6 }
+  ],
+  "lanes": [
+    {
+      "id": "lane-requester",
+      "name": "요청 부서",
+      "order": 1,
+      "ownerDepartment": "각 현업 부서"
+    },
+    {
+      "id": "lane-purchasing",
+      "name": "구매",
+      "order": 2,
+      "ownerDepartment": "구매팀"
+    },
+    {
+      "id": "lane-warehouse",
+      "name": "창고",
+      "order": 3,
+      "ownerDepartment": "물류팀"
+    },
+    {
+      "id": "lane-finance",
+      "name": "재무",
+      "order": 4,
+      "ownerDepartment": "재무팀"
+    },
+    {
+      "id": "lane-erp",
+      "name": "ERP 시스템",
+      "order": 5,
+      "ownerDepartment": "IT/ERP 운영"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "p01",
+      "name": "구매 요청",
+      "type": "process",
+      "laneId": "lane-requester",
+      "phaseId": "requisition",
+      "system": "SAP MM",
+      "owner": "요청자",
+      "description": "필요 자재 또는 서비스에 대한 구매 요청(PR)을 생성합니다.",
+      "inputs": ["소요 자재 명세", "예산 코드"],
+      "outputs": ["구매요청(PR)"],
+      "controls": ["구매요청 생성 권한", "계정 지정 규칙"]
+    },
+    {
+      "id": "p02",
+      "name": "구매 요청 승인",
+      "type": "approval",
+      "laneId": "lane-erp",
+      "phaseId": "requisition",
+      "system": "SAP MM",
+      "owner": "부서장 / 구매팀장",
+      "description": "예산 및 승인 라인에 따라 구매 요청을 승인하거나 반려합니다.",
+      "inputs": ["구매요청(PR)"],
+      "outputs": ["승인 PR", "반려 PR"],
+      "controls": ["승인 한도 매트릭스", "예산 가용성 검증"]
+    },
+    {
+      "id": "p03",
+      "name": "견적 비교",
+      "type": "process",
+      "laneId": "lane-purchasing",
+      "phaseId": "sourcing",
+      "system": "SAP MM/SRM",
+      "owner": "구매 담당자",
+      "description": "공급업체 견적을 비교·평가하여 최적 공급업체를 선정합니다.",
+      "inputs": ["승인 PR", "견적서"],
+      "outputs": ["공급업체 선정 결과", "비교 견적표"],
+      "controls": ["공급업체 평가 기준", "최소 견적 수"]
+    },
+    {
+      "id": "p04",
+      "name": "발주 생성",
+      "type": "process",
+      "laneId": "lane-purchasing",
+      "phaseId": "ordering",
+      "system": "SAP MM",
+      "owner": "구매 담당자",
+      "description": "선정된 공급업체에 대해 구매오더(PO)를 생성하고 전송합니다.",
+      "inputs": ["공급업체 선정 결과", "승인 PR"],
+      "outputs": ["구매오더(PO)"],
+      "controls": ["발주 권한", "계약 단가 연동"]
+    },
+    {
+      "id": "p05",
+      "name": "입고 처리",
+      "type": "process",
+      "laneId": "lane-warehouse",
+      "phaseId": "receiving",
+      "system": "SAP MM",
+      "owner": "창고 담당자",
+      "description": "자재 입고 후 수량·품질을 검수하고 Goods Receipt를 전기합니다.",
+      "inputs": ["구매오더(PO)", "납품서"],
+      "outputs": ["입고 전표(GR)", "검수 결과"],
+      "controls": ["입고 검수 절차", "창고 배치 규칙"]
+    },
+    {
+      "id": "p06",
+      "name": "송장 대조",
+      "type": "system",
+      "laneId": "lane-erp",
+      "phaseId": "invoice",
+      "system": "SAP MM/FI",
+      "owner": "ERP 시스템",
+      "description": "공급업체 세금계산서와 PO·입고 내역을 3-way match 합니다.",
+      "inputs": ["입고 전표(GR)", "공급업체 송장"],
+      "outputs": ["대조 완료 송장", "차이 리포트"],
+      "controls": ["송장 대조 허용 오차", "자동 대조 규칙"]
+    },
+    {
+      "id": "p07",
+      "name": "대금 지급 승인",
+      "type": "approval",
+      "laneId": "lane-finance",
+      "phaseId": "payment",
+      "system": "SAP FI",
+      "owner": "재무 팀장",
+      "description": "대조 완료된 송장에 대해 지급 승인을 수행합니다.",
+      "inputs": ["대조 완료 송장"],
+      "outputs": ["지급 승인", "지급 보류"],
+      "controls": ["지급 승인 권한", "지급 조건 정책"]
+    },
+    {
+      "id": "p08",
+      "name": "대금 지급",
+      "type": "process",
+      "laneId": "lane-finance",
+      "phaseId": "payment",
+      "system": "SAP FI",
+      "owner": "재무 담당자",
+      "description": "승인된 송장에 대해 공급업체 대금을 지급하고 전표를 마감합니다.",
+      "inputs": ["지급 승인", "지급 계좌 정보"],
+      "outputs": ["지급 전표", "지급 완료 통보"],
+      "controls": ["지급 실행 권한", "은행 연동 통제"]
+    }
+  ],
+  "edges": [
+    { "id": "pe01", "source": "p01", "target": "p02", "condition": "", "label": "" },
+    {
+      "id": "pe02",
+      "source": "p02",
+      "target": "p03",
+      "condition": "approved",
+      "label": "승인"
+    },
+    {
+      "id": "pe03",
+      "source": "p02",
+      "target": "p01",
+      "condition": "rejected",
+      "label": "반려"
+    },
+    { "id": "pe04", "source": "p03", "target": "p04", "condition": "", "label": "" },
+    { "id": "pe05", "source": "p04", "target": "p05", "condition": "", "label": "" },
+    { "id": "pe06", "source": "p05", "target": "p06", "condition": "", "label": "" },
+    { "id": "pe07", "source": "p06", "target": "p07", "condition": "", "label": "" },
+    {
+      "id": "pe08",
+      "source": "p07",
+      "target": "p08",
+      "condition": "approved",
+      "label": "지급 승인"
+    },
+    {
+      "id": "pe09",
+      "source": "p07",
+      "target": "p06",
+      "condition": "onHold",
+      "label": "보류"
+    }
+  ]
+}

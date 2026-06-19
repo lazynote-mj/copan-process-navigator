@@ -1,0 +1,124 @@
+{
+  "id": "stock-transfer",
+  "name": "창고이동 / 재고이동",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "창고이동 요청부터 WMS 처리·Location 반영까지",
+  "overviewNodeId": "stock-transfer-handling",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "transfer-request-register",
+      "name": "창고이동요청등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "창고 이동 요청을 등록합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "transfer-request",
+      "name": "창고이동요청",
+      "type": "erp",
+      "laneId": "partnership",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "상생협력팀",
+      "description": "창고 이동 요청을 접수·전달합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "wms-transfer-process",
+      "name": "창고이동",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p3",
+      "system": "WMS",
+      "owner": "물류센터",
+      "description": "WMS에서 창고 간 재고 이동을 처리합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "transfer-confirm",
+      "name": "창고이동확정",
+      "type": "erp",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "물류센터",
+      "description": "창고 이동 결과를 확정합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "erp-location-reflect",
+      "name": "ERP 재고 Location 반영",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "창고이동에 따른 ERP 재고 Location을 반영합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "transfer-request-register",
+      "target": "transfer-request",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "transfer-request",
+      "target": "wms-transfer-process",
+      "condition": "",
+      "label": "",
+      "type": "system"
+    },
+    {
+      "id": "e03",
+      "source": "wms-transfer-process",
+      "target": "transfer-confirm",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "transfer-confirm",
+      "target": "erp-location-reflect",
+      "condition": "",
+      "label": "",
+      "type": "system"
+    }
+  ]
+}

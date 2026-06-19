@@ -1,0 +1,12 @@
+{
+  "id": "stock-transfer-process",
+  "name": "재고이동 프로세스",
+  "description": "창고이동 요청부터 WMS 처리·확정·ERP Location 반영까지의 상세 흐름",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

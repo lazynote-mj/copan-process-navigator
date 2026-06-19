@@ -1,0 +1,72 @@
+{
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "processes": [
+    {
+      "id": "consignment-purchase-receipt",
+      "file": "consignment-purchase-receipt.json",
+      "name": "구매요청 ~ 입고 : 판매대행",
+      "overviewNodeId": "purchase-request"
+    },
+    {
+      "id": "b2b-domestic-order-to-sales",
+      "file": "b2b-domestic-order-to-sales.json",
+      "name": "주문등록 ~ 출고 ~ 매출전표 : B2B 국내",
+      "overviewNodeId": "order-register"
+    },
+    {
+      "id": "b2b-domestic-return",
+      "file": "b2b-domestic-return.json",
+      "name": "주문반품 ~ 입고 ~ 반품전표 : B2B 국내",
+      "overviewNodeId": "return-handling"
+    },
+    {
+      "id": "b2b-export-order-to-sales",
+      "file": "b2b-export-order-to-sales.json",
+      "name": "주문등록 ~ 수출출고 ~ 매출전표 : B2B 해외",
+      "overviewNodeId": "order-register"
+    },
+    {
+      "id": "b2c-order-to-sales",
+      "file": "b2c-order-to-sales.json",
+      "name": "주문등록 ~ 출고 ~ 매출전표 : B2C",
+      "overviewNodeId": "order-register"
+    },
+    {
+      "id": "preorder-to-sales",
+      "file": "preorder-to-sales.json",
+      "name": "예약판매 ~ 출고 ~ 매출전표",
+      "overviewNodeId": "order-register"
+    },
+    {
+      "id": "stock-transfer",
+      "file": "stock-transfer.json",
+      "name": "창고이동 / 재고이동",
+      "overviewNodeId": "stock-transfer-handling"
+    },
+    {
+      "id": "other-issue",
+      "file": "other-issue.json",
+      "name": "기타출고",
+      "overviewNodeId": "other-issue-handling"
+    },
+    {
+      "id": "consignment-settlement",
+      "file": "consignment-settlement.json",
+      "name": "위탁정산",
+      "overviewNodeId": "settlement-posting"
+    },
+    {
+      "id": "royalty-mg-settlement",
+      "file": "royalty-mg-settlement.json",
+      "name": "로열티 / MG 정산",
+      "overviewNodeId": "settlement-posting"
+    },
+    {
+      "id": "popup-concert-stock-sales-sync",
+      "file": "popup-concert-stock-sales-sync.json",
+      "name": "팝업/콘서트 재고이동 및 매출내역 동기화",
+      "overviewNodeId": "popup-concert-stock-sales-sync"
+    }
+  ]
+}

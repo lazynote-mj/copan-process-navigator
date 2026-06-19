@@ -1,0 +1,170 @@
+{
+  "id": "preorder-to-sales",
+  "name": "예약판매 ~ 출고 ~ 매출전표",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "예약판매 주문·출고·매출전표",
+  "overviewNodeId": "order-register",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "preorder-register",
+      "name": "예약판매등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "예약판매등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "preorder-deposit",
+      "name": "예약금수령",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "예약금수령",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "preorder-shipment-request",
+      "name": "출고요청",
+      "type": "interface",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "ERP→WMS",
+      "owner": "사업부",
+      "description": "출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "preorder-shipment-confirm",
+      "name": "출고확정",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "WMS→ERP",
+      "owner": "물류센터",
+      "description": "출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "preorder-stock-minus",
+      "name": "재고인식(-)",
+      "type": "system",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "물류센터",
+      "description": "재고인식(-)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "preorder-sales-close",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "preorder-sales-posting",
+      "name": "매출전표생성",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출전표생성",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "preorder-register",
+      "target": "preorder-deposit",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "preorder-deposit",
+      "target": "preorder-shipment-request",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e03",
+      "source": "preorder-shipment-request",
+      "target": "preorder-shipment-confirm",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "preorder-shipment-confirm",
+      "target": "preorder-stock-minus",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e05",
+      "source": "preorder-stock-minus",
+      "target": "preorder-sales-close",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e06",
+      "source": "preorder-sales-close",
+      "target": "preorder-sales-posting",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

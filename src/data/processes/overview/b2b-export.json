@@ -1,0 +1,12 @@
+{
+  "id": "b2b-export",
+  "name": "B2B 수출",
+  "description": "Overview TO-BE — B2B 수출 프로세스 (데이터 입력 예정)",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

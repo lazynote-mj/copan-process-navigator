@@ -1,0 +1,42 @@
+{
+  "id": "overview-default",
+  "name": "Overview 기본 스윔레인",
+  "description": "Copan ERP Overview TO-BE — 부서+시스템 Cross-Functional lane",
+  "lanes": [
+    {
+      "id": "business",
+      "name": "사업부 / ERP",
+      "order": 1,
+      "ownerDepartment": "사업부",
+      "description": "계약, 프로젝트, 구매요청, 주문/출고요청 등 ERP 기준 업무"
+    },
+    {
+      "id": "partnership",
+      "name": "상생협력팀 / ERP",
+      "order": 2,
+      "ownerDepartment": "상생협력팀",
+      "description": "거래처, 발주품의, 계약/발주등록, 입고정보전달"
+    },
+    {
+      "id": "warehouse-easyadmin",
+      "name": "물류센터 / 이지어드민",
+      "order": 3,
+      "ownerDepartment": "물류센터",
+      "description": "입고확인, 입고등록, 출고확인, 출고등록, 재고관리"
+    },
+    {
+      "id": "retail-easychain",
+      "name": "판매현장 / 이지체인",
+      "order": 4,
+      "ownerDepartment": "판매현장",
+      "description": "매장, 팝업, 콘서트현장 판매 및 현장 재고/판매 처리"
+    },
+    {
+      "id": "finance",
+      "name": "재무팀 / ERP",
+      "order": 5,
+      "ownerDepartment": "재무팀",
+      "description": "매입마감, 매출마감, 전표생성, 정산, 자금집행"
+    }
+  ]
+}

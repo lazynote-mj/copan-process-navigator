@@ -1,0 +1,132 @@
+{
+  "id": "royalty-mg-settlement",
+  "name": "로열티 / MG 정산",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "로열티 매출 집계·MG 상계·정산전표",
+  "overviewNodeId": "settlement-posting",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "royalty-sales-aggregate",
+      "name": "로열티매출집계",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "로열티매출집계",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "royalty-sales-close",
+      "name": "로열티매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "로열티매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "mg-deduct-check",
+      "name": "MG상계여부",
+      "type": "decision",
+      "laneId": "finance",
+      "phaseId": "p3",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "MG상계여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "mg-offset-process",
+      "name": "MG상계처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "MG상계처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "settlement-posting",
+      "name": "정산전표처리",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "정산전표처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "royalty-sales-aggregate",
+      "target": "royalty-sales-close",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "royalty-sales-close",
+      "target": "mg-deduct-check",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "mg-deduct-check",
+      "target": "mg-offset-process",
+      "condition": "mgDeduct",
+      "label": "Y",
+      "type": "condition"
+    },
+    {
+      "id": "e05",
+      "source": "mg-deduct-check",
+      "target": "settlement-posting",
+      "condition": "noMgDeduct",
+      "label": "N",
+      "type": "condition"
+    },
+    {
+      "id": "e06",
+      "source": "mg-offset-process",
+      "target": "settlement-posting",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

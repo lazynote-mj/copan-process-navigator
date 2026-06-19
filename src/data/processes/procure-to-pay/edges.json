@@ -1,0 +1,13 @@
+[
+  { "id": "e01", "source": "purchase-request", "target": "vendor-check", "condition": "", "label": "", "type": "normal" },
+  { "id": "e02", "source": "vendor-check", "target": "vendor-register", "condition": "newVendor", "label": "신규", "type": "condition" },
+  { "id": "e03", "source": "vendor-check", "target": "po-approval", "condition": "existingVendor", "label": "기존", "type": "condition" },
+  { "id": "e04", "source": "vendor-register", "target": "po-approval", "condition": "", "label": "", "type": "normal" },
+  { "id": "e05", "source": "po-approval", "target": "purchase-order", "condition": "", "label": "", "type": "normal" },
+  { "id": "e06", "source": "purchase-order", "target": "inbound-info", "condition": "", "label": "", "type": "normal" },
+  { "id": "e07", "source": "inbound-info", "target": "inbound-check", "condition": "", "label": "", "type": "system" },
+  { "id": "e08", "source": "inbound-check", "target": "inbound-confirm", "condition": "", "label": "", "type": "system" },
+  { "id": "e09", "source": "inbound-confirm", "target": "stock-plus", "condition": "", "label": "", "type": "system" },
+  { "id": "e10", "source": "stock-plus", "target": "ap-close", "condition": "", "label": "", "type": "normal" },
+  { "id": "e11", "source": "ap-close", "target": "fi-posting", "condition": "", "label": "", "type": "normal" }
+]

@@ -1,0 +1,58 @@
+.node-connections-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.node-connections-panel__header .property-panel__section-title {
+  margin: 0;
+}
+
+.node-connections-panel__row {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.node-connections-panel__row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.node-connections-panel__edge-id {
+  font-size: 11px;
+  color: #475569;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: left;
+}
+
+.edge-connection-fields__handles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.node-connections-panel__warnings {
+  margin-bottom: 8px;
+}
+
+.property-panel__hint--warn {
+  color: #b45309;
+}
+
+.property-panel__btn--sm {
+  padding: 4px 8px;
+  font-size: 11px;
+}

@@ -1,0 +1,19 @@
+{
+  "id": "order-to-cash",
+  "name": "판매 ~ 출고 ~ 매출",
+  "description": "온라인 주문부터 출고, 재고차감, 매출마감 및 전표처리",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [
+    { "id": "p1", "label": "온라인주문", "order": 1 },
+    { "id": "p2", "label": "주문연동", "order": 2 },
+    { "id": "p3", "label": "출고요청", "order": 3 },
+    { "id": "p4", "label": "출고확인", "order": 4 },
+    { "id": "p5", "label": "출고확정", "order": 5 },
+    { "id": "p6", "label": "재고차감", "order": 6 },
+    { "id": "p7", "label": "매출마감", "order": 7 },
+    { "id": "p8", "label": "회계전표", "order": 8 }
+  ]
+}

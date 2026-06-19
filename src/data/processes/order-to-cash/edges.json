@@ -1,0 +1,9 @@
+[
+  { "id": "e01", "source": "online-order", "target": "order-sync", "condition": "", "label": "", "type": "normal" },
+  { "id": "e02", "source": "order-sync", "target": "shipment-request", "condition": "", "label": "", "type": "system" },
+  { "id": "e03", "source": "shipment-request", "target": "shipment-check", "condition": "", "label": "", "type": "system" },
+  { "id": "e04", "source": "shipment-check", "target": "shipment-confirm", "condition": "", "label": "", "type": "system" },
+  { "id": "e05", "source": "shipment-confirm", "target": "stock-minus", "condition": "", "label": "", "type": "normal" },
+  { "id": "e06", "source": "stock-minus", "target": "sales-close", "condition": "", "label": "", "type": "normal" },
+  { "id": "e07", "source": "sales-close", "target": "sales-posting", "condition": "", "label": "", "type": "normal" }
+]

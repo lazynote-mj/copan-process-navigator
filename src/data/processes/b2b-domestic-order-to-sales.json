@@ -1,0 +1,193 @@
+{
+  "id": "b2b-domestic-order-to-sales",
+  "name": "주문등록 ~ 출고 ~ 매출전표 : B2B 국내",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "B2B 국내 주문부터 출고·매출전표까지",
+  "overviewNodeId": "order-register",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "order-register",
+      "name": "주문등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "주문등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "shipment-request",
+      "name": "출고요청",
+      "type": "interface",
+      "laneId": "business",
+      "phaseId": "p2",
+      "system": "ERP→WMS",
+      "owner": "사업부",
+      "description": "출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "shipment-check",
+      "name": "출고확인",
+      "type": "manual",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p3",
+      "system": "WMS",
+      "owner": "물류센터",
+      "description": "출고확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "shipment-register",
+      "name": "출고등록",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "WMS",
+      "owner": "물류센터",
+      "description": "출고등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "shipment-confirm",
+      "name": "출고확정",
+      "type": "interface",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p5",
+      "system": "WMS→ERP",
+      "owner": "물류센터",
+      "description": "출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "stock-minus",
+      "name": "재고인식(-)",
+      "type": "system",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "물류센터",
+      "description": "재고인식(-)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "sales-close",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "sales-posting",
+      "name": "매출전표생성",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출전표생성",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "order-register",
+      "target": "shipment-request",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "shipment-request",
+      "target": "shipment-check",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e03",
+      "source": "shipment-check",
+      "target": "shipment-register",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "shipment-register",
+      "target": "shipment-confirm",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e05",
+      "source": "shipment-confirm",
+      "target": "stock-minus",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e06",
+      "source": "stock-minus",
+      "target": "sales-close",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e07",
+      "source": "sales-close",
+      "target": "sales-posting",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

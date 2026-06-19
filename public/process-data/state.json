@@ -1,0 +1,5742 @@
+{
+  "kind": "copan-process-navigator-state",
+  "version": 2,
+  "exportedAt": "2026-06-19T05:13:35.072Z",
+  "commonMasters": {
+    "lanes": [
+      {
+        "id": "business",
+        "name": "사업부 / ERP",
+        "order": 1,
+        "ownerDepartment": "사업부",
+        "description": "계약, 프로젝트, 구매요청, 주문/출고요청 등 ERP 기준 업무"
+      },
+      {
+        "id": "partnership",
+        "name": "상생협력팀 / ERP",
+        "order": 2,
+        "ownerDepartment": "상생협력팀",
+        "description": "거래처, 발주품의, 계약/발주등록, 입고정보전달"
+      },
+      {
+        "id": "warehouse-easyadmin",
+        "name": "물류센터 / 이지어드민",
+        "order": 3,
+        "ownerDepartment": "물류센터",
+        "description": "입고확인, 입고등록, 출고확인, 출고등록, 재고관리"
+      },
+      {
+        "id": "retail-easychain",
+        "name": "판매현장 / 이지체인",
+        "order": 4,
+        "ownerDepartment": "판매현장",
+        "description": "매장, 팝업, 콘서트현장 판매 및 현장 재고/판매 처리"
+      },
+      {
+        "id": "finance",
+        "name": "재무팀 / ERP",
+        "order": 5,
+        "ownerDepartment": "재무팀",
+        "description": "매입마감, 매출마감, 전표생성, 정산, 자금집행"
+      }
+    ],
+    "phases": [
+      {
+        "id": "business-to-project::p1",
+        "label": "사업기회",
+        "order": 1
+      },
+      {
+        "id": "business-to-project::p2",
+        "label": "사업검토",
+        "order": 2
+      },
+      {
+        "id": "business-to-project::p3",
+        "label": "계약품의",
+        "order": 3
+      },
+      {
+        "id": "business-to-project::p4",
+        "label": "계약등록",
+        "order": 4
+      },
+      {
+        "id": "business-to-project::p5",
+        "label": "프로젝트등록",
+        "order": 5
+      },
+      {
+        "id": "business-to-project::p6",
+        "label": "실행품의",
+        "order": 6
+      },
+      {
+        "id": "procure-to-pay::p1",
+        "label": "구매요청",
+        "order": 7
+      },
+      {
+        "id": "procure-to-pay::p2",
+        "label": "거래처확인",
+        "order": 8
+      },
+      {
+        "id": "procure-to-pay::p3",
+        "label": "거래처등록",
+        "order": 9
+      },
+      {
+        "id": "procure-to-pay::p4",
+        "label": "발주품의",
+        "order": 10
+      },
+      {
+        "id": "procure-to-pay::p5",
+        "label": "발주등록",
+        "order": 11
+      },
+      {
+        "id": "procure-to-pay::p6",
+        "label": "입고정보",
+        "order": 12
+      },
+      {
+        "id": "procure-to-pay::p7",
+        "label": "입고확인",
+        "order": 13
+      },
+      {
+        "id": "procure-to-pay::p8",
+        "label": "입고확정",
+        "order": 14
+      },
+      {
+        "id": "procure-to-pay::p9",
+        "label": "재고인식",
+        "order": 15
+      },
+      {
+        "id": "procure-to-pay::p10",
+        "label": "매입마감",
+        "order": 16
+      },
+      {
+        "id": "procure-to-pay::p11",
+        "label": "회계전표",
+        "order": 17
+      },
+      {
+        "id": "order-to-cash::p1",
+        "label": "온라인주문",
+        "order": 18
+      },
+      {
+        "id": "order-to-cash::p2",
+        "label": "주문연동",
+        "order": 19
+      },
+      {
+        "id": "order-to-cash::p3",
+        "label": "출고요청",
+        "order": 20
+      },
+      {
+        "id": "order-to-cash::p4",
+        "label": "출고확인",
+        "order": 21
+      },
+      {
+        "id": "order-to-cash::p5",
+        "label": "출고확정",
+        "order": 22
+      },
+      {
+        "id": "order-to-cash::p6",
+        "label": "재고차감",
+        "order": 23
+      },
+      {
+        "id": "order-to-cash::p7",
+        "label": "매출마감",
+        "order": 24
+      },
+      {
+        "id": "order-to-cash::p8",
+        "label": "회계전표",
+        "order": 25
+      },
+      {
+        "id": "overview::order-register",
+        "label": "주문등록",
+        "order": 26
+      },
+      {
+        "id": "overview::sales-inquiry",
+        "label": "매출마감조회",
+        "order": 27
+      },
+      {
+        "id": "overview::return",
+        "label": "반품",
+        "order": 28
+      },
+      {
+        "id": "overview::warehouse-transfer",
+        "label": "창고이동",
+        "order": 29
+      },
+      {
+        "id": "overview::other-outbound",
+        "label": "기타출고",
+        "order": 30
+      },
+      {
+        "id": "overview::consignment",
+        "label": "위탁정산",
+        "order": 31
+      },
+      {
+        "id": "overview::royalty-mg",
+        "label": "로열티/MG정산",
+        "order": 32
+      },
+      {
+        "id": "overview::fund",
+        "label": "자금",
+        "order": 33
+      }
+    ],
+    "layoutRules": {
+      "maxCellColumns": 2,
+      "cellSlotMax": 10,
+      "positionFromSlot": true
+    },
+    "routerRules": {
+      "edgeNodeMargin": 16,
+      "edgeEdgeGap": 8,
+      "outerDetourLast": true
+    },
+    "styleRules": {
+      "hiddenInBusinessView": [
+        "interface",
+        "interface-rule",
+        "api"
+      ]
+    },
+    "handleRules": {
+      "defaultSourceHandle": "bottom",
+      "defaultTargetHandle": "top"
+    },
+    "viewModes": [
+      {
+        "id": "business",
+        "label": "업무"
+      },
+      {
+        "id": "system",
+        "label": "시스템"
+      }
+    ]
+  },
+  "processes": [
+    {
+      "id": "to-be-overview",
+      "type": "overview",
+      "name": "TO-BE Overview",
+      "description": "Copan ERP TO-BE 전체 프로세스 Overview",
+      "version": "TO-BE v0.1",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "opportunity",
+          "name": "사업기회확보",
+          "type": "manual",
+          "laneId": "business",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 1,
+          "processZone": "business-contract",
+          "cellOrder": 0,
+          "system": "manual",
+          "owner": "사업부",
+          "description": "신규 사업기회를 발굴하고 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "business-review",
+          "name": "사업참여검토",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "business-to-project::p2",
+          "phaseOrder": 2,
+          "localOrder": 2,
+          "processZone": "business-contract",
+          "cellOrder": 1,
+          "system": "manual",
+          "owner": "사업부",
+          "description": "사업 참여 여부 및 실행 가능성을 검토합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "contract-approval",
+          "name": "사업계약품의",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "business-to-project::p3",
+          "phaseOrder": 3,
+          "localOrder": 3,
+          "processZone": "business-contract",
+          "cellOrder": 3,
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "사업 계약 체결을 위한 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 7
+        },
+        {
+          "id": "contract-register",
+          "name": "계약등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "business-to-project::p4",
+          "phaseOrder": 4,
+          "localOrder": 4,
+          "processZone": "business-contract",
+          "cellOrder": 2,
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "승인된 계약 정보를 ERP에 등록합니다.",
+          "inputs": [],
+          "outputs": [
+            "계약코드 생성"
+          ],
+          "controls": [],
+          "cellSlot": 6
+        },
+        {
+          "id": "project-register",
+          "name": "프로젝트등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "business-to-project::p5",
+          "phaseOrder": 5,
+          "localOrder": 5,
+          "processZone": "business-contract",
+          "cellOrder": 4,
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "계약 기준으로 프로젝트를 생성합니다.",
+          "inputs": [],
+          "outputs": [
+            "프로젝트코드 생성"
+          ],
+          "controls": [],
+          "cellSlot": 8
+        },
+        {
+          "id": "project-approval",
+          "name": "사업실행품의",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "business-to-project::p6",
+          "phaseOrder": 6,
+          "localOrder": 6,
+          "processZone": "business-contract",
+          "cellOrder": 5,
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "프로젝트 실행을 위한 최종 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 9
+        },
+        {
+          "id": "purchase-request",
+          "name": "구매요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p1",
+          "phaseOrder": 7,
+          "localOrder": 7,
+          "processZone": "purchase-order",
+          "cellOrder": 0,
+          "cellSlot": 6,
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "프로젝트 또는 운영 단위 구매 요청을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "zoneOrder": 0
+        },
+        {
+          "id": "vendor-check",
+          "name": "거래처/품목 확인",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p2",
+          "phaseOrder": 8,
+          "localOrder": 8,
+          "processZone": "purchase-order",
+          "cellOrder": 1,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "거래처 등록 여부를 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 2,
+          "zoneOrder": 1
+        },
+        {
+          "id": "vendor-register",
+          "name": "거래처 등록요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p3",
+          "phaseOrder": 9,
+          "localOrder": 9,
+          "processZone": "purchase-order",
+          "cellOrder": 1,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "신규 거래처 등록을 요청합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 4
+        },
+        {
+          "id": "po-approval",
+          "name": "발주품의",
+          "type": "decision",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p4",
+          "phaseOrder": 10,
+          "localOrder": 10,
+          "processZone": "purchase-order",
+          "cellOrder": 3,
+          "system": "groupware",
+          "owner": "상생협력팀",
+          "description": "발주 품의를 상신하고 승인받습니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 7
+        },
+        {
+          "id": "purchase-order",
+          "name": "계약/발주등록",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p5",
+          "phaseOrder": 11,
+          "localOrder": 11,
+          "processZone": "purchase-order",
+          "cellOrder": 0,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "승인된 발주 정보를 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "zoneOrder": 0,
+          "cellSlot": 6
+        },
+        {
+          "id": "inbound-info",
+          "name": "입고정보전달",
+          "type": "interface",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p6",
+          "phaseOrder": 12,
+          "localOrder": 12,
+          "processZone": "inbound-inventory",
+          "cellOrder": 0,
+          "system": "ERP→WMS API",
+          "owner": "상생협력팀",
+          "description": "발주 정보를 WMS로 전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "inbound-check",
+          "name": "입고확인",
+          "type": "erp",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "procure-to-pay::p7",
+          "phaseOrder": 13,
+          "localOrder": 13,
+          "processZone": "inbound-inventory",
+          "cellOrder": 0,
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "입고 예정 물량을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 2
+        },
+        {
+          "id": "inbound-confirm",
+          "name": "입고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "procure-to-pay::p8",
+          "phaseOrder": 14,
+          "localOrder": 14,
+          "processZone": "inbound-inventory",
+          "cellOrder": 1,
+          "system": "WMS→ERP API",
+          "owner": "물류센터",
+          "description": "입고 확정 결과를 ERP로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 3
+        },
+        {
+          "id": "stock-plus",
+          "name": "재고인식(+)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "procure-to-pay::p9",
+          "phaseOrder": 15,
+          "localOrder": 15,
+          "processZone": "inbound-inventory",
+          "cellOrder": 2,
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "입고에 따른 재고 증가를 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 3
+        },
+        {
+          "id": "ap-close",
+          "name": "매입마감확정",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p10",
+          "phaseOrder": 16,
+          "localOrder": 16,
+          "processZone": "inbound-inventory",
+          "cellOrder": 0,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매입 마감을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 7
+        },
+        {
+          "id": "fi-posting",
+          "name": "회계전표 반영",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "procure-to-pay::p11",
+          "phaseOrder": 17,
+          "localOrder": 17,
+          "processZone": "inbound-inventory",
+          "cellOrder": 0,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매입 전표를 회계에 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "zoneOrder": 0,
+          "cellSlot": 4
+        },
+        {
+          "id": "online-order",
+          "name": "온라인몰판매",
+          "type": "external",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "order-to-cash::p1",
+          "phaseOrder": 18,
+          "localOrder": 18,
+          "processZone": "sales-shipment",
+          "cellOrder": 0,
+          "system": "Cafe24",
+          "owner": "사업부",
+          "description": "온라인 몰에서 주문이 발생합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "order-sync",
+          "name": "주문정보연동",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "order-to-cash::p2",
+          "phaseOrder": 19,
+          "localOrder": 19,
+          "processZone": "sales-shipment",
+          "cellOrder": 1,
+          "system": "OMS API",
+          "owner": "사업부",
+          "description": "주문 정보를 OMS/ERP로 연동합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 2
+        },
+        {
+          "id": "shipment-request",
+          "name": "출고요청",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "order-to-cash::p3",
+          "phaseOrder": 20,
+          "localOrder": 20,
+          "processZone": "sales-shipment",
+          "cellOrder": 3,
+          "cellSlot": 1,
+          "system": "ERP→WMS",
+          "owner": "사업부",
+          "description": "출고 지시를 WMS로 전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "shipment-check",
+          "name": "출고확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "order-to-cash::p4",
+          "phaseOrder": 21,
+          "localOrder": 21,
+          "processZone": "sales-shipment",
+          "cellOrder": 0,
+          "system": "Manual",
+          "owner": "물류센터",
+          "description": "출고 대상 및 수량을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 2
+        },
+        {
+          "id": "shipment-confirm",
+          "name": "출고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "order-to-cash::p5",
+          "phaseOrder": 22,
+          "localOrder": 22,
+          "processZone": "sales-shipment",
+          "cellOrder": 1,
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "출고 확정 결과를 ERP로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "stock-minus",
+          "name": "재고인식(-)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "order-to-cash::p6",
+          "phaseOrder": 23,
+          "localOrder": 23,
+          "processZone": "sales-shipment",
+          "cellOrder": 2,
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "출고에 따른 재고 감소를 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 8
+        },
+        {
+          "id": "sales-close",
+          "name": "매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "order-to-cash::p7",
+          "phaseOrder": 24,
+          "localOrder": 24,
+          "processZone": "sales-shipment",
+          "cellOrder": 1,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출 마감을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "sales-posting",
+          "name": "전표생성(미결)",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "order-to-cash::p8",
+          "phaseOrder": 25,
+          "localOrder": 25,
+          "processZone": "sales-shipment",
+          "cellOrder": 1,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출 전표를 회계에 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "order-register",
+          "name": "주문등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "overview::order-register",
+          "phaseOrder": 26,
+          "localOrder": 26,
+          "processZone": "sales-shipment",
+          "cellOrder": 2,
+          "cellSlot": 1,
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "연동된 주문 정보를 ERP에 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "sales-inquiry",
+          "name": "매출마감조회",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::sales-inquiry",
+          "phaseOrder": 27,
+          "localOrder": 27,
+          "processZone": "sales-shipment",
+          "cellOrder": 0,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출 마감 대상을 조회합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "prepayment-process",
+          "name": "선수금처리",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::fund",
+          "phaseOrder": 33,
+          "localOrder": 33,
+          "processZone": "settlement-close",
+          "cellOrder": 2,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "PG사 선수금 및 예약판매 선수금 반제를 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "return-shipment-request",
+          "name": "출고반품요청",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::return",
+          "phaseOrder": 28,
+          "localOrder": 28,
+          "processZone": "return-movement",
+          "cellOrder": 1,
+          "system": "ERP→WMS",
+          "owner": "물류센터",
+          "description": "반품 출고 지시를 WMS로 자동 전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "return-inbound-check",
+          "name": "반품입고확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::return",
+          "phaseOrder": 28,
+          "localOrder": 28,
+          "processZone": "return-movement",
+          "cellOrder": 0,
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "반품 입고 대상을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "return-inbound-register",
+          "name": "반품입고등록",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::return",
+          "phaseOrder": 28,
+          "localOrder": 28,
+          "processZone": "return-movement",
+          "cellOrder": 1,
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "반품 입고를 WMS에 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "return-confirm",
+          "name": "반품확정",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::return",
+          "phaseOrder": 28,
+          "localOrder": 28,
+          "processZone": "return-movement",
+          "cellOrder": 2,
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "반품 확정 결과를 ERP로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "warehouse-transfer-request",
+          "name": "창고이동요청등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "overview::warehouse-transfer",
+          "phaseOrder": 29,
+          "localOrder": 29,
+          "processZone": "return-movement",
+          "cellOrder": 5,
+          "cellSlot": 4,
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "창고 이동 요청을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "warehouse-transfer",
+          "name": "창고이동",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::warehouse-transfer",
+          "phaseOrder": 29,
+          "localOrder": 29,
+          "processZone": "return-movement",
+          "cellOrder": 0,
+          "system": "ERP→WMS",
+          "owner": "물류센터",
+          "description": "창고 간 재고 이동을 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "warehouse-transfer-confirm",
+          "name": "창고이동확정",
+          "type": "erp",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::warehouse-transfer",
+          "phaseOrder": 29,
+          "localOrder": 29,
+          "processZone": "return-movement",
+          "cellOrder": 1,
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "창고 이동 결과를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "free-gift-approval",
+          "name": "무상증정품의",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "overview::other-outbound",
+          "phaseOrder": 30,
+          "localOrder": 30,
+          "processZone": "return-movement",
+          "cellOrder": 6,
+          "cellSlot": 2,
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "무상증정 출고 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "other-outbound-request",
+          "name": "기타출고요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "overview::other-outbound",
+          "phaseOrder": 30,
+          "localOrder": 30,
+          "processZone": "return-movement",
+          "cellOrder": 0,
+          "cellSlot": 1,
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "기타 출고 요청을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "other-outbound-confirm",
+          "name": "기타출고확정",
+          "type": "erp",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::other-outbound",
+          "phaseOrder": 30,
+          "localOrder": 30,
+          "processZone": "return-movement",
+          "cellOrder": 2,
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "기타 출고를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "consignment-stock-status",
+          "name": "위탁재고현황",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "overview::consignment",
+          "phaseOrder": 31,
+          "localOrder": 31,
+          "processZone": "settlement-close",
+          "cellOrder": 0,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "위탁 재고 현황을 조회합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "consignment-sales-register",
+          "name": "위탁매출마감등록",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::consignment",
+          "phaseOrder": 31,
+          "localOrder": 31,
+          "processZone": "settlement-close",
+          "cellOrder": 1,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "위탁 매출 마감을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "consignment-sales-close",
+          "name": "위탁매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::consignment",
+          "phaseOrder": 31,
+          "localOrder": 31,
+          "processZone": "settlement-close",
+          "cellOrder": 2,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "위탁 매출 마감을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "exception-handling",
+          "name": "예외사항처리",
+          "type": "exception",
+          "laneId": "partnership",
+          "phaseId": "overview::consignment",
+          "phaseOrder": 31,
+          "localOrder": 31,
+          "processZone": "settlement-close",
+          "cellOrder": 3,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "정산 예외 사항을 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "royalty-sales-aggregate",
+          "name": "로열티매출집계",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "overview::royalty-mg",
+          "phaseOrder": 32,
+          "localOrder": 32,
+          "processZone": "settlement-close",
+          "cellOrder": 4,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "로열티 매출을 집계합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "royalty-sales-close",
+          "name": "로열티매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::royalty-mg",
+          "phaseOrder": 32,
+          "localOrder": 32,
+          "processZone": "settlement-close",
+          "cellOrder": 5,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "로열티 매출 마감을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "mg-deduct-check",
+          "name": "MG 차감여부",
+          "type": "decision",
+          "laneId": "finance",
+          "phaseId": "overview::royalty-mg",
+          "phaseOrder": 32,
+          "localOrder": 32,
+          "processZone": "settlement-close",
+          "cellOrder": 6,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "MG 차감 대상 여부를 판단합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "mg-offset-process",
+          "name": "MG상계처리",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::royalty-mg",
+          "phaseOrder": 32,
+          "localOrder": 32,
+          "processZone": "settlement-close",
+          "cellOrder": 7,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "MG 상계를 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "settlement-posting",
+          "name": "정산전표처리",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "overview::royalty-mg",
+          "phaseOrder": 32,
+          "localOrder": 32,
+          "processZone": "settlement-close",
+          "cellOrder": 8,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "정산 전표를 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "regular-fund-execution",
+          "name": "정기자금집행",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "overview::fund",
+          "phaseOrder": 33,
+          "localOrder": 33,
+          "processZone": "settlement-close",
+          "cellOrder": 3,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "자금기준일 수립기준에 따라 정기 자금을 집행합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "popup-sales",
+          "name": "팝업/콘서트 판매",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "order-to-cash::p1",
+          "phaseOrder": 18,
+          "localOrder": 19,
+          "processZone": "sales-shipment",
+          "cellOrder": 0,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "팝업스토어 현장 판매 처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "concert-sales",
+          "name": "매장판매",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "order-to-cash::p1",
+          "phaseOrder": 18,
+          "localOrder": 20,
+          "processZone": "sales-shipment",
+          "cellOrder": 0,
+          "cellSlot": 2,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "콘서트/행사 현장 판매 처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "store-transfer-rt",
+          "name": "매장간재고이동(RT)",
+          "type": "erp",
+          "laneId": "retail-easychain",
+          "phaseId": "overview::warehouse-transfer",
+          "phaseOrder": 29,
+          "localOrder": 29,
+          "processZone": "return-movement",
+          "cellOrder": 0,
+          "cellSlot": 3,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "매장 간 재고 이동(RT) 처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "store-transfer",
+          "name": "매장 간 이동",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "overview::warehouse-transfer",
+          "phaseOrder": 29,
+          "localOrder": 30,
+          "processZone": "return-movement",
+          "cellOrder": 1,
+          "cellSlot": 4,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "매장 간 재고/물류 이동 조율",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "pos-easychain-sync",
+          "name": "POS/이지체인 판매정보 연동",
+          "type": "interface",
+          "laneId": "retail-easychain",
+          "phaseId": "order-to-cash::p2",
+          "phaseOrder": 19,
+          "localOrder": 21,
+          "processZone": "sales-shipment",
+          "cellOrder": 5,
+          "cellSlot": 6,
+          "system": "이지체인→ERP",
+          "owner": "판매현장",
+          "description": "현장 POS 판매정보를 ERP로 연동",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "node-mqg215ai-glqwv",
+          "name": "반품주문등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 31,
+          "processZone": "sales-shipment",
+          "cellSlot": 3,
+          "system": "ERP",
+          "owner": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "node-mqg2200t-bzgvl",
+          "name": "출고반품요청",
+          "type": "system",
+          "laneId": "business",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 32,
+          "processZone": "sales-shipment",
+          "cellSlot": 8,
+          "system": "ERP → WMS",
+          "owner": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "node-mqhkso0a-7ceuz",
+          "name": "매입마감조회",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 33,
+          "owner": "",
+          "system": "ERP",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "processZone": "inbound-inventory",
+          "cellSlot": 6
+        },
+        {
+          "id": "node-mqhkwa5x-sihxe",
+          "name": "전표생성(미결)",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 33,
+          "owner": "",
+          "system": "ERP",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "processZone": "inbound-inventory",
+          "cellSlot": 8
+        },
+        {
+          "id": "node-mqhltm4t-el6dq",
+          "name": "거래처 등록승인",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 33,
+          "owner": "",
+          "system": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "processZone": "purchase-order",
+          "cellSlot": 4
+        },
+        {
+          "id": "node-mqhm27ka-y41py",
+          "name": "품목등록요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 34,
+          "owner": "",
+          "system": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "processZone": "purchase-order",
+          "cellSlot": 3
+        },
+        {
+          "id": "node-mqhm3415-s0x6r",
+          "name": "품목 등록승인",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 35,
+          "owner": "",
+          "system": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 3,
+          "processZone": "purchase-order"
+        },
+        {
+          "id": "node-mqk4l3ai-882sn",
+          "name": "위탁여부체크",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 35,
+          "owner": "",
+          "system": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "processZone": "purchase-order",
+          "cellSlot": 7
+        },
+        {
+          "id": "node-mqkfpf9l-jy7t5",
+          "name": "출고요청",
+          "type": "system",
+          "laneId": "business",
+          "phaseId": "business-to-project::p1",
+          "phaseOrder": 1,
+          "localOrder": 36,
+          "owner": "",
+          "system": "",
+          "description": "",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "processZone": "sales-shipment",
+          "cellSlot": 6
+        }
+      ],
+      "edges": [
+        {
+          "id": "main:e2e:01",
+          "source": "opportunity",
+          "target": "business-review",
+          "condition": "",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:02",
+          "source": "contract-register",
+          "target": "contract-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:03",
+          "source": "contract-approval",
+          "target": "contract-register",
+          "condition": "",
+          "label": "N",
+          "type": "return",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "right",
+          "targetHandle": "right"
+        },
+        {
+          "id": "main:e2e:05",
+          "source": "project-register",
+          "target": "project-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "main:e2e:06",
+          "source": "project-approval",
+          "target": "purchase-request",
+          "condition": "",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:08",
+          "source": "vendor-check",
+          "target": "vendor-register",
+          "condition": "",
+          "label": "신규",
+          "type": "condition",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          },
+          "sourceHandle": "left",
+          "targetHandle": "left",
+          "data": {
+            "edgeType": "condition",
+            "routingKind": "orthogonal",
+            "routingMode": "auto",
+            "validationStatus": "error",
+            "routeIssue": "node_collision",
+            "routeIssueLabel": "오류: 노드 관통",
+            "suggestedFix": "경로가 다른 노드를 관통합니다. handle 변경 또는 manual bend로 우회하세요.",
+            "collidedNodeIds": [
+              "node-mqhm27ka-y41py"
+            ],
+            "collidedNodeNames": [
+              "품목등록요청"
+            ],
+            "bendCount": 4
+          }
+        },
+        {
+          "id": "main:e2e:09",
+          "source": "purchase-order",
+          "target": "po-approval",
+          "condition": "existingVendor",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:12",
+          "source": "po-approval",
+          "target": "purchase-order",
+          "condition": "",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          },
+          "targetHandle": "right",
+          "sourceHandle": "right"
+        },
+        {
+          "id": "main:e2e:14",
+          "source": "inbound-info",
+          "target": "inbound-check",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "right",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:15",
+          "source": "inbound-check",
+          "target": "inbound-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:16",
+          "source": "inbound-register",
+          "target": "inbound-confirm",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "main:e2e:17",
+          "source": "inbound-confirm",
+          "target": "stock-plus",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "main:e2e:18",
+          "source": "stock-plus",
+          "target": "node-mqhkso0a-7ceuz",
+          "condition": "",
+          "label": "",
+          "type": "virtual",
+          "displayOnly": true,
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "sourceHandle": "left",
+          "targetHandle": "right"
+        },
+        {
+          "id": "main:e2e:20",
+          "source": "ap-close",
+          "target": "node-mqhkwa5x-sihxe",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:23",
+          "source": "order-sync",
+          "target": "shipment-check",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "main:e2e:25",
+          "source": "shipment-request",
+          "target": "shipment-check",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "main:e2e:26",
+          "source": "shipment-check",
+          "target": "shipment-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "main:e2e:27",
+          "source": "shipment-register",
+          "target": "shipment-confirm",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "main:e2e:28",
+          "source": "shipment-confirm",
+          "target": "stock-minus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "main:e2e:30",
+          "source": "sales-inquiry",
+          "target": "sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:consignment:01",
+          "source": "consignment-stock-status",
+          "target": "consignment-sales-register",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "sub:consignment:02",
+          "source": "consignment-sales-register",
+          "target": "consignment-sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:consignment:03",
+          "source": "consignment-sales-close",
+          "target": "settlement-anomaly-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:consignment:04",
+          "source": "settlement-anomaly-check",
+          "target": "exception-handling",
+          "condition": "settlementAnomaly",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:consignment:05",
+          "source": "settlement-anomaly-check",
+          "target": "prepayment-process",
+          "condition": "noSettlementAnomaly",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:consignment:06",
+          "source": "prepayment-process",
+          "target": "regular-fund-execution",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:consignment:07",
+          "source": "regular-fund-execution",
+          "target": "settlement-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:royalty:01",
+          "source": "royalty-sales-aggregate",
+          "target": "royalty-sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:royalty:02",
+          "source": "royalty-sales-close",
+          "target": "mg-deduct-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:royalty:03",
+          "source": "mg-deduct-check",
+          "target": "mg-offset-process",
+          "condition": "mgDeduct",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:royalty:04",
+          "source": "mg-deduct-check",
+          "target": "settlement-posting",
+          "condition": "noMgDeduct",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "sub:royalty:05",
+          "source": "mg-offset-process",
+          "target": "settlement-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhfky2k-4r7lq",
+          "source": "project-approval",
+          "target": "project-register",
+          "sourceHandle": "right",
+          "targetHandle": "right",
+          "type": "return",
+          "label": "N",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhfski5-twx7t",
+          "source": "contract-approval",
+          "target": "project-register",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "condition",
+          "label": "Y",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          }
+        },
+        {
+          "id": "edge-mqhfu68e-x0t2y",
+          "source": "vendor-check",
+          "target": "node-mqk4l3ai-882sn",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "condition",
+          "label": "기존",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhg3m23-pxsyl",
+          "source": "node-mqg215ai-glqwv",
+          "target": "node-mqg2200t-bzgvl",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhg4y29-x9814",
+          "source": "node-mqg2200t-bzgvl",
+          "target": "return-inbound-check",
+          "sourceHandle": "right",
+          "targetHandle": "top",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhgrizt-z43iu",
+          "source": "pos-easychain-sync",
+          "target": "sales-inquiry",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhgxhyc-1vxp6",
+          "source": "popup-sales",
+          "target": "pos-easychain-sync",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhgy7ly-9oyvv",
+          "source": "concert-sales",
+          "target": "pos-easychain-sync",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhhbjkp-2ef2g",
+          "source": "po-approval",
+          "target": "inbound-info",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "condition",
+          "label": "Y",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhkjbyk-tcew8",
+          "source": "business-review",
+          "target": "opportunity",
+          "sourceHandle": "left",
+          "targetHandle": "left",
+          "type": "return",
+          "label": "N",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          }
+        },
+        {
+          "id": "edge-mqhkxfpu-vau45",
+          "source": "node-mqhkso0a-7ceuz",
+          "target": "ap-close",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhmwsvf-rpeh2",
+          "source": "node-mqhm27ka-y41py",
+          "target": "node-mqhm3415-s0x6r",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqhna8aw-a13zi",
+          "source": "node-mqhkwa5x-sihxe",
+          "target": "fi-posting",
+          "sourceHandle": "bottom",
+          "targetHandle": "left",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          }
+        },
+        {
+          "id": "edge-mqj9t4c4-k6w4a",
+          "source": "project-approval",
+          "target": "order-register",
+          "sourceHandle": "right",
+          "targetHandle": "top",
+          "type": "condition",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          }
+        },
+        {
+          "id": "edge-mqjb32xq-g0cr1",
+          "source": "vendor-register",
+          "target": "node-mqhltm4t-el6dq",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqjb3v8p-e6iks",
+          "source": "vendor-check",
+          "target": "node-mqhm27ka-y41py",
+          "sourceHandle": "left",
+          "targetHandle": "left",
+          "type": "condition",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "data": {
+            "edgeType": "condition",
+            "routingKind": "orthogonal",
+            "routingMode": "auto",
+            "validationStatus": "ok",
+            "routeIssueLabel": "정상",
+            "bendCount": 0
+          }
+        },
+        {
+          "id": "edge-mqjbpnt1-0yebq",
+          "source": "store-transfer-rt",
+          "target": "store-transfer",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqjbqp9g-fbpdu",
+          "source": "store-transfer",
+          "target": "warehouse-transfer-confirm",
+          "sourceHandle": "left",
+          "targetHandle": "right",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqk4m6m4-6ljdt",
+          "source": "node-mqk4l3ai-882sn",
+          "target": "purchase-order",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "condition",
+          "label": "N",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          }
+        },
+        {
+          "id": "edge-mqk4mvwu-y2wje",
+          "source": "node-mqk4l3ai-882sn",
+          "target": "inbound-info",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "condition",
+          "label": "Y",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqkagn6z-vjvpt",
+          "source": "business-review",
+          "target": "contract-register",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          },
+          "data": {
+            "edgeType": "normal",
+            "routingKind": "orthogonal",
+            "routingMode": "auto",
+            "validationStatus": "error",
+            "routeIssue": "node_collision",
+            "routeIssueLabel": "오류: 노드 관통",
+            "suggestedFix": "경로가 다른 노드를 관통합니다. handle 변경 또는 manual bend로 우회하세요.",
+            "collidedNodeIds": [
+              "contract-approval"
+            ],
+            "collidedNodeNames": [
+              "사업계약품의"
+            ],
+            "bendCount": 2
+          }
+        },
+        {
+          "id": "edge-mqkfdcp5-j1yo2",
+          "source": "purchase-request",
+          "target": "node-mqk4l3ai-882sn",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          }
+        },
+        {
+          "id": "order-register-to-order-register-split",
+          "source": "order-register",
+          "target": "node-mqkfpf9l-jy7t5",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqkfvpka-jsq9g",
+          "source": "node-mqkfpf9l-jy7t5",
+          "target": "shipment-check",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          }
+        },
+        {
+          "id": "edge-mqkh23m7-9sts7",
+          "source": "online-order",
+          "target": "shipment-check",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "virtual",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "displayOnly": true,
+          "manualRoute": false
+        }
+      ],
+      "zones": [
+        {
+          "id": "zone-mqhl3bms-q5a35",
+          "name": "사업부 선택영역",
+          "type": "process-zone",
+          "laneIds": [],
+          "phaseIds": [],
+          "nodeIds": [
+            "opportunity",
+            "business-review"
+          ],
+          "style": {
+            "showBackground": true,
+            "showBorder": true,
+            "borderStyle": "solid",
+            "visible": true,
+            "opacity": 0.12
+          }
+        },
+        {
+          "id": "zone-mqi2txz2-2t3l6",
+          "name": "기준정보 확인",
+          "type": "process-zone",
+          "laneIds": [],
+          "phaseIds": [],
+          "nodeIds": [
+            "vendor-check"
+          ],
+          "style": {
+            "showBackground": true,
+            "showBorder": true,
+            "borderStyle": "solid",
+            "visible": true,
+            "opacity": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "id": "business-to-project",
+      "type": "detail",
+      "name": "사업 시작 ~ 프로젝트 등록",
+      "description": "사업기회 확보부터 계약 승인, 계약등록, 프로젝트 생성까지 흐름",
+      "version": "TO-BE v0.1",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "opportunity",
+          "name": "사업기회확보",
+          "type": "manual",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "manual",
+          "owner": "사업부",
+          "description": "신규 사업기회를 발굴하고 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1,
+          "cellOrder": 0,
+          "zoneOrder": 0
+        },
+        {
+          "id": "business-review",
+          "name": "사업참여검토",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "p2",
+          "system": "manual",
+          "owner": "사업부",
+          "description": "사업 참여 여부 및 실행 가능성을 검���합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "contract-approval",
+          "name": "사업계약품의",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "p3",
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "사업 계약 체결을 위한 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "contract-register",
+          "name": "계약등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p4",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "승인된 계약 정보를 ERP에 등록합니다.",
+          "inputs": [],
+          "outputs": [
+            "계약코드 생성"
+          ],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "project-register",
+          "name": "프로젝트등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "계약 기준으로 프로젝트를 생성합니다.",
+          "inputs": [],
+          "outputs": [
+            "프로젝트코드 생성"
+          ],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "project-approval",
+          "name": "사업실행품의",
+          "type": "decision",
+          "laneId": "business",
+          "phaseId": "p6",
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "프로젝트 실행을 위한 최종 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "opportunity",
+          "target": "business-review",
+          "condition": "",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "e02",
+          "source": "business-review",
+          "target": "contract-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "contract-register",
+          "target": "contract-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "contract-approval",
+          "target": "project-register",
+          "condition": "",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "e05",
+          "source": "project-register",
+          "target": "project-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqj869ps-zq4r3",
+          "source": "contract-approval",
+          "target": "contract-register",
+          "sourceHandle": "right",
+          "targetHandle": "right",
+          "type": "condition",
+          "label": "N",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "edge-mqj885pq-duuw7",
+          "source": "business-review",
+          "target": "opportunity",
+          "sourceHandle": "right",
+          "targetHandle": "right",
+          "type": "condition",
+          "label": "N",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [
+        {
+          "id": "zone-mqj8717f-gcjcs",
+          "name": "사업부 선택영역",
+          "type": "process-zone",
+          "laneIds": [],
+          "phaseIds": [],
+          "nodeIds": [
+            "opportunity",
+            "business-review"
+          ],
+          "style": {
+            "showBackground": true,
+            "showBorder": true,
+            "borderStyle": "solid",
+            "visible": true,
+            "opacity": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "id": "business-to-purchase-request",
+      "type": "detail",
+      "name": "사업기회확보 ~ 구매요청",
+      "description": "사업기회 확보부터 ��로젝트 실행품의·구매요청까지",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "opportunity",
+          "name": "사업기회확보",
+          "type": "manual",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "manual",
+          "owner": "사업부",
+          "description": "신규 사업기회를 발굴하고 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "business-review",
+          "name": "사업참여검토",
+          "type": "manual",
+          "laneId": "business",
+          "phaseId": "p2",
+          "system": "manual",
+          "owner": "사업부",
+          "description": "사업 참여 여부 및 실행 가능성을 검토합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "contract-approval",
+          "name": "사업계약품의",
+          "type": "approval",
+          "laneId": "business",
+          "phaseId": "p3",
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "사업 계약 체결을 위한 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "contract-register",
+          "name": "계약등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p4",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "승인된 계약 정보를 ERP에 등록합니다.",
+          "inputs": [],
+          "outputs": [
+            "계약코드 생성"
+          ],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "project-register",
+          "name": "프로젝트등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "계약 기준으로 프로젝트를 생성합니다.",
+          "inputs": [],
+          "outputs": [
+            "프로젝트코드 생성"
+          ],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "project-approval",
+          "name": "사업실행품의",
+          "type": "approval",
+          "laneId": "business",
+          "phaseId": "p6",
+          "system": "groupware",
+          "owner": "사업부",
+          "description": "프로젝트 실행을 위한 ��종 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "purchase-request",
+          "name": "구매요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "구매요청",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "opportunity",
+          "target": "business-review",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "business-review",
+          "target": "contract-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "contract-register",
+          "target": "contract-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "contract-approval",
+          "target": "project-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "project-register",
+          "target": "project-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "project-approval",
+          "target": "purchase-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "purchase-request",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "purchase-to-ap-invoice",
+      "type": "detail",
+      "name": "구매요청 ~ 입고 ~ 매입전표",
+      "description": "구매요청부터 입고·재고인식·매입마감·회계전표까지",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "purchase-request",
+          "name": "구매요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "프로젝트 또는 운영 단위 구매 요청을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "vendor-check",
+          "name": "거래처 확인",
+          "type": "decision",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "거래처 등록 여부를 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 1
+        },
+        {
+          "id": "vendor-register",
+          "name": "거래처등록요청",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p3",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "신규 거래처 등록을 요청합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 2
+        },
+        {
+          "id": "po-approval",
+          "name": "발주품의",
+          "type": "approval",
+          "laneId": "partnership",
+          "phaseId": "p4",
+          "system": "groupware",
+          "owner": "상생협력팀",
+          "description": "발주 품의를 상신하고 승인받습니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 3
+        },
+        {
+          "id": "purchase-order",
+          "name": "계약/발주등록",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "승인된 발주 정보를 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 4
+        },
+        {
+          "id": "inbound-info",
+          "name": "입고정보전달",
+          "type": "interface",
+          "laneId": "partnership",
+          "phaseId": "p6",
+          "system": "ERP→WMS API",
+          "owner": "상생협력팀",
+          "description": "발주 정보를 WMS로 전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 5
+        },
+        {
+          "id": "inbound-check",
+          "name": "입고확인",
+          "type": "erp",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p7",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "입고 예정 물량을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 1
+        },
+        {
+          "id": "inbound-confirm",
+          "name": "입고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p8",
+          "system": "WMS→ERP API",
+          "owner": "물류센터",
+          "description": "입고 확정 결과를 ERP로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 8,
+          "localOrder": 2
+        },
+        {
+          "id": "stock-plus",
+          "name": "재고인식(+)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p9",
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "입고에 따른 재고 증가를 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 9,
+          "localOrder": 3
+        },
+        {
+          "id": "ap-close",
+          "name": "매입마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p10",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매입 마감을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 10,
+          "localOrder": 1
+        },
+        {
+          "id": "fi-posting",
+          "name": "회계전표 반영",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p11",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매입 전표를 회계에 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 11,
+          "localOrder": 2
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "purchase-request",
+          "target": "vendor-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "vendor-check",
+          "target": "vendor-register",
+          "condition": "newVendor",
+          "label": "신규",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "vendor-check",
+          "target": "po-approval",
+          "condition": "existingVendor",
+          "label": "기존",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "vendor-register",
+          "target": "po-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "po-approval",
+          "target": "purchase-order",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "purchase-order",
+          "target": "inbound-info",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e07",
+          "source": "inbound-info",
+          "target": "inbound-check",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e08",
+          "source": "inbound-check",
+          "target": "inbound-confirm",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e09",
+          "source": "inbound-confirm",
+          "target": "stock-plus",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e10",
+          "source": "stock-plus",
+          "target": "ap-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e11",
+          "source": "ap-close",
+          "target": "fi-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "purchase-request",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "consignment-purchase-receipt",
+      "type": "detail",
+      "name": "구매요청 ~ 입고 : 판매대행",
+      "description": "판매대행(위탁) 구매·입고 프로세스",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "purchase-request",
+          "name": "구매요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "구매요청",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "consignment-po",
+          "name": "판매대행 발주",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "판매대행 발주",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "consignment-inbound-info",
+          "name": "입고정보전달",
+          "type": "interface",
+          "laneId": "partnership",
+          "phaseId": "p3",
+          "system": "ERP→WMS API",
+          "owner": "상생협력팀",
+          "description": "입고정보전달",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "consignment-inbound-check",
+          "name": "입고확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "입고확인",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "consignment-inbound-register",
+          "name": "입고등록",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "입고등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "consignment-inbound-confirm",
+          "name": "입고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p6",
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "입고확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "consignment-stock-plus",
+          "name": "위탁재고인식(+)",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "위탁재고인식(+)",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "purchase-request",
+          "target": "consignment-po",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "consignment-po",
+          "target": "consignment-inbound-info",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "consignment-inbound-info",
+          "target": "consignment-inbound-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "consignment-inbound-check",
+          "target": "consignment-inbound-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "consignment-inbound-register",
+          "target": "consignment-inbound-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "consignment-inbound-confirm",
+          "target": "consignment-stock-plus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "purchase-request",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "b2b-domestic-order-to-sales",
+      "type": "detail",
+      "name": "주문등록 ~ 출고 ~ 매출전표 : B2B 국내",
+      "description": "B2B 국내 주문부터 출고·매출전표까지",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "order-register",
+          "name": "주문등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "주문등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1,
+          "cellSlot": 1
+        },
+        {
+          "id": "shipment-request",
+          "name": "출고요청",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "p2",
+          "system": "ERP→WMS",
+          "owner": "사업부",
+          "description": "출고요청",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "shipment-check",
+          "name": "출고확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p3",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "출고확인",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3,
+          "cellSlot": 2
+        },
+        {
+          "id": "shipment-register",
+          "name": "출고등록",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "출고등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4,
+          "cellSlot": 3
+        },
+        {
+          "id": "shipment-confirm",
+          "name": "출고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "출고확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5,
+          "cellSlot": 4
+        },
+        {
+          "id": "stock-minus",
+          "name": "재고인식(-)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p6",
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "재고인식(-)",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6,
+          "cellSlot": 9
+        },
+        {
+          "id": "sales-close",
+          "name": "매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출마감확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7,
+          "cellSlot": 9
+        },
+        {
+          "id": "sales-posting",
+          "name": "매출전표생성",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p8",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출전표생성",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 8,
+          "localOrder": 8,
+          "cellSlot": 11
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "order-register",
+          "target": "shipment-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "shipment-request",
+          "target": "shipment-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "shipment-check",
+          "target": "shipment-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "shipment-register",
+          "target": "shipment-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "shipment-confirm",
+          "target": "stock-minus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "stock-minus",
+          "target": "sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e07",
+          "source": "sales-close",
+          "target": "sales-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "order-register",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "b2b-domestic-return",
+      "type": "detail",
+      "name": "주문반품 ~ 입고 ~ 반품전표 : B2B 국내",
+      "description": "B2B 국내 반품 주���부터 입고·재고·매출마감·전표까지",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "return-order-register",
+          "name": "반품주문등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "반품 주문을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "return-order-confirm",
+          "name": "반품주문확정",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "반품 주문을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "return-shipment-request",
+          "name": "출고반품요청",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "p3",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "반품 출고 지시를 WMS로 전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "stock-sync-api-inbound",
+          "name": "재고연동 API(입고요청)",
+          "type": "system",
+          "laneId": "business",
+          "phaseId": "p4",
+          "system": "ERP→WMS API",
+          "owner": "사업부",
+          "description": "입고 요청을 재고연동 API로 WMS에 전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "inbound-request-check",
+          "name": "입고 요청 확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "WMS에서 입고 요청 내역을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "b2b-return-inbound",
+          "name": "B2B 반품입고 처리",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p6",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "B2B 반품 입고를 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "inbound-qty-input",
+          "name": "입고 수량 입력",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p7",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "반품 입고 수량을 입력합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        },
+        {
+          "id": "return-inbound-register",
+          "name": "반품입고등록",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p8",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "반품 입고를 WMS에 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 8,
+          "localOrder": 8
+        },
+        {
+          "id": "return-confirm",
+          "name": "반품확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p9",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "반품을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 9,
+          "localOrder": 9
+        },
+        {
+          "id": "consignment-flag-check",
+          "name": "위탁 여부",
+          "type": "decision",
+          "laneId": "finance",
+          "phaseId": "p10",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "위탁 재고 여부를 판단합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 10,
+          "localOrder": 10
+        },
+        {
+          "id": "consignment-stock-status-check",
+          "name": "위탁재고 현황 확인",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p11",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "위탁 재고 현황을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 11,
+          "localOrder": 11
+        },
+        {
+          "id": "erp-stock-plus",
+          "name": "ERP 재고(+)",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p11",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "반품에 따른 ERP 재고를 증가 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 11,
+          "localOrder": 12
+        },
+        {
+          "id": "batch-sales-close-register",
+          "name": "일괄매출마감등록",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p12",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "반품 매출 마감 대상을 일괄 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 12,
+          "localOrder": 13
+        },
+        {
+          "id": "sales-close-confirm",
+          "name": "매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p12",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출 마감을 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 12,
+          "localOrder": 14
+        },
+        {
+          "id": "voucher-pending",
+          "name": "전표생성(미결)",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p13",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "미결 전표를 생성합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 13,
+          "localOrder": 15
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "return-order-register",
+          "target": "return-order-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "return-order-confirm",
+          "target": "return-shipment-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "return-shipment-request",
+          "target": "stock-sync-api-inbound",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "stock-sync-api-inbound",
+          "target": "inbound-request-check",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "inbound-request-check",
+          "target": "b2b-return-inbound",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "b2b-return-inbound",
+          "target": "inbound-qty-input",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e07",
+          "source": "inbound-qty-input",
+          "target": "return-inbound-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e08",
+          "source": "return-inbound-register",
+          "target": "return-confirm",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e09",
+          "source": "return-confirm",
+          "target": "consignment-flag-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e10",
+          "source": "consignment-flag-check",
+          "target": "consignment-stock-status-check",
+          "condition": "consignment",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e11",
+          "source": "consignment-flag-check",
+          "target": "erp-stock-plus",
+          "condition": "noConsignment",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e12",
+          "source": "consignment-stock-status-check",
+          "target": "erp-stock-plus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e13",
+          "source": "erp-stock-plus",
+          "target": "batch-sales-close-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e14",
+          "source": "batch-sales-close-register",
+          "target": "sales-close-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e15",
+          "source": "sales-close-confirm",
+          "target": "voucher-pending",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "return-handling",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "b2b-export-order-to-sales",
+      "type": "detail",
+      "name": "주문등록 ~ 수출출고 ~ 매출전표 : B2B 해외",
+      "description": "B2B 해외(수출) 주문·수출출고·매출전표",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "export-order-register",
+          "name": "수출주문등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "수출주문등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "export-customs-check",
+          "name": "수출통관확인",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "수출통관확인",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "export-shipment-request",
+          "name": "수출출고요청",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "p3",
+          "system": "ERP→WMS",
+          "owner": "사업부",
+          "description": "수출출고요청",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "export-shipment-confirm",
+          "name": "수출출고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "수출출고확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "export-stock-minus",
+          "name": "재고인식(-)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "재고인식(-)",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "export-sales-close",
+          "name": "매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p6",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출마감확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "export-sales-posting",
+          "name": "매출전표생성",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출전표생성",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "export-order-register",
+          "target": "export-customs-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "export-customs-check",
+          "target": "export-shipment-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "export-shipment-request",
+          "target": "export-shipment-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "export-shipment-confirm",
+          "target": "export-stock-minus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "export-stock-minus",
+          "target": "export-sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "export-sales-close",
+          "target": "export-sales-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "order-register",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "b2c-order-to-sales",
+      "type": "detail",
+      "name": "주문등록 ~ 출고 ~ 매출전표 : B2C",
+      "description": "B2C(온라인) 주문·출고·매출전표",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "online-order",
+          "name": "온라인주문",
+          "type": "external",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "Cafe24",
+          "owner": "사업부",
+          "description": "온라인주문",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "order-sync",
+          "name": "주문정보연동",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "p2",
+          "system": "OMS API",
+          "owner": "사업부",
+          "description": "주문정보연동",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "b2c-order-register",
+          "name": "주문등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p3",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "주문등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "shipment-request",
+          "name": "출고요청",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "p2",
+          "system": "ERP→WMS",
+          "owner": "사업부",
+          "description": "출고요청",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "shipment-check",
+          "name": "출고확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p3",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "출고확인",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "shipment-register",
+          "name": "출고등록",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "출고등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "shipment-confirm",
+          "name": "출고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "출고확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "stock-minus",
+          "name": "재고인식(-)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p6",
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "재고인식(-)",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "sales-close",
+          "name": "매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출마감확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        },
+        {
+          "id": "sales-posting",
+          "name": "매출전표생성",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p8",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출전표생성",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 8,
+          "localOrder": 8
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "online-order",
+          "target": "order-sync",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "order-sync",
+          "target": "b2c-order-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "b2c-order-register",
+          "target": "shipment-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "shipment-request",
+          "target": "shipment-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "shipment-check",
+          "target": "shipment-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "shipment-register",
+          "target": "shipment-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e07",
+          "source": "shipment-confirm",
+          "target": "stock-minus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e08",
+          "source": "stock-minus",
+          "target": "sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e09",
+          "source": "sales-close",
+          "target": "sales-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "order-register",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "preorder-to-sales",
+      "type": "detail",
+      "name": "예약판매 ~ 출고 ~ 매출전표",
+      "description": "예약판매 주문·출고·매출전표",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "preorder-register",
+          "name": "예약판매등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "예약판매등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "preorder-deposit",
+          "name": "예약금수령",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "예약금수령",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "preorder-shipment-request",
+          "name": "출고요청",
+          "type": "interface",
+          "laneId": "business",
+          "phaseId": "p3",
+          "system": "ERP→WMS",
+          "owner": "사업부",
+          "description": "출고요청",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "preorder-shipment-confirm",
+          "name": "출고확정",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "WMS→ERP",
+          "owner": "물류센터",
+          "description": "출고확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "preorder-stock-minus",
+          "name": "재고인식(-)",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "재고인식(-)",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "preorder-sales-close",
+          "name": "매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p6",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출마감확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "preorder-sales-posting",
+          "name": "매출전표생성",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출전표생성",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "preorder-register",
+          "target": "preorder-deposit",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "preorder-deposit",
+          "target": "preorder-shipment-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "preorder-shipment-request",
+          "target": "preorder-shipment-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "preorder-shipment-confirm",
+          "target": "preorder-stock-minus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "preorder-stock-minus",
+          "target": "preorder-sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "preorder-sales-close",
+          "target": "preorder-sales-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "order-register",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "stock-transfer",
+      "type": "detail",
+      "name": "창고이동 / 재고이동",
+      "description": "창고이동 요청부터 WMS 처리·Location 반영까지",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "transfer-request-register",
+          "name": "창고이동요청등록",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "창고 이�� 요청을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "transfer-request",
+          "name": "창고이동요청",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "창고 이동 요청을 접수·전달합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "wms-transfer-process",
+          "name": "창고이동",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p3",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "WMS에서 창고 간 재고 이동을 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "transfer-confirm",
+          "name": "창고이동확정",
+          "type": "erp",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "ERP",
+          "owner": "물류센터",
+          "description": "창고 이동 결과를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "erp-location-reflect",
+          "name": "ERP 재고 Location 반영",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "창고이동에 따른 ERP 재고 Location을 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "transfer-request-register",
+          "target": "transfer-request",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "transfer-request",
+          "target": "wms-transfer-process",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "wms-transfer-process",
+          "target": "transfer-confirm",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "transfer-confirm",
+          "target": "erp-location-reflect",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "stock-transfer-handling",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "other-issue",
+      "type": "detail",
+      "name": "기타출고",
+      "description": "기타출고·무상증정 품의·WMS 출고·재고차감",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "other-issue-request",
+          "name": "기타출고요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "기타 출고 요청을 등록���니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "free-gift-approval",
+          "name": "무상증정품의",
+          "type": "approval",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "system": "groupware",
+          "owner": "상생협력팀",
+          "description": "무상증정 출고 품의를 상신합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "gift-approval-check",
+          "name": "승인 여부",
+          "type": "decision",
+          "laneId": "partnership",
+          "phaseId": "p3",
+          "system": "groupware",
+          "owner": "상생협력팀",
+          "description": "무상증정 품의 승인 여부를 판단합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "other-issue-reject",
+          "name": "기타출고요청 반려/종료",
+          "type": "exception",
+          "laneId": "partnership",
+          "phaseId": "p3",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "품의 반려 또는 요청을 종료합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 4
+        },
+        {
+          "id": "outbound-request-check",
+          "name": "출고요청 확인",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "출고 요청 내역을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 5
+        },
+        {
+          "id": "wms-outbound-process",
+          "name": "WMS 출고처리",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p5",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "WMS에서 기타 출고를 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 6
+        },
+        {
+          "id": "outbound-qty-input",
+          "name": "출고 수량 입력",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p6",
+          "system": "WMS",
+          "owner": "물류센터",
+          "description": "출고 수량을 입력합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 7
+        },
+        {
+          "id": "other-issue-confirm",
+          "name": "기타출고확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "기타 출고를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 8
+        },
+        {
+          "id": "erp-stock-minus",
+          "name": "ERP 재고(-)",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p8",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "기타출고에 따른 ERP 재고를 차감 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 8,
+          "localOrder": 9
+        },
+        {
+          "id": "fi-posting-optional",
+          "name": "회계전표 반영",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p9",
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "필요 시 회계전표를 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 9,
+          "localOrder": 10
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "other-issue-request",
+          "target": "free-gift-approval",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "free-gift-approval",
+          "target": "gift-approval-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "gift-approval-check",
+          "target": "outbound-request-check",
+          "condition": "approved",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "gift-approval-check",
+          "target": "other-issue-reject",
+          "condition": "rejected",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "outbound-request-check",
+          "target": "wms-outbound-process",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "wms-outbound-process",
+          "target": "outbound-qty-input",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e07",
+          "source": "outbound-qty-input",
+          "target": "other-issue-confirm",
+          "condition": "",
+          "label": "",
+          "type": "system",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e08",
+          "source": "other-issue-confirm",
+          "target": "erp-stock-minus",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e09",
+          "source": "erp-stock-minus",
+          "target": "fi-posting-optional",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "other-issue-handling",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "consignment-settlement",
+      "type": "detail",
+      "name": "위탁정산",
+      "description": "위탁 재고·매출 마감·정산전표",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "consignment-stock-status",
+          "name": "위탁재고현황",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "위탁재고현황",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "consignment-sales-register",
+          "name": "위탁매출마감등록",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "위탁매출마감등록",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "consignment-sales-close",
+          "name": "위탁매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p3",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "위탁매출마감확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "settlement-anomaly-check",
+          "name": "정산 이상여부",
+          "type": "decision",
+          "laneId": "finance",
+          "phaseId": "p4",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "정산 이상여부",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "prepayment-process",
+          "name": "선수금처리",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "선수금처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        },
+        {
+          "id": "regular-fund-execution",
+          "name": "정기자금집행",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p6",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "정기자금집행",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 6,
+          "localOrder": 6
+        },
+        {
+          "id": "settlement-posting",
+          "name": "정산전표처리",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p7",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "정산전표처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 7,
+          "localOrder": 7
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "consignment-stock-status",
+          "target": "consignment-sales-register",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "consignment-sales-register",
+          "target": "consignment-sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "consignment-sales-close",
+          "target": "settlement-anomaly-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "settlement-anomaly-check",
+          "target": "prepayment-process",
+          "condition": "noSettlementAnomaly",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e01",
+          "source": "prepayment-process",
+          "target": "regular-fund-execution",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "regular-fund-execution",
+          "target": "settlement-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "settlement-posting",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "royalty-mg-settlement",
+      "type": "detail",
+      "name": "로열티 / MG 정산",
+      "description": "로열티 매출 집계·MG 상계·정산전표",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-15",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "royalty-sales-aggregate",
+          "name": "로열티매출집계",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p1",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "로열티매출집계",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1
+        },
+        {
+          "id": "royalty-sales-close",
+          "name": "로열티매출마감확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p2",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "로열티매출마감확정",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 2
+        },
+        {
+          "id": "mg-deduct-check",
+          "name": "MG상계여부",
+          "type": "decision",
+          "laneId": "finance",
+          "phaseId": "p3",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "MG상계여부",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 3
+        },
+        {
+          "id": "mg-offset-process",
+          "name": "MG상계처리",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p4",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "MG상계처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4
+        },
+        {
+          "id": "settlement-posting",
+          "name": "정산전표처리",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p5",
+          "system": "ERP",
+          "owner": "사업부",
+          "description": "정산전표처리",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 5,
+          "localOrder": 5
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "royalty-sales-aggregate",
+          "target": "royalty-sales-close",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e02",
+          "source": "royalty-sales-close",
+          "target": "mg-deduct-check",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "mg-deduct-check",
+          "target": "mg-offset-process",
+          "condition": "mgDeduct",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "mg-deduct-check",
+          "target": "settlement-posting",
+          "condition": "noMgDeduct",
+          "label": "N",
+          "type": "condition",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "mg-offset-process",
+          "target": "settlement-posting",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "settlement-posting",
+      "source": "SCM TO-BE"
+    },
+    {
+      "id": "popup-concert-stock-sales-sync",
+      "type": "detail",
+      "name": "팝업/콘서트 재고이동 및 매출내역 동기화 프로세스",
+      "description": "팝업·콘서트 현장 재고 이동, 현장 판매·매출 수집, 잔여재고 회수, 기타출고 정산",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-06-18",
+      "owner": "ERP PMO",
+      "nodes": [
+        {
+          "id": "onsite-stock-transfer-request",
+          "name": "현장 재고 이동 요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 1,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "팝업/콘서트 현장으로 판매 재고 이동을 요청합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "inout-order-request-api",
+          "name": "입출고요청주문 API",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 2,
+          "system": "API",
+          "owner": "판매현장",
+          "description": "입출고 요청 주문을 API로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "transfer-request-check",
+          "name": "요청 확인/출고지시",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 3,
+          "system": "이지어드민",
+          "owner": "물류센터",
+          "description": "이동 요청을 확인하고 출고를 지시합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "outbound-progress",
+          "name": "출고 진행",
+          "type": "system",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 4,
+          "system": "이지어드민",
+          "owner": "물류센터",
+          "description": "이지어드민에서 출고를 진행합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "stock-move-confirm-api",
+          "name": "재고 이동 확정 API",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 5,
+          "system": "API",
+          "owner": "물류센터",
+          "description": "재고 이동 확정 결과를 API로 연동합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "onsite-inbound-qty-check",
+          "name": "현장 입고 수량 확인",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 6,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "현장 입고 수량을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "onsite-inbound-confirm",
+          "name": "현장 입고 확정 / 판매가능 재고 반영",
+          "type": "system",
+          "laneId": "retail-easychain",
+          "phaseId": "p1",
+          "phaseOrder": 1,
+          "localOrder": 7,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "현장 입고를 확정하고 판매가능 재고를 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "onsite-sales-progress",
+          "name": "현장판매 진행",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "p2",
+          "phaseOrder": 2,
+          "localOrder": 8,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "팝업/콘서트 현장에서 판매를 진행합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "daily-sales-close",
+          "name": "일일 판매마감",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "p2",
+          "phaseOrder": 2,
+          "localOrder": 9,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "일일 판매를 마감합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "pos-item-aggregate-api",
+          "name": "POS 품목 집계별 API",
+          "type": "interface",
+          "laneId": "retail-easychain",
+          "phaseId": "p2",
+          "phaseOrder": 2,
+          "localOrder": 10,
+          "system": "API",
+          "owner": "판매현장",
+          "description": "POS 품목별 집계 데이터를 API로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "sales-data-collect",
+          "name": "매출내역 수집",
+          "type": "system",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "phaseOrder": 2,
+          "localOrder": 11,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "현장 매출 내역을 ERP로 수집합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "sales-voucher-create",
+          "name": "매출전표 생성/검증요청",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p2",
+          "phaseOrder": 2,
+          "localOrder": 12,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "매출전표를 생성하고 검증을 요청합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "sales-voucher-confirm",
+          "name": "매출전표 확정/매출인식",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p2",
+          "phaseOrder": 2,
+          "localOrder": 13,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "매출전표를 확정하고 매출을 인식합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "onsite-outbound-qty-check",
+          "name": "현장 출고 수량 확인",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "p3",
+          "phaseOrder": 3,
+          "localOrder": 14,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "현장 출고 수량을 확인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "onsite-outbound-confirm",
+          "name": "현장 출고 확정",
+          "type": "manual",
+          "laneId": "retail-easychain",
+          "phaseId": "p3",
+          "phaseOrder": 3,
+          "localOrder": 15,
+          "system": "이지체인",
+          "owner": "판매현장",
+          "description": "현장 출고를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "stock-move-confirm-api-return",
+          "name": "재고 이동 확정 API",
+          "type": "interface",
+          "laneId": "retail-easychain",
+          "phaseId": "p3",
+          "phaseOrder": 3,
+          "localOrder": 16,
+          "system": "API",
+          "owner": "물류센터",
+          "description": "잔여재고 회수 이동 확정을 API로 연동합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "cellSlot": 1
+        },
+        {
+          "id": "onsite-transfer-confirm-wms",
+          "name": "현장판매 재고 이동 확정",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p3",
+          "phaseOrder": 3,
+          "localOrder": 17,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "현장판매 재고 이동을 ERP에서 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "return-inbound-confirm",
+          "name": "입고 확정",
+          "type": "erp",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p3",
+          "phaseOrder": 3,
+          "localOrder": 18,
+          "system": "이지어드민",
+          "owner": "물류센터",
+          "description": "회수 재고 입고를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "onsite-transfer-confirm-final",
+          "name": "현장판매 재고 이동 확정",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p3",
+          "phaseOrder": 3,
+          "localOrder": 19,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "현장판매 재고 이동 최종 확정을 반영합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "other-outbound-request",
+          "name": "기타출고요청",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 20,
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "기타출고(사용분) 요청을 등록합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "gw-approval",
+          "name": "GW 결재승인",
+          "type": "approval",
+          "laneId": "partnership",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 21,
+          "system": "groupware",
+          "owner": "상생협력팀",
+          "description": "기타출고 품의를 결재 승인합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "outbound-order-api",
+          "name": "출고요청 주문 API",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 22,
+          "system": "API",
+          "owner": "물류센터",
+          "description": "출고요청 주문을 API로 전송합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "outbound-confirm-api",
+          "name": "출고확정 API",
+          "type": "interface",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 23,
+          "system": "API",
+          "owner": "물류센터",
+          "description": "출고 확정 결과를 API로 연동합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "other-outbound-confirm",
+          "name": "기타출고 확정",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 24,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "기타출고를 확정합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "inventory-asset-cost",
+          "name": "재고자산 비용처리",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 25,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "재고자산 비용을 처리합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        },
+        {
+          "id": "co-voucher-confirm",
+          "name": "CO전표 확정/수익성 분석",
+          "type": "system",
+          "laneId": "finance",
+          "phaseId": "p4",
+          "phaseOrder": 4,
+          "localOrder": 26,
+          "system": "ERP",
+          "owner": "재무팀",
+          "description": "CO 전표를 확정하고 수익성을 분석합니다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": []
+        }
+      ],
+      "edges": [
+        {
+          "id": "e01",
+          "source": "onsite-stock-transfer-request",
+          "target": "inout-order-request-api",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          },
+          "sourceHandle": "right",
+          "targetHandle": "top"
+        },
+        {
+          "id": "e02",
+          "source": "inout-order-request-api",
+          "target": "transfer-request-check",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e03",
+          "source": "transfer-request-check",
+          "target": "outbound-progress",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e04",
+          "source": "outbound-progress",
+          "target": "stock-move-confirm-api",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e05",
+          "source": "stock-move-confirm-api",
+          "target": "onsite-inbound-qty-check",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e06",
+          "source": "onsite-inbound-qty-check",
+          "target": "onsite-inbound-confirm",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e07",
+          "source": "onsite-inbound-confirm",
+          "target": "onsite-sales-progress",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e08",
+          "source": "onsite-sales-progress",
+          "target": "daily-sales-close",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e09",
+          "source": "daily-sales-close",
+          "target": "pos-item-aggregate-api",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e10",
+          "source": "pos-item-aggregate-api",
+          "target": "sales-data-collect",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e11",
+          "source": "sales-data-collect",
+          "target": "sales-voucher-create",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e12",
+          "source": "sales-voucher-create",
+          "target": "sales-voucher-confirm",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e13",
+          "source": "sales-voucher-confirm",
+          "target": "onsite-outbound-qty-check",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e14",
+          "source": "onsite-outbound-qty-check",
+          "target": "onsite-outbound-confirm",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e15",
+          "source": "onsite-outbound-confirm",
+          "target": "stock-move-confirm-api-return",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e16",
+          "source": "stock-move-confirm-api-return",
+          "target": "onsite-transfer-confirm-wms",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e17",
+          "source": "onsite-transfer-confirm-wms",
+          "target": "return-inbound-confirm",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e18",
+          "source": "return-inbound-confirm",
+          "target": "onsite-transfer-confirm-final",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e19",
+          "source": "onsite-transfer-confirm-final",
+          "target": "other-outbound-request",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e20",
+          "source": "other-outbound-request",
+          "target": "gw-approval",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e21",
+          "source": "gw-approval",
+          "target": "outbound-order-api",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e22",
+          "source": "outbound-order-api",
+          "target": "outbound-confirm-api",
+          "type": "system",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e23",
+          "source": "outbound-confirm-api",
+          "target": "other-outbound-confirm",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e24",
+          "source": "other-outbound-confirm",
+          "target": "inventory-asset-cost",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        },
+        {
+          "id": "e25",
+          "source": "inventory-asset-cost",
+          "target": "co-voucher-confirm",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto"
+          }
+        }
+      ],
+      "zones": [],
+      "overviewNodeId": "popup-concert-stock-sales-sync",
+      "source": "SCM TO-BE"
+    }
+  ]
+}

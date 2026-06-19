@@ -1,0 +1,12 @@
+{
+  "id": "goods-receipt-inventory-purchase",
+  "name": "입고·재고·매입",
+  "description": "Overview TO-BE — 입고, 재고, 매입 전표 프로세스 (데이터 입력 예정)",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "nodes": [],
+  "edges": []
+}

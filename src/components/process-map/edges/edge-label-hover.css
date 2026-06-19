@@ -1,0 +1,20 @@
+.process-edge__label--hover-reveal {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.process-edge__label--broken {
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  font-weight: 600;
+}
+
+.process-edge--broken {
+  opacity: 0.95;
+}
+
+.process-edge__label--hover-reveal.process-edge__label--visible,
+.process-map-canvas--overview .process-edge--selected ~ .process-edge__label--hover-reveal {
+  opacity: 1;
+}

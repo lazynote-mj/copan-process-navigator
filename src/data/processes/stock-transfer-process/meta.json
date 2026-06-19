@@ -1,0 +1,16 @@
+{
+  "id": "stock-transfer-process",
+  "name": "재고이동 프로세스",
+  "description": "창고이동 요청부터 WMS 처리·확정·ERP Location 반영까지의 상세 흐름",
+  "version": "TO-BE v0.1",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [
+    { "id": "p1", "label": "이동요청등록", "order": 1 },
+    { "id": "p2", "label": "이동요청", "order": 2 },
+    { "id": "p3", "label": "WMS이동처리", "order": 3 },
+    { "id": "p4", "label": "이동확정", "order": 4 },
+    { "id": "p5", "label": "Location반영", "order": 5 }
+  ]
+}

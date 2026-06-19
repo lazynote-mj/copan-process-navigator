@@ -1,0 +1,174 @@
+{
+  "id": "business-to-purchase-request",
+  "name": "사업기회확보 ~ 구매요청",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "사업기회 확보부터 프로젝트 실행품의·구매요청까지",
+  "overviewNodeId": "purchase-request",
+  "status": "draft",
+  "lastModified": "2026-06-15",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "opportunity",
+      "name": "사업기회확보",
+      "type": "manual",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "manual",
+      "owner": "사업부",
+      "description": "신규 사업기회를 발굴하고 등록합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "business-review",
+      "name": "사업참여검토",
+      "type": "manual",
+      "laneId": "business",
+      "phaseId": "p2",
+      "system": "manual",
+      "owner": "사업부",
+      "description": "사업 참여 여부 및 실행 가능성을 검토합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "contract-approval",
+      "name": "사업계약품의",
+      "type": "approval",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "groupware",
+      "owner": "사업부",
+      "description": "사업 계약 체결을 위한 품의를 상신합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "contract-register",
+      "name": "계약등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "승인된 계약 정보를 ERP에 등록합니다.",
+      "inputs": [],
+      "outputs": [
+        "계약코드 생성"
+      ],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "project-register",
+      "name": "프로젝트등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "계약 기준으로 프로젝트를 생성합니다.",
+      "inputs": [],
+      "outputs": [
+        "프로젝트코드 생성"
+      ],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "project-approval",
+      "name": "사업실행품의",
+      "type": "approval",
+      "laneId": "business",
+      "phaseId": "p6",
+      "system": "groupware",
+      "owner": "사업부",
+      "description": "프로젝트 실행을 위한 최종 품의를 상신합니다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "purchase-request",
+      "name": "구매요청",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "구매요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "opportunity",
+      "target": "business-review",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e02",
+      "source": "business-review",
+      "target": "contract-register",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e03",
+      "source": "contract-register",
+      "target": "contract-approval",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e04",
+      "source": "contract-approval",
+      "target": "project-register",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e05",
+      "source": "project-register",
+      "target": "project-approval",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    },
+    {
+      "id": "e06",
+      "source": "project-approval",
+      "target": "purchase-request",
+      "condition": "",
+      "label": "",
+      "type": "normal"
+    }
+  ]
+}

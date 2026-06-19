@@ -1,0 +1,103 @@
+.interface-rule-node {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.interface-rule-node__diamond {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.interface-rule-node__polygon {
+  fill: #ecfeff;
+  stroke: #0d9488;
+  stroke-width: 1.75;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1px 3px rgba(13, 148, 136, 0.15));
+}
+
+.interface-rule-node__content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 10px 8px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.interface-rule-node__badge {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  line-height: 1.1;
+}
+
+.interface-rule-node__name {
+  font-size: 9px;
+  font-weight: 700;
+  color: #134e4a;
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 58px;
+  word-break: keep-all;
+}
+
+.interface-rule-node__meta {
+  font-size: 7px;
+  color: #64748b;
+  line-height: 1.1;
+  max-width: 62px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.interface-rule-node--compact .interface-rule-node__name {
+  font-size: 8px;
+  max-width: 54px;
+}
+
+.interface-rule-node--compact .interface-rule-node__meta {
+  font-size: 6px;
+  max-width: 58px;
+}
+
+.interface-rule-node--selected .interface-rule-node__polygon {
+  stroke: var(--accent, #2563eb);
+  filter: drop-shadow(0 0 0 2px rgba(37, 99, 235, 0.18));
+}
+
+.interface-rule-node__handle {
+  width: 7px;
+  height: 7px;
+  opacity: 0;
+  border: 1px solid #0d9488;
+  background: #fff;
+}
+
+.interface-rule-node--selected .interface-rule-node__handle,
+.process-map-canvas--edit .interface-rule-node:hover .interface-rule-node__handle {
+  opacity: 1;
+}
+
+.interface-rule-node--compact .interface-rule-node__handle {
+  display: none;
+}

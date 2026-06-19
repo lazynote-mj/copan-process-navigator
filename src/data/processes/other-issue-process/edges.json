@@ -1,0 +1,25 @@
+[
+  { "id": "e01", "source": "other-issue-request", "target": "free-gift-approval", "condition": "", "label": "", "type": "normal" },
+  { "id": "e02", "source": "free-gift-approval", "target": "gift-approval-check", "condition": "", "label": "", "type": "normal" },
+  {
+    "id": "e03",
+    "source": "gift-approval-check",
+    "target": "outbound-request-check",
+    "condition": "approved",
+    "label": "Y",
+    "type": "condition"
+  },
+  {
+    "id": "e04",
+    "source": "gift-approval-check",
+    "target": "other-issue-reject",
+    "condition": "rejected",
+    "label": "N",
+    "type": "condition"
+  },
+  { "id": "e05", "source": "outbound-request-check", "target": "wms-outbound-process", "condition": "", "label": "", "type": "normal" },
+  { "id": "e06", "source": "wms-outbound-process", "target": "outbound-qty-input", "condition": "", "label": "", "type": "normal" },
+  { "id": "e07", "source": "outbound-qty-input", "target": "other-issue-confirm", "condition": "", "label": "", "type": "system" },
+  { "id": "e08", "source": "other-issue-confirm", "target": "erp-stock-minus", "condition": "", "label": "", "type": "normal" },
+  { "id": "e09", "source": "erp-stock-minus", "target": "fi-posting-optional", "condition": "", "label": "", "type": "normal" }
+]
