@@ -4,6 +4,7 @@ import type { Edge, Node } from '../../types/process'
 import { classifyBranchPolarity } from './edgeBranchRouting'
 import { isSettlementBranchNode } from './settlementGroupLayout'
 import { isReturnLikeEdge } from './sameLaneReturnRouting'
+import { isInterfaceRuleNode } from './interfaceRuleLayout'
 
 export type CellGridLayout = {
   columnCount: number
@@ -24,79 +25,103 @@ export type CellSlotAssignment = {
 
 export const OVERVIEW_MAX_CELL_COLUMNS = 2
 export const CELL_SLOT_MIN = 1
-export const CELL_SLOT_MAX = 10
+export const OVERVIEW_CELL_MAX_ROWS = 5
+export const DETAIL_CELL_MAX_ROWS = 7
+export const CELL_MAX_ROWS = DETAIL_CELL_MAX_ROWS
+export const OVERVIEW_CELL_SLOT_MAX = OVERVIEW_CELL_MAX_ROWS * OVERVIEW_MAX_CELL_COLUMNS
+export const DETAIL_CELL_SLOT_MAX = DETAIL_CELL_MAX_ROWS * OVERVIEW_MAX_CELL_COLUMNS
+export const CELL_SLOT_MAX = DETAIL_CELL_SLOT_MAX
 export const LEFT_SLOT_START = 1
-export const LEFT_SLOT_END = 5
-export const RIGHT_SLOT_START = 6
-export const RIGHT_SLOT_END = 10
-export const CELL_MAX_ROWS = 5
+export const LEFT_SLOT_END = CELL_MAX_ROWS
+export const RIGHT_SLOT_START = CELL_MAX_ROWS + 1
+export const RIGHT_SLOT_END = CELL_SLOT_MAX
 
 const COLUMN_LABELS = ['LEFT', 'RIGHT'] as const
 const AUXILIARY_NAME_PATTERN = /등록\s*요청|등록\s*승인|예외\s*처리/
 
 /**
- * 2열 slot 구조 (최대 5행):
- * 1  6   LEFT/RIGHT row1
- * 2  7   row2
- * 3  8   row3
- * 4  9   row4
- * 5  10  row5
+ * 2열 slot 구조 (최대 7행):
+ * 1  8   LEFT/RIGHT row1
+ * 2  9   row2
+ * 3  10  row3
+ * 4  11  row4
+ * 5  12  row5
+ * 6  13  row6
+ * 7  14  row7
  */
-export function cellSlotToRowCol(slot: number): { row: number; col: number } {
-  const normalized = clampCellSlot(normalizeLegacyCellSlot(slot))
-  if (normalized <= LEFT_SLOT_END) {
+function cellSlotMax(maxRows: number): number {
+  return maxRows * OVERVIEW_MAX_CELL_COLUMNS
+}
+
+function rightSlotStart(maxRows: number): number {
+  return maxRows + 1
+}
+
+export function cellSlotToRowCol(
+  slot: number,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
+): { row: number; col: number } {
+  const normalized = clampCellSlot(normalizeLegacyCellSlot(slot, maxRows), maxRows)
+  if (normalized <= maxRows) {
     return { row: normalized - LEFT_SLOT_START, col: 0 }
   }
-  return { row: normalized - RIGHT_SLOT_START, col: 1 }
+  return { row: normalized - rightSlotStart(maxRows), col: 1 }
 }
 
-export function rowColToCellSlot(row: number, col: number): number {
-  const clampedRow = Math.min(Math.max(row, 0), CELL_MAX_ROWS - 1)
-  return col === 0 ? LEFT_SLOT_START + clampedRow : RIGHT_SLOT_START + clampedRow
+export function rowColToCellSlot(
+  row: number,
+  col: number,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
+): number {
+  const clampedRow = Math.min(Math.max(row, 0), maxRows - 1)
+  return col === 0 ? LEFT_SLOT_START + clampedRow : rightSlotStart(maxRows) + clampedRow
 }
 
-export function clampCellSlot(slot: number): number {
-  return Math.min(CELL_SLOT_MAX, Math.max(CELL_SLOT_MIN, slot))
+export function clampCellSlot(slot: number, maxRows = OVERVIEW_CELL_MAX_ROWS): number {
+  return Math.min(cellSlotMax(maxRows), Math.max(CELL_SLOT_MIN, slot))
 }
 
-/** 3열 레거시 slot(11+) → 2열 slot(1~10) */
-export function normalizeLegacyCellSlot(slot: number): number {
-  if (slot <= CELL_SLOT_MAX) return slot
+/** 3열 레거시 slot(15+) → 2열 slot(1~14) */
+export function normalizeLegacyCellSlot(slot: number, maxRows = OVERVIEW_CELL_MAX_ROWS): number {
+  const maxSlot = cellSlotMax(maxRows)
+  if (slot <= maxSlot) return slot
 
-  if (slot <= 12) {
-    return clampCellSlot(slot - 2)
-  }
-
-  const offset = slot - 13
-  const legacyRow = Math.floor(offset / 3) + 4
+  const offset = slot - (maxSlot + 1)
+  const legacyRow = Math.floor(offset / 3) + maxRows - 1
   const legacyCol = offset % 3
   if (legacyCol === 0) {
-    return clampCellSlot(legacyRow + 1)
+    return clampCellSlot(legacyRow + 1, maxRows)
   }
-  return clampCellSlot(RIGHT_SLOT_START + legacyRow - 4)
+  return clampCellSlot(rightSlotStart(maxRows) + legacyRow - (maxRows - 1), maxRows)
 }
 
-export function cellSlotLabel(slot: number): string {
-  const { row, col } = cellSlotToRowCol(slot)
+export function cellSlotLabel(slot: number, maxRows = DETAIL_CELL_MAX_ROWS): string {
+  const { row, col } = cellSlotToRowCol(slot, maxRows)
   const colName = COLUMN_LABELS[col] ?? `열${col + 1}`
   return `${slot}: ${colName} ${row + 1}행`
 }
 
-export function buildCellSlotLabels(maxSlot = CELL_SLOT_MAX): Record<number, string> {
+export function buildCellSlotLabels(
+  maxSlot = CELL_SLOT_MAX,
+  maxRows = DETAIL_CELL_MAX_ROWS,
+): Record<number, string> {
   const labels: Record<number, string> = {}
   for (let slot = CELL_SLOT_MIN; slot <= maxSlot; slot += 1) {
-    labels[slot] = cellSlotLabel(slot)
+    labels[slot] = cellSlotLabel(slot, maxRows)
   }
   return labels
 }
 
 export const CELL_SLOT_LABELS: Record<number, string> = buildCellSlotLabels()
 
-/** Property Panel — 1~10 slot 옵션 */
-export function listCellSlotOptions(maxSlot = CELL_SLOT_MAX): Array<{ value: number; label: string }> {
+/** Property Panel — 1~14 slot 옵션 */
+export function listCellSlotOptions(
+  maxSlot = CELL_SLOT_MAX,
+  maxRows = DETAIL_CELL_MAX_ROWS,
+): Array<{ value: number; label: string }> {
   return Array.from({ length: maxSlot }, (_, index) => {
     const value = index + 1
-    return { value, label: CELL_SLOT_LABELS[value] ?? cellSlotLabel(value) }
+    return { value, label: cellSlotLabel(value, maxRows) }
   })
 }
 
@@ -123,19 +148,27 @@ export function resolveNodeCellOrder(node: Node): number {
   return 0
 }
 
-export function findNextEmptyCellSlot(used: Set<number>): number {
-  for (let slot = CELL_SLOT_MIN; slot <= CELL_SLOT_MAX; slot += 1) {
+export function findNextEmptyCellSlot(
+  used: Set<number>,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
+): number {
+  for (let slot = CELL_SLOT_MIN; slot <= cellSlotMax(maxRows); slot += 1) {
     if (!used.has(slot)) return slot
   }
-  return CELL_SLOT_MAX
+  return cellSlotMax(maxRows)
 }
 
-function findEmptySlotInColumn(used: Set<number>, col: number, preferredRow = 0): number | null {
-  const preferred = rowColToCellSlot(preferredRow, col)
+function findEmptySlotInColumn(
+  used: Set<number>,
+  col: number,
+  preferredRow = 0,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
+): number | null {
+  const preferred = rowColToCellSlot(preferredRow, col, maxRows)
   if (!used.has(preferred)) return preferred
 
-  for (let row = 0; row < CELL_MAX_ROWS; row += 1) {
-    const slot = rowColToCellSlot(row, col)
+  for (let row = 0; row < maxRows; row += 1) {
+    const slot = rowColToCellSlot(row, col, maxRows)
     if (!used.has(slot)) return slot
   }
   return null
@@ -145,6 +178,7 @@ export function isAuxiliaryCellNode(node: Node, cellNodes: Node[], edges: Edge[]
   if (node.type === 'exception' || node.type === 'approval') return true
   if (isSettlementBranchNode(node)) return true
   if (node.type === 'decision' || node.type === 'connector') return false
+  if (isInterfaceRuleNode(node.type)) return false
 
   if (AUXILIARY_NAME_PATTERN.test(node.name.trim())) return true
 
@@ -183,6 +217,7 @@ function resolveAutoCellSlots(
   edges: Edge[],
   usedSlots: Set<number>,
   assignedRows: Map<string, number>,
+  maxRows: number,
 ): Map<string, number> {
   const slots = new Map<string, number>()
   const mainNodes = autoNodes.filter((node) => !isAuxiliaryCellNode(node, cellNodes, edges))
@@ -191,13 +226,13 @@ function resolveAutoCellSlots(
 
   let leftRow = 0
   for (const node of mainNodes) {
-    let slot = findEmptySlotInColumn(usedSlots, 0, leftRow)
-    if (slot == null) slot = findNextEmptyCellSlot(usedSlots)
+    let slot = findEmptySlotInColumn(usedSlots, 0, leftRow, maxRows)
+    if (slot == null) slot = findNextEmptyCellSlot(usedSlots, maxRows)
 
     slots.set(node.id, slot)
     usedSlots.add(slot)
-    assignedRows.set(node.id, cellSlotToRowCol(slot).row)
-    leftRow = cellSlotToRowCol(slot).row + 1
+    assignedRows.set(node.id, cellSlotToRowCol(slot, maxRows).row)
+    leftRow = cellSlotToRowCol(slot, maxRows).row + 1
   }
 
   if (!useRightColumn) {
@@ -206,12 +241,12 @@ function resolveAutoCellSlots(
 
   for (const node of auxiliaryNodes) {
     const preferredRow = inferAuxiliaryPreferredRow(node, cellNodes, edges, assignedRows)
-    let slot = findEmptySlotInColumn(usedSlots, 1, preferredRow)
-    if (slot == null) slot = findNextEmptyCellSlot(usedSlots)
+    let slot = findEmptySlotInColumn(usedSlots, 1, preferredRow, maxRows)
+    if (slot == null) slot = findNextEmptyCellSlot(usedSlots, maxRows)
 
     slots.set(node.id, slot)
     usedSlots.add(slot)
-    assignedRows.set(node.id, cellSlotToRowCol(slot).row)
+    assignedRows.set(node.id, cellSlotToRowCol(slot, maxRows).row)
   }
 
   return slots
@@ -233,6 +268,7 @@ export function cellHasManualSlots(nodes: Node[]): boolean {
 
 export type ResolveCellSlotOptions = {
   edges?: Edge[]
+  maxRows?: number
 }
 
 /** cell 내 노드별 effective slot — manual cellSlot은 절대 변경하지 않음 */
@@ -241,12 +277,13 @@ export function resolveCellSlotAssignments(
   options: ResolveCellSlotOptions = {},
 ): Map<string, CellSlotAssignment> {
   const edges = options.edges ?? []
+  const maxRows = options.maxRows ?? OVERVIEW_CELL_MAX_ROWS
   const sorted = sortCellNodes(cellNodes)
   const storedSlotCounts = new Map<number, number>()
 
   for (const node of sorted) {
     if (node.cellSlot == null) continue
-    const normalized = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot))
+    const normalized = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot, maxRows), maxRows)
     storedSlotCounts.set(normalized, (storedSlotCounts.get(normalized) ?? 0) + 1)
   }
 
@@ -261,8 +298,8 @@ export function resolveCellSlotAssignments(
     collisionResolved: boolean,
     hasStoredCollision: boolean,
   ) => {
-    const normalized = clampCellSlot(normalizeLegacyCellSlot(slot))
-    const { row, col } = cellSlotToRowCol(normalized)
+    const normalized = clampCellSlot(normalizeLegacyCellSlot(slot, maxRows), maxRows)
+    const { row, col } = cellSlotToRowCol(normalized, maxRows)
     result.set(node.id, {
       slot: normalized,
       row,
@@ -277,14 +314,14 @@ export function resolveCellSlotAssignments(
 
   for (const node of sorted) {
     if (node.cellSlot == null) continue
-    const slot = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot))
+    const slot = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot, maxRows), maxRows)
     const hasStoredCollision = (storedSlotCounts.get(slot) ?? 0) > 1
     const hasRuntimeCollision = usedSlots.has(slot)
     assign(node, slot, true, false, hasStoredCollision || hasRuntimeCollision)
   }
 
   const autoNodes = sorted.filter((node) => node.cellSlot == null)
-  const autoSlots = resolveAutoCellSlots(autoNodes, sorted, edges, usedSlots, assignedRows)
+  const autoSlots = resolveAutoCellSlots(autoNodes, sorted, edges, usedSlots, assignedRows, maxRows)
 
   for (const node of autoNodes) {
     const preferred = autoSlots.get(node.id)
@@ -293,7 +330,7 @@ export function resolveCellSlotAssignments(
       continue
     }
 
-    const slot = findNextEmptyCellSlot(usedSlots)
+    const slot = findNextEmptyCellSlot(usedSlots, maxRows)
     assign(node, slot, false, true, false)
   }
 
@@ -354,19 +391,19 @@ export function computeCellGridLayout(nodeCount: number): CellGridLayout {
   }
 }
 
-function cellSlotCollisionMessage(node: Node, laneNodes: Node[]): string | null {
+function cellSlotCollisionMessage(node: Node, laneNodes: Node[], maxRows: number): string | null {
   if (node.cellSlot == null) return null
 
-  const normalized = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot))
+  const normalized = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot, maxRows), maxRows)
   const duplicate = laneNodes.some((n) => {
     if (n.id === node.id || n.cellSlot == null) return false
-    return clampCellSlot(normalizeLegacyCellSlot(n.cellSlot)) === normalized
+    return clampCellSlot(normalizeLegacyCellSlot(n.cellSlot, maxRows), maxRows) === normalized
   })
   if (duplicate) {
     return '동일한 셀 위치가 이미 사용 중입니다. 배치가 겹칠 수 있습니다.'
   }
 
-  const assignment = resolveCellSlotAssignments(laneNodes).get(node.id)
+  const assignment = resolveCellSlotAssignments(laneNodes, { maxRows }).get(node.id)
   if (assignment?.hasStoredCollision) {
     return '동일한 셀 위치가 이미 사용 중입니다. 배치가 겹칠 수 있습니다.'
   }
@@ -378,14 +415,14 @@ function cellSlotCollisionMessage(node: Node, laneNodes: Node[]): string | null 
 export function getCellSlotCollisionWarning(node: Node, process: { nodes: Node[] }): string | null {
   if (node.cellSlot == null || !node.processZone) return null
   const cellNodes = getCellNodesInOrder(process, node.processZone, node.laneId)
-  return cellSlotCollisionMessage(node, cellNodes)
+  return cellSlotCollisionMessage(node, cellNodes, OVERVIEW_CELL_MAX_ROWS)
 }
 
 /** Property Panel — Detail swimlane cellSlot 중복 경고 */
 export function getLaneCellSlotCollisionWarning(node: Node, process: { nodes: Node[] }): string | null {
   if (node.cellSlot == null) return null
   const laneNodes = getLaneNodesInOrder(process, node.laneId)
-  return cellSlotCollisionMessage(node, laneNodes)
+  return cellSlotCollisionMessage(node, laneNodes, DETAIL_CELL_MAX_ROWS)
 }
 
 export function getCellNodesInOrder(process: { nodes: Node[] }, zoneId: string, laneId: string): Node[] {

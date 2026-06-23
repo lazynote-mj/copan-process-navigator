@@ -24,6 +24,7 @@ import {
 } from '../types/processData'
 import { buildProcessDataFromPayload, createInitialProcessData } from './processDataMigration'
 import type { ProcessDataFilePayload } from './processDataMigration'
+import type { DetailProcessGroup, OverviewProcessGroup } from '../types/toBeNavigator'
 
 function normalizeProcessZones(zones: ProcessZone[] | undefined): ProcessZone[] {
   return (zones ?? []).map((zone) => ({
@@ -385,6 +386,51 @@ export function importProcessDataFromPayload(
   dataSource: ProcessData['dataSource'],
 ): ProcessData {
   return buildProcessDataFromPayload(payload, dataSource)
+}
+
+export function saveOverviewProcessGroup(
+  data: ProcessData,
+  group: OverviewProcessGroup,
+): ProcessData {
+  const groups = [...(data.overviewProcessGroups ?? [])]
+  const index = groups.findIndex((entry) => entry.id === group.id)
+  const nextGroup = structuredClone(group)
+  if (index >= 0) {
+    groups[index] = nextGroup
+  } else {
+    groups.push(nextGroup)
+  }
+  return {
+    ...data,
+    overviewProcessGroups: groups,
+    dirty: true,
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+export function saveDetailProcessGroup(
+  data: ProcessData,
+  group: DetailProcessGroup,
+): ProcessData {
+  const groups = [...(data.detailProcessGroups ?? [])]
+  const index = groups.findIndex((entry) => entry.id === group.id)
+  const nextGroup = structuredClone(group)
+  if (index >= 0) {
+    groups[index] = nextGroup
+  } else {
+    groups.push(nextGroup)
+  }
+  return {
+    ...data,
+    detailProcessGroups: groups,
+    dirty: true,
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+/** @deprecated saveOverviewProcessGroup */
+export function saveProcessGroup(data: ProcessData, group: OverviewProcessGroup): ProcessData {
+  return saveOverviewProcessGroup(data, group)
 }
 
 export function markProcessDataClean(data: ProcessData): ProcessData {

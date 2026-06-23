@@ -3,23 +3,23 @@
   "name": "창고이동 / 재고이동",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "창고이동 요청부터 WMS 처리·Location 반영까지",
+  "description": "PDF 도형 기준 매장 간 재고이동 프로세스",
   "overviewNodeId": "stock-transfer-handling",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "transfer-request-register",
-      "name": "창고이동요청등록",
-      "type": "erp",
-      "laneId": "business",
+      "id": "stock-transfer-step-01",
+      "name": "재고이동요청(POS)",
+      "type": "pos",
+      "laneId": "retail-easychain",
       "phaseId": "p1",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "창고 이동 요청을 등록합니다.",
+      "system": "POS",
+      "owner": "판매현장",
+      "description": "재고이동요청(POS)",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,14 +27,14 @@
       "localOrder": 1
     },
     {
-      "id": "transfer-request",
-      "name": "창고이동요청",
-      "type": "erp",
-      "laneId": "partnership",
+      "id": "stock-transfer-step-02",
+      "name": "매장 재고이동 처리",
+      "type": "manual",
+      "laneId": "retail-easychain",
       "phaseId": "p2",
-      "system": "ERP",
-      "owner": "상생협력팀",
-      "description": "창고 이동 요청을 접수·전달합니다.",
+      "system": "POS",
+      "owner": "판매현장",
+      "description": "매장 재고이동 처리",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -42,14 +42,14 @@
       "localOrder": 2
     },
     {
-      "id": "wms-transfer-process",
-      "name": "창고이동",
-      "type": "interface",
-      "laneId": "warehouse-easyadmin",
+      "id": "stock-transfer-step-03",
+      "name": "재고이동확정(POS)",
+      "type": "pos",
+      "laneId": "retail-easychain",
       "phaseId": "p3",
-      "system": "WMS",
-      "owner": "물류센터",
-      "description": "WMS에서 창고 간 재고 이동을 처리합니다.",
+      "system": "POS",
+      "owner": "판매현장",
+      "description": "재고이동확정(POS)",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -57,14 +57,14 @@
       "localOrder": 3
     },
     {
-      "id": "transfer-confirm",
-      "name": "창고이동확정",
-      "type": "erp",
-      "laneId": "warehouse-easyadmin",
+      "id": "stock-transfer-step-04",
+      "name": "위탁 여부",
+      "type": "decision",
+      "laneId": "business",
       "phaseId": "p4",
       "system": "ERP",
-      "owner": "물류센터",
-      "description": "창고 이동 결과를 확정합니다.",
+      "owner": "사업부",
+      "description": "위탁 여부",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -72,53 +72,162 @@
       "localOrder": 4
     },
     {
-      "id": "erp-location-reflect",
-      "name": "ERP 재고 Location 반영",
-      "type": "system",
-      "laneId": "finance",
+      "id": "stock-transfer-step-05",
+      "name": "위탁재고 현황",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p5",
       "system": "ERP",
-      "owner": "재무팀",
-      "description": "창고이동에 따른 ERP 재고 Location을 반영합니다.",
+      "owner": "사업부",
+      "description": "위탁재고 현황",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
       "localOrder": 5
+    },
+    {
+      "id": "stock-transfer-step-06",
+      "name": "입/출고정보",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "p6",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "입/출고정보",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "stock-transfer-step-07",
+      "name": "매장재고이동입력",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p7",
+      "system": "이지체인/POS",
+      "owner": "판매현장",
+      "description": "매장재고이동입력",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "stock-transfer-step-08",
+      "name": "매장재고이동현황",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p8",
+      "system": "이지체인/POS",
+      "owner": "판매현장",
+      "description": "매장재고이동현황",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "transfer-request-register",
-      "target": "transfer-request",
+      "id": "stock-transfer-e01",
+      "source": "stock-transfer-step-01",
+      "target": "stock-transfer-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "transfer-request",
-      "target": "wms-transfer-process",
+      "id": "stock-transfer-e02",
+      "source": "stock-transfer-step-02",
+      "target": "stock-transfer-step-03",
       "condition": "",
       "label": "",
-      "type": "system"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e03",
-      "source": "wms-transfer-process",
-      "target": "transfer-confirm",
-      "condition": "",
-      "label": "",
-      "type": "normal"
+      "id": "stock-transfer-e03",
+      "source": "stock-transfer-step-03",
+      "target": "stock-transfer-step-04",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e04",
-      "source": "transfer-confirm",
-      "target": "erp-location-reflect",
+      "id": "stock-transfer-e04",
+      "source": "stock-transfer-step-04",
+      "target": "stock-transfer-step-05",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-transfer-e05",
+      "source": "stock-transfer-step-05",
+      "target": "stock-transfer-step-06",
       "condition": "",
       "label": "",
-      "type": "system"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-transfer-e06",
+      "source": "stock-transfer-step-06",
+      "target": "stock-transfer-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-transfer-e07",
+      "source": "stock-transfer-step-07",
+      "target": "stock-transfer-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-transfer-branch-01",
+      "source": "stock-transfer-step-04",
+      "target": "stock-transfer-step-06",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

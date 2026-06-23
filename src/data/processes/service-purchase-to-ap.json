@@ -1,0 +1,287 @@
+{
+  "id": "service-purchase-to-ap",
+  "name": "구매요청 ~ 매입전표 : (서비스)",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 서비스 구매요청~매입전표 프로세스",
+  "overviewNodeId": "purchase-request",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "service-purchase-to-ap-step-01",
+      "name": "구매요청",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "구매요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "service-purchase-to-ap-step-02",
+      "name": "구매요청확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "구매요청확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "service-purchase-to-ap-step-03",
+      "name": "구매발주 품의(G/W)",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "G/W",
+      "owner": "사업부",
+      "description": "구매발주 품의(G/W)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "service-purchase-to-ap-step-04",
+      "name": "발주등록",
+      "type": "erp",
+      "laneId": "partnership",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "상생협력팀",
+      "description": "발주등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "service-purchase-to-ap-step-05",
+      "name": "발주확정",
+      "type": "erp",
+      "laneId": "partnership",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "상생협력팀",
+      "description": "발주확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "service-purchase-to-ap-step-06",
+      "name": "입고요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p6",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "입고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "service-purchase-to-ap-step-07",
+      "name": "입고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p7",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "입고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "service-purchase-to-ap-step-08",
+      "name": "매입마감조회",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매입마감조회",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "service-purchase-to-ap-step-09",
+      "name": "매입마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p9",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매입마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "service-purchase-to-ap-step-10",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p10",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 10
+    }
+  ],
+  "edges": [
+    {
+      "id": "service-purchase-to-ap-e01",
+      "source": "service-purchase-to-ap-step-01",
+      "target": "service-purchase-to-ap-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e02",
+      "source": "service-purchase-to-ap-step-02",
+      "target": "service-purchase-to-ap-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e03",
+      "source": "service-purchase-to-ap-step-03",
+      "target": "service-purchase-to-ap-step-04",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e04",
+      "source": "service-purchase-to-ap-step-04",
+      "target": "service-purchase-to-ap-step-05",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e05",
+      "source": "service-purchase-to-ap-step-05",
+      "target": "service-purchase-to-ap-step-06",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e06",
+      "source": "service-purchase-to-ap-step-06",
+      "target": "service-purchase-to-ap-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e07",
+      "source": "service-purchase-to-ap-step-07",
+      "target": "service-purchase-to-ap-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e08",
+      "source": "service-purchase-to-ap-step-08",
+      "target": "service-purchase-to-ap-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e09",
+      "source": "service-purchase-to-ap-step-09",
+      "target": "service-purchase-to-ap-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-branch-01",
+      "source": "service-purchase-to-ap-step-03",
+      "target": "service-purchase-to-ap-step-02",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

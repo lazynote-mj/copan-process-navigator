@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { Edge, Lane, Node, Process, ProcessZone } from '../types/process'
+import type { DetailProcessGroup, OverviewProcessGroup } from '../types/toBeNavigator'
 import {
   cloneProcessData,
   getProcessByScope,
@@ -15,7 +16,7 @@ import {
   type ProcessData,
   type ProcessScope,
 } from '../types/processData'
-import { mergeMissingDetailProcesses } from './activeProcessData'
+import { mergeMissingDetailProcesses, syncDetailProcessesFromRegistry } from './activeProcessData'
 import { createInitialProcessData } from './processDataMigration'
 import {
   connectEdge,
@@ -29,6 +30,8 @@ import {
   saveLane,
   saveNode,
   saveZone,
+  saveDetailProcessGroup,
+  saveProcessGroup,
   updateEdge,
   updateNode,
   type DetailProcessFallback,
@@ -46,11 +49,13 @@ type ProcessDataStoreValue = {
   getActiveProcess: (scope: ProcessScope) => ReturnType<typeof getProcessByScope>
   ensureDetailProcess: (processId: string) => void
   updateNode: (scope: ProcessScope, nodeId: string, patch: Partial<Node>) => void
-  saveNode: (scope: ProcessScope, node: Node, isNew: boolean) => void
+  saveNode: (scope: ProcessScope, node: Node, isNew: boolean) => Process | undefined
   updateEdge: (scope: ProcessScope, edgeId: string, patch: Partial<Edge>) => void
-  saveEdge: (scope: ProcessScope, edge: Edge, isNew: boolean) => void
-  saveLane: (scope: ProcessScope, lane: Lane, isNew: boolean) => void
-  saveZone: (scope: ProcessScope, zone: ProcessZone, isNew: boolean) => void
+  saveEdge: (scope: ProcessScope, edge: Edge, isNew: boolean) => Process | undefined
+  saveLane: (scope: ProcessScope, lane: Lane, isNew: boolean) => Process | undefined
+  saveZone: (scope: ProcessScope, zone: ProcessZone, isNew: boolean) => Process | undefined
+  saveProcessGroup: (group: OverviewProcessGroup) => void
+  saveDetailProcessGroup: (group: DetailProcessGroup) => void
   deleteNode: (scope: ProcessScope, nodeId: string) => void
   deleteEdge: (scope: ProcessScope, edgeId: string) => void
   deleteLane: (scope: ProcessScope, laneId: string) => void
@@ -89,12 +94,18 @@ export function ProcessDataProvider({
       .then((remote) => {
         if (cancelled) return
         const base = cloneProcessData(remote ?? fallbackData)
-        setProcessData(mergeMissingDetailProcesses(base, registryDetailProcesses))
+        const merged = mergeMissingDetailProcesses(base, registryDetailProcesses)
+        setProcessData(syncDetailProcessesFromRegistry(merged, registryDetailProcesses))
         setSaveStatus(remote ? 'saved' : 'idle')
       })
       .catch(() => {
         if (cancelled) return
-        setProcessData(mergeMissingDetailProcesses(cloneProcessData(fallbackData), registryDetailProcesses))
+        setProcessData(
+          syncDetailProcessesFromRegistry(
+            mergeMissingDetailProcesses(cloneProcessData(fallbackData), registryDetailProcesses),
+            registryDetailProcesses,
+          ),
+        )
         setSaveStatus('idle')
       })
       .finally(() => {
@@ -118,6 +129,21 @@ export function ProcessDataProvider({
     })
     setSaveStatus('modified')
     setSaveError(null)
+  }, [])
+
+  /** setState functional updater는 동기 실행 — 저장 직후 canonical process를 반환 */
+  const mutateAndGet = useCallback((updater: (current: ProcessData) => ProcessData): ProcessData | null => {
+    let next: ProcessData | null = null
+    setProcessData((current) => {
+      if (!current) return current
+      next = updater(current)
+      return next
+    })
+    if (next) {
+      setSaveStatus('modified')
+      setSaveError(null)
+    }
+    return next
   }, [])
 
   const persistAll = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
@@ -149,18 +175,27 @@ export function ProcessDataProvider({
         mutate((current) => ensureDetailProcess(current, processId, detailFallback(processId))),
       updateNode: (scope, nodeId, patch) =>
         mutate((current) => updateNode(current, scope, nodeId, patch, detailFallback)),
-      saveNode: (scope, node, isNew) =>
-        mutate((current) => saveNode(current, scope, node, isNew, detailFallback)),
+      saveNode: (scope, node, isNew) => {
+        const next = mutateAndGet((current) => saveNode(current, scope, node, isNew, detailFallback))
+        return next ? getProcessByScope(next, scope) : undefined
+      },
       updateEdge: (scope, edgeId, patch) =>
         mutate((current) => updateEdge(current, scope, edgeId, patch, detailFallback)),
       saveEdge: (scope, edge, isNew) => {
         const normalized = normalizeEdgeForStorage(withEdgeHandleDefaults(edge))
-        mutate((current) => saveEdge(current, scope, normalized, isNew, detailFallback))
+        const next = mutateAndGet((current) => saveEdge(current, scope, normalized, isNew, detailFallback))
+        return next ? getProcessByScope(next, scope) : undefined
       },
-      saveLane: (scope, lane, isNew) =>
-        mutate((current) => saveLane(current, scope, lane, isNew)),
-      saveZone: (scope, zone, isNew) =>
-        mutate((current) => saveZone(current, scope, zone, isNew, detailFallback)),
+      saveLane: (scope, lane, isNew) => {
+        const next = mutateAndGet((current) => saveLane(current, scope, lane, isNew))
+        return next ? getProcessByScope(next, scope) : undefined
+      },
+      saveZone: (scope, zone, isNew) => {
+        const next = mutateAndGet((current) => saveZone(current, scope, zone, isNew, detailFallback))
+        return next ? getProcessByScope(next, scope) : undefined
+      },
+      saveProcessGroup: (group) => mutate((current) => saveProcessGroup(current, group)),
+      saveDetailProcessGroup: (group) => mutate((current) => saveDetailProcessGroup(current, group)),
       deleteNode: (scope, nodeId) =>
         mutate((current) => deleteNode(current, scope, nodeId, detailFallback)),
       deleteEdge: (scope, edgeId) =>
@@ -175,7 +210,7 @@ export function ProcessDataProvider({
       },
       persistAll,
     }
-  }, [detailFallback, mutate, persistAll, processData, saveError, saveStatus, summary])
+  }, [detailFallback, mutate, mutateAndGet, persistAll, processData, saveError, saveStatus, summary])
 
   if (!ready || !value) {
     return <div className="app-loading">프로세스 데이터 불러오는 중…</div>

@@ -7,24 +7,28 @@ import { resolveNodeZone } from './overviewProcessZones'
 import type { OverviewGridMetrics } from './overviewGridMetrics'
 import type { ZoneLayoutBand } from './overviewGridLayout'
 import { laneOrderToStartX, metricsToSwimlaneGrid } from './swimlaneGridLayout'
+import { isBranchNodeType as isBranchNodeTypeFromAnchors } from './decisionAnchors'
+import { getDecisionNodeSize } from './decisionNodeLayout'
 
+/** Rule 노드 — 판단노드와 동일 마스터 (Overview·Detail 공통) */
 export const INTERFACE_RULE_LAYOUT = {
-  width: 88,
-  height: 88,
-  diamondWidth: 52,
-  diamondHeight: 52,
-  exclusionPadding: 8,
-  belowMinGap: 48,
+  width: 140,
+  height: 44,
+  diamondWidth: 140,
+  diamondHeight: 44,
+  exclusionPadding: 14,
+  belowMinGap: 60,
 } as const
 
 export const MERGE_NODE_SIZE = { width: 96, height: 44 } as const
 
+/** @deprecated DECISION_NODE_LAYOUT와 동일 — 하위 호환 */
 export const INTERFACE_RULE_OVERVIEW_SIZE = {
-  width: 68,
-  height: 68,
+  width: 140,
+  height: 44,
 } as const
 
-export const INTERFACE_RULE_POLYGON_POINTS = '26,4 64,34 38,64 4,34'
+export const INTERFACE_RULE_POLYGON_POINTS = '70,0 140,22 70,44 0,22'
 
 export type InterfaceRuleAnchor = {
   fromLaneId: string
@@ -35,16 +39,15 @@ export function isInterfaceRuleNode(type: string | undefined): boolean {
   return type === 'interface-rule'
 }
 
-export function isBranchNodeType(type: string | undefined): boolean {
-  return type === 'decision' || isInterfaceRuleNode(type)
-}
+/** @deprecated decisionAnchors.isBranchNodeType — 하위 호환 re-export */
+export const isBranchNodeType = isBranchNodeTypeFromAnchors
 
-export function getInterfaceRuleNodeSize(_name = ''): { width: number; height: number } {
-  return { width: INTERFACE_RULE_LAYOUT.width, height: INTERFACE_RULE_LAYOUT.height }
+export function getInterfaceRuleNodeSize(name = ''): { width: number; height: number } {
+  return getDecisionNodeSize(name)
 }
 
 export function getInterfaceRuleOverviewSize(): { width: number; height: number } {
-  return { ...INTERFACE_RULE_OVERVIEW_SIZE }
+  return getDecisionNodeSize()
 }
 
 function laneColumnMidX(lane: Lane, metrics: OverviewGridMetrics): number {
@@ -161,8 +164,8 @@ export function placeOverviewInterfaceRules(
     placed.push({
       id: rule.id,
       laneId: rule.laneId,
-      x,
-      y,
+      x: x + (rule.offsetX ?? 0),
+      y: y + (rule.offsetY ?? 0),
       width: size.width,
       height: size.height,
     })

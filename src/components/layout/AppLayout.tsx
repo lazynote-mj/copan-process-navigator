@@ -2,39 +2,52 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useProcessDataStore } from '../../data/processDataStore'
 import { getActiveProcessData, resolveDetailProcessesForMenu } from '../../data/activeProcessData'
-import { getDetailProcessById, getProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
+import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
 import { canDeleteLane } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
 import {
   buildNewEdgeSelection,
+  buildNewDetailProcessGroupSelection,
   buildNewLaneSelection,
   buildNewNodeSelection,
+  buildNewProcessGroupSelection,
   buildNewZoneSelection,
+  buildSelectedDetailProcessGroup,
   buildSelectedEdge,
   buildSelectedNode,
+  buildSelectedProcessGroup,
+  buildSelectedZone,
   cloneEdgeData,
   cloneLaneData,
   cloneNodeData,
+  cloneProcessGroup,
+  cloneDetailProcessGroup,
   cloneZoneData,
   refreshSelectedElement,
 } from '../../lib/editor/selectedElement'
+import {
+  resolveFocusEdgeIdsForNode,
+  resolveRelatedNodeIdsForFocus,
+} from '../../lib/editor/processGroupMembership'
 import { withEdgeHandleDefaults } from '../../lib/editor/edgeHandles'
+import { applyRoutedHandlePatch, type RoutedHandlePatch } from '../../lib/editor/routedEdgeSync'
 import { normalizeEdgeForStorage } from '../../lib/editor/edgeUpdate'
 import { selectedElementToObject } from '../../lib/editor/selectionManager'
 import type { AppMode, SelectedElement } from '../../lib/editor/selectionTypes'
 import type { OverviewHighlight, ViewMode } from '../../lib/editor/viewModeTypes'
 import type { Edge, Lane, Node, Process, ProcessZone } from '../../types/process'
 import type { ProcessScope } from '../../types/processData'
-import { getOverviewProcess } from '../../types/processData'
+import { getOverviewProcess, resolveDetailProcessGroups, resolveOverviewProcessGroups } from '../../types/processData'
+import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
 import {
   buildDisplayProcess,
-  type MapDisplayMode,
 } from '../../lib/nodeVisibility'
+import { resolveNodeDetailProcessIds } from '../../data/overviewDetailProcesses'
+import { resolveOverviewNodeType } from '../../lib/overviewNodeDisplay'
 import { DataStatusBar } from './DataStatusBar'
 import { Drawer } from './Drawer'
 import { ProcessGroupMenu, resolveHighlightMode } from './ProcessGroupMenu'
-import { ProcessMenu } from './ProcessMenu'
 import { Toolbar } from './Toolbar'
 import { ProcessMapCanvas } from '../process-map/ProcessMapCanvas'
 import { PropertyPanel } from '../editor/PropertyPanel'
@@ -52,16 +65,14 @@ export function AppLayout() {
   const [isRightOpen, setIsRightOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>(() => readUiPreferences().viewMode ?? 'overview')
   const [appMode, setAppMode] = useState<AppMode>(() => readUiPreferences().appMode ?? 'view')
-  const [mapDisplayMode, setMapDisplayMode] = useState<MapDisplayMode>(
-    () => readUiPreferences().mapDisplayMode ?? 'business',
-  )
   const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null)
 
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [relatedOnly, setRelatedOnly] = useState(false)
+  const [overviewHomeKey, setOverviewHomeKey] = useState(0)
   const [detailProcessId, setDetailProcessId] = useState<string>(() =>
     readUiPreferences().detailProcessId
-      ?? toBeNavigator.processGroups[0]?.detailProcessId
+      ?? toBeNavigator.detailProcessGroups[0]?.detailProcessId
       ?? toBeNavigator.detailProcesses[0]?.id
       ?? '',
   )
@@ -89,8 +100,14 @@ export function AppLayout() {
   }, [viewMode, detailProcessId, processData])
 
   const displayProcess = useMemo(
-    () => buildDisplayProcess(activeProcess, mapDisplayMode),
-    [activeProcess, mapDisplayMode],
+    () => buildDisplayProcess(activeProcess, 'system'),
+    [activeProcess],
+  )
+
+  /** 편집 모드에서는 system-only 노드(interface-rule 등)도 캔버스에 표시 */
+  const canvasProcess = useMemo(
+    () => (appMode === 'edit' ? activeProcess : displayProcess),
+    [appMode, activeProcess, displayProcess],
   )
 
   const allDetailProcesses = useMemo(
@@ -98,7 +115,52 @@ export function AppLayout() {
     [processData],
   )
 
-  const selectedGroup = selectedGroupId ? getProcessGroupById(selectedGroupId) : undefined
+  const overviewProcessGroups = useMemo(
+    () => resolveOverviewProcessGroups(processData, toBeNavigator.overviewProcessGroups),
+    [processData],
+  )
+
+  const detailProcessGroups = useMemo(
+    () => resolveDetailProcessGroups(processData, toBeNavigator.detailProcessGroups),
+    [processData],
+  )
+
+  const resolveLinkedDetailProcessId = useCallback(
+    (group: OverviewProcessGroup) => {
+      if (!group.linkedDetailGroupId) return undefined
+      const linked =
+        detailProcessGroups.find((entry) => entry.id === group.linkedDetailGroupId)
+        ?? getDetailProcessGroupById(group.linkedDetailGroupId)
+      return linked?.detailProcessId
+    },
+    [detailProcessGroups],
+  )
+
+  const savedSelectedOverviewGroup = selectedGroupId
+    ? overviewProcessGroups.find((group) => group.id === selectedGroupId)
+    : undefined
+
+  const savedSelectedDetailGroup = selectedGroupId
+    ? detailProcessGroups.find((group) => group.id === selectedGroupId)
+    : undefined
+
+  /** 패널 draft 멤버십을 캔버스 하이라이트에 즉시 반영 */
+  const highlightGroup = useMemo((): OverviewProcessGroup | undefined => {
+    if (viewMode !== 'overview' || !selectedGroupId) return undefined
+    if (
+      selectedElement?.type === 'process-group' &&
+      selectedElement.id === selectedGroupId
+    ) {
+      return selectedElement.data
+    }
+    return savedSelectedOverviewGroup
+  }, [viewMode, selectedGroupId, selectedElement, savedSelectedOverviewGroup])
+
+  const focusNodeId = useMemo(() => {
+    if (viewMode !== 'overview' || !highlightGroup || selectedElement?.type !== 'node') return null
+    if (!highlightGroup.overviewNodeIds.includes(selectedElement.id)) return null
+    return selectedElement.id
+  }, [viewMode, highlightGroup, selectedElement])
 
   const overviewHighlight = useMemo((): OverviewHighlight | null => {
     if (viewMode !== 'overview') return null
@@ -106,33 +168,51 @@ export function AppLayout() {
     if (mode === 'all') {
       return { groupId: null, nodeIds: new Set(), edgeIds: new Set(), mode: 'all' }
     }
-    if (!selectedGroup) {
+    if (!highlightGroup) {
       return { groupId: null, nodeIds: new Set(), edgeIds: new Set(), mode: 'all' }
     }
-    return {
-      groupId: selectedGroup.id,
-      nodeIds: new Set(selectedGroup.overviewNodeIds),
-      edgeIds: new Set(selectedGroup.overviewEdgeIds),
+    const overview = getOverviewProcess(processData)
+    const base: OverviewHighlight = {
+      groupId: highlightGroup.id,
+      nodeIds: new Set(highlightGroup.overviewNodeIds),
+      edgeIds: new Set(highlightGroup.overviewEdgeIds),
       mode,
     }
-  }, [viewMode, selectedGroupId, relatedOnly, selectedGroup])
+    if (!focusNodeId) return base
+    const focusEdgeIds = overview
+      ? resolveFocusEdgeIdsForNode(highlightGroup, focusNodeId, overview.edges)
+      : new Set<string>()
+    const focusNodeIds = overview
+      ? resolveRelatedNodeIdsForFocus(
+          focusNodeId,
+          focusEdgeIds,
+          overview.edges,
+          new Set(highlightGroup.overviewNodeIds),
+        )
+      : new Set<string>([focusNodeId])
+    return { ...base, focusNodeId, focusEdgeIds, focusNodeIds }
+  }, [viewMode, selectedGroupId, relatedOnly, highlightGroup, focusNodeId, processData])
 
   const detailHeader = useMemo(() => {
     if (viewMode === 'overview') return null
     const processLabel = [activeProcess.version, activeProcess.status].filter(Boolean).join(' ')
+    const groupIndex = detailProcessGroups.findIndex((group) => group.detailProcessId === activeProcess.id)
     return {
+      groupNumber: groupIndex >= 0 ? String(groupIndex + 1).padStart(2, '0') : undefined,
       processLabel,
       title: activeProcess.name,
     }
-  }, [viewMode, activeProcess])
+  }, [viewMode, activeProcess, detailProcessGroups])
 
   useEffect(() => {
     setSelectedElement(null)
-  }, [viewMode, detailProcessId, selectedGroupId])
+  }, [viewMode, detailProcessId])
 
   useEffect(() => {
-    setSelectedElement((prev) => refreshSelectedElement(prev, activeProcess))
-  }, [activeProcess])
+    setSelectedElement((prev) =>
+      refreshSelectedElement(prev, activeProcess, overviewProcessGroups, detailProcessGroups),
+    )
+  }, [activeProcess, overviewProcessGroups, detailProcessGroups])
 
   useEffect(() => {
     writeUiPreferences({
@@ -142,35 +222,84 @@ export function AppLayout() {
       isLeftOpen,
       isRightOpen,
       appMode,
-      mapDisplayMode,
     })
-  }, [viewMode, detailProcessId, selectedGroupId, isLeftOpen, isRightOpen, appMode, mapDisplayMode])
+  }, [viewMode, detailProcessId, selectedGroupId, isLeftOpen, isRightOpen, appMode])
 
 
   const handleOpenDetailProcess = useCallback((processId: string) => {
+    store.ensureDetailProcess(processId)
     setDetailProcessId(processId)
     setViewMode('detail')
     setIsLeftOpen(false)
     setSelectedElement(null)
     setIsRightOpen(false)
-    const group = toBeNavigator.processGroups.find((g) => g.detailProcessId === processId)
+    const group =
+      detailProcessGroups.find((entry) => entry.detailProcessId === processId)
+      ?? toBeNavigator.detailProcessGroups.find((entry) => entry.detailProcessId === processId)
     setSelectedGroupId(group?.id ?? null)
-  }, [])
+  }, [store, detailProcessGroups])
 
-  const handleOpenDetail = useCallback(
+  const handleOpenDetailFromOverview = useCallback(
     (groupId: string) => {
-      const group = getProcessGroupById(groupId)
-      if (!group) return
-      setSelectedGroupId(groupId)
-      handleOpenDetailProcess(group.detailProcessId)
+      const group =
+        overviewProcessGroups.find((entry) => entry.id === groupId)
+        ?? getOverviewProcessGroupById(groupId)
+      if (!group?.linkedDetailGroupId) return
+      const linked =
+        detailProcessGroups.find((entry) => entry.id === group.linkedDetailGroupId)
+        ?? getDetailProcessGroupById(group.linkedDetailGroupId)
+      if (!linked) return
+      setSelectedGroupId(linked.id)
+      handleOpenDetailProcess(linked.detailProcessId)
     },
-    [handleOpenDetailProcess],
+    [overviewProcessGroups, detailProcessGroups, handleOpenDetailProcess],
   )
 
-  const handleSelectElement = useCallback((next: SelectedElement | null) => {
-    setSelectedElement(next)
-    if (next) setIsRightOpen(true)
-  }, [])
+  const handleOpenDetailFromDetailMenu = useCallback(
+    (groupId: string) => {
+      const group =
+        detailProcessGroups.find((entry) => entry.id === groupId)
+        ?? getDetailProcessGroupById(groupId)
+      if (!group) return
+      setSelectedGroupId(group.id)
+      handleOpenDetailProcess(group.detailProcessId)
+    },
+    [detailProcessGroups, handleOpenDetailProcess],
+  )
+
+  const handleSelectOverviewGroup = useCallback(
+    (groupId: string | null) => {
+      setSelectedGroupId(groupId)
+      if (!groupId) {
+        setSelectedElement(null)
+        return
+      }
+      const group = overviewProcessGroups.find((entry) => entry.id === groupId)
+      if (group) {
+        setSelectedElement(buildSelectedProcessGroup(group))
+        setIsRightOpen(true)
+      }
+    },
+    [overviewProcessGroups],
+  )
+
+  const handleSelectElement = useCallback(
+    (next: SelectedElement | null) => {
+      if (viewMode === 'overview' && appMode === 'view' && next?.type === 'node') {
+        const node = activeProcess.nodes.find((entry) => entry.id === next.id)
+        if (node && resolveOverviewNodeType(node) === 'linked-process') {
+          const detailIds = resolveNodeDetailProcessIds(node)
+          if (detailIds.length === 1) {
+            handleOpenDetailProcess(detailIds[0])
+            return
+          }
+        }
+      }
+      setSelectedElement(next)
+      if (next) setIsRightOpen(true)
+    },
+    [viewMode, appMode, activeProcess.nodes, handleOpenDetailProcess],
+  )
 
   const handleClearSelection = useCallback(() => {
     setSelectedElement(null)
@@ -215,41 +344,183 @@ export function AppLayout() {
   )
 
   const handleSaveNode = (node: Node, isNew: boolean) => {
-    store.saveNode(activeScope, node, isNew)
-    setSelectedElement({ type: 'node', id: node.id, data: cloneNodeData(node) })
+    const savedProcess = store.saveNode(activeScope, node, isNew)
+    const savedNode = savedProcess?.nodes.find((entry) => entry.id === node.id)
+    setSelectedElement({
+      type: 'node',
+      id: node.id,
+      data: cloneNodeData(savedNode ?? node),
+    })
     setIsRightOpen(true)
   }
 
   const handleEdgeRoutingChange = useCallback(
     (edgeId: string, routing: Edge['routing']) => {
-      store.updateEdge(activeScope, edgeId, { routing: routing ?? { mode: 'auto' } })
+      const patch: Partial<Edge> = { routing: routing ?? { mode: 'auto' } }
+      if (routing?.mode === 'manual') {
+        patch.manualRoute = true
+        if (routing.points?.length) {
+          patch.bendPoints = routing.points.map((point) => ({ ...point }))
+          patch.points = routing.points.map((point) => ({ ...point }))
+        }
+      } else if (routing?.mode === 'auto') {
+        patch.manualRoute = false
+        patch.bendPoints = undefined
+        patch.points = undefined
+      }
+      store.updateEdge(activeScope, edgeId, patch)
+    },
+    [store, activeScope],
+  )
+
+  const handleEdgeLabelPlacementChange = useCallback(
+    (edgeId: string, labelPlacement: Edge['labelPlacement']) => {
+      store.updateEdge(activeScope, edgeId, { labelPlacement })
+    },
+    [store, activeScope],
+  )
+
+  const handleRoutedHandlesSync = useCallback(
+    (patches: RoutedHandlePatch[]) => {
+      const currentProcess = store.getActiveProcess(activeScope)
+      if (!currentProcess) return
+      for (const patch of patches) {
+        const current = currentProcess.edges.find((edge) => edge.id === patch.edgeId)
+        if (!current) continue
+        store.updateEdge(activeScope, patch.edgeId, applyRoutedHandlePatch(current, patch))
+      }
     },
     [store, activeScope],
   )
 
   const handleSaveEdge = (edge: Edge, isNew: boolean, options?: { keepNodeId?: string }) => {
     const normalized = normalizeEdgeForStorage(withEdgeHandleDefaults(edge))
-    store.saveEdge(activeScope, normalized, isNew)
+    const savedProcess = store.saveEdge(activeScope, normalized, isNew)
     if (options?.keepNodeId) {
-      const latest = store.getActiveProcess(activeScope)
-      if (latest) {
-        const nodeSel = buildSelectedNode(latest, options.keepNodeId)
-        if (nodeSel) setSelectedElement(nodeSel)
+      const node = savedProcess?.nodes.find((entry) => entry.id === options.keepNodeId)
+      if (node) {
+        setSelectedElement({ type: 'node', id: node.id, data: cloneNodeData(node) })
+        return
       }
-    } else {
-      setSelectedElement({ type: 'edge', id: normalized.id, data: cloneEdgeData(normalized) })
     }
+    const savedEdge = savedProcess?.edges.find((entry) => entry.id === normalized.id)
+    setSelectedElement({
+      type: 'edge',
+      id: normalized.id,
+      data: cloneEdgeData(savedEdge ?? normalized),
+    })
   }
 
   const handleSaveLane = (lane: Lane, isNew: boolean) => {
-    store.saveLane(activeScope, lane, isNew)
-    setSelectedElement({ type: 'lane', id: lane.id, data: cloneLaneData(lane) })
+    const savedProcess = store.saveLane(activeScope, lane, isNew)
+    const savedLane = savedProcess?.lanes.find((entry) => entry.id === lane.id)
+    setSelectedElement({
+      type: 'lane',
+      id: lane.id,
+      data: cloneLaneData(savedLane ?? lane),
+    })
   }
 
   const handleSaveZone = (zone: ProcessZone, isNew: boolean) => {
-    store.saveZone(activeScope, zone, isNew)
-    setSelectedElement({ type: 'zone', id: zone.id, data: cloneZoneData(zone) })
+    const savedProcess = store.saveZone(activeScope, zone, isNew)
+    const savedZone = savedProcess?.zones?.find((entry) => entry.id === zone.id)
+    setSelectedElement({
+      type: 'zone',
+      id: zone.id,
+      data: cloneZoneData(savedZone ?? zone),
+    })
   }
+
+  const handleSaveProcessGroup = (group: OverviewProcessGroup) => {
+    store.saveProcessGroup(group)
+    for (const detailGroup of detailProcessGroups) {
+      if (detailGroup.linkedOverviewGroupId === group.id && detailGroup.id !== group.linkedDetailGroupId) {
+        const { linkedOverviewGroupId: _removed, ...rest } = detailGroup
+        store.saveDetailProcessGroup(rest)
+      }
+    }
+    if (group.linkedDetailGroupId) {
+      const detailGroup = detailProcessGroups.find((entry) => entry.id === group.linkedDetailGroupId)
+      if (detailGroup && detailGroup.linkedOverviewGroupId !== group.id) {
+        store.saveDetailProcessGroup({ ...detailGroup, linkedOverviewGroupId: group.id })
+      }
+    }
+    setSelectedGroupId(group.id)
+    setSelectedElement({ type: 'process-group', id: group.id, data: cloneProcessGroup(group) })
+    setIsRightOpen(true)
+  }
+
+  const handleSaveDetailProcessGroup = (group: DetailProcessGroup) => {
+    store.saveDetailProcessGroup(group)
+    for (const overviewGroup of overviewProcessGroups) {
+      if (overviewGroup.linkedDetailGroupId === group.id && overviewGroup.id !== group.linkedOverviewGroupId) {
+        const { linkedDetailGroupId: _removed, ...rest } = overviewGroup
+        store.saveProcessGroup(rest)
+      }
+    }
+    if (group.linkedOverviewGroupId) {
+      const overviewGroup = overviewProcessGroups.find((entry) => entry.id === group.linkedOverviewGroupId)
+      if (overviewGroup && overviewGroup.linkedDetailGroupId !== group.id) {
+        store.saveProcessGroup({ ...overviewGroup, linkedDetailGroupId: group.id })
+      }
+    }
+    setSelectedGroupId(group.id)
+    setDetailProcessId(group.detailProcessId)
+    setSelectedElement({
+      type: 'detail-process-group',
+      id: group.id,
+      data: cloneDetailProcessGroup(group),
+    })
+    setIsRightOpen(true)
+  }
+
+  const handleProcessGroupDraftChange = useCallback((group: OverviewProcessGroup) => {
+    setSelectedElement(buildSelectedProcessGroup(group))
+  }, [])
+
+  const handleAddOverviewProcessGroup = useCallback(() => {
+    setAppMode('edit')
+    setSelectedGroupId(null)
+    setSelectedElement(buildNewProcessGroupSelection(overviewProcessGroups))
+    setIsRightOpen(true)
+  }, [overviewProcessGroups])
+
+  const handleEditOverviewProcessGroup = useCallback(
+    (groupId: string) => {
+      const group = overviewProcessGroups.find((entry) => entry.id === groupId)
+      if (!group) return
+      setSelectedGroupId(group.id)
+      setSelectedElement(buildSelectedProcessGroup(group))
+      setIsRightOpen(true)
+    },
+    [overviewProcessGroups],
+  )
+
+  const handleAddDetailProcessGroup = useCallback(() => {
+    setAppMode('edit')
+    const currentFirst = [
+      ...allDetailProcesses.filter((process) => process.id === detailProcessId),
+      ...allDetailProcesses.filter((process) => process.id !== detailProcessId),
+    ]
+    setSelectedElement(buildNewDetailProcessGroupSelection(detailProcessGroups, currentFirst))
+    setIsRightOpen(true)
+  }, [detailProcessGroups, allDetailProcesses, detailProcessId])
+
+  const handleEditDetailProcessGroup = useCallback(
+    (groupId: string) => {
+      const group = detailProcessGroups.find((entry) => entry.id === groupId)
+      if (!group) return
+      setSelectedGroupId(group.id)
+      setSelectedElement(buildSelectedDetailProcessGroup(group))
+      setIsRightOpen(true)
+    },
+    [detailProcessGroups],
+  )
+
+  const linkedDetailProcessIdForPanel = useMemo(() => {
+    if (!savedSelectedOverviewGroup) return undefined
+    return resolveLinkedDetailProcessId(savedSelectedOverviewGroup)
+  }, [savedSelectedOverviewGroup, resolveLinkedDetailProcessId])
 
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
@@ -336,22 +607,53 @@ export function AppLayout() {
     }
   }, [persistAll])
 
+  const resetToFullOverview = useCallback(() => {
+    setViewMode('overview')
+    setSelectedGroupId(null)
+    setRelatedOnly(false)
+    setSelectedElement(null)
+    setIsRightOpen(false)
+    setOverviewHomeKey((key) => key + 1)
+  }, [])
+
   const handleViewModeChange = (mode: ViewMode) => {
+    if (mode === 'overview') {
+      resetToFullOverview()
+      return
+    }
     setViewMode(mode)
-    if (mode === 'detail' && selectedGroupId) {
-      const group = getProcessGroupById(selectedGroupId)
-      if (group) setDetailProcessId(group.detailProcessId)
+    if (selectedGroupId) {
+      const detailGroup =
+        detailProcessGroups.find((entry) => entry.id === selectedGroupId)
+        ?? detailProcessGroups.find((entry) => entry.linkedOverviewGroupId === selectedGroupId)
+      if (detailGroup) {
+        store.ensureDetailProcess(detailGroup.detailProcessId)
+        setDetailProcessId(detailGroup.detailProcessId)
+      }
+    } else if (detailProcessId) {
+      store.ensureDetailProcess(detailProcessId)
     }
   }
 
   const handleBackToOverview = () => {
-    setViewMode('overview')
+    resetToFullOverview()
   }
 
   const handleSelectEdgeFromPanel = useCallback(
     (edgeId: string) => {
       const el = buildSelectedEdge(activeProcess, edgeId)
       if (el) setSelectedElement(el)
+    },
+    [activeProcess],
+  )
+
+  const handleSelectZoneFromPanel = useCallback(
+    (zoneId: string) => {
+      const el = buildSelectedZone(activeProcess, zoneId)
+      if (el) {
+        setSelectedElement(el)
+        setIsRightOpen(true)
+      }
     },
     [activeProcess],
   )
@@ -363,7 +665,6 @@ export function AppLayout() {
       <Toolbar
         viewMode={viewMode}
         appMode={appMode}
-        mapDisplayMode={mapDisplayMode}
         saveStatus={saveStatus}
         isLeftOpen={isLeftOpen}
         isRightOpen={isRightOpen}
@@ -372,7 +673,6 @@ export function AppLayout() {
         onToggleRight={() => setIsRightOpen((prev) => !prev)}
         onViewModeChange={handleViewModeChange}
         onAppModeChange={handleAppModeChange}
-        onMapDisplayModeChange={setMapDisplayMode}
         onBackToOverview={handleBackToOverview}
         onAddNode={() => handleStartNew('new-node', selectedLaneId)}
         onAddEdge={() => handleStartNew('new-edge')}
@@ -407,17 +707,26 @@ export function AppLayout() {
                   selectedElement={selectedElement}
                   process={activeProcess}
                   detailProcesses={allDetailProcesses}
+                  overviewProcessGroups={overviewProcessGroups}
+                  detailProcessGroups={detailProcessGroups}
                   onOpenDetailProcess={handleOpenDetailProcess}
                   onSaveNode={handleSaveNode}
                   onSaveEdge={handleSaveEdge}
                   onSaveLane={handleSaveLane}
                   onSaveZone={handleSaveZone}
+                  onSaveProcessGroup={handleSaveProcessGroup}
+                  onSaveDetailProcessGroup={handleSaveDetailProcessGroup}
+                  onProcessGroupDraftChange={handleProcessGroupDraftChange}
+                  savedProcessGroup={savedSelectedOverviewGroup}
+                  savedDetailProcessGroup={savedSelectedDetailGroup}
+                  linkedDetailProcessId={linkedDetailProcessIdForPanel}
                   onDeleteNode={handleDeleteNode}
                   onDeleteEdge={handleDeleteEdge}
                   onDeleteLane={handleDeleteLane}
                   onDeleteZone={handleDeleteZone}
                   onCancelNew={() => setSelectedElement(null)}
                   onSelectEdge={handleSelectEdgeFromPanel}
+                  onSelectZone={handleSelectZoneFromPanel}
                   onRequestEditMode={handleRequestEditMode}
                 />
               </div>
@@ -425,57 +734,53 @@ export function AppLayout() {
           }
         >
           <ProcessMapCanvas
-            process={displayProcess}
+            process={canvasProcess}
             viewMode={viewMode}
             appMode={appMode}
             selectedElement={selectedElement}
             overviewHighlight={overviewHighlight}
+            overviewHomeKey={overviewHomeKey}
             panelInsetRight={isRightOpen ? PROPERTY_PANEL_WIDTH : 0}
             onSelectElement={handleSelectElement}
             onClearSelection={handleClearSelection}
             onEdgeRoutingChange={handleEdgeRoutingChange}
+            onEdgeLabelPlacementChange={handleEdgeLabelPlacementChange}
             onConnectEdge={handleConnectEdge}
             onNodePlacementChange={handleNodePlacementChange}
+            onRoutedHandlesSync={handleRoutedHandlesSync}
           />
         </ProcessCanvasContainer>
       </div>
 
       <DataStatusBar processData={processData} nodeCount={summary.nodeCount} edgeCount={summary.edgeCount} />
 
-      <Drawer side="left" isOpen={isLeftOpen} title={viewMode === 'overview' ? '프로세스 그룹' : '프로세스'} onClose={() => setIsLeftOpen(false)}>
+      <Drawer side="left" isOpen={isLeftOpen} title={viewMode === 'overview' ? 'Overview 프로세스 그룹' : '프로세스 상세'} onClose={() => setIsLeftOpen(false)}>
         {viewMode === 'overview' ? (
           <ProcessGroupMenu
-            groups={toBeNavigator.processGroups}
+            variant="overview"
+            groups={overviewProcessGroups}
             selectedGroupId={selectedGroupId}
             relatedOnly={relatedOnly}
-            onSelectGroup={setSelectedGroupId}
+            detailProcesses={allDetailProcesses}
+            resolveLinkedDetailProcessId={resolveLinkedDetailProcessId}
+            onSelectGroup={handleSelectOverviewGroup}
             onRelatedOnlyChange={setRelatedOnly}
-            onOpenDetail={handleOpenDetail}
+            onOpenDetail={handleOpenDetailFromOverview}
+            onAddGroup={handleAddOverviewProcessGroup}
+            onEditGroup={handleEditOverviewProcessGroup}
           />
         ) : (
-          <>
-            <ProcessMenu
-              processes={allDetailProcesses}
-              selectedId={detailProcessId}
-              onSelect={(processId) => {
-                handleOpenDetailProcess(processId)
-              }}
-            />
-            <ProcessGroupMenu
-              groups={toBeNavigator.processGroups}
-              selectedGroupId={
-                toBeNavigator.processGroups.find((g) => g.detailProcessId === detailProcessId)?.id ?? null
-              }
-              relatedOnly={false}
-              showOverviewControls={false}
-              onSelectGroup={(groupId) => {
-                if (!groupId) return
-                handleOpenDetail(groupId)
-              }}
-              onRelatedOnlyChange={() => {}}
-              onOpenDetail={handleOpenDetail}
-            />
-          </>
+          <ProcessGroupMenu
+            variant="detail"
+            groups={detailProcessGroups}
+            selectedGroupId={
+              detailProcessGroups.find((group) => group.detailProcessId === detailProcessId)?.id ?? null
+            }
+            detailProcesses={allDetailProcesses}
+            onSelectGroup={handleOpenDetailFromDetailMenu}
+            onAddGroup={handleAddDetailProcessGroup}
+            onEditGroup={handleEditDetailProcessGroup}
+          />
         )}
       </Drawer>
     </div>

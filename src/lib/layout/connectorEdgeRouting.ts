@@ -13,6 +13,7 @@ import {
   getHandlePoint,
   pointsToPath,
   simplifyPath,
+  snapPathEndpointsToHandles,
   validateOrthogonalPath,
   type OrthogonalRouteOptions,
   type OrthogonalRouteResult,
@@ -194,8 +195,14 @@ export function routeConnectorOrthogonalEdge(
 
   const sourceHandle = resolved.sourceHandle
   const targetHandle = resolved.targetHandle
-  const points = simplifyPath(
-    buildConnectorPath(source, target, sourceHandle, targetHandle, process),
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  const sourcePt = getHandlePoint(source, sourceHandle, 0.5, sourceType)
+  const targetPt = getHandlePoint(target, targetHandle, 0.5, targetType)
+  const points = snapPathEndpointsToHandles(
+    simplifyPath(buildConnectorPath(source, target, sourceHandle, targetHandle, process)),
+    sourcePt,
+    targetPt,
   )
   const path = pointsToPath(points, minContentX)
   const labelPoint = labelPointFromOrthogonalPath(points, minContentX)

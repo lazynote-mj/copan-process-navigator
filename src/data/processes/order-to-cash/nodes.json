@@ -106,7 +106,7 @@
   },
   {
     "id": "sales-posting",
-    "name": "회계전표 반영",
+    "name": "매출전표 반영",
     "type": "system",
     "laneId": "finance",
     "phaseId": "p8",

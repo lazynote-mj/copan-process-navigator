@@ -1,0 +1,115 @@
+.database-node {
+  position: relative;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.database-node__shape {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.06));
+}
+
+.database-node__body {
+  fill: #e0f2fe;
+  stroke: #0369a1;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.database-node__cap {
+  fill: rgba(255, 255, 255, 0.36);
+  stroke: #0369a1;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.database-node__cap--bottom {
+  fill: none;
+}
+
+.database-node__content {
+  position: absolute;
+  inset: 8px 12px 6px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.database-node--compact .database-node__content {
+  inset: 10px 9px 5px;
+  gap: 1px;
+}
+
+.database-node--compact .process-node__name {
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.database-node--compact .process-node__subtitle {
+  font-size: 9px;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.15;
+}
+
+.database-node--cell-3col .database-node__content {
+  inset: 8px 5px 4px;
+}
+
+.database-node--cell-3col .process-node__name {
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.database-node--cell-3col .process-node__subtitle {
+  font-size: 8.5px;
+  line-height: 1.1;
+}
+
+.database-node .process-node__name,
+.database-node .process-node__subtitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.database-node--selected .database-node__body,
+.database-node--selected .database-node__cap {
+  stroke: var(--accent, #2563eb);
+}
+
+.process-node-flow--database.process-node-flow--highlighted .database-node__body,
+.process-node-flow--database.process-node-flow--highlighted .database-node__cap {
+  stroke: #2563eb;
+  stroke-width: 2;
+}
+
+.process-node-flow--focus .database-node__body,
+.process-node-flow--focus .database-node__cap {
+  stroke: #ea580c;
+  stroke-width: 2.5;
+}
+
+.database-node__handle {
+  width: 5px !important;
+  height: 5px !important;
+  background: #0369a1 !important;
+  border: none !important;
+  opacity: 0;
+  z-index: 2;
+}
+
+.database-node:hover .database-node__handle {
+  opacity: 1;
+}

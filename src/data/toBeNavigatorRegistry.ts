@@ -1,9 +1,15 @@
 import type { Edge, Node, Phase, Process, ProcessStatus, ProcessZone } from '../types/process'
-import type { ProcessGroup, ToBeNavigatorBundle } from '../types/toBeNavigator'
+import type {
+  DetailProcessGroup,
+  OverviewProcessGroup,
+  ProcessGroup,
+  ToBeNavigatorBundle,
+} from '../types/toBeNavigator'
 import { normalizeProcessNodes, normalizeProcessEdges } from './processExport'
 import { getOverviewLanes } from './laneRegistry'
 import { processRegistry } from './processRegistry'
 import {
+  buildDetailProcessGroups,
   buildOverviewEdgesFromSequence,
   buildOverviewProcessGroups,
   validateOverviewEdgeEndpoints,
@@ -11,7 +17,8 @@ import {
 
 import overviewJson from './toBeOverview/overview.json'
 
-const processGroups = buildOverviewProcessGroups()
+const overviewProcessGroups = buildOverviewProcessGroups()
+const detailProcessGroups = buildDetailProcessGroups()
 
 type OverviewFile = {
   meta: {
@@ -53,7 +60,8 @@ function loadOverviewProcess(data: OverviewFile): Process {
 
 export const toBeNavigator: ToBeNavigatorBundle = {
   overview: loadOverviewProcess(overviewJson as OverviewFile),
-  processGroups,
+  overviewProcessGroups,
+  detailProcessGroups,
   detailProcesses: processRegistry,
 }
 
@@ -61,8 +69,36 @@ export function getDetailProcessById(id: string): Process | undefined {
   return toBeNavigator.detailProcesses.find((p) => p.id === id)
 }
 
+export function getOverviewProcessGroupById(id: string): OverviewProcessGroup | undefined {
+  return toBeNavigator.overviewProcessGroups.find((g) => g.id === id)
+}
+
+export function getDetailProcessGroupById(id: string): DetailProcessGroup | undefined {
+  return toBeNavigator.detailProcessGroups.find((g) => g.id === id)
+}
+
+/** @deprecated getOverviewProcessGroupById / getDetailProcessGroupById */
 export function getProcessGroupById(id: string): ProcessGroup | undefined {
-  return toBeNavigator.processGroups.find((g) => g.id === id)
+  const overview = getOverviewProcessGroupById(id)
+  if (overview) {
+    const linked = overview.linkedDetailGroupId
+      ? getDetailProcessGroupById(overview.linkedDetailGroupId)
+      : undefined
+    return {
+      ...overview,
+      ...(linked ? { detailProcessId: linked.detailProcessId } : {}),
+    }
+  }
+  const detail = getDetailProcessGroupById(id)
+  if (!detail) return undefined
+  return {
+    id: detail.id,
+    name: detail.name,
+    description: detail.description,
+    overviewNodeIds: [],
+    overviewEdgeIds: [],
+    detailProcessId: detail.detailProcessId,
+  }
 }
 
 export function prefixEdgeId(processId: string, edgeId: string): string {

@@ -2,7 +2,7 @@ import type { Process, Node } from '../../types/process'
 import {
   getLaneById,
   getPhaseLabel,
-  NODE_TYPES,
+  EDITABLE_DETAIL_NODE_TYPES,
   NODE_TYPE_META,
   getNodeTypeLabel,
 } from '../../types/process'
@@ -93,7 +93,7 @@ export function NodeDetail({
           value={node.type}
           onChange={(e) => onNodeTypeChange?.(node.id, e.target.value as NodeType)}
         >
-          {NODE_TYPES.map((type) => (
+          {EDITABLE_DETAIL_NODE_TYPES.map((type) => (
             <option key={type} value={type}>
               {NODE_TYPE_META[type].label} — {NODE_TYPE_META[type].description}
             </option>

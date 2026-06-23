@@ -1,0 +1,134 @@
+[
+  {
+    "id": "pg-business-to-purchase-request",
+    "name": "사업 기회 확보 ~ 구매 요청 : 제/상품",
+    "description": "사업기회 확보·계약·프로젝트 품의·기준정보·구매요청까지 (응원봉, MD 등 제/상품)",
+    "detailProcessId": "business-to-purchase-request"
+  },
+  {
+    "id": "pg-purchase-to-ap-invoice",
+    "name": "구매 요청 ~ 입고 ~ 매입 전표 : 제/상품",
+    "description": "구매요청·발주·입고·재고인식·매입마감·매입전표·회계반영 (제/상품)",
+    "detailProcessId": "purchase-to-ap-invoice"
+  },
+  {
+    "id": "pg-consignment-purchase-receipt",
+    "name": "구매 요청 ~ 입고 : 판매 대행",
+    "description": "판매대행(위탁) 구매요청부터 입고·재고인식까지",
+    "detailProcessId": "consignment-purchase-receipt"
+  },
+  {
+    "id": "pg-b2b-domestic-order-to-sales",
+    "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2B 국내",
+    "description": "B2B 국내 주문등록·출고·매출마감·매출전표",
+    "detailProcessId": "b2b-domestic-order-to-sales"
+  },
+  {
+    "id": "pg-b2b-domestic-return",
+    "name": "주문 반품 ~ 입고 ~ 반품 전표 : B2B 국내",
+    "description": "B2B 국내 주문반품·입고·반품전표",
+    "detailProcessId": "b2b-domestic-return",
+    "linkedOverviewGroupId": "ov-returns"
+  },
+  {
+    "id": "pg-b2b-export-order-to-sales",
+    "name": "주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외",
+    "description": "B2B 해외(수출) 주문등록·수출출고·매출전표",
+    "detailProcessId": "b2b-export-order-to-sales"
+  },
+  {
+    "id": "pg-b2c-order-to-sales",
+    "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2C",
+    "description": "B2C 주문등록·출고·매출마감·매출전표",
+    "detailProcessId": "b2c-order-to-sales"
+  },
+  {
+    "id": "pg-preorder-to-sales",
+    "name": "예약 판매 ~ 출고 ~ 매출전표 : B2C",
+    "description": "B2C 예약판매·출고·매출전표",
+    "detailProcessId": "preorder-to-sales"
+  },
+  {
+    "id": "pg-b2c-return",
+    "name": "주문 반품 ~ 입고 ~ 반품전표 : B2C",
+    "description": "B2C 주문반품·입고·반품전표",
+    "detailProcessId": "b2c-return"
+  },
+  {
+    "id": "pg-popup-concert-stock-sales-sync",
+    "name": "공연장/팝업 판매 ~ 출고 ~ 매출전표 : 제/상품",
+    "description": "공연장·팝업 현장 판매·재고이동·매출내역 동기화",
+    "detailProcessId": "popup-concert-stock-sales-sync",
+    "linkedOverviewGroupId": "ov-popup-concert"
+  },
+  {
+    "id": "pg-event-sales",
+    "name": "이벤트 : 제/상품",
+    "description": "이벤트 주문 관리·수령방식별 출고·매출전표",
+    "detailProcessId": "event-sales"
+  },
+  {
+    "id": "pg-store-sales",
+    "name": "매장 판매 ~ 출고 ~ 매출전표 : 제/상품",
+    "description": "매장 POS 판매·출고·매출전표",
+    "detailProcessId": "store-sales"
+  },
+  {
+    "id": "pg-stock-transfer",
+    "name": "매장 간 재고이동 : 제/상품",
+    "description": "매장·창고 간 재고이동",
+    "detailProcessId": "stock-transfer",
+    "linkedOverviewGroupId": "ov-warehouse-transfer"
+  },
+  {
+    "id": "pg-other-issue",
+    "name": "기타 출고 : 제/상품",
+    "description": "기타출고·무상증정",
+    "detailProcessId": "other-issue",
+    "linkedOverviewGroupId": "ov-other-outbound"
+  },
+  {
+    "id": "pg-royalty-mg-settlement",
+    "name": "기획사 로열티 정산 : 제/상품",
+    "description": "로열티 매출 집계·MG 상계·정산전표",
+    "detailProcessId": "royalty-mg-settlement",
+    "linkedOverviewGroupId": "ov-royalty-mg"
+  },
+  {
+    "id": "pg-consignment-settlement",
+    "name": "위탁 매출 정산",
+    "description": "위탁 재고·매출 마감 및 이상 검증·정산전표",
+    "detailProcessId": "consignment-settlement",
+    "linkedOverviewGroupId": "ov-consignment-settlement"
+  },
+  {
+    "id": "pg-revenue-share-settlement",
+    "name": "수익배분 매출 정산",
+    "description": "수익배분 매출 집계·정산·전표",
+    "detailProcessId": "revenue-share-settlement"
+  },
+  {
+    "id": "pg-service-business-to-expense",
+    "name": "사업기회 ~ 비용 전표 생성 : (서비스)",
+    "description": "플랫폼·콘텐츠·공연 등 서비스 사업기회부터 비용전표까지",
+    "detailProcessId": "service-business-to-expense"
+  },
+  {
+    "id": "pg-service-purchase-to-ap",
+    "name": "구매 요청 ~ 매입 전표 생성 : (서비스)",
+    "description": "서비스 구매요청·매입마감·매입전표",
+    "detailProcessId": "service-purchase-to-ap"
+  },
+  {
+    "id": "pg-service-order-to-sales",
+    "name": "주문 등록 ~ 매출 전표 생성 : (서비스)",
+    "description": "서비스 주문등록·매출마감·매출전표",
+    "detailProcessId": "service-order-to-sales"
+  },
+  {
+    "id": "pg-service-project-settlement",
+    "name": "프로젝트 정산 : (서비스)",
+    "description": "서비스 프로젝트 정산·전표·회계반영",
+    "detailProcessId": "service-project-settlement"
+  }
+]

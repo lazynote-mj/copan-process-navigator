@@ -21,6 +21,7 @@ import {
 import {
   getCellPlacementSize,
   resolveCellColumnLayout,
+  type CellColumnLayout,
 } from './cellColumnLayout'
 import {
   gridContentWidthFromProcess,
@@ -30,12 +31,13 @@ import {
 } from './laneLayoutResolver'
 import { DECISION_NODE_LAYOUT } from './decisionNodeLayout'
 import { PROCESS_ZONES, resolveNodeZone, zoneOrderIndex } from './overviewProcessZones'
-import { placeOverviewInterfaceRules, isInterfaceRuleNode } from './interfaceRuleLayout'
+import { isInterfaceRuleNode } from './interfaceRuleLayout'
 import { isConnectorNodeType, placeConnectorNodes } from './connectorLayout'
 import {
   cellHasManualSlots,
   computeCellGridLayoutFromSlots,
   getMaxRowFromAssignments,
+  OVERVIEW_CELL_MAX_ROWS,
   OVERVIEW_MAX_CELL_COLUMNS,
   resolveCellSlotAssignments,
   sortCellNodes,
@@ -100,13 +102,14 @@ function prepareCellLayout(
   nodes: Node[],
   edges: Edge[] = [],
   maxColumnCount?: number,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
 ): {
   sorted: Node[]
   assignments: Map<string, CellSlotAssignment>
   layout: CellGridLayout
 } {
   const sorted = sortCellNodes(nodes)
-  const assignments = resolveCellSlotAssignments(sorted, { edges })
+  const assignments = resolveCellSlotAssignments(sorted, { edges, maxRows })
   const layout = computeCellGridLayoutFromSlots(
     assignments.values(),
     maxColumnCount ?? OVERVIEW_MAX_CELL_COLUMNS,
@@ -126,12 +129,12 @@ function gapBetweenRowPair(
   const colCount = Math.max(grid[upperRow]?.length ?? 0, grid[lowerRow]?.length ?? 0)
   for (let col = 0; col < colCount; col++) {
     const upper = grid[upperRow]?.[col]
-    if (!upper || upper.type !== 'decision') continue
+    if (!upper || (upper.type !== 'decision' && !isInterfaceRuleNode(upper.type))) continue
 
     for (let row = upperRow + 1; row <= lowerRow; row++) {
       const lower = grid[row]?.[col]
       if (!lower) continue
-      if (lower.type !== 'decision') {
+      if (lower.type !== 'decision' && !isInterfaceRuleNode(lower.type)) {
         gap = Math.max(gap, DECISION_NODE_LAYOUT.belowMinGap)
       }
       break
@@ -140,26 +143,44 @@ function gapBetweenRowPair(
   return gap
 }
 
+function rowNodePlacementHeight(
+  node: Node,
+  metrics: OverviewGridMetrics,
+  cellLayout?: CellColumnLayout,
+): number {
+  if (cellLayout) {
+    return getCellPlacementSize(node.type, metrics, cellLayout, node.name).height
+  }
+  return gridNodeVisualHeight(node.type, metrics)
+}
+
 function computeRowHeights(
   grid: (Node | null)[][],
   metrics: OverviewGridMetrics,
   manualMode: boolean,
   maxRowIndex: number,
+  cellLayout?: CellColumnLayout,
 ): number[] {
   return grid.map((rowNodes, rowIndex) => {
     let maxNodeHeight = 0
     let hasDecision = false
     let hasNode = false
+    const isLastRow = rowIndex === maxRowIndex
 
     for (const node of rowNodes) {
       if (!node) continue
       hasNode = true
-      maxNodeHeight = Math.max(maxNodeHeight, gridNodeVisualHeight(node.type, metrics))
-      if (node.type === 'decision') hasDecision = true
+      maxNodeHeight = Math.max(maxNodeHeight, rowNodePlacementHeight(node, metrics, cellLayout))
+      if (node.type === 'decision' || isInterfaceRuleNode(node.type)) hasDecision = true
     }
 
     if (hasNode) {
-      const padded = maxNodeHeight + metrics.rowPaddingY
+      const topPad = metrics.rowPaddingY
+      let bottomPad = metrics.rowPaddingY
+      if (isLastRow && hasDecision) {
+        bottomPad = Math.max(bottomPad, DECISION_NODE_LAYOUT.exclusionPadding)
+      }
+      const padded = maxNodeHeight + topPad + bottomPad
       if (hasDecision) {
         return Math.max(padded, metrics.rowMinHeightDecision)
       }
@@ -172,6 +193,13 @@ function computeRowHeights(
 
     return 0
   })
+}
+
+function findNextActiveRow(rowHeights: number[], fromRow: number): number {
+  for (let row = fromRow; row < rowHeights.length; row++) {
+    if ((rowHeights[row] ?? 0) > 0) return row
+  }
+  return -1
 }
 
 function computeRowYOffsets(
@@ -198,12 +226,7 @@ function computeRowYOffsets(
       continue
     }
 
-    const nextActive = (() => {
-      for (let r = row + 1; r < rowHeights.length; r++) {
-        if (rowHeights[r] > 0) return r
-      }
-      return -1
-    })()
+    const nextActive = findNextActiveRow(rowHeights, row + 1)
     if (nextActive >= 0) {
       y += gapBetweenRowPair(grid, row, nextActive, metrics)
     }
@@ -251,10 +274,11 @@ function computeCellContentHeight(
   metrics: OverviewGridMetrics,
   edges: Edge[] = [],
   maxColumnCount?: number,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
 ): number {
   if (nodes.length === 0) return 0
 
-  const { assignments, layout } = prepareCellLayout(nodes, edges, maxColumnCount)
+  const { assignments, layout } = prepareCellLayout(nodes, edges, maxColumnCount, maxRows)
   const manualMode = cellHasManualSlots(nodes)
   const sorted = sortCellNodes(nodes)
   const grid = buildCellNodeGrid(sorted, assignments, layout)
@@ -282,31 +306,55 @@ export function computeLaneCellHeight(
   edges: Edge[] = [],
   maxColumnCount?: number,
   process?: Process,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
 ): number {
   if (nodes.length === 0) return metrics.cellMinHeight
   const phaseMin = process ? resolvePhaseMinHeight(process, nodes) : 0
   return Math.max(
     metrics.cellMinHeight,
     phaseMin,
-    computeCellContentHeight(nodes, metrics, edges, maxColumnCount ?? OVERVIEW_MAX_CELL_COLUMNS),
+    computeCellContentHeight(nodes, metrics, edges, maxColumnCount ?? OVERVIEW_MAX_CELL_COLUMNS, maxRows),
   )
 }
 
 export type LaneCellPlacementOptions = {
-  /** Detail 등 — cell 열 상한 (기본 Overview 2열) */
+  /** Detail etc. - max columns per cell (Overview default 2) */
   maxColumnCount?: number
   edges?: Edge[]
-  /** Overview Zone — 동일 row 번호를 모든 lane에서 같은 Y로 맞출 때 */
+  /** Overview zone cell - unify row Y across columns within the same lane */
   unifiedRows?: ZoneUnifiedRowLayout
-  /** unifiedRows 사용 시 공통 yBase (zone 내 lane 동일) */
+  /** yBase when unifiedRows is set */
   yBaseOverride?: number
+  /** manual cellSlot - lane-wide LEFT/RIGHT column X (aligned across zones) */
+  laneColumnLayout?: CellColumnLayout
+  maxRows?: number
 }
 
-/** Zone 전체 lane 공유 row 높이·offset */
+/** Lane cell shared row heights and absolute Y offsets (within the lane) */
 export type ZoneUnifiedRowLayout = {
   rowHeights: number[]
   rowYOffsets: number[]
   maxRowIndex: number
+}
+
+/** Unify row bands across columns inside one lane cell (not across swimlanes). */
+export function computeLaneCellUnifiedRowLayout(
+  plan: LaneCellRowPlan,
+  metrics: OverviewGridMetrics,
+): ZoneUnifiedRowLayout {
+  return computeZoneUnifiedRowLayout([plan], metrics)
+}
+
+/**
+ * Zone-wide row bands: row height is max across swimlanes; row Y is max of each
+ * lane's local offsets so the same cellSlot row aligns horizontally without
+ * importing another lane's decision-row gaps into gap spacing.
+ */
+export function computeZoneCellUnifiedRowLayout(
+  lanePlans: LaneCellRowPlan[],
+  metrics: OverviewGridMetrics,
+): ZoneUnifiedRowLayout {
+  return computeZoneUnifiedRowLayout(lanePlans, metrics)
 }
 
 type LaneCellRowPlan = {
@@ -321,6 +369,8 @@ export function buildLaneCellRowPlan(
   edges: Edge[],
   metrics: OverviewGridMetrics,
   maxColumnCount?: number,
+  cellLayout?: CellColumnLayout,
+  maxRows = OVERVIEW_CELL_MAX_ROWS,
 ): LaneCellRowPlan | null {
   if (nodes.length === 0) return null
 
@@ -328,6 +378,7 @@ export function buildLaneCellRowPlan(
     nodes,
     edges,
     maxColumnCount ?? OVERVIEW_MAX_CELL_COLUMNS,
+    maxRows,
   )
   const manualMode = cellHasManualSlots(nodes)
   const grid = buildCellNodeGrid(sorted, assignments, layout)
@@ -337,7 +388,7 @@ export function buildLaneCellRowPlan(
 
   return {
     grid,
-    rowHeights: computeRowHeights(grid, metrics, manualMode, maxRowIndex),
+    rowHeights: computeRowHeights(grid, metrics, manualMode, maxRowIndex, cellLayout),
     maxRowIndex,
     manualMode,
   }
@@ -377,22 +428,19 @@ export function computeZoneUnifiedRowLayout(
   })
 
   const rowYOffsets = new Array<number>(rowCount).fill(0)
-  let y = 0
-
   for (let row = 0; row < rowCount; row++) {
-    rowYOffsets[row] = y
-    const rowHeight = rowHeights[row] ?? 0
-    if (rowHeight <= 0) continue
-
-    y += rowHeight
-
-    if (row < maxRowIndex) {
-      let gap = metrics.nodeGapY
-      for (const plan of lanePlans) {
-        gap = Math.max(gap, gapBetweenRowPair(plan.grid, row, row + 1, metrics))
-      }
-      y += gap
+    let maxOffset = 0
+    for (const plan of lanePlans) {
+      const localOffsets = computeRowYOffsets(
+        plan.grid,
+        plan.rowHeights,
+        metrics,
+        plan.manualMode,
+        plan.maxRowIndex,
+      )
+      maxOffset = Math.max(maxOffset, localOffsets[row] ?? 0)
     }
+    rowYOffsets[row] = maxOffset
   }
 
   return { rowHeights, rowYOffsets, maxRowIndex }
@@ -400,18 +448,12 @@ export function computeZoneUnifiedRowLayout(
 
 export function computeUnifiedContentHeight(
   unified: ZoneUnifiedRowLayout,
-  metrics: OverviewGridMetrics,
+  _metrics: OverviewGridMetrics,
 ): number {
   if (unified.maxRowIndex < 0) return 0
 
-  let total = 0
-  for (let row = 0; row <= unified.maxRowIndex; row++) {
-    total += unified.rowHeights[row] ?? 0
-    if (row < unified.maxRowIndex) {
-      total += metrics.nodeGapY
-    }
-  }
-  return total
+  const lastRow = unified.maxRowIndex
+  return (unified.rowYOffsets[lastRow] ?? 0) + (unified.rowHeights[lastRow] ?? 0)
 }
 
 export type PlacedCellNode = PlacedNode
@@ -431,17 +473,22 @@ export function placeNodesInLaneCell(
   const maxColumnCount = options?.maxColumnCount ?? OVERVIEW_MAX_CELL_COLUMNS
   const edges = options?.edges ?? []
   const unifiedRows = options?.unifiedRows
-  const { sorted, assignments, layout } = prepareCellLayout(nodes, edges, maxColumnCount)
+  const { sorted, assignments, layout } = prepareCellLayout(
+    nodes,
+    edges,
+    maxColumnCount,
+    options?.maxRows ?? OVERVIEW_CELL_MAX_ROWS,
+  )
   const manualMode = cellHasManualSlots(nodes)
   const { columnCount, rowCount } = layout
   const grid = buildCellNodeGrid(sorted, assignments, layout)
   const maxRowIndex = manualMode
     ? getMaxRowFromAssignments(assignments.values())
     : getMaxOccupiedRowIndex(grid)
-  const localRowHeights = computeRowHeights(grid, metrics, manualMode, maxRowIndex)
+  const cellLayout = resolveCellColumnLayout(cellLeft, cellWidth, columnCount, metrics)
+  const localRowHeights = computeRowHeights(grid, metrics, manualMode, maxRowIndex, cellLayout)
   const rowHeights = unifiedRows?.rowHeights ?? localRowHeights
   const rowYOffsets = unifiedRows?.rowYOffsets ?? computeRowYOffsets(grid, localRowHeights, metrics, manualMode, maxRowIndex)
-  const cellLayout = resolveCellColumnLayout(cellLeft, cellWidth, columnCount, metrics)
   const yBase = options?.yBaseOverride ?? cellTop + metrics.cellPaddingY
 
   const placed: PlacedCellNode[] = []
@@ -453,11 +500,24 @@ export function placeNodesInLaneCell(
     const row = Math.min(Math.max(assignment.row, 0), rowCount - 1)
     const col = Math.min(Math.max(assignment.col, 0), columnCount - 1)
     const rowHeight = rowHeights[row] ?? metrics.rowMinHeightNormal
-    const size = getCellPlacementSize(node.type, metrics, cellLayout, node.name)
-    const columnCenterX = cellLayout.columnCenters[col] ?? cellLayout.columnCenters[0]
+    const layoutForNode =
+      assignment.isManualSlot && options?.laneColumnLayout
+        ? options.laneColumnLayout
+        : cellLayout
+    const layoutCol =
+      assignment.isManualSlot && options?.laneColumnLayout ? assignment.col : col
+    const size = getCellPlacementSize(node.type, metrics, layoutForNode, node.name)
+    const columnCenterX =
+      layoutForNode.columnCenters[layoutCol] ?? layoutForNode.columnCenters[0]
     const rowTop = yBase + (rowYOffsets[row] ?? 0)
     const rowCenterY = rowTop + rowHeight / 2
-    const nodeY = unifiedRows || manualMode ? rowTop : rowCenterY - size.height / 2
+    const nodeY = unifiedRows
+      ? rowCenterY - size.height / 2
+      : manualMode
+        ? rowTop + (row === maxRowIndex ? metrics.rowPaddingY : 0)
+        : row === maxRowIndex
+          ? rowTop + metrics.rowPaddingY
+          : rowCenterY - size.height / 2
 
     placed.push({
       id: node.id,
@@ -504,14 +564,13 @@ function buildLaneBands(
 function toFlowNodes(process: Process, placed: PlacedNode[]): FlowNode<ProcessNodeData>[] {
   return placed.map((node) => {
     const source = process.nodes.find((n) => n.id === node.id)!
-    return buildProcessFlowNode(source, process, node, true)
+    return buildProcessFlowNode(source, process, node, true, 'overview')
   })
 }
 
 /**
- * Overview grid layout — node.processZone(구조적 Y grid) 기준 배치.
- * process.zones(visual grouping)는 배치 후 computeProcessZoneRects로만 그려지며
- * cellSlot/cellOrder/row height에 영향하지 않음.
+ * Overview grid layout - node.processZone drives Y grid bands.
+ * cellSlot/cellOrder control placement within each lane cell.
  */
 export function getOverviewGridLayout(
   process: Process,
@@ -520,16 +579,16 @@ export function getOverviewGridLayout(
   const afterSettlement = applySettlementGroupLayout(process)
   const laidOutNodes = applyReturnMovementGroupLayout({ ...process, nodes: afterSettlement })
   const validNodes = validateNodes({ ...process, nodes: laidOutNodes })
-  /** edges: JSON process sequence — layout/노드 유효성으로 삭제하지 않음 */
+  /** edges follow JSON process sequence */
   const processWithEdges = { ...process, nodes: validNodes, edges: process.edges }
 
   const sortedLanes = [...process.lanes].sort((a, b) => a.order - b.order)
-  /** Lane 헤더는 HTML sticky — 캔버스 Y는 zone부터 시작 */
+  /** Lane header sticky offset - zone bands start below contentTop */
   const contentTop = CANVAS_TOP_PADDING
 
   const cells = new Map<CellKey, Node[]>()
   for (const node of validNodes) {
-    if (isInterfaceRuleNode(node.type) || isConnectorNodeType(node.type)) continue
+    if (isConnectorNodeType(node.type)) continue
     const zone = resolveNodeZone(node)
     const key = cellKey(zone.zoneId, node.laneId)
     const list = cells.get(key) ?? []
@@ -558,12 +617,26 @@ export function getOverviewGridLayout(
     for (const lane of sortedLanes) {
       const key = cellKey(zone.id, lane.id)
       const cellNodes = cells.get(key) ?? []
-      const plan = buildLaneCellRowPlan(cellNodes, processWithEdges.edges, metrics)
+      const cellLeft = laneColumnLeft(processWithEdges, lane.order, metrics)
+      const laneWidth = resolveLaneCellWidth(processWithEdges, lane.id, metrics.cellWidth)
+      const cellLayout = resolveCellColumnLayout(
+        cellLeft,
+        laneWidth,
+        OVERVIEW_MAX_CELL_COLUMNS,
+        metrics,
+      )
+      const plan = buildLaneCellRowPlan(
+        cellNodes,
+        processWithEdges.edges,
+        metrics,
+        undefined,
+        cellLayout,
+      )
       if (!plan) continue
 
       entries.push({
         laneId: lane.id,
-        cellLeft: laneColumnLeft(processWithEdges, lane.order, metrics),
+        cellLeft,
         cellNodes,
         plan,
       })
@@ -577,7 +650,7 @@ export function getOverviewGridLayout(
 
   for (const zone of PROCESS_ZONES) {
     const entries = zoneLanePlans.get(zone.id) ?? []
-    const unifiedRows = computeZoneUnifiedRowLayout(
+    const unifiedRows = computeZoneCellUnifiedRowLayout(
       entries.map((entry) => entry.plan),
       metrics,
     )
@@ -609,6 +682,16 @@ export function getOverviewGridLayout(
       ? zoneBands[zoneBands.length - 1].bottom - contentTop
       : 0
 
+  const laneColumnLayouts = new Map<string, CellColumnLayout>()
+  for (const lane of sortedLanes) {
+    const cellLeft = laneColumnLeft(processWithEdges, lane.order, metrics)
+    const laneWidth = resolveLaneCellWidth(processWithEdges, lane.id, metrics.cellWidth)
+    laneColumnLayouts.set(
+      lane.id,
+      resolveCellColumnLayout(cellLeft, laneWidth, OVERVIEW_MAX_CELL_COLUMNS, metrics),
+    )
+  }
+
   let placed: PlacedNode[] = []
   for (const zoneBand of zoneBands) {
     const entries = zoneLanePlans.get(zoneBand.zoneId) ?? []
@@ -628,6 +711,7 @@ export function getOverviewGridLayout(
           edges: processWithEdges.edges,
           unifiedRows,
           yBaseOverride: yBase,
+          laneColumnLayout: laneColumnLayouts.get(entry.laneId),
         },
       )
       placed = placed.concat(cellPlaced)
@@ -642,15 +726,6 @@ export function getOverviewGridLayout(
   const minContentX = bands[0]?.contentLeft ?? metrics.zoneLabelColumnWidth
 
   const { flowEdges: builtEdges } = buildOverviewEdges(processWithEdges, placed, minContentX)
-
-  const rulePlaced = placeOverviewInterfaceRules(
-    processWithEdges,
-    zoneBands,
-    sortedLanes,
-    builtEdges,
-    metrics,
-  )
-  placed = placed.concat(rulePlaced)
 
   const edgeMaxX = Math.max(
     canvasWidth,

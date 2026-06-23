@@ -3,7 +3,6 @@ import { resolveEdgeType } from '../../types/edgeTypes'
 import { resolveEdgeSourceHandle, resolveEdgeTargetHandle, hasUserSpecifiedHandles, resolveLockedEdgeHandles, isManualRouteEdge, resolveSavedBendPoints } from '../editor/edgeHandles'
 import {
   DECISION_NODE_LAYOUT,
-  decisionBranchLabelPoint,
   inferDecisionOutgoingPair,
   isDecisionSameColumn,
 } from './decisionNodeLayout'
@@ -21,13 +20,22 @@ import {
 } from './edgeFlowDirection'
 import type { PlacedNode } from './laneLayout'
 import { parsePathPoints } from './edgeRouter'
-import { labelPointFromOrthogonalPath, resolveLabelPlacement } from './edgeLabelPlacement'
+import { labelPointFromOrthogonalPath, resolveLabelPlacement, resolveBranchDepartureLabelPlacement, resolveBranchApproachLabelPlacement, resolveDecisionSameRowReturnLabelPlacement, resolveVerticalDropLegLabelPlacement, shouldPreferTargetLabelPlacement, inferHandleFromPathSegment, type LabelRect } from './edgeLabelPlacement'
 import { OVERVIEW_VERTICAL_METRICS } from './overviewVerticalMetrics'
 import {
+  buildDecisionSameRowLeftReturnPath,
+  buildDecisionSameRowTopReturnPath,
   buildSameLaneBracketPath,
+  buildSameLaneSideTopOneBendPath,
+  buildSameLaneVerticalOneBendPath,
   pickBracketSide,
   qualifiesForDecisionRightDownBracket,
+  qualifiesForDecisionSameRowLeftReturn,
+  qualifiesForDecisionSameRowTopReturn,
   qualifiesForSameLaneBracketReturn,
+  qualifiesForSameLaneSideTopOneBend,
+  qualifiesForSameLaneVerticalSideBracket,
+  isReturnLikeEdge,
   type BracketSide,
 } from './sameLaneReturnRouting'
 import {
@@ -42,8 +50,8 @@ import {
 } from './edgeRouteValidation'
 import { routeConnectorOrthogonalEdge, isConnectorEdge } from './connectorEdgeRouting'
 import { isConnectorNodeType } from './connectorLayout'
-import { isInterfaceRuleNode } from './interfaceRuleLayout'
-import { cellSlotToRowCol } from './overviewCellPlacement'
+import { DETAIL_CELL_MAX_ROWS, OVERVIEW_CELL_MAX_ROWS, cellSlotToRowCol } from './overviewCellPlacement'
+import { compareZoneOrder } from './overviewZoneLayout'
 import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
 
 /** 디버그 대상 edge — console.debug 출력 */
@@ -58,7 +66,6 @@ export const ARROW_MARKER_LENGTH = 12
 export const ARROW_MARKER_WIDTH = 10
 /** path endpoint = target anchor — marker gap 없음 */
 export const ARROW_GAP = 0
-export const SOURCE_HANDLE_GAP = 2
 export const EDGE_OFFSET_STEP = 12
 /** 직선 연결 허용 — 노드 중심 축 정렬 오차 (px) */
 export const STRAIGHT_ALIGN_TOLERANCE = 12
@@ -116,6 +123,8 @@ export type OrthogonalRouteOptions = {
   process?: Process
   /** collision reroute 내부 재호출 시 무한 재귀 방지 */
   suppressCollisionReroute?: boolean
+  /** 이미 배치된 edge 라벨 영역 — 겹침 방지 */
+  existingLabelRects?: LabelRect[]
 }
 
 const NODE_COLLISION_COST = 200
@@ -125,6 +134,10 @@ const NEAR_EDGE_CENTER_DISTANCE = LOCAL_ROUTING_DISTANCE
 const DECISION_BRANCH_SIDE_PENALTY = 8000
 const CELL_INTERNAL_WRONG_HANDLE_PENALTY = 12000
 const SAME_CELL_SKIP_DETOUR_MARGIN = 28
+
+function cellSlotRowsForProcess(process?: Process): number {
+  return process?.overviewNodeId ? DETAIL_CELL_MAX_ROWS : OVERVIEW_CELL_MAX_ROWS
+}
 const PREFERRED_HANDLE_MISMATCH_PENALTY = 5000
 const COLUMN_TRANSITION_EXTERNAL_PENALTY = 15000
 
@@ -138,6 +151,8 @@ export type OrthogonalRouteResult = {
   targetHandle: EdgeHandleId
   labelPoint: Point
   labelHidden?: boolean
+  /** collision-free 배치 시 라벨 bbox — 후속 edge 라벨 겹침 방지 */
+  labelRect?: LabelRect
   /** decision diamond vertex 등 gap 없는 endpoint */
   exactEndpoints?: boolean
   routingStatus?: 'reroutedDueToCollision'
@@ -168,7 +183,6 @@ function isRoutingObstacleNode(nodeId: string, process?: Process): boolean {
   if (!process) return true
   const node = process.nodes.find((n) => n.id === nodeId)
   if (!node) return true
-  if (isInterfaceRuleNode(node.type)) return false
   if (NON_OBSTACLE_NODE_TYPES.has(node.type)) return false
   return true
 }
@@ -195,11 +209,99 @@ function sharesColumnRange(source: PlacedNode, target: PlacedNode): boolean {
   )
 }
 
+function branchDownwardSharesColumn(
+  source: PlacedNode,
+  target: PlacedNode,
+  sourceType?: string,
+): boolean {
+  if (!isBranchNodeType(sourceType)) return false
+  if (nodeCenterY(target) <= nodeCenterY(source) + 4) return false
+  return (
+    isDecisionSameColumn(source, target) ||
+    sharesColumnRange(source, target) ||
+    Math.abs(nodeCenterX(source) - nodeCenterX(target)) <= DOWNWARD_STRAIGHT_X_TOLERANCE
+  )
+}
+
+/** 같은 lane · 동일 cellSlot 열(LEFT/RIGHT) — zone이 달라도 수직 직선 */
+function sameLaneManualCellSlotColumn(
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  if (!process) return false
+  const sNode = process.nodes.find((n) => n.id === source.id)
+  const tNode = process.nodes.find((n) => n.id === target.id)
+  if (sNode?.cellSlot == null || tNode?.cellSlot == null) return false
+  if (sNode.laneId !== tNode.laneId) return false
+  const maxRows = cellSlotRowsForProcess(process)
+  return cellSlotToRowCol(sNode.cellSlot, maxRows).col === cellSlotToRowCol(tNode.cellSlot, maxRows).col
+}
+
+function detailLayoutNode(process: Process | undefined, nodeId: string) {
+  return process?.nodes.find((n) => n.id === nodeId)
+}
+
+function sameDetailLayoutColumn(
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  const sNode = detailLayoutNode(process, source.id)
+  const tNode = detailLayoutNode(process, target.id)
+  if (sNode?.detailLayout?.column == null || tNode?.detailLayout?.column == null) return false
+  return sNode.laneId === tNode.laneId && sNode.detailLayout.column === tNode.detailLayout.column
+}
+
+function sameDetailLayoutRow(
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  const sNode = detailLayoutNode(process, source.id)
+  const tNode = detailLayoutNode(process, target.id)
+  if (sNode?.detailLayout?.row == null || tNode?.detailLayout?.row == null) return false
+  return sNode.laneId === tNode.laneId && sNode.detailLayout.row === tNode.detailLayout.row
+}
+
+function detailLayoutRightwardColumnFlow(
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  const sNode = detailLayoutNode(process, source.id)
+  const tNode = detailLayoutNode(process, target.id)
+  if (sNode?.detailLayout?.column == null || tNode?.detailLayout?.column == null) return false
+  if (sNode.laneId !== tNode.laneId) return false
+  if (tNode.detailLayout.column <= sNode.detailLayout.column) return false
+  return target.x > source.x + source.width - ORTHO_EPS
+}
+
+function clampAnchorRatio(value: number): number {
+  return Math.min(1, Math.max(0, value))
+}
+
+function sharedRowY(source: PlacedNode, target: PlacedNode): number | null {
+  const overlapMin = Math.max(source.y, target.y)
+  const overlapMax = Math.min(source.y + source.height, target.y + target.height)
+  if (overlapMax - overlapMin < COLUMN_OVERLAP_MIN) return null
+  return (overlapMin + overlapMax) / 2
+}
+
 function bendTierCost(bendCount: number): number {
   if (bendCount <= 0) return ROUTE_TIER_COST.straight
   if (bendCount === 1) return ROUTE_TIER_COST.oneBend
   if (bendCount === 2) return ROUTE_TIER_COST.twoBend
   return ROUTE_TIER_COST.threePlusBend + (bendCount - 3) * 20
+}
+
+function hasImmediateHorizontalFromSourceExit(points: Point[]): boolean {
+  const simplified = simplifyOrthogonal(points)
+  if (simplified.length < 3) return false
+  const exit = simplified[1]
+  const next = simplified[2]
+  if (!exit || !next) return false
+  return Math.abs(next.y - exit.y) <= ORTHO_EPS && Math.abs(next.x - exit.x) > ORTHO_EPS
 }
 
 function hasDownRightUpDetour(points: Point[]): boolean {
@@ -237,6 +339,14 @@ function removeDownRightUpUTurn(points: Point[]): Point[] {
         (d1 === 'down' && d2 === 'right' && d3 === 'up') ||
         (d1 === 'down' && d2 === 'left' && d3 === 'up')
       ) {
+        const start = result[i]!
+        const end = result[i + 3]!
+        const underpassY = result[i + 2]!.y
+        /** Decision N — 아래로 내린 뒤 좌회전하는 underpass는 유지 */
+        const isReturnUnderpass =
+          underpassY > start.y + ORTHO_EPS && underpassY > end.y + ORTHO_EPS
+        if (isReturnUnderpass) continue
+
         result = [
           ...result.slice(0, i + 1),
           { x: result[i + 3].x, y: result[i].y },
@@ -266,7 +376,22 @@ function qualifiesForSameRowRightTargetShortRoute(
   if (th !== 'left') return false
   if (nodeCenterX(target) <= nodeCenterX(source) - ORTHO_EPS) return false
 
-  const rowLimit = OVERVIEW_GRID_METRICS.rowMinHeightNormal * 1.5
+  const crossLaneSameZone =
+    process != null && nodesShareOverviewZoneDifferentLane(source, target, process)
+  let rowLimit = OVERVIEW_GRID_METRICS.rowMinHeightNormal * 1.5
+  if (crossLaneSameZone && process) {
+    const sNode = process.nodes.find((n) => n.id === source.id)
+    const tNode = process.nodes.find((n) => n.id === target.id)
+    if (sNode?.cellSlot && tNode?.cellSlot) {
+      const rowDiff = Math.abs(
+        cellSlotToRowCol(sNode.cellSlot, OVERVIEW_CELL_MAX_ROWS).row -
+          cellSlotToRowCol(tNode.cellSlot, OVERVIEW_CELL_MAX_ROWS).row,
+      )
+      rowLimit = OVERVIEW_GRID_METRICS.rowMinHeightNormal * (rowDiff + 1.25)
+    } else {
+      rowLimit = OVERVIEW_GRID_METRICS.rowMinHeightNormal * 3
+    }
+  }
   const dy = Math.abs(nodeCenterY(target) - nodeCenterY(source))
   const sameOrAdjacentRow =
     dy <= rowLimit ||
@@ -275,15 +400,7 @@ function qualifiesForSameRowRightTargetShortRoute(
 
   if (!sameOrAdjacentRow) return false
 
-  const obstacles = getHorizontalObstaclesBetween(
-    source,
-    target,
-    placed,
-    excludeIds,
-    PRIORITY_ROUTE_NODE_PADDING,
-    process,
-  )
-  return obstacles.length === 0
+  return isAdjacentHorizontalRouteClear(source, target, placed, excludeIds, process, edge)
 }
 
 function logEdgeHandleDebug(
@@ -443,23 +560,14 @@ function tryCollisionFreeReroute(
         edge,
         process,
       )
-      const label = resolveEdgeLabel(
-        edge,
-        finalized,
-        placed,
-        excludeIds,
-        minContentX,
-        existingSegments,
-        process,
-      )
+      const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
       return {
         path: pointsToPath(finalized, minContentX),
         points: finalized,
         bendPoints: extractBendPoints(finalized),
         sourceHandle: selected.sourceHandle,
         targetHandle: selected.targetHandle,
-        labelPoint: label.point,
-        labelHidden: label.hidden,
+        ...routeLabelFields(label),
         routingStatus: 'reroutedDueToCollision',
       }
     }
@@ -492,23 +600,14 @@ function tryCollisionFreeReroute(
       edge,
       process,
     )
-    const label = resolveEdgeLabel(
-      edge,
-      finalized,
-      placed,
-      excludeIds,
-      minContentX,
-      existingSegments,
-      process,
-    )
+    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
     return {
       path: pointsToPath(finalized, minContentX),
       points: finalized,
       bendPoints: extractBendPoints(finalized),
       sourceHandle: current.sourceHandle,
       targetHandle: current.targetHandle,
-      labelPoint: label.point,
-      labelHidden: label.hidden,
+      ...routeLabelFields(label),
       routingStatus: 'reroutedDueToCollision',
     }
   }
@@ -563,29 +662,27 @@ function tryCollisionFreeReroute(
         edge,
         process,
       )
-      const label = resolveEdgeLabel(
-        edge,
-        finalized,
-        placed,
-        excludeIds,
-        minContentX,
-        existingSegments,
-        process,
-      )
+      const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
       return {
         path: pointsToPath(finalized, minContentX),
         points: finalized,
         bendPoints: extractBendPoints(finalized),
         sourceHandle: sh,
         targetHandle: th,
-        labelPoint: label.point,
-        labelHidden: label.hidden,
+        ...routeLabelFields(label),
         routingStatus: 'reroutedDueToCollision',
       }
     }
   }
 
   return null
+}
+
+function isLockedDecisionSameRowTopReturn(options: OrthogonalRouteOptions): boolean {
+  const { edge, source, target, process } = options
+  if (!hasUserSpecifiedHandles(edge)) return false
+  if (resolveEdgeSourceHandle(edge) !== 'top' || resolveEdgeTargetHandle(edge) !== 'top') return false
+  return process != null && qualifiesForDecisionSameRowTopReturn(edge, source, target, process)
 }
 
 function applyCollisionValidation(
@@ -619,17 +716,31 @@ function applyCollisionValidation(
   }
 
   if (collided.length > 0 && !options.suppressCollisionReroute) {
-    console.warn(
-      `[EdgeRouter] Route collision detected (${options.edge.id}): ${collided.map((n) => n.name).join(', ')}`,
-    )
-    const rerouted = tryCollisionFreeReroute(options, next)
-    if (rerouted) {
-      next = rerouted
-      collided = getCollidedNodes(next.points, placed, excludeIds, nodeMargin, process)
+    const skipRerouteForStraightCrossZone =
+      process != null &&
+      qualifiesForSameLaneCrossZoneStraightVertical(source, target, process) &&
+      getCollidedNodes(preSimplify, placed, excludeIds, nodeMargin, process).length === 0
+
+    if (!skipRerouteForStraightCrossZone) {
+      console.warn(
+        `[EdgeRouter] Route collision detected (${options.edge.id}): ${collided.map((n) => n.name).join(', ')}`,
+      )
+      const rerouted = tryCollisionFreeReroute(options, next)
+      if (rerouted) {
+        next = rerouted
+        collided = getCollidedNodes(next.points, placed, excludeIds, nodeMargin, process)
+      }
+    } else {
+      next = {
+        ...next,
+        points: preSimplify,
+        path: pointsToPath(preSimplify, options.minContentX ?? 0),
+      }
+      collided = []
     }
   }
 
-  if (collided.length > 0) {
+  if (collided.length > 0 && !isLockedDecisionSameRowTopReturn(options)) {
     next = {
       ...next,
       collidedNodes: collided,
@@ -637,12 +748,14 @@ function applyCollisionValidation(
   }
 
   const bendCount = countOrthogonalBends(next.points)
+  const skipReturnCollisionValidation = isLockedDecisionSameRowTopReturn(options)
   const validation = resolveEdgeRouteValidation({
-    hasNodeCollision: collided.length > 0,
-    collidedNodes: collided,
+    hasNodeCollision: skipReturnCollisionValidation ? false : collided.length > 0,
+    collidedNodes: skipReturnCollisionValidation ? [] : collided,
     routingStatus: next.routingStatus,
     bendCount,
     pathEmpty: next.points.length < 2,
+    manualRoute: isManualRouteEdge(options.edge),
   })
 
   next = {
@@ -665,6 +778,11 @@ function finishOrthogonalRoute(
 ): OrthogonalRouteResult {
   let next = result
   next = validateRightSideShortRoute(options, next)
+  next = validateSameLaneVerticalSideBracketRoute(options, next)
+  next = validateSameLaneSideTopOneBendRoute(options, next)
+  next = validateSameLaneBracketReturnRoute(options, next)
+  next = validateCrossZoneGapBottomTopRoute(options, next)
+  next = validateCrossLaneRightLeftRoute(options, next)
   next = applyCollisionValidation(options, next, routeType)
   logEdgeRouterDebug(options, next, routeType, candidates, candidateCosts)
   logEdgeHandleDebug(options, next, routeType)
@@ -704,7 +822,17 @@ function validateRightSideShortRoute(
   const sourceHandle: EdgeHandleId = resolveEdgeSourceHandle(edge) ?? 'right'
   const targetHandle: EdgeHandleId = resolveEdgeTargetHandle(edge) ?? 'left'
   const idx = branchContext?.parallelIndex ?? parallelIndex
-  const points = buildAdjacentHorizontalPath(source, target, sourceType, targetType, process)
+  const points =
+    resolveClearAdjacentHorizontalPath(
+      source,
+      target,
+      placed,
+      excludeIds,
+      process,
+      edge,
+      idx,
+    ) ??
+    buildAdjacentHorizontalPath(source, target, sourceType, targetType, process)
   const finalized = finalizeRoutedPath(
     points,
     source,
@@ -718,15 +846,7 @@ function validateRightSideShortRoute(
     edge,
     process,
   )
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -734,8 +854,176 @@ function validateRightSideShortRoute(
     bendPoints: extractBendPoints(finalized),
     sourceHandle,
     targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
+    exactEndpoints: true,
+  }
+}
+
+/** same-lane ] bracket — stale manual / over-bend 경로를 1-bend L 또는 compact bracket으로 교정 */
+function validateSameLaneVerticalSideBracketRoute(
+  options: OrthogonalRouteOptions,
+  result: OrthogonalRouteResult,
+): OrthogonalRouteResult {
+  const { edge, source, target, process } = options
+  if (!process) return result
+
+  const sh = result.sourceHandle
+  const th = result.targetHandle
+  if (!qualifiesForSameLaneVerticalSideBracket(source, target, sh, th, process)) {
+    return result
+  }
+  if (sh !== 'right' && sh !== 'left') return result
+
+  const bends = countOrthogonalBends(result.points)
+  if (bends <= 1) return result
+
+  console.warn(
+    `[EdgeRouter] Stale over-bend side route (${edge.id}): ${bends} bends, rerouting compact L`,
+  )
+
+  const oneBend = routeSameLaneVerticalOneBendEdge(options, sh, th)
+  if (oneBend && countOrthogonalBends(oneBend.points) < bends) {
+    return oneBend
+  }
+
+  const bracket = routeBracketEdge(options, sh as BracketSide, sh, th)
+  if (countOrthogonalBends(bracket.points) >= bends) return result
+  return bracket
+}
+
+/** same-lane side→top — 1-bend L (수평 → 수직)으로 교정 */
+function validateSameLaneSideTopOneBendRoute(
+  options: OrthogonalRouteOptions,
+  result: OrthogonalRouteResult,
+): OrthogonalRouteResult {
+  const { edge, source, target, process } = options
+  if (!process) return result
+
+  const sh = result.sourceHandle
+  const th = result.targetHandle
+  if (!qualifiesForSameLaneSideTopOneBend(source, target, sh, th, process)) return result
+
+  const bends = countOrthogonalBends(result.points)
+  if (bends <= 1) return result
+
+  console.warn(
+    `[EdgeRouter] Stale over-bend side→top route (${edge.id}): ${bends} bends, rerouting 1-bend L`,
+  )
+
+  const oneBend = routeSameLaneSideTopOneBendEdge(options, sh)
+  if (!oneBend || countOrthogonalBends(oneBend.points) >= bends) return result
+  return oneBend
+}
+
+/** same-lane upward return — gutter/legacy 경로가 3+ bend면 2-bend bracket으로 교정 */
+function validateSameLaneBracketReturnRoute(
+  options: OrthogonalRouteOptions,
+  result: OrthogonalRouteResult,
+): OrthogonalRouteResult {
+  const { edge, source, target, process } = options
+  if (!process) return result
+  if (!qualifiesForSameLaneBracketReturn(edge, source, target, process)) return result
+
+  const bends = countOrthogonalBends(result.points)
+  if (bends <= 2) return result
+
+  console.warn(
+    `[EdgeRouter] Stale over-bend upward return (${edge.id}): ${bends} bends, rerouting 2-bend bracket`,
+  )
+
+  const bracket = routeSameLaneBracketReturnEdge(options)
+  if (countOrthogonalBends(bracket.points) >= bends) return result
+  return bracket
+}
+
+/** cross-zone gap bottom→top — zone gap corridor 2-bend 경로로 교정 */
+function validateCrossZoneGapBottomTopRoute(
+  options: OrthogonalRouteOptions,
+  result: OrthogonalRouteResult,
+): OrthogonalRouteResult {
+  const { edge, source, target, process } = options
+  if (!process) return result
+
+  const sh = result.sourceHandle
+  const th = result.targetHandle
+  if (sh !== 'bottom' || th !== 'top') return result
+  if (!qualifiesForCrossZoneGapVerticalDrop(source, target, process)) return result
+
+  const bends = countOrthogonalBends(result.points)
+  if (bends <= 2) return result
+
+  console.warn(
+    `[EdgeRouter] Stale over-bend cross-zone route (${edge.id}): ${bends} bends, rerouting 2-bend gap path`,
+  )
+
+  const rerouted = routeDownwardBottomTopEdge(options, 'bottom', 'top')
+  if (countOrthogonalBends(rerouted.points) >= bends) return result
+  return rerouted
+}
+
+/** cross-lane right→left — gutter L-path가 2 bend인데 detour로 4+ bend인 경우 교정 */
+function validateCrossLaneRightLeftRoute(
+  options: OrthogonalRouteOptions,
+  result: OrthogonalRouteResult,
+): OrthogonalRouteResult {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    process,
+    parallelIndex = 0,
+    branchContext,
+    minContentX = 0,
+    existingSegments = [],
+  } = options
+  if (!process) return result
+  if (result.sourceHandle !== 'right' || result.targetHandle !== 'left') return result
+  if (!nodesShareOverviewZoneDifferentLane(source, target, process)) return result
+
+  const bends = countOrthogonalBends(result.points)
+  if (bends <= 2) return result
+
+  const excludeIds = new Set([source.id, target.id])
+  const idx = branchContext?.parallelIndex ?? parallelIndex
+  const points = resolveClearAdjacentHorizontalPath(
+    source,
+    target,
+    placed,
+    excludeIds,
+    process,
+    edge,
+    idx,
+  )
+  if (!points) return result
+
+  const finalized = finalizeRoutedPath(
+    points,
+    source,
+    target,
+    'right',
+    'left',
+    { parallelIndex: idx },
+    placed,
+    excludeIds,
+    PRIORITY_ROUTE_NODE_PADDING,
+    edge,
+    process,
+  )
+  const compactBends = countOrthogonalBends(finalized)
+  if (compactBends >= bends) return result
+
+  console.warn(
+    `[EdgeRouter] Cross-lane right→left over-bend (${edge.id}): ${bends} → ${compactBends} bends`,
+  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+  return {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: extractBendPoints(finalized),
+    sourceHandle: 'right',
+    targetHandle: 'left',
+    ...routeLabelFields(label),
     exactEndpoints: true,
   }
 }
@@ -760,7 +1048,18 @@ function routeSameRowRightTargetEdge(options: OrthogonalRouteOptions): Orthogona
   const targetHandle: EdgeHandleId = resolveEdgeTargetHandle(edge) ?? 'left'
   const idx = branchContext?.parallelIndex ?? parallelIndex
 
-  const points = buildAdjacentHorizontalPath(source, target, sourceType, targetType, process)
+  const points =
+    resolveClearAdjacentHorizontalPath(
+      source,
+      target,
+      placed,
+      excludeIds,
+      process,
+      edge,
+      idx,
+      PRIORITY_ROUTE_NODE_PADDING,
+    ) ??
+    buildAdjacentHorizontalPath(source, target, sourceType, targetType, process)
   const finalized = finalizeRoutedPath(
     points,
     source,
@@ -774,15 +1073,7 @@ function routeSameRowRightTargetEdge(options: OrthogonalRouteOptions): Orthogona
     edge,
     process,
   )
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return finishOrthogonalRoute(
     options,
@@ -792,8 +1083,7 @@ function routeSameRowRightTargetEdge(options: OrthogonalRouteOptions): Orthogona
       bendPoints: extractBendPoints(finalized),
       sourceHandle,
       targetHandle,
-      labelPoint: label.point,
-      labelHidden: label.hidden,
+      ...routeLabelFields(label),
       exactEndpoints: true,
     },
     'same-row-right-target',
@@ -953,24 +1243,6 @@ function offsetLanePoint(
   return axis === 'horizontal'
     ? { x: point.x, y: point.y + offset }
     : { x: point.x + offset, y: point.y }
-}
-
-function directionIntoHandle(handle: EdgeHandleId): Point {
-  switch (handle) {
-    case 'left':
-      return { x: 1, y: 0 }
-    case 'right':
-      return { x: -1, y: 0 }
-    case 'top':
-      return { x: 0, y: 1 }
-    case 'bottom':
-      return { x: 0, y: -1 }
-  }
-}
-
-function directionOutOfHandle(handle: EdgeHandleId): Point {
-  const into = directionIntoHandle(handle)
-  return { x: -into.x, y: -into.y }
 }
 
 export function isOrthogonalSegment(a: Point, b: Point): boolean {
@@ -1134,6 +1406,9 @@ function appendTargetApproachBend(
       break
     }
     case 'left': {
+      if (Math.abs(prev.y - newEnd.y) < ORTHO_EPS && prev.x < newEnd.x - ORTHO_EPS) {
+        break
+      }
       const preX = newEnd.x + APPROACH_MIN_LEG
       if (prev.x <= newEnd.x) {
         const detourY = prev.y + APPROACH_MIN_LEG * 2
@@ -1167,6 +1442,15 @@ function ensureTargetApproach(
     return route.slice(0, -1)
   }
 
+  // Cross-lane L-path: corridor already at target row, left of handle — horizontal approach from right
+  if (
+    expected === 'right' &&
+    Math.abs(prev.y - newEnd.y) < ORTHO_EPS &&
+    prev.x < newEnd.x - ORTHO_EPS
+  ) {
+    return route
+  }
+
   const dir = segmentDirection(prev, newEnd)
   if (dir === expected) return route
   if (dir && isOppositeDirection(dir, expected)) {
@@ -1184,22 +1468,29 @@ type EndpointOptions = {
  * path endpoint = target anchor. marker gap 없음.
  * 마지막 segment 방향이 target handle 접근 방향과 일치하도록 보정.
  */
+/** path 첫·끝 점을 handle anchor에 고정 — simplify/stub 이후 drift 방지 */
+export function snapPathEndpointsToHandles(
+  points: Point[],
+  sourceHandlePoint: Point,
+  targetHandlePoint: Point,
+): Point[] {
+  if (points.length < 2) return points
+  const snapped = points.map((p) => ({ ...p }))
+  snapped[0] = { ...sourceHandlePoint }
+  snapped[snapped.length - 1] = { ...targetHandlePoint }
+  return snapped
+}
+
 function applyArrowMarkerEndpoints(
   points: Point[],
-  sourceHandle: EdgeHandleId,
+  _sourceHandle: EdgeHandleId,
   targetHandle: EdgeHandleId,
   sourceHandlePoint: Point,
   targetHandlePoint: Point,
-  options: EndpointOptions = {},
+  _options: EndpointOptions = {},
 ): Point[] {
   const newEnd: Point = { ...targetHandlePoint }
-  const out = directionOutOfHandle(sourceHandle)
-  const newStart: Point = options.sourceIsDecision
-    ? { ...sourceHandlePoint }
-    : {
-        x: sourceHandlePoint.x + out.x * SOURCE_HANDLE_GAP,
-        y: sourceHandlePoint.y + out.y * SOURCE_HANDLE_GAP,
-      }
+  const newStart: Point = { ...sourceHandlePoint }
 
   const expected = expectedApproachDirection(targetHandle)
   if (points.length >= 2) {
@@ -1284,10 +1575,7 @@ export function validateEdgePath(points: Point[], ctx: EdgePathValidationContext
   const startDist = Math.hypot(start.x - sourcePt.x, start.y - sourcePt.y)
   const endDist = Math.hypot(end.x - expectedEnd.x, end.y - expectedEnd.y)
 
-  const startTolerance = isBranchNodeType(sourceType)
-    ? PATH_ENDPOINT_TOLERANCE
-    : PATH_ENDPOINT_TOLERANCE + SOURCE_HANDLE_GAP
-  if (startDist > startTolerance) {
+  if (startDist > PATH_ENDPOINT_TOLERANCE) {
     console.warn(`Invalid edge path: ${edge.id}`)
     return false
   }
@@ -1348,6 +1636,8 @@ function finalizeRoutedPath(
   })
   result = simplifyPath(result)
   validateNoNodeCollision(result, placed, excludeIds, nodeMargin)
+
+  result = snapPathEndpointsToHandles(result, sourcePt, targetPt)
 
   if (edge) {
     validateEdgePath(result, {
@@ -1484,6 +1774,40 @@ function countNodeCollisions(
   return getCollidedNodes(points, placed, excludeIds, nodeMargin, process).length
 }
 
+function segmentIntersectsNodeForCollision(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  node: PlacedNode,
+  nodeMargin: number,
+  process?: Process,
+): boolean {
+  if (Math.abs(y1 - y2) < 0.5) {
+    const y = y1
+    if (y < node.y || y > node.y + node.height) return false
+    const minX = Math.min(x1, x2)
+    const maxX = Math.max(x1, x2)
+    const nodeType = process?.nodes.find((n) => n.id === node.id)?.type
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    const pad = nodeMargin + extra
+    return maxX >= node.x - pad && minX <= node.x + node.width + pad
+  }
+
+  if (Math.abs(x1 - x2) < 0.5) {
+    const x = x1
+    if (x < node.x || x > node.x + node.width) return false
+    const minY = Math.min(y1, y2)
+    const maxY = Math.max(y1, y2)
+    const nodeType = process?.nodes.find((n) => n.id === node.id)?.type
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    const pad = nodeMargin + extra
+    return maxY >= node.y - pad && minY <= node.y + node.height + pad
+  }
+
+  return segmentIntersectsRect(x1, y1, x2, y2, expandNode(node, nodeMargin, process))
+}
+
 export function getCollidedNodes(
   points: Point[],
   placed: PlacedNode[],
@@ -1496,7 +1820,7 @@ export function getCollidedNodes(
     for (const node of placed) {
       if (excludeIds.has(node.id)) continue
       if (!isRoutingObstacleNode(node.id, process)) continue
-      if (segmentIntersectsRect(seg.x1, seg.y1, seg.x2, seg.y2, expandNode(node, nodeMargin, process))) {
+      if (segmentIntersectsNodeForCollision(seg.x1, seg.y1, seg.x2, seg.y2, node, nodeMargin, process)) {
         hit.add(node.id)
       }
     }
@@ -1831,6 +2155,8 @@ function needsOverviewCorridor(
   return isLongOverviewEdge(source, target)
 }
 
+type ResolvedEdgeLabel = { point: Point; hidden: boolean; labelRect?: LabelRect }
+
 function resolveEdgeLabel(
   edge: Edge,
   points: Point[],
@@ -1839,25 +2165,135 @@ function resolveEdgeLabel(
   minContentX: number,
   existingSegments: Segment[],
   process?: Process,
-): { point: Point; hidden: boolean } {
+  existingLabelRects: LabelRect[] = [],
+): ResolvedEdgeLabel {
   const sourceNode = process?.nodes.find((n) => n.id === edge.source)
+  const targetNode = process?.nodes.find((n) => n.id === edge.target)
   const edgeType = resolveEdgeType(edge)
   const isDecisionBranch =
     isBranchNodeType(sourceNode?.type) || edgeType === 'condition'
   const preferFirstSegment = isDecisionBranch || Boolean(edge.label?.trim())
   const ownSegments = pathSegments(points)
+  const nodeTypes = process
+    ? new Map(process.nodes.map((node) => [node.id, node.type]))
+    : undefined
 
   if (edge.label?.trim()) {
+    const sourcePlaced = placed.find((p) => p.id === edge.source)
+    const targetPlaced = placed.find((p) => p.id === edge.target)
+    const sourceHandle =
+      resolveEdgeSourceHandle(edge) ??
+      (points.length >= 2 ? inferHandleFromPathSegment(points[0]!, points[1]!) : 'bottom')
+    const targetHandle =
+      resolveEdgeTargetHandle(edge) ??
+      (points.length >= 2
+        ? inferHandleFromPathSegment(points[points.length - 2]!, points[points.length - 1]!)
+        : 'top')
+
     if (isBranchNodeType(sourceNode?.type)) {
-      const source = placed.find((p) => p.id === edge.source)
-      const target = placed.find((p) => p.id === edge.target)
-      if (source) {
-        const [sh] = target
-          ? inferDecisionOutgoingPair(source, target, edge)
-          : [resolveEdgeSourceHandle(edge) ?? ('right' as EdgeHandleId)]
-        return { point: decisionBranchLabelPoint(source, sh), hidden: false }
+      if (
+        sourcePlaced &&
+        targetPlaced &&
+        process &&
+        (qualifiesForDecisionSameRowTopReturn(edge, sourcePlaced, targetPlaced, process) ||
+          qualifiesForDecisionSameRowLeftReturn(edge, sourcePlaced, targetPlaced, process))
+      ) {
+        const returnLabel = resolveDecisionSameRowReturnLabelPlacement({
+          points,
+          sourceHandle,
+          minContentX,
+          placed,
+          excludeIds,
+          ownSegments,
+          labelText: edge.label,
+          existingLabelRects,
+          nodeTypes,
+          sourcePlaced: sourcePlaced ?? undefined,
+          sourceType: sourceNode?.type,
+        })
+        if (returnLabel) {
+          return returnLabel
+        }
+      }
+
+      const branchDeparture = resolveBranchDepartureLabelPlacement({
+        points,
+        sourceHandle,
+        minContentX,
+        placed,
+        excludeIds,
+        ownSegments,
+        labelText: edge.label,
+        existingLabelRects,
+        nodeTypes,
+        sourcePlaced: sourcePlaced ?? undefined,
+        sourceType: sourceNode?.type,
+      })
+      return branchDeparture
+    } else if (isBranchNodeType(targetNode?.type)) {
+      const branchApproach = resolveBranchApproachLabelPlacement({
+        points,
+        targetHandle,
+        minContentX,
+        placed,
+        excludeIds,
+        ownSegments,
+        labelText: edge.label,
+        existingLabelRects,
+        nodeTypes,
+        targetPlaced: targetPlaced ?? undefined,
+        targetType: targetNode?.type,
+      })
+      if (branchApproach) {
+        return branchApproach
+      }
+    } else if (
+      sourcePlaced &&
+      targetPlaced &&
+      sourceHandle === targetHandle &&
+      (sourceHandle === 'right' || sourceHandle === 'left') &&
+      targetPlaced.y > sourcePlaced.y + sourcePlaced.height * 0.2
+    ) {
+      const verticalDropLabel = resolveVerticalDropLegLabelPlacement({
+        points,
+        sourceHandle,
+        minContentX,
+        placed,
+        excludeIds,
+        ownSegments,
+        labelText: edge.label,
+        existingLabelRects,
+        nodeTypes,
+        sourcePlaced,
+        sourceType: sourceNode?.type,
+      })
+      if (verticalDropLabel) {
+        return verticalDropLabel
+      }
+    } else if (
+      targetPlaced &&
+      shouldPreferTargetLabelPlacement(edgeType, edge.label, sourceNode, targetNode)
+    ) {
+      const targetApproach = resolveBranchApproachLabelPlacement({
+        points,
+        targetHandle,
+        minContentX,
+        placed,
+        excludeIds,
+        ownSegments,
+        labelText: edge.label,
+        existingLabelRects,
+        nodeTypes,
+        targetPlaced,
+        targetType: targetNode?.type,
+      })
+      if (targetApproach) {
+        return targetApproach
       }
     }
+
+    const preferTarget = shouldPreferTargetLabelPlacement(edgeType, edge.label, sourceNode, targetNode)
+
     return resolveLabelPlacement({
       points,
       minContentX,
@@ -1865,12 +2301,46 @@ function resolveEdgeLabel(
       excludeIds,
       existingSegments,
       ownSegments,
-      preferFirstSegment,
+      preferFirstSegment: preferFirstSegment && !preferTarget,
+      preferEndpointSegments: true,
+      labelText: edge.label,
+      existingLabelRects,
+      nodeTypes,
+      sourcePlaced: sourcePlaced ?? undefined,
+      sourceType: sourceNode?.type,
+      sourceHandle,
       alwaysVisible: isDecisionBranch,
     })
   }
 
   return { point: labelPointFromOrthogonalPath(points, minContentX, preferFirstSegment), hidden: false }
+}
+
+function resolveRouteEdgeLabel(
+  options: OrthogonalRouteOptions,
+  points: Point[],
+  existingSegments: Segment[],
+): ResolvedEdgeLabel {
+  const { edge, source, target, placed, process, minContentX = 0, existingLabelRects = [] } = options
+  const excludeIds = new Set([source.id, target.id])
+  return resolveEdgeLabel(
+    edge,
+    points,
+    placed,
+    excludeIds,
+    minContentX,
+    existingSegments,
+    process,
+    existingLabelRects,
+  )
+}
+
+function routeLabelFields(label: ResolvedEdgeLabel): Pick<OrthogonalRouteResult, 'labelPoint' | 'labelHidden' | 'labelRect'> {
+  return {
+    labelPoint: label.point,
+    labelHidden: label.hidden,
+    ...(label.labelRect ? { labelRect: label.labelRect } : {}),
+  }
 }
 
 function getSameCellBlockers(
@@ -2060,9 +2530,110 @@ function qualifiesForCrossLaneZoneAdjacentRows(
   const sNode = process.nodes.find((n) => n.id === source.id)
   const tNode = process.nodes.find((n) => n.id === target.id)
   if (!sNode?.cellSlot || !tNode?.cellSlot) return false
-  const sRow = cellSlotToRowCol(sNode.cellSlot).row
-  const tRow = cellSlotToRowCol(tNode.cellSlot).row
-  return Math.abs(sRow - tRow) <= 1
+  const maxRows = cellSlotRowsForProcess(process)
+  const sRow = cellSlotToRowCol(sNode.cellSlot, maxRows).row
+  const tRow = cellSlotToRowCol(tNode.cellSlot, maxRows).row
+  return Math.abs(sRow - tRow) <= 2
+}
+
+/** right→left L-path — bbox가 아닌 실제 경로 collision 검사 */
+function buildAdjacentHorizontalPathCandidates(
+  source: PlacedNode,
+  target: PlacedNode,
+  sourceType: string | undefined,
+  targetType: string | undefined,
+  process?: Process,
+  placed?: PlacedNode[],
+  nodePadding = PRIORITY_ROUTE_NODE_PADDING,
+): Point[][] {
+  const start = getHandlePoint(source, 'right', 0.5, sourceType)
+  const end = getHandlePoint(target, 'left', 0.5, targetType)
+  const candidates: Point[][] = []
+
+  if (process && placed && nodesShareOverviewZoneDifferentLane(source, target, process)) {
+    for (const gutterX of resolveCrossLaneGutterCandidates(
+      source,
+      target,
+      placed,
+      process,
+      nodePadding,
+    )) {
+      if (gutterX > start.x + HANDLE_STUB && gutterX < end.x - ORTHO_EPS) {
+        candidates.push([
+          start,
+          { x: gutterX, y: start.y },
+          { x: gutterX, y: end.y },
+          end,
+        ])
+      }
+    }
+  }
+
+  candidates.push(buildAdjacentHorizontalPath(source, target, sourceType, targetType, process))
+  return candidates
+}
+
+function resolveClearAdjacentHorizontalPath(
+  source: PlacedNode,
+  target: PlacedNode,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  process?: Process,
+  edge?: Edge,
+  parallelIndex = 0,
+  nodePadding = PRIORITY_ROUTE_NODE_PADDING,
+): Point[] | null {
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  for (const raw of buildAdjacentHorizontalPathCandidates(
+    source,
+    target,
+    sourceType,
+    targetType,
+    process,
+    placed,
+    nodePadding,
+  )) {
+    const finalized = finalizeRoutedPath(
+      raw,
+      source,
+      target,
+      'right',
+      'left',
+      { parallelIndex },
+      placed,
+      excludeIds,
+      nodePadding,
+      edge,
+      process,
+    )
+    if (countNodeCollisions(finalized, placed, excludeIds, nodePadding, process) === 0) {
+      return raw
+    }
+  }
+  return null
+}
+
+function isAdjacentHorizontalRouteClear(
+  source: PlacedNode,
+  target: PlacedNode,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  process?: Process,
+  edge?: Edge,
+  parallelIndex = 0,
+): boolean {
+  return (
+    resolveClearAdjacentHorizontalPath(
+      source,
+      target,
+      placed,
+      excludeIds,
+      process,
+      edge,
+      parallelIndex,
+    ) != null
+  )
 }
 
 /** Overview Zone — 다른 lane · 인접 row · 좌→우 cross-lane 수평 연결 */
@@ -2072,19 +2643,12 @@ function qualifiesForCrossLaneZoneHorizontalBridge(
   placed: PlacedNode[],
   excludeIds: Set<string>,
   process?: Process,
+  edge?: Edge,
 ): boolean {
   if (!nodesShareOverviewZoneDifferentLane(source, target, process)) return false
   if (target.x <= source.x + source.width - ORTHO_EPS) return false
   if (!qualifiesForCrossLaneZoneAdjacentRows(source, target, process)) return false
-  const obstacles = getHorizontalObstaclesBetween(
-    source,
-    target,
-    placed,
-    excludeIds,
-    PRIORITY_ROUTE_NODE_PADDING,
-    process,
-  )
-  return obstacles.length === 0
+  return isAdjacentHorizontalRouteClear(source, target, placed, excludeIds, process, edge)
 }
 
 function buildAdjacentHorizontalPath(
@@ -2109,8 +2673,11 @@ function buildAdjacentHorizontalPath(
     const bendX = start.x + HANDLE_STUB
     return [start, { x: bendX, y: start.y }, { x: bendX, y: end.y }, end]
   }
+  const crossLaneSameZone =
+    process != null && nodesShareOverviewZoneDifferentLane(source, target, process)
   const preX = end.x - APPROACH_MIN_LEG
-  return [start, { x: preX, y: start.y }, { x: preX, y: end.y }, end]
+  const splitX = crossLaneSameZone ? start.x + HANDLE_STUB : preX
+  return [start, { x: splitX, y: start.y }, { x: splitX, y: end.y }, end]
 }
 
 function qualifiesForAdjacentVerticalStraight(
@@ -2199,15 +2766,7 @@ function routeAdjacentVerticalStraightEdge(
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -2215,8 +2774,7 @@ function routeAdjacentVerticalStraightEdge(
     bendPoints: extractBendPoints(finalized),
     sourceHandle,
     targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
     exactEndpoints: true,
   }
 }
@@ -2229,24 +2787,34 @@ function resolveGeometryHandlePair(
   placed?: PlacedNode[],
   excludeIds?: Set<string>,
   process?: Process,
+  edge?: Edge,
 ): [EdgeHandleId, EdgeHandleId] | null {
   if (
     placed &&
     excludeIds &&
-    qualifiesForCrossLaneZoneHorizontalBridge(source, target, placed, excludeIds, process)
+    qualifiesForCrossLaneZoneHorizontalBridge(source, target, placed, excludeIds, process, edge)
   ) {
     return ['right', 'left']
   }
-  if (qualifiesForAdjacentHorizontalStraight(source, target, sourceType, targetType)) {
+  if (
+    qualifiesForAdjacentHorizontalStraight(
+      source,
+      target,
+      sourceType,
+      targetType,
+      placed,
+      excludeIds,
+      process,
+      edge,
+    )
+  ) {
     return ['right', 'left']
   }
   if (qualifiesForAdjacentVerticalStraight(source, target, sourceType, targetType)) {
     return ['bottom', 'top']
   }
   if (
-    isBranchNodeType(sourceType) &&
-    isDecisionSameColumn(source, target) &&
-    nodeCenterY(target) > nodeCenterY(source) + 4
+    branchDownwardSharesColumn(source, target, sourceType)
   ) {
     return ['bottom', 'top']
   }
@@ -2261,8 +2829,15 @@ function qualifiesForAdjacentHorizontalStraight(
   placed?: PlacedNode[],
   excludeIds?: Set<string>,
   process?: Process,
+  edge?: Edge,
 ): boolean {
-  if (isBranchNodeType(sourceType) || isBranchNodeType(targetType)) return false
+  if (isBranchNodeType(sourceType)) return false
+  if (isBranchNodeType(targetType)) {
+    if (!placed || !excludeIds || !process) return false
+    if (!nodesShareOverviewZoneDifferentLane(source, target, process)) return false
+    if (target.x <= source.x + source.width - ORTHO_EPS) return false
+    return isAdjacentHorizontalRouteClear(source, target, placed, excludeIds, process, edge)
+  }
   if (!isAdjacentHorizontalPair(source, target)) return false
   if (placed && excludeIds) {
     const obstacles = getHorizontalObstaclesBetween(
@@ -2301,7 +2876,18 @@ function routeAdjacentHorizontalStraightEdge(
   const targetHandle: EdgeHandleId = 'left'
   const idx = branchContext?.parallelIndex ?? parallelIndex
 
-  const points = buildAdjacentHorizontalPath(source, target, sourceType, targetType, process)
+  const points =
+    resolveClearAdjacentHorizontalPath(
+      source,
+      target,
+      placed,
+      excludeIds,
+      process,
+      edge,
+      idx,
+      nodePadding,
+    ) ??
+    buildAdjacentHorizontalPath(source, target, sourceType, targetType, process)
   const finalized = finalizeRoutedPath(
     points,
     source,
@@ -2316,15 +2902,7 @@ function routeAdjacentHorizontalStraightEdge(
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -2332,8 +2910,7 @@ function routeAdjacentHorizontalStraightEdge(
     bendPoints: extractBendPoints(finalized),
     sourceHandle,
     targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
     exactEndpoints: true,
   }
 }
@@ -2376,6 +2953,60 @@ function isSameLaneEdge(source: PlacedNode, target: PlacedNode): boolean {
   return source.laneId === target.laneId
 }
 
+/** 같은 lane · 인접 zone — 아래로 내려가는 흐름 (사업실행품의→구매요청 등) */
+function qualifiesForSameLaneCrossZoneVerticalDrop(
+  source: PlacedNode,
+  target: PlacedNode,
+  process: Process,
+): boolean {
+  const sNode = process.nodes.find((n) => n.id === source.id)
+  const tNode = process.nodes.find((n) => n.id === target.id)
+  if (!sNode?.processZone || !tNode?.processZone) return false
+  if (sNode.laneId !== tNode.laneId) return false
+  if (sNode.processZone === tNode.processZone) return false
+  return target.y > source.y + source.height * 0.2
+}
+
+/** 다른 lane · 위→아래 zone — zone gap corridor에서만 수평 전환 (전표생성→로열티집계 등) */
+function qualifiesForCrossZoneCrossLaneVerticalDrop(
+  source: PlacedNode,
+  target: PlacedNode,
+  process: Process,
+): boolean {
+  const sNode = process.nodes.find((n) => n.id === source.id)
+  const tNode = process.nodes.find((n) => n.id === target.id)
+  if (!sNode?.processZone || !tNode?.processZone) return false
+  if (sNode.laneId === tNode.laneId) return false
+  if (sNode.processZone === tNode.processZone) return false
+  if (target.y <= source.y + source.height * 0.2) return false
+  return compareZoneOrder(sNode.processZone, tNode.processZone) < 0
+}
+
+function qualifiesForCrossZoneGapVerticalDrop(
+  source: PlacedNode,
+  target: PlacedNode,
+  process: Process,
+): boolean {
+  return (
+    qualifiesForSameLaneCrossZoneVerticalDrop(source, target, process) ||
+    qualifiesForCrossZoneCrossLaneVerticalDrop(source, target, process)
+  )
+}
+
+/** cross-zone gap + 같은 lane + 같은 열(cellSlot/column) — 수직 직선 */
+function qualifiesForSameLaneCrossZoneStraightVertical(
+  source: PlacedNode,
+  target: PlacedNode,
+  process: Process,
+): boolean {
+  if (!qualifiesForSameLaneCrossZoneVerticalDrop(source, target, process)) return false
+  return (
+    sameLaneManualCellSlotColumn(source, target, process) ||
+    sharesColumnRange(source, target) ||
+    Math.abs(nodeCenterX(source) - nodeCenterX(target)) <= DOWNWARD_STRAIGHT_X_TOLERANCE
+  )
+}
+
 function isDownwardBottomTopFlow(
   source: PlacedNode,
   target: PlacedNode,
@@ -2410,6 +3041,395 @@ function getVerticalObstaclesBetween(
   )
 }
 
+/** 단일 x 열에서 topY~bottomY 구간을 가로지르는 obstacle */
+function getVerticalObstaclesAtX(
+  x: number,
+  topY: number,
+  bottomY: number,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  padding: number,
+  process?: Process,
+): PlacedNode[] {
+  if (bottomY <= topY) return []
+  return filterRoutingObstacles(placed, excludeIds, process).filter(
+    (n) =>
+      n.y + n.height + padding > topY &&
+      n.y - padding < bottomY &&
+      n.x - padding < x &&
+      n.x + n.width + padding > x,
+  )
+}
+
+/** 단일 y 행에서 leftX~rightX 구간을 가로지르는 obstacle */
+function getHorizontalObstaclesAtY(
+  y: number,
+  leftX: number,
+  rightX: number,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  padding: number,
+  process?: Process,
+): PlacedNode[] {
+  const minX = Math.min(leftX, rightX)
+  const maxX = Math.max(leftX, rightX)
+  if (maxX - minX <= ORTHO_EPS) return []
+  return filterRoutingObstacles(placed, excludeIds, process).filter(
+    (n) =>
+      n.y - padding < y &&
+      n.y + n.height + padding > y &&
+      n.x + n.width + padding > minX &&
+      n.x - padding < maxX,
+  )
+}
+
+/** cross-lane 최종 수직 접근·corridor 수평 구간 obstacle 회피용 corridor Y */
+function resolveCrossZoneFinalApproachCorridorY(
+  baseCorridorY: number,
+  sx: number,
+  tx: number,
+  tgtEntryY: number,
+  target: PlacedNode,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process?: Process,
+): number {
+  let corridorY = baseCorridorY
+  for (let i = 0; i < 8; i++) {
+    let nextY = corridorY
+
+    for (const obstacle of getVerticalObstaclesAtX(
+      tx,
+      corridorY,
+      tgtEntryY,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )) {
+      nextY = Math.max(nextY, obstacle.y + obstacle.height + nodePadding + 8)
+    }
+
+    for (const obstacle of getHorizontalObstaclesAtY(
+      corridorY,
+      sx,
+      tx,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )) {
+      nextY = Math.max(nextY, obstacle.y + obstacle.height + nodePadding + 8)
+    }
+
+    if (nextY <= corridorY + ORTHO_EPS) break
+    corridorY = nextY
+  }
+
+  if (
+    process &&
+    getHorizontalObstaclesAtY(corridorY, sx, tx, placed, excludeIds, nodePadding, process).length > 0
+  ) {
+    const tNode = process.nodes.find((node) => node.id === target.id)
+    if (tNode?.processZone) {
+      const zoneCorridor = findClearCorridorYInTargetZone(
+        tNode.processZone,
+        sx,
+        tx,
+        baseCorridorY,
+        placed,
+        process,
+        excludeIds,
+        nodePadding,
+      )
+      if (zoneCorridor != null) return zoneCorridor
+    }
+  }
+
+  return corridorY
+}
+
+function getPlacedNodesInProcessZone(
+  zoneId: string,
+  placed: PlacedNode[],
+  process: Process,
+): PlacedNode[] {
+  return placed.filter((node) => {
+    const meta = process.nodes.find((n) => n.id === node.id)
+    return meta?.processZone === zoneId
+  })
+}
+
+/** 같은 zone · lane gutter X 후보 — target-lane 좌측 · 경로상 인접 lane gap 우선 */
+function resolveCrossLaneGutterCandidates(
+  source: PlacedNode,
+  target: PlacedNode,
+  placed: PlacedNode[],
+  process: Process,
+  nodePadding: number,
+): number[] {
+  const sMeta = process.nodes.find((n) => n.id === source.id)
+  const tMeta = process.nodes.find((n) => n.id === target.id)
+  if (!sMeta?.processZone || !tMeta?.processZone) return []
+  if (sMeta.processZone !== tMeta.processZone) return []
+  if (sMeta.laneId === tMeta.laneId) return []
+
+  const zoneNodes = getPlacedNodesInProcessZone(sMeta.processZone, placed, process)
+  const laneRightEdge = (laneId: string): number | null => {
+    const values = zoneNodes
+      .filter((node) => process.nodes.find((n) => n.id === node.id)?.laneId === laneId)
+      .map((node) => node.x + node.width)
+    return values.length > 0 ? Math.max(...values) : null
+  }
+  const laneLeftEdge = (laneId: string): number | null => {
+    const values = zoneNodes
+      .filter((node) => process.nodes.find((n) => n.id === node.id)?.laneId === laneId)
+      .map((node) => node.x)
+    return values.length > 0 ? Math.min(...values) : null
+  }
+
+  const sortedLanes = [...process.lanes].sort((a, b) => a.order - b.order)
+  const sourceOrder = sortedLanes.find((lane) => lane.id === sMeta.laneId)?.order
+  const targetOrder = sortedLanes.find((lane) => lane.id === tMeta.laneId)?.order
+  if (sourceOrder == null || targetOrder == null) return []
+
+  const candidates: number[] = []
+  const targetLeft = laneLeftEdge(tMeta.laneId)
+  if (targetLeft != null) {
+    candidates.push(targetLeft - nodePadding - 8)
+  }
+
+  const minOrder = Math.min(sourceOrder, targetOrder)
+  const maxOrder = Math.max(sourceOrder, targetOrder)
+  for (let order = minOrder; order < maxOrder; order++) {
+    const leftLane = sortedLanes.find((lane) => lane.order === order)
+    const rightLane = sortedLanes.find((lane) => lane.order === order + 1)
+    if (!leftLane || !rightLane) continue
+    const leftEdge = laneRightEdge(leftLane.id)
+    const rightEdge = laneLeftEdge(rightLane.id)
+    if (leftEdge == null || rightEdge == null) continue
+    if (rightEdge <= leftEdge + nodePadding * 2) continue
+    candidates.push(leftEdge + nodePadding + (rightEdge - leftEdge - nodePadding * 2) * 0.5)
+  }
+
+  const sourceRight = laneRightEdge(sMeta.laneId)
+  if (sourceRight != null) {
+    candidates.push(sourceRight + nodePadding + 8)
+  }
+
+  const seen = new Set<number>()
+  const unique: number[] = []
+  for (const value of candidates) {
+    const rounded = Math.round(value * 10) / 10
+    if (!Number.isFinite(rounded) || seen.has(rounded)) continue
+    seen.add(rounded)
+    unique.push(rounded)
+  }
+  return unique
+}
+
+function resolveZoneLeftGutterX(
+  zoneId: string,
+  placed: PlacedNode[],
+  process: Process,
+  nodePadding: number,
+  minContentX = 0,
+): number {
+  const zoneNodes = getPlacedNodesInProcessZone(zoneId, placed, process)
+  if (zoneNodes.length === 0) return minContentX + 8
+  return Math.max(minContentX + 8, Math.min(...zoneNodes.map((node) => node.x)) - nodePadding - 16)
+}
+
+function resolveLaneDetourRightX(
+  source: PlacedNode,
+  topY: number,
+  bottomY: number,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process?: Process,
+): number {
+  const minY = Math.min(topY, bottomY)
+  const maxY = Math.max(topY, bottomY)
+  const blockers = filterRoutingObstacles(placed, excludeIds, process).filter(
+    (node) =>
+      node.laneId === source.laneId &&
+      node.y + node.height + nodePadding > minY &&
+      node.y - nodePadding < maxY,
+  )
+  const base = source.x + source.width + nodePadding + 12
+  if (blockers.length === 0) return base
+  return Math.max(base, ...blockers.map((node) => node.x + node.width)) + nodePadding + 12
+}
+
+function resolveLaneDetourLeftX(
+  source: PlacedNode,
+  topY: number,
+  bottomY: number,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process?: Process,
+): number {
+  const minY = Math.min(topY, bottomY)
+  const maxY = Math.max(topY, bottomY)
+  const blockers = filterRoutingObstacles(placed, excludeIds, process).filter(
+    (node) =>
+      node.laneId === source.laneId &&
+      node.y + node.height + nodePadding > minY &&
+      node.y - nodePadding < maxY,
+  )
+  const base = source.x - nodePadding - 12
+  if (blockers.length === 0) return base
+  return Math.min(base, ...blockers.map((node) => node.x)) - nodePadding - 12
+}
+
+function findClearHorizontalBandY(
+  leftX: number,
+  rightX: number,
+  startY: number,
+  endY: number,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process?: Process,
+): number | null {
+  const minX = Math.min(leftX, rightX)
+  const maxX = Math.max(leftX, rightX)
+  const fromY = Math.min(startY, endY)
+  const toY = Math.max(startY, endY)
+
+  for (let y = fromY; y <= toY; y += 6) {
+    if (getHorizontalObstaclesAtY(y, minX, maxX, placed, excludeIds, nodePadding, process).length === 0) {
+      return y
+    }
+  }
+  return null
+}
+
+/** target zone 행 사이 gap — zone 내부에서 노드 없이 수평 이동 가능한 Y */
+function findClearCorridorYInTargetZone(
+  zoneId: string,
+  sx: number,
+  tx: number,
+  minY: number,
+  placed: PlacedNode[],
+  process: Process,
+  excludeIds: Set<string>,
+  nodePadding: number,
+): number | null {
+  const zoneNodes = getPlacedNodesInProcessZone(zoneId, placed, process)
+  if (zoneNodes.length === 0) return null
+
+  const rowBands = [...zoneNodes]
+    .sort((a, b) => a.y - b.y || a.x - b.x)
+    .reduce<Array<{ top: number; bottom: number }>>((bands, node) => {
+      const last = bands[bands.length - 1]
+      if (last && Math.abs(node.y - last.top) <= nodePadding + 4) {
+        last.bottom = Math.max(last.bottom, node.y + node.height)
+        return bands
+      }
+      bands.push({ top: node.y, bottom: node.y + node.height })
+      return bands
+    }, [])
+
+  const candidates: number[] = []
+  if (rowBands.length > 0) {
+    candidates.push(rowBands[0]!.top - nodePadding - 10)
+    for (let i = 0; i < rowBands.length - 1; i++) {
+      candidates.push((rowBands[i]!.bottom + rowBands[i + 1]!.top) / 2)
+    }
+    candidates.push(rowBands[rowBands.length - 1]!.bottom + nodePadding + 10)
+  }
+
+  for (const y of [...new Set(candidates)].sort((a, b) => a - b)) {
+    if (y < minY - nodePadding) continue
+    if (getHorizontalObstaclesAtY(y, sx, tx, placed, excludeIds, nodePadding, process).length === 0) {
+      return y
+    }
+  }
+  return null
+}
+
+function appendCrossZoneSideGutterCandidates(
+  candidates: Point[][],
+  wrap: (middles: Point[]) => Point[],
+  source: PlacedNode,
+  target: PlacedNode,
+  sx: number,
+  tx: number,
+  srcExit: Point,
+  tgtEntry: Point,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process?: Process,
+): void {
+  if (!process) return
+  const tNode = process.nodes.find((node) => node.id === target.id)
+  if (!tNode?.processZone) return
+
+  const gutterX = resolveZoneLeftGutterX(tNode.processZone, placed, process, nodePadding)
+  const detourRight = resolveLaneDetourRightX(
+    source,
+    srcExit.y,
+    tgtEntry.y,
+    placed,
+    excludeIds,
+    nodePadding,
+    process,
+  )
+  const detourLeft = resolveLaneDetourLeftX(
+    source,
+    srcExit.y,
+    tgtEntry.y,
+    placed,
+    excludeIds,
+    nodePadding,
+    process,
+  )
+
+  const tryDetour = (detourX: number) => {
+    if (Math.abs(detourX - sx) <= 4) return
+    const clearY = findClearHorizontalBandY(
+      detourX,
+      gutterX,
+      srcExit.y,
+      tgtEntry.y,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )
+    if (clearY == null) return
+    candidates.push(
+      wrap([
+        { x: sx, y: clearY },
+        { x: detourX, y: clearY },
+        { x: gutterX, y: clearY },
+        { x: gutterX, y: tgtEntry.y },
+        { x: tx, y: tgtEntry.y },
+      ]),
+    )
+  }
+
+  tryDetour(detourLeft)
+  tryDetour(detourRight)
+
+  const clearY = findClearHorizontalBandY(sx, gutterX, srcExit.y, tgtEntry.y, placed, excludeIds, nodePadding, process)
+  if (clearY == null) return
+
+  candidates.push(
+    wrap([
+      { x: sx, y: clearY },
+      { x: gutterX, y: clearY },
+      { x: gutterX, y: tgtEntry.y },
+      { x: tx, y: tgtEntry.y },
+    ]),
+  )
+}
+
 export function countOrthogonalBends(points: Point[]): number {
   return Math.max(0, simplifyPath(points).length - 2)
 }
@@ -2417,6 +3437,313 @@ export function countOrthogonalBends(points: Point[]): number {
 type DownwardPathOptions = {
   allowOuterDetour?: boolean
   process?: Process
+  sourceType?: string
+  targetType?: string
+  /** cross-zone gap 경로 — 2 bend 허용 */
+  allowGapBends?: boolean
+}
+
+const CELL_LEFT_TRUNK_GUTTER = 14
+
+function qualifiesForCellLeftTrunkFanOut(
+  source: PlacedNode,
+  target: PlacedNode,
+  branchContext: EdgeBranchContext | undefined,
+  sourceHandle: EdgeHandleId,
+  targetHandle: EdgeHandleId,
+): boolean {
+  if (!branchContext?.isCellInternalFlow) return false
+  if (branchContext.sourceGroupSize < 2) return false
+  if (sourceHandle !== 'bottom' || targetHandle !== 'top') return false
+  if (target.y + target.height * 0.2 <= source.y + source.height) return false
+  return sharesColumnRange(source, target)
+}
+
+/** 같은 cell — source에서 좌측 공유 trunk → 아래 분기 */
+function buildCellLeftTrunkFanOutPath(
+  source: PlacedNode,
+  target: PlacedNode,
+  parallelIndex: number,
+  anchors: PathAnchorOptions = {},
+): Point[] {
+  const frame = buildHandlePathFrame(source, target, 'bottom', 'top', parallelIndex, {
+    ...anchors,
+    sourceAnchorRatio: anchors.sourceAnchorRatio ?? 0,
+  })
+  const trunkX = Math.min(source.x, target.x) - CELL_LEFT_TRUNK_GUTTER
+  const middles: Point[] = []
+  if (Math.abs(frame.srcExit.x - trunkX) > 4) {
+    middles.push({ x: trunkX, y: frame.srcExit.y })
+  }
+  middles.push({ x: trunkX, y: frame.tgtEntry.y })
+  if (Math.abs(frame.tgtEntry.x - trunkX) > 4) {
+    middles.push({ x: frame.tgtEntry.x, y: frame.tgtEntry.y })
+  }
+  return frame.wrap(middles)
+}
+
+function resolveProcessZoneSpan(
+  sourceZoneId: string,
+  targetZoneId: string,
+  process: Process,
+  placed: PlacedNode[],
+): { top: number; bottom: number } | null {
+  let sourceZoneBottom = Number.NEGATIVE_INFINITY
+  let targetZoneTop = Number.POSITIVE_INFINITY
+
+  for (const node of placed) {
+    const meta = process.nodes.find((n) => n.id === node.id)
+    if (!meta?.processZone) continue
+    if (meta.processZone === sourceZoneId) {
+      sourceZoneBottom = Math.max(sourceZoneBottom, node.y + node.height)
+    }
+    if (meta.processZone === targetZoneId) {
+      targetZoneTop = Math.min(targetZoneTop, node.y)
+    }
+  }
+
+  if (!Number.isFinite(sourceZoneBottom) || !Number.isFinite(targetZoneTop)) return null
+  if (targetZoneTop <= sourceZoneBottom + 8) return null
+  return { top: sourceZoneBottom, bottom: targetZoneTop }
+}
+
+/** zone gap 우선 — 막히면 source~target span에서 obstacle-free Y 탐색 */
+function resolveCrossZoneHorizontalCorridorY(
+  source: PlacedNode,
+  target: PlacedNode,
+  sx: number,
+  tx: number,
+  process: Process,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+): number {
+  const gapTop = source.y + source.height
+  const gapBottom = target.y
+  const sNode = process.nodes.find((n) => n.id === source.id)
+  const tNode = process.nodes.find((n) => n.id === target.id)
+
+  let spanTop = gapTop
+  let spanBottom = gapBottom
+
+  if (sNode?.processZone && tNode?.processZone && sNode.processZone !== tNode.processZone) {
+    const zoneSpan = resolveProcessZoneSpan(sNode.processZone, tNode.processZone, process, placed)
+    if (zoneSpan && zoneSpan.bottom - zoneSpan.top >= nodePadding * 2 + 12) {
+      spanTop = zoneSpan.top
+      spanBottom = zoneSpan.bottom
+    } else if (sNode.laneId !== tNode.laneId && zoneSpan) {
+      spanTop = zoneSpan.top
+      spanBottom = zoneSpan.bottom
+    }
+  }
+
+  if (spanBottom <= spanTop + 8) return spanTop + 8
+
+  const midGap = spanTop + (spanBottom - spanTop) * 0.5
+  if (getHorizontalObstaclesAtY(midGap, sx, tx, placed, excludeIds, nodePadding, process).length === 0) {
+    return midGap
+  }
+
+  if (gapBottom > gapTop + 8) {
+    const nodeMid = gapTop + (gapBottom - gapTop) * 0.5
+    if (getHorizontalObstaclesAtY(nodeMid, sx, tx, placed, excludeIds, nodePadding, process).length === 0) {
+      return nodeMid
+    }
+  }
+
+  const clear = findClearHorizontalBandY(
+    sx,
+    tx,
+    spanTop,
+    spanBottom,
+    placed,
+    excludeIds,
+    nodePadding,
+    process,
+  )
+  if (clear != null) return clear
+
+  if (gapBottom > gapTop + 8) {
+    const clearInNodeSpan = findClearHorizontalBandY(
+      sx,
+      tx,
+      gapTop,
+      gapBottom,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )
+    if (clearInNodeSpan != null) return clearInNodeSpan
+  }
+
+  return midGap
+}
+
+/** zone gap 중앙 — 셀 내부가 아닌 zone 사이에서만 수평 전환 */
+function resolveCrossZoneCorridorY(
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+  placed?: PlacedNode[],
+): number {
+  const gapTop = source.y + source.height
+  const gapBottom = target.y
+  const sNode = process?.nodes.find((n) => n.id === source.id)
+  const tNode = process?.nodes.find((n) => n.id === target.id)
+
+  if (
+    sNode?.processZone &&
+    tNode?.processZone &&
+    sNode.processZone !== tNode.processZone &&
+    process &&
+    placed
+  ) {
+    const zoneSpan = resolveProcessZoneSpan(sNode.processZone, tNode.processZone, process, placed)
+    if (zoneSpan) {
+      return zoneSpan.top + (zoneSpan.bottom - zoneSpan.top) * 0.5
+    }
+
+    if (sNode.laneId !== tNode.laneId) {
+      const zoneBottom = placed.reduce((max, node) => {
+        const meta = process.nodes.find((n) => n.id === node.id)
+        if (meta?.processZone !== sNode.processZone) return max
+        return Math.max(max, node.y + node.height)
+      }, gapTop)
+      return zoneBottom + 28
+    }
+  }
+
+  if (gapBottom <= gapTop + 8) return gapTop + 8
+  return gapTop + (gapBottom - gapTop) * 0.5
+}
+
+/** 같은 lane · 인접 zone — bottom→top, 수평은 zone gap에서만 */
+function buildCrossZoneGapDownPaths(
+  source: PlacedNode,
+  target: PlacedNode,
+  parallelIndex: number,
+  anchors: PathAnchorOptions = {},
+  sourceType?: string,
+  targetType?: string,
+  process?: Process,
+  placed?: PlacedNode[],
+  excludeIds: Set<string> = new Set([source.id, target.id]),
+  nodePadding: number = PRIORITY_ROUTE_NODE_PADDING,
+): Point[][] {
+  const { srcExit, tgtEntry, wrap } = buildHandlePathFrame(
+    source,
+    target,
+    'bottom',
+    'top',
+    parallelIndex,
+    anchors,
+    sourceType,
+    targetType,
+  )
+  const sx = srcExit.x
+  const tx = tgtEntry.x
+  const baseCorridorY =
+    process && placed
+      ? resolveCrossZoneHorizontalCorridorY(
+          source,
+          target,
+          sx,
+          tx,
+          process,
+          placed,
+          excludeIds,
+          nodePadding,
+        )
+      : resolveCrossZoneCorridorY(source, target, process, placed)
+
+  const alignedColumn =
+    sharesColumnRange(source, target) ||
+    sameLaneManualCellSlotColumn(source, target, process)
+  const nearColumn = Math.abs(sx - tx) <= DOWNWARD_STRAIGHT_X_TOLERANCE
+
+  if (alignedColumn || nearColumn) {
+    if (Math.abs(sx - tx) <= ORTHO_EPS) {
+      return [wrap([])]
+    }
+    /** 같은 열 fan-out — 수평은 zone gap corridor에서만 */
+    return [
+      wrap([
+        { x: sx, y: baseCorridorY },
+        { x: tx, y: baseCorridorY },
+      ]),
+    ]
+  }
+
+  const corridorY = placed
+    ? resolveCrossZoneFinalApproachCorridorY(
+        baseCorridorY,
+        sx,
+        tx,
+        tgtEntry.y,
+        target,
+        placed,
+        excludeIds,
+        nodePadding,
+        process,
+      )
+    : baseCorridorY
+
+  const candidates: Point[][] = [
+    wrap([
+      { x: sx, y: corridorY },
+      { x: tx, y: corridorY },
+    ]),
+  ]
+
+  if (placed) {
+    const finalObstacles = getVerticalObstaclesAtX(
+      tx,
+      corridorY,
+      tgtEntry.y,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )
+    if (finalObstacles.length > 0) {
+      const detourRight = Math.max(...finalObstacles.map((node) => node.x + node.width)) + nodePadding + 12
+      const detourLeft = Math.min(...finalObstacles.map((node) => node.x)) - nodePadding - 12
+      candidates.push(
+        wrap([
+          { x: sx, y: corridorY },
+          { x: detourLeft, y: corridorY },
+          { x: detourLeft, y: tgtEntry.y },
+          { x: tx, y: tgtEntry.y },
+        ]),
+      )
+      candidates.push(
+        wrap([
+          { x: sx, y: corridorY },
+          { x: detourRight, y: corridorY },
+          { x: detourRight, y: tgtEntry.y },
+          { x: tx, y: tgtEntry.y },
+        ]),
+      )
+    }
+
+    appendCrossZoneSideGutterCandidates(
+      candidates,
+      wrap,
+      source,
+      target,
+      sx,
+      tx,
+      srcExit,
+      tgtEntry,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )
+  }
+
+  return dedupePaths(candidates)
 }
 
 /**
@@ -2455,6 +3782,43 @@ function buildDownwardBottomTopPaths(
   )
   const hasObstacles = obstacles.length > 0
   const candidates: Point[][] = []
+
+  if (
+    options.process &&
+    qualifiesForSameLaneCrossZoneStraightVertical(source, target, options.process)
+  ) {
+    const sourceType = options.sourceType ?? getNodeType(options.process, source.id)
+    const targetType = options.targetType ?? getNodeType(options.process, target.id)
+    return buildCrossZoneGapDownPaths(
+      source,
+      target,
+      parallelIndex,
+      anchors,
+      sourceType,
+      targetType,
+      options.process,
+      placed,
+      excludeIds,
+      nodePadding,
+    )
+  }
+
+  if (options.process && qualifiesForCrossZoneGapVerticalDrop(source, target, options.process)) {
+    const sourceType = options.sourceType ?? getNodeType(options.process, source.id)
+    const targetType = options.targetType ?? getNodeType(options.process, target.id)
+    return buildCrossZoneGapDownPaths(
+      source,
+      target,
+      parallelIndex,
+      anchors,
+      sourceType,
+      targetType,
+      options.process,
+      placed,
+      excludeIds,
+      nodePadding,
+    )
+  }
 
   if (!hasObstacles && (xDiff <= DOWNWARD_STRAIGHT_X_TOLERANCE || sharesColumnRange(source, target))) {
     candidates.push(wrap([]))
@@ -2501,6 +3865,7 @@ function selectDownwardBottomTopPath(
   nodePadding: number,
   hasObstacles: boolean,
   process?: Process,
+  allowGapBends = false,
 ): Point[] | null {
   let best: Point[] | null = null
   let bestScore = Number.POSITIVE_INFINITY
@@ -2512,11 +3877,13 @@ function selectDownwardBottomTopPath(
     let score = bendTierCost(bends) + length * 0.05 + collisions * 10000
     if (routeHasDirectionReversal(points)) score += ROUTE_TIER_COST.directionReversal
     if (hasDownRightUpDetour(points)) score += ROUTE_TIER_COST.directionReversal
+    if (hasImmediateHorizontalFromSourceExit(points)) score += ROUTE_TIER_COST.outerRoute
 
     if (collisions > 0) continue
 
-    if (bends > MAX_ORTHOGONAL_BENDS) continue
-    if (!hasObstacles && bends > 1) continue
+    const maxBends = allowGapBends ? 5 : MAX_ORTHOGONAL_BENDS
+    if (bends > maxBends) continue
+    if (!hasObstacles && bends > 1 && !allowGapBends) continue
 
     if (score < bestScore) {
       bestScore = score
@@ -2915,6 +4282,98 @@ function selectMinimalHandlePath(
   return selectDownwardBottomTopPath(candidates, placed, excludeIds, nodePadding, hasObstacles, process)
 }
 
+function routeDecisionSameRowLeftReturnEdge(
+  options: OrthogonalRouteOptions,
+): OrthogonalRouteResult {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex = 0,
+    minContentX = 0,
+    existingSegments = [],
+    process,
+  } = options
+
+  const excludeIds = new Set([source.id, target.id])
+  const nodePadding = PRIORITY_ROUTE_NODE_PADDING
+  const built = buildDecisionSameRowLeftReturnPath(source, target)
+  const finalized = finalizeRoutedPath(
+    built.points,
+    source,
+    target,
+    built.sourceHandle,
+    built.targetHandle,
+    { parallelIndex, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
+    placed,
+    excludeIds,
+    nodePadding,
+    edge,
+    process,
+  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+
+  return {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: extractBendPoints(finalized),
+    sourceHandle: built.sourceHandle,
+    targetHandle: built.targetHandle,
+    ...routeLabelFields(label),
+    exactEndpoints: true,
+  }
+}
+
+function routeDecisionSameRowTopReturnEdge(
+  options: OrthogonalRouteOptions,
+): OrthogonalRouteResult {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex = 0,
+    minContentX = 0,
+    existingSegments = [],
+    process,
+  } = options
+
+  const excludeIds = new Set([source.id, target.id])
+  const nodePadding = PRIORITY_ROUTE_NODE_PADDING
+  const targetType = getNodeType(process, target.id)
+  const built = buildDecisionSameRowTopReturnPath(source, target, targetType, {
+    placed,
+    excludeIds,
+    nodePadding,
+    process,
+  })
+  const finalized = finalizeRoutedPath(
+    built.points,
+    source,
+    target,
+    built.sourceHandle,
+    built.targetHandle,
+    { parallelIndex, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
+    placed,
+    excludeIds,
+    nodePadding,
+    edge,
+    process,
+  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+
+  return {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: extractBendPoints(finalized),
+    sourceHandle: built.sourceHandle,
+    targetHandle: built.targetHandle,
+    ...routeLabelFields(label),
+    exactEndpoints: true,
+  }
+}
+
 function routeDecisionAwareEdge(
   options: OrthogonalRouteOptions,
   sourceHandle: EdgeHandleId,
@@ -2938,6 +4397,42 @@ function routeDecisionAwareEdge(
   const isManual = edge.routing?.mode === 'manual'
   const sourceIsDecision = isBranchNodeType(sourceType)
 
+  if (
+    !isManual &&
+    process &&
+    sourceHandle === 'right' &&
+    targetHandle === 'left' &&
+    nodesShareOverviewZoneDifferentLane(source, target, process) &&
+    isAdjacentHorizontalRouteClear(
+      source,
+      target,
+      placed,
+      excludeIds,
+      process,
+      edge,
+      parallelIndex,
+    )
+  ) {
+    return routeSameRowRightTargetEdge(options)
+  }
+
+  if (!isManual && sourceIsDecision && process) {
+    if (
+      hasUserSpecifiedHandles(edge) &&
+      sourceHandle === 'top' &&
+      targetHandle === 'top' &&
+      qualifiesForDecisionSameRowTopReturn(edge, source, target, process)
+    ) {
+      return routeDecisionSameRowTopReturnEdge(options)
+    }
+    if (
+      !hasUserSpecifiedHandles(edge) &&
+      qualifiesForDecisionSameRowLeftReturn(edge, source, target, process)
+    ) {
+      return routeDecisionSameRowLeftReturnEdge(options)
+    }
+  }
+
   if (!isManual && !hasUserSpecifiedHandles(edge)) {
     const geometryPair = resolveGeometryHandlePair(
       source,
@@ -2947,6 +4442,7 @@ function routeDecisionAwareEdge(
       placed,
       excludeIds,
       process,
+      edge,
     )
     if (geometryPair) {
       sourceHandle = geometryPair[0]
@@ -2973,16 +4469,15 @@ function routeDecisionAwareEdge(
   if (sourceIsDecision && !isManual) {
     const sc = nodeCenter(source)
     const tc = nodeCenter(target)
-    if (sourceHandle === 'left' && targetHandle === 'left' && tc.y < sc.y - 4) {
+    if (sourceHandle === 'left' && targetHandle === 'left' && Math.abs(tc.y - sc.y) > 4) {
       return routeBracketEdge(options, 'left', 'left', 'left')
     }
-    if (
-      sourceHandle === 'right' &&
-      targetHandle === 'right' &&
-      tc.y > sc.y + 4 &&
-      !isDecisionSameColumn(source, target)
-    ) {
-      return routeBracketEdge(options, 'right', 'right', 'right')
+    if (sourceHandle === 'right' && targetHandle === 'right' && Math.abs(tc.y - sc.y) > 4) {
+      const targetAbove = tc.y < sc.y - 4
+      const targetBelow = tc.y > sc.y + 4
+      if (targetAbove || (targetBelow && !isDecisionSameColumn(source, target))) {
+        return routeBracketEdge(options, 'right', 'right', 'right')
+      }
     }
   }
 
@@ -3007,15 +4502,20 @@ function routeDecisionAwareEdge(
     sourceIsDecision &&
     sourceHandle === 'bottom' &&
     targetHandle === 'top' &&
-    isDecisionSameColumn(source, target)
+    branchDownwardSharesColumn(source, target, sourceType)
   ) {
+    const anchorX = getHandlePoint(source, 'bottom', 0.5, sourceType).x
+    const straightAnchors: PathAnchorOptions = {
+      ...anchors,
+      targetAnchorRatio: clampAnchorRatio((anchorX - target.x) / target.width),
+    }
     const frame = buildHandlePathFrame(
       source,
       target,
       sourceHandle,
       targetHandle,
       parallelIndex,
-      anchors,
+      straightAnchors,
       sourceType,
       targetType,
     )
@@ -3030,33 +4530,34 @@ function routeDecisionAwareEdge(
         target,
         sourceHandle,
         targetHandle,
-        anchors,
+        straightAnchors,
         placed,
         excludeIds,
         nodePadding,
         edge,
         process,
       )
-      const label = resolveEdgeLabel(
-        edge,
-        finalized,
-        placed,
-        excludeIds,
-        minContentX,
-        existingSegments,
-        process,
-      )
+      const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
       return {
         path: pointsToPath(finalized, minContentX),
         points: finalized,
         bendPoints: [],
         sourceHandle,
         targetHandle,
-        labelPoint: label.point,
-        labelHidden: label.hidden,
+        ...routeLabelFields(label),
         exactEndpoints: true,
       }
     }
+  }
+
+  if (
+    !isManual &&
+    process &&
+    sourceHandle === 'bottom' &&
+    targetHandle === 'top' &&
+    qualifiesForCrossZoneGapVerticalDrop(source, target, process)
+  ) {
+    return routeDownwardBottomTopEdge(options, sourceHandle, targetHandle)
   }
 
   const candidates = buildMinimalHandlePaths(
@@ -3109,15 +4610,7 @@ function routeDecisionAwareEdge(
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return finishOrthogonalRoute(
     options,
@@ -3127,8 +4620,7 @@ function routeDecisionAwareEdge(
       bendPoints: [],
       sourceHandle,
       targetHandle,
-      labelPoint: label.point,
-      labelHidden: label.hidden,
+      ...routeLabelFields(label),
       exactEndpoints: true,
     },
     'decision-aware',
@@ -3157,6 +4649,7 @@ function routeDownwardBottomTopEdge(
     target,
     placed,
     parallelIndex = 0,
+    branchContext,
     minContentX = 0,
     existingSegments = [],
     process,
@@ -3164,14 +4657,46 @@ function routeDownwardBottomTopEdge(
 
   const excludeIds = new Set([source.id, target.id])
   const nodePadding = PRIORITY_ROUTE_NODE_PADDING
-  const anchors: PathAnchorOptions = {
-    sourceAnchorRatio: 0.5,
-    targetAnchorRatio: 0.5,
-    parallelIndex,
+  const anchors = resolvePathAnchors(parallelIndex, branchContext)
+
+  if (
+    qualifiesForCellLeftTrunkFanOut(source, target, branchContext, sourceHandle, targetHandle)
+  ) {
+    const fanOutPath = buildCellLeftTrunkFanOutPath(source, target, parallelIndex, {
+      ...anchors,
+      sourceAnchorRatio: 0,
+    })
+    const finalized = finalizeRoutedPath(
+      fanOutPath,
+      source,
+      target,
+      sourceHandle,
+      targetHandle,
+      { ...anchors, sourceAnchorRatio: 0 },
+      placed,
+      excludeIds,
+      nodePadding,
+      edge,
+      process,
+    )
+    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+    return {
+      path: pointsToPath(finalized, minContentX),
+      points: finalized,
+      bendPoints: [],
+      sourceHandle,
+      targetHandle,
+      ...routeLabelFields(label),
+    }
   }
+
   const sameLaneOrCell = isSameLaneEdge(source, target) || isSameCellEdge(source, target, process)
   const near = isNearEdge(source, target, process)
   const obstacles = getVerticalObstaclesBetween(source, target, placed, excludeIds, nodePadding, process)
+  const sourceType = process ? getNodeType(process, source.id) : undefined
+  const targetType = process ? getNodeType(process, target.id) : undefined
+  const crossZoneGap =
+    process != null && qualifiesForCrossZoneGapVerticalDrop(source, target, process)
 
   const candidates = buildDownwardBottomTopPaths(
     source,
@@ -3181,11 +4706,25 @@ function routeDownwardBottomTopEdge(
     excludeIds,
     nodePadding,
     anchors,
-    { allowOuterDetour: !sameLaneOrCell && !near, process },
+    {
+      allowOuterDetour: !sameLaneOrCell && !near,
+      process,
+      sourceType,
+      targetType,
+      allowGapBends: crossZoneGap,
+    },
   )
 
   const selected =
-    selectDownwardBottomTopPath(candidates, placed, excludeIds, nodePadding, obstacles.length > 0, process) ??
+    selectDownwardBottomTopPath(
+      candidates,
+      placed,
+      excludeIds,
+      nodePadding,
+      obstacles.length > 0,
+      process,
+      crossZoneGap,
+    ) ??
     candidates[0] ??
     buildHandlePathFrame(source, target, sourceHandle, targetHandle, parallelIndex, anchors).wrap([])
 
@@ -3203,15 +4742,7 @@ function routeDownwardBottomTopEdge(
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -3219,8 +4750,7 @@ function routeDownwardBottomTopEdge(
     bendPoints: [],
     sourceHandle,
     targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
   }
 }
 
@@ -3284,6 +4814,27 @@ function buildPriorityHandlePaths(
     isAdjacentHorizontalPair(source, target)
   ) {
     candidates.unshift(buildAdjacentHorizontalPath(source, target))
+  }
+
+  if (
+    sourceHandle === 'right' &&
+    targetHandle === 'left' &&
+    process &&
+    nodesShareOverviewZoneDifferentLane(source, target, process)
+  ) {
+    for (const gutterX of resolveCrossLaneGutterCandidates(
+      source,
+      target,
+      placed,
+      process,
+      nodePadding,
+    )) {
+      if (gutterX > srcExit.x + ORTHO_EPS && gutterX < tgtEntry.x - ORTHO_EPS) {
+        candidates.unshift(
+          wrap([{ x: gutterX, y: srcExit.y }, { x: gutterX, y: tgtEntry.y }]),
+        )
+      }
+    }
   }
 
   if (sourceHandle === 'bottom' && targetHandle === 'top') {
@@ -3412,15 +4963,7 @@ function routePriorityHandleEdge(
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -3428,8 +4971,7 @@ function routePriorityHandleEdge(
     bendPoints: [],
     sourceHandle,
     targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
   }
 }
 
@@ -3622,6 +5164,7 @@ function routeBracketEdge(
     targetType,
     side,
     idx,
+    { placed, excludeIds, nodePadding, process },
   )
 
   const finalized = finalizeRoutedPath(
@@ -3638,15 +5181,7 @@ function routeBracketEdge(
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -3654,8 +5189,123 @@ function routeBracketEdge(
     bendPoints: [],
     sourceHandle,
     targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
+    exactEndpoints: true,
+  }
+}
+
+function routeSameLaneVerticalOneBendEdge(
+  options: OrthogonalRouteOptions,
+  sourceHandle: EdgeHandleId,
+  targetHandle: EdgeHandleId,
+): OrthogonalRouteResult | null {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex = 0,
+    branchContext,
+    minContentX = 0,
+    existingSegments = [],
+    process,
+  } = options
+  if (!process) return null
+
+  const excludeIds = new Set([source.id, target.id])
+  const nodePadding = PRIORITY_ROUTE_NODE_PADDING
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  const idx = branchContext?.parallelIndex ?? parallelIndex
+
+  const raw = buildSameLaneVerticalOneBendPath(
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    sourceType,
+    targetType,
+  )
+  const finalized = finalizeRoutedPath(
+    raw,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    { parallelIndex: idx },
+    placed,
+    excludeIds,
+    nodePadding,
+    edge,
+    process,
+  )
+  if (countNodeCollisions(finalized, placed, excludeIds, nodePadding, process) > 0) {
+    return null
+  }
+
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+  return {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: extractBendPoints(finalized),
+    sourceHandle,
+    targetHandle,
+    ...routeLabelFields(label),
+    exactEndpoints: true,
+  }
+}
+
+function routeSameLaneSideTopOneBendEdge(
+  options: OrthogonalRouteOptions,
+  sourceHandle: EdgeHandleId,
+): OrthogonalRouteResult | null {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex = 0,
+    branchContext,
+    minContentX = 0,
+    existingSegments = [],
+    process,
+  } = options
+  if (!process) return null
+  if (sourceHandle !== 'right' && sourceHandle !== 'left') return null
+
+  const excludeIds = new Set([source.id, target.id])
+  const nodePadding = PRIORITY_ROUTE_NODE_PADDING
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  const idx = branchContext?.parallelIndex ?? parallelIndex
+  const targetHandle: EdgeHandleId = 'top'
+
+  const raw = buildSameLaneSideTopOneBendPath(source, target, sourceHandle, sourceType, targetType)
+  const finalized = finalizeRoutedPath(
+    raw,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    { parallelIndex: idx },
+    placed,
+    excludeIds,
+    nodePadding,
+    edge,
+    process,
+  )
+  if (countNodeCollisions(finalized, placed, excludeIds, nodePadding, process) > 0) {
+    return null
+  }
+
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+  return {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: extractBendPoints(finalized),
+    sourceHandle,
+    targetHandle,
+    ...routeLabelFields(label),
     exactEndpoints: true,
   }
 }
@@ -3711,15 +5361,7 @@ function routeReturnGutterEdge(options: OrthogonalRouteOptions): OrthogonalRoute
     edge,
     process,
   )
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   return {
     path: pointsToPath(finalized, minContentX),
@@ -3727,8 +5369,7 @@ function routeReturnGutterEdge(options: OrthogonalRouteOptions): OrthogonalRoute
     bendPoints: extractBendPoints(finalized),
     sourceHandle: selected.sourceHandle,
     targetHandle: selected.targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
     exactEndpoints: isBranchNodeType(sourceType) || isBranchNodeType(targetType),
   }
 }
@@ -3777,6 +5418,7 @@ function routeSameLaneBracketReturnEdge(
       idx,
       sourceType,
       targetType,
+      process,
     )
   }
 
@@ -3789,6 +5431,64 @@ function routeDecisionRightDownBracketEdge(
   const { source, target, edge } = options
   const [sh, th] = inferDecisionOutgoingPair(source, target, edge)
   return routeBracketEdge(options, 'right', sh, th === 'top' ? 'right' : th)
+}
+
+function isLeftwardDecisionReturnEdge(
+  edge: Edge,
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  if (!process || !isReturnLikeEdge(edge)) return false
+  const sourceType = getNodeType(process, source.id)
+  if (!isBranchNodeType(sourceType)) return false
+  return nodeCenterX(target) < nodeCenterX(source) - 12
+}
+
+function routeCompactDecisionRightReturnEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex = 0,
+    minContentX = 0,
+    existingSegments = [],
+    process,
+  } = options
+  const sourceHandle: EdgeHandleId = 'right'
+  const targetHandle: EdgeHandleId = 'right'
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  const start = getHandlePoint(source, sourceHandle, 0.5, sourceType)
+  const end = getHandlePoint(target, targetHandle, 0.5, targetType)
+  const offsetX = Math.max(start.x, end.x) + 32 + Math.abs(parallelIndex) * 8
+  const points = [start, { x: offsetX, y: start.y }, { x: offsetX, y: end.y }, end]
+  const excludeIds = new Set([source.id, target.id])
+  const finalized = finalizeRoutedPath(
+    points,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    { parallelIndex, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
+    placed,
+    excludeIds,
+    PRIORITY_ROUTE_NODE_PADDING,
+    edge,
+    process,
+  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+
+  return {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: extractBendPoints(finalized),
+    sourceHandle,
+    targetHandle,
+    ...routeLabelFields(label),
+    exactEndpoints: true,
+  }
 }
 
 function routeLockedHandleEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult | null {
@@ -3809,11 +5509,94 @@ function routeLockedHandleEdge(options: OrthogonalRouteOptions): OrthogonalRoute
 
   const sourceType = getNodeType(process, options.source.id)
   const targetType = getNodeType(process, options.target.id)
-  if (isBranchNodeType(sourceType) || isBranchNodeType(targetType)) {
+  const branchLocked = isBranchNodeType(sourceType) || isBranchNodeType(targetType)
+  const branchBracketIntent =
+    (sh === 'right' && th === 'right') ||
+    (sh === 'left' && th === 'left') ||
+    (sh === 'top' && th === 'top')
+  if (
+    branchLocked &&
+    sh === 'right' &&
+    th === 'right' &&
+    isLeftwardDecisionReturnEdge(edge, options.source, options.target, process)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeCompactDecisionRightReturnEdge(options),
+      'decision-compact-right-return-locked',
+    )
+  }
+  if (
+    ((sh === 'right' && th === 'left') || (sh === 'left' && th === 'right')) &&
+    isHorizontallyAligned(options.source, options.target, SAME_ROW_Y_TOLERANCE)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routePriorityHandleEdge(options, sh, th),
+      'same-row-horizontal-locked',
+    )
+  }
+
+  if (
+    sh === 'right' &&
+    th === 'left' &&
+    detailLayoutRightwardColumnFlow(options.source, options.target, process)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeAdjacentHorizontalStraightEdge(options),
+      'detail-layout-rightward-column-locked',
+    )
+  }
+
+  if (
+    branchLocked &&
+    sh === 'bottom' &&
+    th === 'top' &&
+    branchDownwardSharesColumn(options.source, options.target, sourceType)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeDecisionAwareEdge(options, sh, th),
+      'branch-downward-straight-locked',
+    )
+  }
+
+  if (branchLocked && !branchBracketIntent) {
+    return finishOrthogonalRoute(
+      options,
+      routePriorityHandleEdge(options, sh, th),
+      'branch-priority-locked',
+    )
+  }
+
+  if (branchLocked) {
     return finishOrthogonalRoute(
       options,
       routeDecisionAwareEdge(options, sh, th),
       'decision-aware-locked',
+    )
+  }
+
+  const { source, target } = options
+  if (
+    qualifiesForSameLaneSideTopOneBend(source, target, sh, th, process) &&
+    (sh === 'right' || sh === 'left')
+  ) {
+    const oneBend = routeSameLaneSideTopOneBendEdge(options, sh)
+    if (oneBend) {
+      return finishOrthogonalRoute(options, oneBend, 'same-lane-side-top-one-bend-locked')
+    }
+  }
+
+  if (
+    qualifiesForSameLaneVerticalSideBracket(source, target, sh, th, process) &&
+    (sh === 'right' || sh === 'left')
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeBracketEdge(options, sh, sh, th),
+      'same-lane-vertical-side-bracket-locked',
     )
   }
 
@@ -3822,6 +5605,106 @@ function routeLockedHandleEdge(options: OrthogonalRouteOptions): OrthogonalRoute
     routePriorityHandleEdge(options, sh, th),
     'priority-locked',
   )
+}
+
+function routeDetailLayoutCompactEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult | null {
+  const { edge, source, target, placed, process, minContentX = 0, existingSegments = [] } = options
+  if (!process) return null
+  if (hasUserSpecifiedHandles(edge) || isManualRouteEdge(edge)) return null
+
+  if (sameDetailLayoutColumn(source, target, process)) {
+    const sourceHandle: EdgeHandleId = nodeCenterY(target) >= nodeCenterY(source) ? 'bottom' : 'top'
+    const targetHandle: EdgeHandleId = nodeCenterY(target) >= nodeCenterY(source) ? 'top' : 'bottom'
+    const anchorX = sharedColumnX(source, target) ?? (nodeCenterX(source) + nodeCenterX(target)) / 2
+    const sourceRatio = clampAnchorRatio((anchorX - source.x) / source.width)
+    const targetRatio = clampAnchorRatio((anchorX - target.x) / target.width)
+    const sourceType = getNodeType(process, source.id)
+    const targetType = getNodeType(process, target.id)
+    const start = getHandlePoint(source, sourceHandle, sourceRatio, sourceType)
+    const end = getHandlePoint(target, targetHandle, targetRatio, targetType)
+    const excludeIds = new Set([source.id, target.id])
+    const finalized = finalizeRoutedPath(
+      [start, end],
+      source,
+      target,
+      sourceHandle,
+      targetHandle,
+      { sourceAnchorRatio: sourceRatio, targetAnchorRatio: targetRatio },
+      placed,
+      excludeIds,
+      PRIORITY_ROUTE_NODE_PADDING,
+      edge,
+      process,
+    )
+    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+    return finishOrthogonalRoute(
+      options,
+      {
+        path: pointsToPath(finalized, minContentX),
+        points: finalized,
+        bendPoints: extractBendPoints(finalized),
+        sourceHandle,
+        targetHandle,
+        ...routeLabelFields(label),
+        exactEndpoints: true,
+      },
+      nodeCenterY(target) >= nodeCenterY(source)
+        ? 'detail-layout-same-column-down'
+        : 'detail-layout-same-column-up',
+    )
+  }
+
+  if (sameDetailLayoutRow(source, target, process)) {
+    const sourceHandle: EdgeHandleId = nodeCenterX(target) >= nodeCenterX(source) ? 'right' : 'left'
+    const targetHandle: EdgeHandleId = nodeCenterX(target) >= nodeCenterX(source) ? 'left' : 'right'
+    const anchorY = sharedRowY(source, target) ?? (nodeCenterY(source) + nodeCenterY(target)) / 2
+    const sourceRatio = clampAnchorRatio((anchorY - source.y) / source.height)
+    const targetRatio = clampAnchorRatio((anchorY - target.y) / target.height)
+    const sourceType = getNodeType(process, source.id)
+    const targetType = getNodeType(process, target.id)
+    const start = getHandlePoint(source, sourceHandle, sourceRatio, sourceType)
+    const end = getHandlePoint(target, targetHandle, targetRatio, targetType)
+    const excludeIds = new Set([source.id, target.id])
+    const finalized = finalizeRoutedPath(
+      [start, end],
+      source,
+      target,
+      sourceHandle,
+      targetHandle,
+      { sourceAnchorRatio: sourceRatio, targetAnchorRatio: targetRatio },
+      placed,
+      excludeIds,
+      PRIORITY_ROUTE_NODE_PADDING,
+      edge,
+      process,
+    )
+    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+    return finishOrthogonalRoute(
+      options,
+      {
+        path: pointsToPath(finalized, minContentX),
+        points: finalized,
+        bendPoints: extractBendPoints(finalized),
+        sourceHandle,
+        targetHandle,
+        ...routeLabelFields(label),
+        exactEndpoints: true,
+      },
+      nodeCenterX(target) >= nodeCenterX(source)
+        ? 'detail-layout-same-row-right'
+        : 'detail-layout-same-row-left',
+    )
+  }
+
+  if (detailLayoutRightwardColumnFlow(source, target, process)) {
+    return finishOrthogonalRoute(
+      options,
+      routeAdjacentHorizontalStraightEdge(options),
+      'detail-layout-rightward-column',
+    )
+  }
+
+  return null
 }
 
 export function routeOrthogonalEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult {
@@ -3846,6 +5729,73 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
   const useManualPath = isManualRouteEdge(edge)
   const nodeMargin = overviewMode ? overviewEdgeNodeMargin(edge) : EDGE_NODE_MARGIN
   const edgeGap = overviewMode ? OVERVIEW_VERTICAL_METRICS.edgeEdgeGap : EDGE_EDGE_MARGIN
+
+  const resolvedSourceHandle = resolveEdgeSourceHandle(edge)
+  const resolvedTargetHandle = resolveEdgeTargetHandle(edge)
+  if (
+    process &&
+    resolvedSourceHandle &&
+    resolvedTargetHandle &&
+    qualifiesForSameLaneVerticalSideBracket(
+      source,
+      target,
+      resolvedSourceHandle,
+      resolvedTargetHandle,
+      process,
+    ) &&
+    (resolvedSourceHandle === 'right' || resolvedSourceHandle === 'left')
+  ) {
+    const oneBend = routeSameLaneVerticalOneBendEdge(
+      options,
+      resolvedSourceHandle,
+      resolvedTargetHandle,
+    )
+    if (oneBend) {
+      return finishOrthogonalRoute(options, oneBend, 'same-lane-vertical-one-bend')
+    }
+    return finishOrthogonalRoute(
+      options,
+      routeBracketEdge(
+        options,
+        resolvedSourceHandle as BracketSide,
+        resolvedSourceHandle,
+        resolvedTargetHandle,
+      ),
+      'same-lane-vertical-side-bracket',
+    )
+  }
+
+  if (
+    process &&
+    resolvedSourceHandle &&
+    resolvedTargetHandle &&
+    qualifiesForSameLaneSideTopOneBend(
+      source,
+      target,
+      resolvedSourceHandle,
+      resolvedTargetHandle,
+      process,
+    ) &&
+    (resolvedSourceHandle === 'right' || resolvedSourceHandle === 'left')
+  ) {
+    const oneBend = routeSameLaneSideTopOneBendEdge(options, resolvedSourceHandle)
+    if (oneBend) {
+      return finishOrthogonalRoute(options, oneBend, 'same-lane-side-top-one-bend')
+    }
+  }
+
+  if (
+    process &&
+    resolvedSourceHandle === 'bottom' &&
+    resolvedTargetHandle === 'top' &&
+    qualifiesForCrossZoneGapVerticalDrop(source, target, process)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeDownwardBottomTopEdge(options, 'bottom', 'top'),
+      'cross-zone-gap-vertical-drop',
+    )
+  }
 
   if (useManualPath) {
     const defaultPair = recommendHandlePairs(edge, source, target, branchContext)[0]
@@ -3877,23 +5827,14 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
       edge,
       process,
     )
-    const label = resolveEdgeLabel(
-      edge,
-      finalized,
-      placed,
-      excludeIds,
-      minContentX,
-      existingSegments,
-      process,
-    )
+    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
     const manualResult: OrthogonalRouteResult = {
       path: pointsToPath(finalized, minContentX),
       points: finalized,
       bendPoints: manualPoints,
       sourceHandle,
       targetHandle,
-      labelPoint: label.point,
-      labelHidden: label.hidden,
+      ...routeLabelFields(label),
     }
     const manualCollisions = getCollidedNodes(
       finalized,
@@ -3914,6 +5855,9 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     return finishOrthogonalRoute(options, manualResult, 'manual')
   }
 
+  const detailCompactRoute = routeDetailLayoutCompactEdge(options)
+  if (detailCompactRoute) return detailCompactRoute
+
   const lockedRoute = routeLockedHandleEdge(options)
   if (lockedRoute) return lockedRoute
 
@@ -3931,6 +5875,23 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     return routeSameRowRightTargetEdge(options)
   }
 
+  if (
+    process &&
+    !hasUserSpecifiedHandles(edge) &&
+    !isManualRouteEdge(edge) &&
+    qualifiesForSameLaneCrossZoneStraightVertical(source, target, process)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeDownwardBottomTopEdge(options, 'bottom', 'top'),
+      'cross-zone-vertical-drop',
+    )
+  }
+
+  if (qualifiesForSameLaneBracketReturn(edge, source, target, process)) {
+    return finishOrthogonalRoute(options, routeSameLaneBracketReturnEdge(options), 'same-lane-bracket-return')
+  }
+
   if (process && qualifiesForReturnFeedbackEdge(edge, source, target, process)) {
     const gutterRoute = routeReturnGutterEdge(options)
     if (gutterRoute) {
@@ -3938,8 +5899,39 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     }
   }
 
-  if (qualifiesForSameLaneBracketReturn(edge, source, target, process)) {
-    return finishOrthogonalRoute(options, routeSameLaneBracketReturnEdge(options), 'same-lane-bracket-return')
+  if (process && qualifiesForDecisionSameRowLeftReturn(edge, source, target, process)) {
+    if (
+      hasUserSpecifiedHandles(edge) &&
+      resolveEdgeSourceHandle(edge) === 'top' &&
+      resolveEdgeTargetHandle(edge) === 'top' &&
+      qualifiesForDecisionSameRowTopReturn(edge, source, target, process)
+    ) {
+      return finishOrthogonalRoute(
+        options,
+        routeDecisionSameRowTopReturnEdge(options),
+        'decision-same-row-top-return',
+      )
+    }
+    if (!hasUserSpecifiedHandles(edge)) {
+      return finishOrthogonalRoute(
+        options,
+        routeDecisionSameRowLeftReturnEdge(options),
+        'decision-same-row-left-return',
+      )
+    }
+  }
+
+  if (
+    process &&
+    !hasUserSpecifiedHandles(edge) &&
+    !isManualRouteEdge(edge) &&
+    qualifiesForCrossZoneGapVerticalDrop(source, target, process)
+  ) {
+    return finishOrthogonalRoute(
+      options,
+      routeDownwardBottomTopEdge(options, 'bottom', 'top'),
+      'cross-zone-vertical-drop',
+    )
   }
 
   if (qualifiesForDecisionRightDownBracket(edge, source, target, process)) {
@@ -3949,7 +5941,31 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
   const sourceTypeEarly = getNodeType(process, source.id)
   const targetTypeEarly = getNodeType(process, target.id)
   if (
-    qualifiesForCrossLaneZoneHorizontalBridge(source, target, placed, excludeIdsEarly, process)
+    process &&
+    !hasUserSpecifiedHandles(edge) &&
+    nodesShareOverviewZoneDifferentLane(source, target, process) &&
+    qualifiesForCrossLaneZoneAdjacentRows(source, target, process) &&
+    nodeCenterX(target) > nodeCenterX(source) - ORTHO_EPS
+  ) {
+    const crossLaneClear = resolveClearAdjacentHorizontalPath(
+      source,
+      target,
+      placed,
+      excludeIdsEarly,
+      process,
+      edge,
+      branchContext?.parallelIndex ?? parallelIndex,
+    )
+    if (crossLaneClear) {
+      return finishOrthogonalRoute(
+        options,
+        routeAdjacentHorizontalStraightEdge(options),
+        'cross-lane-horizontal',
+      )
+    }
+  }
+  if (
+    qualifiesForCrossLaneZoneHorizontalBridge(source, target, placed, excludeIdsEarly, process, edge)
   ) {
     return finishOrthogonalRoute(options, routeAdjacentHorizontalStraightEdge(options), 'cross-lane-horizontal')
   }
@@ -3984,6 +6000,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
       placed,
       excludeIds,
       process,
+      edge,
     )
   ) {
     return routeAdjacentHorizontalStraightEdge(options)
@@ -3998,7 +6015,12 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     const targetType = getNodeType(process, target.id)
     const sh = userSource ?? 'right'
     const th = userTarget ?? 'left'
-    if (isBranchNodeType(sourceType) || isBranchNodeType(targetType)) {
+    const branchPartial = isBranchNodeType(sourceType) || isBranchNodeType(targetType)
+    const branchBracketIntent =
+      (sh === 'right' && th === 'right') ||
+      (sh === 'left' && th === 'left') ||
+      (sh === 'top' && th === 'top')
+    if (branchPartial && branchBracketIntent) {
       return finishOrthogonalRoute(
         options,
         routeDecisionAwareEdge(options, sh, th),
@@ -4468,15 +6490,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     process,
   )
 
-  const label = resolveEdgeLabel(
-    edge,
-    finalized,
-    placed,
-    excludeIds,
-    minContentX,
-    existingSegments,
-    process,
-  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
 
   const exactEndpoints = true
 
@@ -4486,8 +6500,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     bendPoints: extractBendPoints(finalized),
     sourceHandle: best.sourceHandle,
     targetHandle: best.targetHandle,
-    labelPoint: label.point,
-    labelHidden: label.hidden,
+    ...routeLabelFields(label),
     exactEndpoints: exactEndpoints || undefined,
   }
 }

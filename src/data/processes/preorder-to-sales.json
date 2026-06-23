@@ -3,23 +3,23 @@
   "name": "예약판매 ~ 출고 ~ 매출전표",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "예약판매 주문·출고·매출전표",
+  "description": "PDF 도형 기준 B2C 예약판매~출고~매출전표 프로세스",
   "overviewNodeId": "order-register",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "preorder-register",
-      "name": "예약판매등록",
-      "type": "erp",
+      "id": "preorder-to-sales-step-01",
+      "name": "B2C(온라인커머스) 예약 판매",
+      "type": "external",
       "laneId": "business",
       "phaseId": "p1",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "예약판매등록",
+      "system": "Cafe24",
+      "owner": "온라인몰",
+      "description": "B2C(온라인커머스) 예약 판매",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,14 +27,14 @@
       "localOrder": 1
     },
     {
-      "id": "preorder-deposit",
-      "name": "예약금수령",
-      "type": "erp",
+      "id": "preorder-to-sales-step-02",
+      "name": "PG사 정산",
+      "type": "manual",
       "laneId": "finance",
       "phaseId": "p2",
-      "system": "ERP",
+      "system": "PG",
       "owner": "재무팀",
-      "description": "예약금수령",
+      "description": "PG사 정산",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -42,14 +42,14 @@
       "localOrder": 2
     },
     {
-      "id": "preorder-shipment-request",
-      "name": "출고요청",
-      "type": "interface",
+      "id": "preorder-to-sales-step-03",
+      "name": "이지어드민 주문수집",
+      "type": "database",
       "laneId": "business",
       "phaseId": "p3",
-      "system": "ERP→WMS",
-      "owner": "사업부",
-      "description": "출고요청",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "이지어드민 주문수집",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -57,14 +57,14 @@
       "localOrder": 3
     },
     {
-      "id": "preorder-shipment-confirm",
-      "name": "출고확정",
-      "type": "interface",
+      "id": "preorder-to-sales-step-04",
+      "name": "B2C 출고 확인",
+      "type": "manual",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p4",
-      "system": "WMS→ERP",
+      "system": "이지어드민",
       "owner": "물류센터",
-      "description": "출고확정",
+      "description": "B2C 출고 확인",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -72,14 +72,14 @@
       "localOrder": 4
     },
     {
-      "id": "preorder-stock-minus",
-      "name": "재고인식(-)",
-      "type": "system",
+      "id": "preorder-to-sales-step-05",
+      "name": "출고 수량 입력",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p5",
-      "system": "ERP",
+      "system": "이지어드민/WMS",
       "owner": "물류센터",
-      "description": "재고인식(-)",
+      "description": "출고 수량 입력",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -87,14 +87,14 @@
       "localOrder": 5
     },
     {
-      "id": "preorder-sales-close",
-      "name": "매출마감확정",
-      "type": "erp",
-      "laneId": "finance",
+      "id": "preorder-to-sales-step-06",
+      "name": "위탁여부",
+      "type": "decision",
+      "laneId": "business",
       "phaseId": "p6",
       "system": "ERP",
-      "owner": "재무팀",
-      "description": "매출마감확정",
+      "owner": "사업부",
+      "description": "위탁여부",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -102,69 +102,379 @@
       "localOrder": 6
     },
     {
-      "id": "preorder-sales-posting",
-      "name": "매출전표생성",
-      "type": "system",
-      "laneId": "finance",
+      "id": "preorder-to-sales-step-07",
+      "name": "위탁재고 현황",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p7",
       "system": "ERP",
-      "owner": "재무팀",
-      "description": "매출전표생성",
+      "owner": "사업부",
+      "description": "위탁재고 현황",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
       "localOrder": 7
+    },
+    {
+      "id": "preorder-to-sales-step-08",
+      "name": "주문등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "주문등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "preorder-to-sales-step-09",
+      "name": "주문확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p9",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "주문확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "preorder-to-sales-step-10",
+      "name": "출고요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p10",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 10
+    },
+    {
+      "id": "preorder-to-sales-step-11",
+      "name": "출고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p11",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 11
+    },
+    {
+      "id": "preorder-to-sales-step-12",
+      "name": "출고정보",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "p12",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "출고정보",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 12
+    },
+    {
+      "id": "preorder-to-sales-step-13",
+      "name": "일괄매출마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p13",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "일괄매출마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 13,
+      "localOrder": 13
+    },
+    {
+      "id": "preorder-to-sales-step-14",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p14",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 14,
+      "localOrder": 14
+    },
+    {
+      "id": "preorder-to-sales-step-15",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p15",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 15,
+      "localOrder": 15
+    },
+    {
+      "id": "preorder-to-sales-step-16",
+      "name": "선수금 처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p16",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "선수금 처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 16,
+      "localOrder": 16
+    },
+    {
+      "id": "preorder-to-sales-step-17",
+      "name": "선수금 반제처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p17",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "선수금 반제처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 17,
+      "localOrder": 17
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "preorder-register",
-      "target": "preorder-deposit",
+      "id": "preorder-to-sales-e01",
+      "source": "preorder-to-sales-step-01",
+      "target": "preorder-to-sales-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "preorder-deposit",
-      "target": "preorder-shipment-request",
+      "id": "preorder-to-sales-e02",
+      "source": "preorder-to-sales-step-01",
+      "target": "preorder-to-sales-step-03",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
-      "id": "e03",
-      "source": "preorder-shipment-request",
-      "target": "preorder-shipment-confirm",
+      "id": "preorder-to-sales-e03",
+      "source": "preorder-to-sales-step-03",
+      "target": "preorder-to-sales-step-04",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e04",
-      "source": "preorder-shipment-confirm",
-      "target": "preorder-stock-minus",
+      "id": "preorder-to-sales-e04",
+      "source": "preorder-to-sales-step-04",
+      "target": "preorder-to-sales-step-05",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e05",
-      "source": "preorder-stock-minus",
-      "target": "preorder-sales-close",
+      "id": "preorder-to-sales-e05",
+      "source": "preorder-to-sales-step-05",
+      "target": "preorder-to-sales-step-06",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e06",
-      "source": "preorder-sales-close",
-      "target": "preorder-sales-posting",
+      "id": "preorder-to-sales-e06",
+      "source": "preorder-to-sales-step-06",
+      "target": "preorder-to-sales-step-07",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e07",
+      "source": "preorder-to-sales-step-07",
+      "target": "preorder-to-sales-step-08",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "preorder-to-sales-e08",
+      "source": "preorder-to-sales-step-08",
+      "target": "preorder-to-sales-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e09",
+      "source": "preorder-to-sales-step-09",
+      "target": "preorder-to-sales-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e10",
+      "source": "preorder-to-sales-step-10",
+      "target": "preorder-to-sales-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e11",
+      "source": "preorder-to-sales-step-11",
+      "target": "preorder-to-sales-step-12",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e12",
+      "source": "preorder-to-sales-step-12",
+      "target": "preorder-to-sales-step-13",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e13",
+      "source": "preorder-to-sales-step-13",
+      "target": "preorder-to-sales-step-14",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e14",
+      "source": "preorder-to-sales-step-14",
+      "target": "preorder-to-sales-step-15",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e15",
+      "source": "preorder-to-sales-step-15",
+      "target": "preorder-to-sales-step-16",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-e16",
+      "source": "preorder-to-sales-step-16",
+      "target": "preorder-to-sales-step-17",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "preorder-to-sales-branch-01",
+      "source": "preorder-to-sales-step-06",
+      "target": "preorder-to-sales-step-08",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

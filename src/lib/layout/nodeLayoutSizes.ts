@@ -20,9 +20,11 @@ export function verticalStackGap(
   return defaultGap
 }
 
-/** Layout bounding box — Process Detail 기준 (Overview는 별도 metrics) */
+import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
+
+/** Layout bounding box — 노드 마스터 (Overview·Detail 공통) */
 export const NODE_LAYOUT = {
-  default: { width: 160, height: 56 },
+  default: { width: OVERVIEW_GRID_METRICS.nodeWidth, height: OVERVIEW_GRID_METRICS.nodeHeight },
   decision: {
     width: DECISION_NODE_LAYOUT.width,
     height: DECISION_NODE_LAYOUT.height,

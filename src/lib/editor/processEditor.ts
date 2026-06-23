@@ -67,7 +67,7 @@ export function createDefaultLane(process: Process): Lane {
 export function createDefaultZone(): ProcessZone {
   return {
     id: generateId('zone'),
-    name: '신규 영역',
+    name: '자동프로세스',
     type: 'process-zone',
     laneIds: [],
     phaseIds: [],
@@ -134,8 +134,8 @@ export function validateNode(node: Node, process: Process): ValidationResult {
   if (!process.lanes.some((l) => l.id === node.laneId)) {
     return { ok: false, message: '유효한 laneId를 선택하세요.' }
   }
-  if (!node.localOrder || node.localOrder < 1) {
-    return { ok: false, message: 'localOrder는 1 이상이어야 합니다.' }
+  if (resolveNodeLocalOrder(node, process) < 1) {
+    return { ok: false, message: '노드 배치 순서(localOrder)를 확인하세요.' }
   }
   return { ok: true }
 }

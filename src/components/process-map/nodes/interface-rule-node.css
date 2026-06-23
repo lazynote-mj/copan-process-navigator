@@ -1,17 +1,16 @@
 .interface-rule-node {
   position: relative;
-  width: 100%;
-  height: 100%;
   box-sizing: border-box;
   cursor: pointer;
+  flex-shrink: 0;
   pointer-events: auto;
+  overflow: visible;
 }
 
 .interface-rule-node__diamond {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  display: block;
   overflow: visible;
   pointer-events: none;
 }
@@ -19,9 +18,9 @@
 .interface-rule-node__polygon {
   fill: #ecfeff;
   stroke: #0d9488;
-  stroke-width: 1.75;
+  stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 1px 3px rgba(13, 148, 136, 0.15));
+  filter: drop-shadow(0 1px 4px rgba(13, 148, 136, 0.12));
 }
 
 .interface-rule-node__content {
@@ -33,71 +32,56 @@
   align-items: center;
   justify-content: center;
   gap: 1px;
-  padding: 10px 8px;
-  text-align: center;
+  padding: 0;
   pointer-events: none;
+  text-align: center;
+  overflow: visible;
 }
 
-.interface-rule-node__badge {
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #0f766e;
-  line-height: 1.1;
-}
-
-.interface-rule-node__name {
-  font-size: 9px;
-  font-weight: 700;
-  color: #134e4a;
-  line-height: 1.15;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-width: 58px;
-  word-break: keep-all;
-}
-
-.interface-rule-node__meta {
-  font-size: 7px;
-  color: #64748b;
-  line-height: 1.1;
-  max-width: 62px;
+/* 판단노드와 동일 — compact 타이포그래피 재사용, 마름모 밖으로 넘침 허용 */
+.interface-rule-node .process-node__name,
+.interface-rule-node .process-node__subtitle {
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.interface-rule-node--compact .interface-rule-node__name {
-  font-size: 8px;
-  max-width: 54px;
-}
-
-.interface-rule-node--compact .interface-rule-node__meta {
-  font-size: 6px;
-  max-width: 58px;
 }
 
 .interface-rule-node--selected .interface-rule-node__polygon {
   stroke: var(--accent, #2563eb);
-  filter: drop-shadow(0 0 0 2px rgba(37, 99, 235, 0.18));
+  filter: drop-shadow(0 0 0 2px rgba(37, 99, 235, 0.2));
 }
 
-.interface-rule-node__handle {
-  width: 7px;
-  height: 7px;
-  opacity: 0;
-  border: 1px solid #0d9488;
-  background: #fff;
+.process-node-flow--interface-rule.process-node-flow--highlighted .interface-rule-node__polygon {
+  stroke-width: 2;
+  stroke: #2563eb;
+  filter: drop-shadow(0 0 0 3px rgba(37, 99, 235, 0.18));
 }
 
-.interface-rule-node--selected .interface-rule-node__handle,
-.process-map-canvas--edit .interface-rule-node:hover .interface-rule-node__handle {
+.process-node-flow--dimmed.process-node-flow--interface-rule .interface-rule-node__polygon {
+  fill: #f8fafc;
+  stroke: #94a3b8;
+  filter: none;
+}
+
+.process-node-flow--dimmed.process-node-flow--interface-rule .interface-rule-node__content {
+  opacity: 0.72;
+}
+
+.process-node-flow--dimmed .interface-rule-node {
   opacity: 1;
 }
 
-.interface-rule-node--compact .interface-rule-node__handle {
-  display: none;
+.interface-rule-node__handle {
+  width: 5px !important;
+  height: 5px !important;
+  background: #0d9488 !important;
+  border: none !important;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.interface-rule-node:hover .interface-rule-node__handle {
+  opacity: 1;
 }

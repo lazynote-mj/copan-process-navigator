@@ -1,6 +1,7 @@
 import type { NodeType } from '../../types/nodeTypes'
 import type { GridLayoutMetrics } from './gridLayoutMetrics'
-import { DECISION_NODE_LAYOUT, getDecisionNodeSize } from './decisionNodeLayout'
+import { DETAIL_DECISION_NODE_LAYOUT } from './decisionNodeLayout'
+import { DETAIL_GRID_METRICS as DETAIL_OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
 import { getInterfaceRuleNodeSize, isInterfaceRuleNode } from './interfaceRuleLayout'
 
 /** Process Detail — 문서형 세로 스크롤, lane 컬럼 배치 */
@@ -33,10 +34,10 @@ export const DETAIL_GRID_METRICS: GridLayoutMetrics = {
   decisionNodeGap: DETAIL_DOCUMENT.nodeVerticalGap,
   laneMinHeight: DETAIL_DOCUMENT.laneMinHeight,
   laneContentPaddingY: DETAIL_DOCUMENT.laneContentPaddingY,
-  nodeWidth: 160,
-  nodeHeight: 56,
-  decisionWidth: DECISION_NODE_LAYOUT.width,
-  decisionHeight: DECISION_NODE_LAYOUT.height,
+  nodeWidth: DETAIL_OVERVIEW_GRID_METRICS.nodeWidth,
+  nodeHeight: DETAIL_OVERVIEW_GRID_METRICS.nodeHeight,
+  decisionWidth: DETAIL_OVERVIEW_GRID_METRICS.decisionWidth,
+  decisionHeight: DETAIL_OVERVIEW_GRID_METRICS.decisionHeight,
 }
 
 export function getDetailNodeSize(
@@ -45,7 +46,10 @@ export function getDetailNodeSize(
   name = '',
 ): { width: number; height: number } {
   if (type === 'decision') {
-    return getDecisionNodeSize(name)
+    return {
+      width: metrics.decisionWidth ?? DETAIL_DECISION_NODE_LAYOUT.width,
+      height: metrics.decisionHeight ?? DETAIL_DECISION_NODE_LAYOUT.height,
+    }
   }
   if (isInterfaceRuleNode(type)) {
     return getInterfaceRuleNodeSize(name)

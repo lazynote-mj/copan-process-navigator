@@ -1,0 +1,323 @@
+{
+  "id": "service-business-to-expense",
+  "name": "사업기회 ~ 비용전표 : (서비스)",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 서비스 사업기회~비용전표 프로세스",
+  "overviewNodeId": "opportunity",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "service-business-to-expense-step-01",
+      "name": "사업기회확보",
+      "type": "manual",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "수작업",
+      "owner": "사업부",
+      "description": "사업기회확보",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "service-business-to-expense-step-02",
+      "name": "사업참여검토",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "사업참여검토",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "service-business-to-expense-step-03",
+      "name": "계약등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "계약등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "service-business-to-expense-step-04",
+      "name": "사업계약품의(G/W)",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p4",
+      "system": "G/W",
+      "owner": "사업부",
+      "description": "사업계약품의(G/W)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "service-business-to-expense-step-05",
+      "name": "프로젝트실행품의입력",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "프로젝트실행품의입력",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "service-business-to-expense-step-06",
+      "name": "프로젝트 실행품의(G/W)",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p6",
+      "system": "G/W",
+      "owner": "사업부",
+      "description": "프로젝트 실행품의(G/W)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "service-business-to-expense-step-07",
+      "name": "프로젝트등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "프로젝트등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "service-business-to-expense-step-08",
+      "name": "WBS코드등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "WBS코드등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "service-business-to-expense-step-09",
+      "name": "프로젝트 지출결의(G/W)",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p9",
+      "system": "G/W",
+      "owner": "사업부",
+      "description": "프로젝트 지출결의(G/W)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "service-business-to-expense-step-10",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p10",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 10
+    }
+  ],
+  "edges": [
+    {
+      "id": "service-business-to-expense-e01",
+      "source": "service-business-to-expense-step-01",
+      "target": "service-business-to-expense-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e02",
+      "source": "service-business-to-expense-step-02",
+      "target": "service-business-to-expense-step-03",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e03",
+      "source": "service-business-to-expense-step-03",
+      "target": "service-business-to-expense-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e04",
+      "source": "service-business-to-expense-step-04",
+      "target": "service-business-to-expense-step-05",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e05",
+      "source": "service-business-to-expense-step-05",
+      "target": "service-business-to-expense-step-06",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e06",
+      "source": "service-business-to-expense-step-06",
+      "target": "service-business-to-expense-step-07",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e07",
+      "source": "service-business-to-expense-step-07",
+      "target": "service-business-to-expense-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e08",
+      "source": "service-business-to-expense-step-08",
+      "target": "service-business-to-expense-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-e09",
+      "source": "service-business-to-expense-step-09",
+      "target": "service-business-to-expense-step-10",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-branch-01",
+      "source": "service-business-to-expense-step-02",
+      "target": "service-business-to-expense-step-01",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-branch-02",
+      "source": "service-business-to-expense-step-04",
+      "target": "service-business-to-expense-step-03",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-branch-03",
+      "source": "service-business-to-expense-step-06",
+      "target": "service-business-to-expense-step-05",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-business-to-expense-branch-04",
+      "source": "service-business-to-expense-step-09",
+      "target": "service-business-to-expense-step-08",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

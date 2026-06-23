@@ -10,6 +10,10 @@ export type OverviewHighlight = {
   nodeIds: Set<string>
   edgeIds: Set<string>
   mode: OverviewHighlightMode
+  /** 그룹 내 선택 노드 — 관련 edge/라벨 추가 강조 */
+  focusNodeId?: string | null
+  focusEdgeIds?: Set<string>
+  focusNodeIds?: Set<string>
 }
 
 export function createEmptyHighlight(): OverviewHighlight {

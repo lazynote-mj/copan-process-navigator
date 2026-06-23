@@ -1,0 +1,341 @@
+{
+  "id": "store-sales",
+  "name": "매장판매 ~ 출고 ~ 매출전표",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 매장 판매~출고~매출전표 프로세스",
+  "overviewNodeId": "store-sales",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "store-sales-step-01",
+      "name": "매장 판매",
+      "type": "manual",
+      "laneId": "retail-easychain",
+      "phaseId": "p1",
+      "system": "POS",
+      "owner": "판매현장",
+      "description": "매장 판매",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "store-sales-step-02",
+      "name": "매장 매출마감등록",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p2",
+      "system": "이지체인/POS",
+      "owner": "판매현장",
+      "description": "매장 매출마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "store-sales-step-03",
+      "name": "주문등록(POS 연동)",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p3",
+      "system": "POS",
+      "owner": "판매현장",
+      "description": "주문등록(POS 연동)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "store-sales-step-04",
+      "name": "주문확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "주문확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "store-sales-step-05",
+      "name": "이지어드민연동현황",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p5",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "이지어드민연동현황",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "store-sales-step-06",
+      "name": "출고요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p6",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "store-sales-step-07",
+      "name": "출고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p7",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "store-sales-step-08",
+      "name": "위탁여부",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "store-sales-step-09",
+      "name": "출고정보",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "p9",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "출고정보",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "store-sales-step-10",
+      "name": "일괄매출마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p10",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "일괄매출마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 10
+    },
+    {
+      "id": "store-sales-step-11",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p11",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 11
+    },
+    {
+      "id": "store-sales-step-12",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p12",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 12
+    }
+  ],
+  "edges": [
+    {
+      "id": "store-sales-e01",
+      "source": "store-sales-step-01",
+      "target": "store-sales-step-02",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e02",
+      "source": "store-sales-step-02",
+      "target": "store-sales-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e03",
+      "source": "store-sales-step-03",
+      "target": "store-sales-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e04",
+      "source": "store-sales-step-04",
+      "target": "store-sales-step-05",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e05",
+      "source": "store-sales-step-05",
+      "target": "store-sales-step-06",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e06",
+      "source": "store-sales-step-06",
+      "target": "store-sales-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e07",
+      "source": "store-sales-step-07",
+      "target": "store-sales-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e08",
+      "source": "store-sales-step-08",
+      "target": "store-sales-step-09",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e09",
+      "source": "store-sales-step-09",
+      "target": "store-sales-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e10",
+      "source": "store-sales-step-10",
+      "target": "store-sales-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e11",
+      "source": "store-sales-step-11",
+      "target": "store-sales-step-12",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-branch-01",
+      "source": "store-sales-step-08",
+      "target": "store-sales-step-10",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

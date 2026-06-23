@@ -3,23 +3,23 @@
   "name": "로열티 / MG 정산",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "로열티 매출 집계·MG 상계·정산전표",
+  "description": "PDF 도형 기준 기획사 로열티/MG 정산 프로세스",
   "overviewNodeId": "settlement-posting",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "royalty-sales-aggregate",
-      "name": "로열티매출집계",
-      "type": "system",
+      "id": "royalty-mg-settlement-step-01",
+      "name": "로열티매출마감집계",
+      "type": "erp",
       "laneId": "finance",
       "phaseId": "p1",
       "system": "ERP",
-      "owner": "사업부",
-      "description": "로열티매출집계",
+      "owner": "재무팀",
+      "description": "로열티매출마감집계",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,13 +27,13 @@
       "localOrder": 1
     },
     {
-      "id": "royalty-sales-close",
+      "id": "royalty-mg-settlement-step-02",
       "name": "로열티매출마감확정",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p2",
       "system": "ERP",
-      "owner": "사업부",
+      "owner": "재무팀",
       "description": "로열티매출마감확정",
       "inputs": [],
       "outputs": [],
@@ -42,14 +42,14 @@
       "localOrder": 2
     },
     {
-      "id": "mg-deduct-check",
-      "name": "MG상계여부",
-      "type": "decision",
-      "laneId": "finance",
+      "id": "royalty-mg-settlement-step-03",
+      "name": "예외사항처리",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p3",
       "system": "ERP",
       "owner": "사업부",
-      "description": "MG상계여부",
+      "description": "예외사항처리",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -57,14 +57,14 @@
       "localOrder": 3
     },
     {
-      "id": "mg-offset-process",
-      "name": "MG상계처리",
-      "type": "erp",
-      "laneId": "finance",
+      "id": "royalty-mg-settlement-step-04",
+      "name": "MG차감 여부",
+      "type": "decision",
+      "laneId": "business",
       "phaseId": "p4",
       "system": "ERP",
       "owner": "사업부",
-      "description": "MG상계처리",
+      "description": "MG차감 여부",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -72,61 +72,189 @@
       "localOrder": 4
     },
     {
-      "id": "settlement-posting",
-      "name": "정산전표처리",
-      "type": "system",
+      "id": "royalty-mg-settlement-step-05",
+      "name": "MG상계입력",
+      "type": "erp",
       "laneId": "finance",
       "phaseId": "p5",
       "system": "ERP",
-      "owner": "사업부",
-      "description": "정산전표처리",
+      "owner": "재무팀",
+      "description": "MG상계입력",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
       "localOrder": 5
+    },
+    {
+      "id": "royalty-mg-settlement-step-06",
+      "name": "MG상계처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "MG상계처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "royalty-mg-settlement-step-07",
+      "name": "정산마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "정산마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "royalty-mg-settlement-step-08",
+      "name": "정산마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "정산마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "royalty-mg-settlement-step-09",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p9",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "royalty-sales-aggregate",
-      "target": "royalty-sales-close",
+      "id": "royalty-mg-settlement-e01",
+      "source": "royalty-mg-settlement-step-01",
+      "target": "royalty-mg-settlement-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "royalty-sales-close",
-      "target": "mg-deduct-check",
+      "id": "royalty-mg-settlement-e02",
+      "source": "royalty-mg-settlement-step-02",
+      "target": "royalty-mg-settlement-step-03",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e04",
-      "source": "mg-deduct-check",
-      "target": "mg-offset-process",
-      "condition": "mgDeduct",
+      "id": "royalty-mg-settlement-e03",
+      "source": "royalty-mg-settlement-step-03",
+      "target": "royalty-mg-settlement-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "royalty-mg-settlement-e04",
+      "source": "royalty-mg-settlement-step-04",
+      "target": "royalty-mg-settlement-step-05",
+      "condition": "Y",
       "label": "Y",
-      "type": "condition"
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e05",
-      "source": "mg-deduct-check",
-      "target": "settlement-posting",
-      "condition": "noMgDeduct",
-      "label": "N",
-      "type": "condition"
-    },
-    {
-      "id": "e06",
-      "source": "mg-offset-process",
-      "target": "settlement-posting",
+      "id": "royalty-mg-settlement-e05",
+      "source": "royalty-mg-settlement-step-05",
+      "target": "royalty-mg-settlement-step-06",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "royalty-mg-settlement-e06",
+      "source": "royalty-mg-settlement-step-06",
+      "target": "royalty-mg-settlement-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "royalty-mg-settlement-e07",
+      "source": "royalty-mg-settlement-step-07",
+      "target": "royalty-mg-settlement-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "royalty-mg-settlement-e08",
+      "source": "royalty-mg-settlement-step-08",
+      "target": "royalty-mg-settlement-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "royalty-mg-settlement-branch-01",
+      "source": "royalty-mg-settlement-step-04",
+      "target": "royalty-mg-settlement-step-07",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

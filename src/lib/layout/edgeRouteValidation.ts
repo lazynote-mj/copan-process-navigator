@@ -1,5 +1,9 @@
 import type { EdgeType } from '../../types/edgeTypes'
-import { buildEdgeMarkerColor, buildEdgeStrokeStyle } from '../../types/edgeTypes'
+import {
+  buildEdgeMarkerColor,
+  buildEdgeStrokeStyle,
+  EDGE_DASHED_STROKE_WIDTH,
+} from '../../types/edgeTypes'
 
 export type EdgeValidationStatus = 'ok' | 'warning' | 'error'
 
@@ -16,17 +20,20 @@ export type EdgeRouteValidation = {
 
 export const EDGE_ERROR_STROKE = {
   stroke: '#dc2626',
-  strokeWidth: 2.5,
+  strokeWidth: EDGE_DASHED_STROKE_WIDTH,
   strokeDasharray: '6 4',
+  strokeLinecap: 'round' as const,
 } as const
 
 export const EDGE_WARNING_STROKE = {
   stroke: '#d97706',
-  strokeWidth: 2.5,
+  strokeWidth: EDGE_DASHED_STROKE_WIDTH,
   strokeDasharray: '5 4',
+  strokeLinecap: 'round' as const,
 } as const
 
-const EXCESSIVE_BEND_WARNING = 3
+/** Overview cross-zone gutter 등 — 4 bend까지는 정상 */
+const EXCESSIVE_BEND_WARNING = 5
 
 export function resolveEdgeRouteValidation(input: {
   broken?: boolean
@@ -40,6 +47,8 @@ export function resolveEdgeRouteValidation(input: {
   missingSourceHandle?: boolean
   missingTargetHandle?: boolean
   handleMismatch?: boolean
+  /** manual route — 노드 접촉은 경고(편집자 의도 경로) */
+  manualRoute?: boolean
 }): EdgeRouteValidation {
   const bendCount = input.bendCount ?? 0
   const collidedNodeIds = input.collidedNodes?.map((node) => node.id)
@@ -100,6 +109,18 @@ export function resolveEdgeRouteValidation(input: {
   }
 
   if (input.hasNodeCollision && (input.collidedNodes?.length ?? 0) > 0) {
+    if (input.manualRoute) {
+      return {
+        validationStatus: 'warning',
+        routeIssue: 'manual_route_collision',
+        routeIssueLabel: '경고: manual route 노드 접촉',
+        suggestedFix: '편집자가 지정한 경로가 노드와 겹칩니다. 필요 시 bend를 조정하세요.',
+        collidedNodeIds,
+        collidedNodeNames,
+        bendCount,
+        routingStatus: input.routingStatus,
+      }
+    }
     return {
       validationStatus: 'error',
       routeIssue: 'node_collision',

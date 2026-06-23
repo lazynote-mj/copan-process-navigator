@@ -7,7 +7,6 @@ export type UiPreferences = {
   isLeftOpen?: boolean
   isRightOpen?: boolean
   appMode?: 'view' | 'edit'
-  mapDisplayMode?: 'business' | 'system'
 }
 
 export function readUiPreferences(): UiPreferences {

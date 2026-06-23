@@ -1,5 +1,6 @@
 import type { Lane, Node, Process } from '../../types/process'
 import { getOverviewLanes } from '../../data/laneRegistry'
+import { LANE_WIDTH, SWIMLANE_LANE_COUNT } from './swimlaneGridLayout'
 import { CANVAS_BOTTOM_PADDING } from './layoutConfig'
 import type { LaneBand, PlacedNode } from './laneLayout'
 import { resolveNodeLocalOrder } from './localOrder'
@@ -45,6 +46,30 @@ export function getDetailOverviewLanes(process: Process): Lane[] {
   const overviewLanes = getOverviewLanes()
   const byId = new Map(process.lanes.map((l) => [l.id, l]))
   return overviewLanes.map((lane) => byId.get(lane.id) ?? lane)
+}
+
+/** 단일 lane Detail — PDF처럼 사업부 1개 lane만 사용 */
+export function isDetailSingleLaneProcess(nodes: Node[]): boolean {
+  return getUsedLaneIds(nodes).size === 1
+}
+
+/**
+ * Detail 레이아웃 lane — 단일 lane 프로세스는 5열 폭을 하나의 lane으로 사용 (PDF 사업부 단일 스윔레인)
+ */
+export function resolveDetailLayoutLanes(process: Process, nodes: Node[]): Lane[] {
+  if (!isDetailSingleLaneProcess(nodes)) {
+    return getDetailOverviewLanes(process)
+  }
+  const usedLaneId = [...getUsedLaneIds(nodes)][0]
+  const lane = getDetailOverviewLanes(process).find((entry) => entry.id === usedLaneId)
+  if (!lane) return getDetailOverviewLanes(process)
+  return [
+    {
+      ...lane,
+      order: 1,
+      width: LANE_WIDTH * SWIMLANE_LANE_COUNT,
+    },
+  ]
 }
 
 export function getUsedLaneIds(nodes: Node[]): Set<string> {

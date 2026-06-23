@@ -3,20 +3,72 @@
   "name": "E2E Main Flow",
   "description": "사업생성 → 구매·발주 → 입고·매입 → 판매·출고·매출 → 정산·자금",
   "links": [
-    { "id": "main:e2e:01", "source": "opportunity", "target": "business-review", "type": "normal" },
-    { "id": "main:e2e:02", "source": "business-review", "target": "contract-approval", "type": "normal" },
-    { "id": "main:e2e:03", "source": "contract-approval", "target": "contract-register", "type": "normal" },
-    { "id": "main:e2e:04", "source": "contract-register", "target": "project-register", "type": "normal" },
-    { "id": "main:e2e:05", "source": "project-register", "target": "project-approval", "type": "normal" },
-
-    { "id": "main:e2e:06", "source": "project-approval", "target": "purchase-request", "type": "normal" },
-    { "id": "main:e2e:06b", "source": "purchase-request", "target": "master-data-split", "type": "normal" },
-    { "id": "main:e2e:07", "source": "master-data-split", "target": "product-check", "type": "normal", "sourceHandle": "right", "targetHandle": "top" },
-    { "id": "main:e2e:07b", "source": "master-data-split", "target": "vendor-check", "type": "normal", "sourceHandle": "left", "targetHandle": "top" },
+    {
+      "id": "main:e2e:01",
+      "source": "opportunity",
+      "target": "business-review",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:02",
+      "source": "business-review",
+      "target": "contract-register",
+      "type": "condition",
+      "label": "Y"
+    },
+    {
+      "id": "main:e2e:03",
+      "source": "contract-register",
+      "target": "contract-approval",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:04",
+      "source": "contract-approval",
+      "target": "project-register",
+      "type": "condition",
+      "label": "Y"
+    },
+    {
+      "id": "main:e2e:05",
+      "source": "project-register",
+      "target": "project-approval",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:06",
+      "source": "project-approval",
+      "target": "purchase-request",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "main:e2e:06b",
+      "source": "purchase-request",
+      "target": "product-check",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "main:e2e:07",
+      "source": "purchase-request",
+      "target": "vendor-check",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
     {
       "id": "main:e2e:08",
       "source": "product-check",
-      "target": "master-data-complete",
+      "target": "po-approval",
       "condition": "existingProduct",
       "label": "기존",
       "type": "condition"
@@ -29,12 +81,22 @@
       "label": "신규",
       "type": "condition"
     },
-    { "id": "main:e2e:08c", "source": "product-register-request", "target": "product-register-approval", "type": "normal" },
-    { "id": "main:e2e:08d", "source": "product-register-approval", "target": "master-data-complete", "type": "normal" },
+    {
+      "id": "main:e2e:08c",
+      "source": "product-register-request",
+      "target": "product-register-approval",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:08d",
+      "source": "product-register-approval",
+      "target": "po-approval",
+      "type": "normal"
+    },
     {
       "id": "main:e2e:09",
       "source": "vendor-check",
-      "target": "master-data-complete",
+      "target": "po-approval",
       "condition": "existingVendor",
       "label": "기존",
       "type": "condition"
@@ -47,50 +109,167 @@
       "label": "신규",
       "type": "condition"
     },
-    { "id": "main:e2e:09c", "source": "vendor-register", "target": "vendor-register-approval", "type": "normal" },
-    { "id": "main:e2e:09d", "source": "vendor-register-approval", "target": "master-data-complete", "type": "normal" },
-    { "id": "main:e2e:10", "source": "master-data-complete", "target": "purchase-order", "type": "normal" },
-    { "id": "main:e2e:11", "source": "purchase-order", "target": "po-approval", "type": "normal" },
-    { "id": "main:e2e:12", "source": "po-approval", "target": "inbound-info", "label": "Y", "type": "condition" },
-
-    { "id": "main:e2e:14", "source": "inbound-info", "target": "inbound-check", "type": "system" },
-    { "id": "main:e2e:15", "source": "inbound-check", "target": "inbound-register", "type": "normal" },
-    { "id": "main:e2e:16", "source": "inbound-register", "target": "inbound-confirm", "type": "system" },
-    { "id": "main:e2e:17", "source": "inbound-confirm", "target": "stock-plus", "type": "system" },
-    { "id": "main:e2e:18", "source": "stock-plus", "target": "ap-inquiry", "type": "normal" },
-    { "id": "main:e2e:19", "source": "ap-inquiry", "target": "ap-close", "type": "normal" },
-    { "id": "main:e2e:20", "source": "ap-close", "target": "ap-voucher-pending", "type": "normal" },
-    { "id": "main:e2e:21", "source": "ap-voucher-pending", "target": "fi-posting", "type": "normal" },
-
-    { "id": "main:e2e:22", "source": "online-order", "target": "order-sync", "type": "normal" },
-    { "id": "main:e2e:23", "source": "order-sync", "target": "order-register", "type": "normal" },
-    { "id": "main:e2e:24", "source": "order-register", "target": "shipment-request", "type": "normal" },
-    { "id": "main:e2e:25", "source": "shipment-request", "target": "shipment-check", "type": "system" },
-    { "id": "main:e2e:26", "source": "shipment-check", "target": "shipment-register", "type": "normal" },
-    { "id": "main:e2e:27", "source": "shipment-register", "target": "shipment-confirm", "type": "system" },
-    { "id": "main:e2e:28", "source": "shipment-confirm", "target": "stock-minus", "type": "normal" },
-    { "id": "main:e2e:29", "source": "stock-minus", "target": "sales-inquiry", "type": "normal" },
-    { "id": "main:e2e:30", "source": "sales-inquiry", "target": "sales-close", "type": "normal" },
-    { "id": "main:e2e:31", "source": "sales-close", "target": "sales-posting", "type": "normal" },
-
-    { "id": "main:e2e:32", "source": "sales-close", "target": "royalty-sales-aggregate", "type": "normal" }
+    {
+      "id": "main:e2e:09c",
+      "source": "vendor-register",
+      "target": "vendor-register-approval",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:09d",
+      "source": "vendor-register-approval",
+      "target": "po-approval",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:11",
+      "source": "po-approval",
+      "target": "purchase-order",
+      "type": "condition",
+      "label": "Y"
+    },
+    {
+      "id": "main:e2e:12",
+      "source": "purchase-order",
+      "target": "inbound-info",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:14",
+      "source": "inbound-info",
+      "target": "inbound-check",
+      "type": "system"
+    },
+    {
+      "id": "main:e2e:15",
+      "source": "inbound-check",
+      "target": "inbound-register",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:16",
+      "source": "inbound-register",
+      "target": "inbound-confirm",
+      "type": "system"
+    },
+    {
+      "id": "main:e2e:17",
+      "source": "inbound-confirm",
+      "target": "stock-plus",
+      "type": "system"
+    },
+    {
+      "id": "main:e2e:18",
+      "source": "stock-plus",
+      "target": "ap-inquiry",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:19",
+      "source": "ap-inquiry",
+      "target": "ap-close",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:20",
+      "source": "ap-close",
+      "target": "ap-voucher-pending",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:21",
+      "source": "ap-voucher-pending",
+      "target": "fi-posting",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:21b",
+      "source": "fi-posting",
+      "target": "regular-fund-execution",
+      "type": "normal",
+      "label": "ERP"
+    },
+    {
+      "id": "main:e2e:22",
+      "source": "online-order",
+      "target": "order-sync",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:23",
+      "source": "order-sync",
+      "target": "order-register",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:24",
+      "source": "order-register",
+      "target": "shipment-request",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:25",
+      "source": "shipment-request",
+      "target": "shipment-check",
+      "type": "system"
+    },
+    {
+      "id": "main:e2e:26",
+      "source": "shipment-check",
+      "target": "shipment-register",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:27",
+      "source": "shipment-register",
+      "target": "shipment-confirm",
+      "type": "system"
+    },
+    {
+      "id": "main:e2e:28",
+      "source": "shipment-confirm",
+      "target": "stock-minus",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:29",
+      "source": "stock-minus",
+      "target": "sales-inquiry",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:30",
+      "source": "sales-inquiry",
+      "target": "sales-close",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:31",
+      "source": "sales-close",
+      "target": "sales-posting",
+      "type": "normal"
+    },
+    {
+      "id": "main:e2e:32",
+      "source": "sales-close",
+      "target": "royalty-sales-aggregate",
+      "type": "normal"
+    }
   ],
   "nodeIds": [
     "opportunity",
     "business-review",
-    "contract-approval",
     "contract-register",
+    "contract-approval",
     "project-register",
     "project-approval",
     "purchase-request",
-    "master-data-split",
     "product-check",
     "vendor-check",
     "product-register-request",
     "product-register-approval",
     "vendor-register",
     "vendor-register-approval",
-    "master-data-complete",
     "po-approval",
     "purchase-order",
     "inbound-info",
@@ -118,6 +297,9 @@
     "mg-deduct-check",
     "mg-offset-process",
     "settlement-posting",
+    "settlement-fi-posting",
     "regular-fund-execution"
-  ]
+  ],
+  "nodes": [],
+  "edges": []
 }

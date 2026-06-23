@@ -14,8 +14,49 @@
     { "id": "p5", "label": "프로젝트등록", "order": 5 },
     { "id": "p6", "label": "실행품의", "order": 6 },
     { "id": "p7", "label": "구매요청", "order": 7 },
-    { "id": "p8", "label": "거래처·발주", "order": 8 },
+    { "id": "p8", "label": "기준정보·발주", "order": 8 },
     { "id": "p9", "label": "입고", "order": 9 },
     { "id": "p10", "label": "재고·매입", "order": 10 }
+  ],
+  "zones": [
+    {
+      "id": "zone-business-selection",
+      "name": "사업부 선택영역",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": ["opportunity", "business-review"],
+      "style": {
+        "showBackground": true,
+        "showBorder": true,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    },
+    {
+      "id": "zone-master-data-check",
+      "name": "기준정보 확인 (DB)",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "product-check",
+        "vendor-check",
+        "product-register-request",
+        "product-register-approval",
+        "vendor-register",
+        "vendor-register-approval"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": true,
+        "borderStyle": "solid",
+        "visible": true,
+        "opacity": 0.14,
+        "fill": "#e0f2fe",
+        "stroke": "#0284c7"
+      }
+    }
   ]
 }

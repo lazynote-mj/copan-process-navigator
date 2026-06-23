@@ -9,7 +9,6 @@ import {
 } from '../types/processData'
 import { buildProcessDataFromPayload, processDataToFilePayload } from './processDataMigration'
 import type { ProcessDataFilePayload } from './processDataMigration'
-import { migrateFanOutToSplitConnectors } from './migrateConnectorFanOut'
 import { normalizeProcessEdges, normalizeProcessNodes } from './processExport'
 import { formatTimestamp } from './workingStateStats'
 
@@ -36,15 +35,14 @@ function applyOverviewMigration(data: ProcessData): ProcessData {
   if (!overviewInstance) return data
 
   const resolved = resolveProcessWithMasters(overviewInstance, data.commonMasters)
-  const migrated = migrateFanOutToSplitConnectors(resolved)
   const idx = data.processes.findIndex((p) => p.type === 'overview')
   if (idx < 0) return data
 
   const processes = [...data.processes]
   processes[idx] = {
     ...processes[idx],
-    nodes: migrated.nodes,
-    edges: migrated.edges,
+    nodes: resolved.nodes,
+    edges: resolved.edges,
   }
   return { ...data, processes }
 }

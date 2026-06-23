@@ -1,6 +1,9 @@
 import { resolveEdgeSourceHandle, resolveEdgeTargetHandle } from '../editor/edgeHandles'
 import type { Edge, EdgeHandleId } from '../../types/process'
-import { DECISION_NODE_LAYOUT, DECISION_POLYGON_VERTICES } from './decisionNodeLayout'
+import {
+  DECISION_NODE_LAYOUT,
+  resolveDecisionLayoutForSize,
+} from './decisionNodeLayout'
 import type { PlacedNode } from './laneLayout'
 
 export type AnchorPoint = { x: number; y: number }
@@ -13,17 +16,25 @@ export function isBranchNodeType(nodeType?: string): boolean {
   return nodeType === 'decision' || nodeType === 'interface-rule'
 }
 
-export function getDecisionDiamondHalfExtents(): { halfW: number; halfH: number } {
+export function getDecisionDiamondHalfExtents(
+  width = DECISION_NODE_LAYOUT.width,
+  height = DECISION_NODE_LAYOUT.height,
+): { halfW: number; halfH: number } {
+  const spec = resolveDecisionLayoutForSize(width, height)
   return {
-    halfW: DECISION_NODE_LAYOUT.diamondWidth / 2,
-    halfH: DECISION_NODE_LAYOUT.diamondHeight / 2,
+    halfW: spec.diamondWidth / 2,
+    halfH: spec.diamondHeight / 2,
   }
 }
 
-export function getDecisionDiamondSize(): { diamondWidth: number; diamondHeight: number } {
+export function getDecisionDiamondSize(
+  width = DECISION_NODE_LAYOUT.width,
+  height = DECISION_NODE_LAYOUT.height,
+): { diamondWidth: number; diamondHeight: number } {
+  const spec = resolveDecisionLayoutForSize(width, height)
   return {
-    diamondWidth: DECISION_NODE_LAYOUT.diamondWidth,
-    diamondHeight: DECISION_NODE_LAYOUT.diamondHeight,
+    diamondWidth: spec.diamondWidth,
+    diamondHeight: spec.diamondHeight,
   }
 }
 
@@ -36,9 +47,10 @@ export function getDecisionNodeCenter(node: PlacedNode): AnchorPoint {
 
 /** polygon 꼭지점 — wrapper (x,y) 기준, layout box 대비 스케일 */
 export function getDecisionDiamondVertex(node: PlacedNode, handle: EdgeHandleId): AnchorPoint {
-  const local = DECISION_POLYGON_VERTICES[handle]
-  const scaleX = node.width / DECISION_NODE_LAYOUT.width
-  const scaleY = node.height / DECISION_NODE_LAYOUT.height
+  const spec = resolveDecisionLayoutForSize(node.width, node.height)
+  const local = spec.vertices[handle]
+  const scaleX = node.width / spec.layoutWidth
+  const scaleY = node.height / spec.layoutHeight
   return {
     x: node.x + local.x * scaleX,
     y: node.y + local.y * scaleY,

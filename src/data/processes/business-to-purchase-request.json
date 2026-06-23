@@ -1,25 +1,25 @@
 {
   "id": "business-to-purchase-request",
-  "name": "사업기회확보 ~ 구매요청",
+  "name": "사업 기회 확보 ~ 구매 요청 : 제/상품",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "사업기회 확보부터 프로젝트 실행품의·구매요청까지",
+  "description": "PDF 도형 기준 제/상품 사업기회~구매요청 프로세스",
   "overviewNodeId": "purchase-request",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "opportunity",
+      "id": "business-to-purchase-request-step-01",
       "name": "사업기회확보",
       "type": "manual",
       "laneId": "business",
       "phaseId": "p1",
-      "system": "manual",
+      "system": "수작업",
       "owner": "사업부",
-      "description": "신규 사업기회를 발굴하고 등록합니다.",
+      "description": "사업기회확보",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,14 +27,14 @@
       "localOrder": 1
     },
     {
-      "id": "business-review",
+      "id": "business-to-purchase-request-step-02",
       "name": "사업참여검토",
-      "type": "manual",
+      "type": "decision",
       "laneId": "business",
       "phaseId": "p2",
-      "system": "manual",
+      "system": "ERP",
       "owner": "사업부",
-      "description": "사업 참여 여부 및 실행 가능성을 검토합니다.",
+      "description": "사업참여검토",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -42,14 +42,29 @@
       "localOrder": 2
     },
     {
-      "id": "contract-approval",
-      "name": "사업계약품의",
-      "type": "approval",
+      "id": "business-to-purchase-request-step-03",
+      "name": "계약등록",
+      "type": "erp",
       "laneId": "business",
       "phaseId": "p3",
-      "system": "groupware",
+      "system": "ERP",
       "owner": "사업부",
-      "description": "사업 계약 체결을 위한 품의를 상신합니다.",
+      "description": "계약등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "business-to-purchase-request-step-04",
+      "name": "사업계약품의",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p4",
+      "system": "G/W",
+      "owner": "사업부",
+      "description": "사업계약품의",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -57,48 +72,29 @@
       "localOrder": 4
     },
     {
-      "id": "contract-register",
-      "name": "계약등록",
-      "type": "erp",
-      "laneId": "business",
-      "phaseId": "p4",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "승인된 계약 정보를 ERP에 등록합니다.",
-      "inputs": [],
-      "outputs": [
-        "계약코드 생성"
-      ],
-      "controls": [],
-      "phaseOrder": 3,
-      "localOrder": 3
-    },
-    {
-      "id": "project-register",
-      "name": "프로젝트등록",
+      "id": "business-to-purchase-request-step-05",
+      "name": "프로젝트실행품의입력",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p5",
       "system": "ERP",
       "owner": "사업부",
-      "description": "계약 기준으로 프로젝트를 생성합니다.",
+      "description": "프로젝트실행품의입력",
       "inputs": [],
-      "outputs": [
-        "프로젝트코드 생성"
-      ],
+      "outputs": [],
       "controls": [],
       "phaseOrder": 5,
       "localOrder": 5
     },
     {
-      "id": "project-approval",
-      "name": "사업실행품의",
-      "type": "approval",
+      "id": "business-to-purchase-request-step-06",
+      "name": "프로젝트 실행품의(G/W)",
+      "type": "decision",
       "laneId": "business",
       "phaseId": "p6",
-      "system": "groupware",
+      "system": "G/W",
       "owner": "사업부",
-      "description": "프로젝트 실행을 위한 최종 품의를 상신합니다.",
+      "description": "프로젝트 실행품의(G/W)",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -106,69 +102,237 @@
       "localOrder": 6
     },
     {
-      "id": "purchase-request",
-      "name": "구매요청",
+      "id": "business-to-purchase-request-step-07",
+      "name": "프로젝트등록",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p7",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "프로젝트등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "business-to-purchase-request-step-08",
+      "name": "WBS코드등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "WBS코드등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "business-to-purchase-request-step-09",
+      "name": "상품 등록 PROCESS",
+      "type": "linked-process",
+      "laneId": "business",
+      "phaseId": "p9",
+      "system": "연결 프로세스",
+      "owner": "사업부",
+      "description": "상품 등록 PROCESS",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "business-to-purchase-request-step-10",
+      "name": "구매요청",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p10",
       "system": "ERP",
       "owner": "사업부",
       "description": "구매요청",
       "inputs": [],
       "outputs": [],
       "controls": [],
-      "phaseOrder": 7,
-      "localOrder": 7
+      "phaseOrder": 10,
+      "localOrder": 10
+    },
+    {
+      "id": "business-to-purchase-request-step-11",
+      "name": "거래처 등록 PROCESS",
+      "type": "linked-process",
+      "laneId": "business",
+      "phaseId": "p11",
+      "system": "연결 프로세스",
+      "owner": "사업부",
+      "description": "거래처 등록 PROCESS",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 11
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "opportunity",
-      "target": "business-review",
+      "id": "business-to-purchase-request-e01",
+      "source": "business-to-purchase-request-step-01",
+      "target": "business-to-purchase-request-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "business-review",
-      "target": "contract-register",
-      "condition": "",
-      "label": "",
-      "type": "normal"
+      "id": "business-to-purchase-request-e02",
+      "source": "business-to-purchase-request-step-02",
+      "target": "business-to-purchase-request-step-03",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e03",
-      "source": "contract-register",
-      "target": "contract-approval",
+      "id": "business-to-purchase-request-e03",
+      "source": "business-to-purchase-request-step-03",
+      "target": "business-to-purchase-request-step-04",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e04",
-      "source": "contract-approval",
-      "target": "project-register",
-      "condition": "",
-      "label": "",
-      "type": "normal"
+      "id": "business-to-purchase-request-e04",
+      "source": "business-to-purchase-request-step-04",
+      "target": "business-to-purchase-request-step-05",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e05",
-      "source": "project-register",
-      "target": "project-approval",
+      "id": "business-to-purchase-request-e05",
+      "source": "business-to-purchase-request-step-05",
+      "target": "business-to-purchase-request-step-06",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e06",
-      "source": "project-approval",
-      "target": "purchase-request",
+      "id": "business-to-purchase-request-e06",
+      "source": "business-to-purchase-request-step-06",
+      "target": "business-to-purchase-request-step-07",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-e07",
+      "source": "business-to-purchase-request-step-07",
+      "target": "business-to-purchase-request-step-08",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-e08",
+      "source": "business-to-purchase-request-step-08",
+      "target": "business-to-purchase-request-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-e09",
+      "source": "business-to-purchase-request-step-09",
+      "target": "business-to-purchase-request-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-e10",
+      "source": "business-to-purchase-request-step-10",
+      "target": "business-to-purchase-request-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-branch-01",
+      "source": "business-to-purchase-request-step-02",
+      "target": "business-to-purchase-request-step-01",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-branch-02",
+      "source": "business-to-purchase-request-step-04",
+      "target": "business-to-purchase-request-step-03",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-branch-03",
+      "source": "business-to-purchase-request-step-06",
+      "target": "business-to-purchase-request-step-05",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

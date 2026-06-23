@@ -1,5 +1,4 @@
 import type { NodeType } from '../../types/nodeTypes'
-import { DECISION_NODE_LAYOUT, getDecisionNodeSize } from './decisionNodeLayout'
 
 /** Overview Cross-Functional Swimlane layout 상수 — Compact + Collision Safe */
 export type OverviewVerticalMetrics = {
@@ -47,9 +46,9 @@ export const OVERVIEW_VERTICAL_METRICS: OverviewVerticalMetrics = {
   returnRouteColumnWidth: 20,
   nodeWidth: 170,
   nodeHeight: 46,
-  decisionWidth: DECISION_NODE_LAYOUT.width,
-  decisionHeight: DECISION_NODE_LAYOUT.height,
-  decisionDiamondSize: DECISION_NODE_LAYOUT.width,
+  decisionWidth: 140,
+  decisionHeight: 44,
+  decisionDiamondSize: 140,
   nodeGapX: 32,
   nodeGapY: 20,
   nodeVerticalGap: 18,
@@ -75,10 +74,10 @@ export const OVERVIEW_VERTICAL_METRICS: OverviewVerticalMetrics = {
 export function getOverviewNodeSize(
   type: NodeType,
   metrics: OverviewVerticalMetrics = OVERVIEW_VERTICAL_METRICS,
-  name = '',
+  _name = '',
 ): { width: number; height: number } {
   if (type === 'decision') {
-    return getDecisionNodeSize(name)
+    return { width: metrics.decisionWidth, height: metrics.decisionHeight }
   }
   return { width: metrics.nodeWidth, height: metrics.nodeHeight }
 }

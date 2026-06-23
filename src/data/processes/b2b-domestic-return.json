@@ -3,23 +3,23 @@
   "name": "주문반품 ~ 입고 ~ 반품전표 : B2B 국내",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "B2B 국내 반품 주문부터 입고·재고·매출마감·전표까지",
+  "description": "PDF 도형 기준 B2B 국내 반품~입고~반품전표 프로세스",
   "overviewNodeId": "return-handling",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "return-order-register",
+      "id": "b2b-domestic-return-step-01",
       "name": "반품주문등록",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p1",
       "system": "ERP",
       "owner": "사업부",
-      "description": "반품 주문을 등록합니다.",
+      "description": "반품주문등록",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,14 +27,14 @@
       "localOrder": 1
     },
     {
-      "id": "return-order-confirm",
+      "id": "b2b-domestic-return-step-02",
       "name": "반품주문확정",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p2",
       "system": "ERP",
       "owner": "사업부",
-      "description": "반품 주문을 확정합니다.",
+      "description": "반품주문확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -42,14 +42,14 @@
       "localOrder": 2
     },
     {
-      "id": "return-shipment-request",
+      "id": "b2b-domestic-return-step-03",
       "name": "출고반품요청",
-      "type": "interface",
-      "laneId": "business",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
       "phaseId": "p3",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "반품 출고 지시를 WMS로 전달합니다.",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고반품요청",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -57,14 +57,14 @@
       "localOrder": 3
     },
     {
-      "id": "stock-sync-api-inbound",
-      "name": "재고연동 API(입고요청)",
-      "type": "system",
+      "id": "b2b-domestic-return-step-04",
+      "name": "위탁 여부",
+      "type": "decision",
       "laneId": "business",
       "phaseId": "p4",
-      "system": "ERP→WMS API",
+      "system": "ERP",
       "owner": "사업부",
-      "description": "입고 요청을 재고연동 API로 WMS에 전달합니다.",
+      "description": "위탁 여부",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -72,14 +72,14 @@
       "localOrder": 4
     },
     {
-      "id": "inbound-request-check",
-      "name": "입고 요청 확인",
-      "type": "manual",
-      "laneId": "warehouse-easyadmin",
+      "id": "b2b-domestic-return-step-05",
+      "name": "위탁재고 현황",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p5",
-      "system": "WMS",
-      "owner": "물류센터",
-      "description": "WMS에서 입고 요청 내역을 확인합니다.",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁재고 현황",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -87,14 +87,14 @@
       "localOrder": 5
     },
     {
-      "id": "b2b-return-inbound",
-      "name": "B2B 반품입고 처리",
-      "type": "interface",
-      "laneId": "warehouse-easyadmin",
+      "id": "b2b-domestic-return-step-06",
+      "name": "입고정보",
+      "type": "database",
+      "laneId": "business",
       "phaseId": "p6",
-      "system": "WMS",
-      "owner": "물류센터",
-      "description": "B2B 반품 입고를 처리합니다.",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "입고정보",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -102,14 +102,14 @@
       "localOrder": 6
     },
     {
-      "id": "inbound-qty-input",
-      "name": "입고 수량 입력",
-      "type": "manual",
+      "id": "b2b-domestic-return-step-07",
+      "name": "입고 요청 확인",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p7",
-      "system": "WMS",
+      "system": "이지어드민/WMS",
       "owner": "물류센터",
-      "description": "반품 입고 수량을 입력합니다.",
+      "description": "입고 요청 확인",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -117,14 +117,14 @@
       "localOrder": 7
     },
     {
-      "id": "return-inbound-register",
-      "name": "반품입고등록",
-      "type": "interface",
+      "id": "b2b-domestic-return-step-08",
+      "name": "B2B반품입고 처리",
+      "type": "manual",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p8",
-      "system": "WMS",
+      "system": "이지어드민",
       "owner": "물류센터",
-      "description": "반품 입고를 WMS에 등록합니다.",
+      "description": "B2B반품입고 처리",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -132,14 +132,14 @@
       "localOrder": 8
     },
     {
-      "id": "return-confirm",
-      "name": "반품확정",
-      "type": "erp",
-      "laneId": "finance",
+      "id": "b2b-domestic-return-step-09",
+      "name": "입고 수량 입력",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
       "phaseId": "p9",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "반품을 확정합니다.",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "입고 수량 입력",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -147,14 +147,14 @@
       "localOrder": 9
     },
     {
-      "id": "consignment-flag-check",
-      "name": "위탁 여부",
-      "type": "decision",
-      "laneId": "finance",
+      "id": "b2b-domestic-return-step-10",
+      "name": "반품확정",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p10",
       "system": "ERP",
-      "owner": "재무팀",
-      "description": "위탁 재고 여부를 판단합니다.",
+      "owner": "사업부",
+      "description": "반품확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -162,14 +162,14 @@
       "localOrder": 10
     },
     {
-      "id": "consignment-stock-status-check",
-      "name": "위탁재고 현황 확인",
+      "id": "b2b-domestic-return-step-11",
+      "name": "일괄매출마감등록",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p11",
       "system": "ERP",
       "owner": "재무팀",
-      "description": "위탁 재고 현황을 확인합니다.",
+      "description": "일괄매출마감등록",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -177,186 +177,192 @@
       "localOrder": 11
     },
     {
-      "id": "erp-stock-plus",
-      "name": "ERP 재고(+)",
-      "type": "system",
-      "laneId": "finance",
-      "phaseId": "p11",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "반품에 따른 ERP 재고를 증가 반영합니다.",
-      "inputs": [],
-      "outputs": [],
-      "controls": [],
-      "phaseOrder": 11,
-      "localOrder": 12
-    },
-    {
-      "id": "batch-sales-close-register",
-      "name": "일괄매출마감등록",
-      "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p12",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "반품 매출 마감 대상을 일괄 등록합니다.",
-      "inputs": [],
-      "outputs": [],
-      "controls": [],
-      "phaseOrder": 12,
-      "localOrder": 13
-    },
-    {
-      "id": "sales-close-confirm",
+      "id": "b2b-domestic-return-step-12",
       "name": "매출마감확정",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p12",
       "system": "ERP",
       "owner": "재무팀",
-      "description": "매출 마감을 확정합니다.",
+      "description": "매출마감확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 12,
-      "localOrder": 14
+      "localOrder": 12
     },
     {
-      "id": "voucher-pending",
+      "id": "b2b-domestic-return-step-13",
       "name": "전표생성(미결)",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p13",
       "system": "ERP",
       "owner": "재무팀",
-      "description": "미결 전표를 생성합니다.",
+      "description": "전표생성(미결)",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 13,
-      "localOrder": 15
+      "localOrder": 13
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "return-order-register",
-      "target": "return-order-confirm",
+      "id": "b2b-domestic-return-e01",
+      "source": "b2b-domestic-return-step-01",
+      "target": "b2b-domestic-return-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "return-order-confirm",
-      "target": "return-shipment-request",
+      "id": "b2b-domestic-return-e02",
+      "source": "b2b-domestic-return-step-02",
+      "target": "b2b-domestic-return-step-03",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e03",
-      "source": "return-shipment-request",
-      "target": "stock-sync-api-inbound",
+      "id": "b2b-domestic-return-e03",
+      "source": "b2b-domestic-return-step-03",
+      "target": "b2b-domestic-return-step-04",
       "condition": "",
       "label": "",
-      "type": "system"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e04",
-      "source": "stock-sync-api-inbound",
-      "target": "inbound-request-check",
-      "condition": "",
-      "label": "",
-      "type": "system"
-    },
-    {
-      "id": "e05",
-      "source": "inbound-request-check",
-      "target": "b2b-return-inbound",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e06",
-      "source": "b2b-return-inbound",
-      "target": "inbound-qty-input",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e07",
-      "source": "inbound-qty-input",
-      "target": "return-inbound-register",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e08",
-      "source": "return-inbound-register",
-      "target": "return-confirm",
-      "condition": "",
-      "label": "",
-      "type": "system"
-    },
-    {
-      "id": "e09",
-      "source": "return-confirm",
-      "target": "consignment-flag-check",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e10",
-      "source": "consignment-flag-check",
-      "target": "consignment-stock-status-check",
-      "condition": "consignment",
+      "id": "b2b-domestic-return-e04",
+      "source": "b2b-domestic-return-step-04",
+      "target": "b2b-domestic-return-step-05",
+      "condition": "Y",
       "label": "Y",
-      "type": "condition"
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e11",
-      "source": "consignment-flag-check",
-      "target": "erp-stock-plus",
-      "condition": "noConsignment",
+      "id": "b2b-domestic-return-e05",
+      "source": "b2b-domestic-return-step-05",
+      "target": "b2b-domestic-return-step-06",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e06",
+      "source": "b2b-domestic-return-step-06",
+      "target": "b2b-domestic-return-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e07",
+      "source": "b2b-domestic-return-step-07",
+      "target": "b2b-domestic-return-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e08",
+      "source": "b2b-domestic-return-step-08",
+      "target": "b2b-domestic-return-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e09",
+      "source": "b2b-domestic-return-step-09",
+      "target": "b2b-domestic-return-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e10",
+      "source": "b2b-domestic-return-step-10",
+      "target": "b2b-domestic-return-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e11",
+      "source": "b2b-domestic-return-step-11",
+      "target": "b2b-domestic-return-step-12",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-e12",
+      "source": "b2b-domestic-return-step-12",
+      "target": "b2b-domestic-return-step-13",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-domestic-return-branch-01",
+      "source": "b2b-domestic-return-step-04",
+      "target": "b2b-domestic-return-step-06",
+      "condition": "N",
       "label": "N",
-      "type": "condition"
-    },
-    {
-      "id": "e12",
-      "source": "consignment-stock-status-check",
-      "target": "erp-stock-plus",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e13",
-      "source": "erp-stock-plus",
-      "target": "batch-sales-close-register",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e14",
-      "source": "batch-sales-close-register",
-      "target": "sales-close-confirm",
-      "condition": "",
-      "label": "",
-      "type": "normal"
-    },
-    {
-      "id": "e15",
-      "source": "sales-close-confirm",
-      "target": "voucher-pending",
-      "condition": "",
-      "label": "",
-      "type": "normal"
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

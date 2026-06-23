@@ -11,7 +11,7 @@ function nodeLayoutPart(process: Process): string {
   return process.nodes
     .map(
       (node) =>
-        `${node.id}:${node.laneId}:${node.type}:${node.processZone ?? ''}:${node.cellOrder ?? ''}:${node.cellSlot ?? ''}:${node.localOrder ?? ''}:${node.zoneOrder ?? ''}`,
+        `${node.id}:${node.laneId}:${node.type}:${node.processZone ?? ''}:${node.cellOrder ?? ''}:${node.cellSlot ?? ''}:${node.detailLayout?.column ?? ''}:${node.detailLayout?.row ?? ''}:${node.localOrder ?? ''}:${node.zoneOrder ?? ''}:${node.offsetX ?? 0}:${node.offsetY ?? 0}`,
     )
     .join('|')
 }

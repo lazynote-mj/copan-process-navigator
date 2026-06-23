@@ -5,7 +5,9 @@
       "name": "반품",
       "description": "반품 처리 — Overview 대표 노드에서 상세 프로세스로 이동",
       "detailProcessId": "b2b-domestic-return",
-      "nodeIds": ["return-handling"],
+      "nodeIds": [
+        "return-handling"
+      ],
       "links": []
     },
     {
@@ -13,7 +15,9 @@
       "name": "재고이동",
       "description": "창고 간 재고 이동 — Overview 대표 노드에서 상세 프로세스로 이동",
       "detailProcessId": "stock-transfer",
-      "nodeIds": ["stock-transfer-handling"],
+      "nodeIds": [
+        "stock-transfer-handling"
+      ],
       "links": []
     },
     {
@@ -21,7 +25,9 @@
       "name": "기타출고",
       "description": "기타출고·무상증정 — Overview 대표 노드에서 상세 프로세스로 이동",
       "detailProcessId": "other-issue",
-      "nodeIds": ["other-issue-handling"],
+      "nodeIds": [
+        "other-issue-handling"
+      ],
       "links": []
     },
     {
@@ -30,7 +36,6 @@
       "description": "위탁 재고·매출 마감 및 이상 검증",
       "detailProcessId": "consignment-settlement",
       "nodeIds": [
-        "stock-minus",
         "consignment-stock-status",
         "consignment-sales-register",
         "consignment-sales-close",
@@ -38,13 +43,34 @@
         "exception-handling",
         "prepayment-process",
         "regular-fund-execution",
-        "settlement-posting"
+        "settlement-posting",
+        "settlement-fi-posting"
       ],
       "links": [
-        { "id": "sub:consignment:00", "source": "stock-minus", "target": "consignment-stock-status", "type": "system" },
-        { "id": "sub:consignment:01", "source": "consignment-stock-status", "target": "consignment-sales-register", "type": "normal" },
-        { "id": "sub:consignment:02", "source": "consignment-sales-register", "target": "consignment-sales-close", "type": "normal" },
-        { "id": "sub:consignment:03", "source": "consignment-sales-close", "target": "settlement-anomaly-check", "type": "normal" },
+        {
+          "id": "sub:consignment:00",
+          "source": "sales-close",
+          "target": "consignment-stock-status",
+          "type": "system"
+        },
+        {
+          "id": "sub:consignment:01",
+          "source": "consignment-stock-status",
+          "target": "consignment-sales-register",
+          "type": "normal"
+        },
+        {
+          "id": "sub:consignment:02",
+          "source": "consignment-sales-register",
+          "target": "consignment-sales-close",
+          "type": "normal"
+        },
+        {
+          "id": "sub:consignment:03",
+          "source": "consignment-sales-close",
+          "target": "settlement-anomaly-check",
+          "type": "normal"
+        },
         {
           "id": "sub:consignment:04",
           "source": "settlement-anomaly-check",
@@ -61,8 +87,30 @@
           "label": "N",
           "type": "condition"
         },
-        { "id": "sub:consignment:06", "source": "prepayment-process", "target": "regular-fund-execution", "type": "normal" },
-        { "id": "sub:consignment:07", "source": "regular-fund-execution", "target": "settlement-posting", "type": "normal" }
+        {
+          "id": "sub:consignment:06",
+          "source": "prepayment-process",
+          "target": "regular-fund-execution",
+          "type": "normal"
+        },
+        {
+          "id": "sub:consignment:07",
+          "source": "regular-fund-execution",
+          "target": "settlement-posting",
+          "type": "normal"
+        },
+        {
+          "id": "sub:consignment:08",
+          "source": "exception-handling",
+          "target": "prepayment-process",
+          "type": "normal"
+        },
+        {
+          "id": "sub:consignment:09",
+          "source": "settlement-posting",
+          "target": "settlement-fi-posting",
+          "type": "normal"
+        }
       ]
     },
     {
@@ -75,11 +123,22 @@
         "royalty-sales-close",
         "mg-deduct-check",
         "mg-offset-process",
-        "settlement-posting"
+        "settlement-posting",
+        "settlement-fi-posting"
       ],
       "links": [
-        { "id": "sub:royalty:01", "source": "royalty-sales-aggregate", "target": "royalty-sales-close", "type": "normal" },
-        { "id": "sub:royalty:02", "source": "royalty-sales-close", "target": "mg-deduct-check", "type": "normal" },
+        {
+          "id": "sub:royalty:01",
+          "source": "royalty-sales-aggregate",
+          "target": "royalty-sales-close",
+          "type": "normal"
+        },
+        {
+          "id": "sub:royalty:02",
+          "source": "royalty-sales-close",
+          "target": "mg-deduct-check",
+          "type": "normal"
+        },
         {
           "id": "sub:royalty:03",
           "source": "mg-deduct-check",
@@ -96,7 +155,18 @@
           "label": "N",
           "type": "condition"
         },
-        { "id": "sub:royalty:05", "source": "mg-offset-process", "target": "settlement-posting", "type": "normal" }
+        {
+          "id": "sub:royalty:05",
+          "source": "mg-offset-process",
+          "target": "settlement-posting",
+          "type": "normal"
+        },
+        {
+          "id": "sub:royalty:06",
+          "source": "settlement-posting",
+          "target": "settlement-fi-posting",
+          "type": "normal"
+        }
       ]
     },
     {
@@ -112,7 +182,9 @@
       "name": "팝업/콘서트 재고·매출 동기화",
       "description": "팝업/콘서트 현장 재고이동 및 매출내역 동기화 — Overview 대표 노드에서 상세 프로세스로 이동",
       "detailProcessId": "popup-concert-stock-sales-sync",
-      "nodeIds": ["popup-concert-stock-sales-sync"],
+      "nodeIds": [
+        "popup-concert-stock-sales-sync"
+      ],
       "links": []
     }
   ]

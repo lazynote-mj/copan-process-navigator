@@ -27,7 +27,9 @@ export function ProcessMenu({ processes, selectedId, onSelect }: ProcessMenuProp
               <span className="process-menu__title">{process.name}</span>
               <span className="process-menu__meta">
                 {process.version} · {process.owner}
-                {process.nodes.length > 0 ? ` · Node ${process.nodes.length}개` : ' · 데이터 입력 예정'}
+                {process.nodes.length > 0
+                  ? ` · 노드 ${process.nodes.length}개 · 연결선 ${process.edges.length}개`
+                  : ' · 데이터 입력 예정'}
               </span>
             </button>
           </li>

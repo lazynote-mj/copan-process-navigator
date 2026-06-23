@@ -1,6 +1,7 @@
-import type { Edge, EdgeHandleId, EdgeRoutingConfig, Node, Process } from '../../types/process'
+import type { Edge, EdgeHandleId, EdgeRoutingConfig, EdgeRoutingPoint, Node, Process } from '../../types/process'
 import { generateId } from './processEditor'
 import { DEFAULT_EDGE_TYPE } from '../../types/edgeTypes'
+import { updateManualRoutingPoints } from '../layout/orthogonalEdgeRouter'
 
 export const EDGE_HANDLE_OPTIONS: { value: EdgeHandleId; label: string }[] = [
   { value: 'top', label: '위' },
@@ -86,12 +87,17 @@ export function migrateEdgeHandles(edge: Edge): Edge {
   }
 }
 
-/** Property Panel 저장 시 UI 기본 handle 포함 (manual routing points는 유지) */
+/** Property Panel 저장 시 handle 기본값 — handleAuto면 router 선택값 유지 */
 export function withEdgeHandleDefaults(edge: Edge): Edge {
+  const auto = isHandleAutoEnabled(edge)
   return {
     ...edge,
-    sourceHandle: resolveEdgeSourceHandle(edge) ?? 'bottom',
-    targetHandle: resolveEdgeTargetHandle(edge) ?? 'top',
+    ...(auto
+      ? {}
+      : {
+          sourceHandle: resolveEdgeSourceHandle(edge) ?? 'bottom',
+          targetHandle: resolveEdgeTargetHandle(edge) ?? 'top',
+        }),
     routing: preserveEdgeRouting(edge),
   }
 }
@@ -102,6 +108,7 @@ export function isHandleAutoEnabled(edge: Edge): boolean {
   if (edge.routing?.mode === 'manual') return false
   if (edge.routing?.handleAuto === true) return true
   if (edge.routing?.handlesLocked === true) return false
+  if (edge.routing?.mode === 'auto' && edge.routing?.handleAuto !== false) return true
   const sh = resolveEdgeSourceHandle(edge)
   const th = resolveEdgeTargetHandle(edge)
   if (sh && th) return false
@@ -140,15 +147,12 @@ export function lockEdgeHandles(edge: Edge): Edge {
 }
 
 export function unlockEdgeHandles(edge: Edge): Edge {
-  const routing = preserveEdgeRouting(edge)
-  const { handlesLocked: _removed, sourceHandle: _rs, targetHandle: _rt, ...rest } = routing
   const next: Edge = {
     ...edge,
-    routing: {
-      ...rest,
-      mode: 'auto',
-      handleAuto: true,
-    },
+    manualRoute: false,
+    bendPoints: undefined,
+    points: undefined,
+    routing: { mode: 'auto', handleAuto: true },
   }
   delete next.sourceHandle
   delete next.targetHandle
@@ -166,6 +170,31 @@ export function patchEdgeHandles(
       ...patch,
     }),
   )
+}
+
+/** 캔버스 bend 편집 또는 패널에서 수동 경로 전환 */
+export function setEdgeManualRouting(edge: Edge, bendPoints: EdgeRoutingPoint[]): Edge {
+  const sourceHandle = resolveEdgeSourceHandle(edge) ?? 'bottom'
+  const targetHandle = resolveEdgeTargetHandle(edge) ?? 'top'
+  const points = bendPoints.map((point) => ({ ...point }))
+  return lockEdgeHandles({
+    ...edge,
+    manualRoute: true,
+    bendPoints: points,
+    points,
+    routing: updateManualRoutingPoints(edge.routing, points, sourceHandle, targetHandle),
+  })
+}
+
+/** manual bend 제거 — auto router + handle 자동 */
+export function resetEdgeAutoRouting(edge: Edge): Edge {
+  return unlockEdgeHandles({
+    ...edge,
+    manualRoute: false,
+    bendPoints: undefined,
+    points: undefined,
+    routing: { mode: 'auto', handleAuto: true },
+  })
 }
 
 export function createDefaultOutgoingEdge(sourceNodeId: string): Edge {

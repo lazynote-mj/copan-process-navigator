@@ -75,14 +75,7 @@ function chainEdges(ids, type = 'normal') {
   }))
 }
 
-const btpNodes = [
-  ...readJson(path.join(root, 'business-to-project/nodes.json')),
-  node('purchase-request', '구매요청', 'business', 7),
-]
-const btpEdges = [
-  ...readJson(path.join(root, 'business-to-project/edges.json')),
-  { id: 'e06', source: 'project-approval', target: 'purchase-request', condition: '', label: '', type: 'normal' },
-]
+const btpCanonical = readJson(path.join(root, 'business-to-purchase-request.json'))
 
 const p2apNodes = readJson(path.join(root, 'procure-to-pay/nodes.json'))
 const p2apEdges = readJson(path.join(root, 'procure-to-pay/edges.json'))
@@ -115,7 +108,7 @@ const b2bDomesticNodes = [
   node('shipment-confirm', '출고확정', 'warehouse-easyadmin', 5, 'interface', 'WMS→ERP', '물류센터'),
   node('stock-minus', '재고인식(-)', 'warehouse-easyadmin', 6, 'system', 'ERP', '물류센터'),
   node('sales-close', '매출마감확정', 'finance', 7, 'erp', 'ERP', '재무팀'),
-  node('sales-posting', '매출전표생성', 'finance', 8, 'system', 'ERP', '재무팀'),
+  node('sales-posting', '매출전표 반영', 'finance', 8, 'system', 'ERP', '재무팀'),
 ]
 
 const consignmentReceiptNodes = [
@@ -147,14 +140,7 @@ const royaltyNodes = [
 ]
 
 const processes = [
-  shell({
-    id: 'business-to-purchase-request',
-    name: '사업기회확보 ~ 구매요청',
-    description: '사업기회 확보부터 프로젝트 실행품의·구매요청까지',
-    overviewNodeId: 'purchase-request',
-    nodes: btpNodes,
-    edges: btpEdges,
-  }),
+  btpCanonical,
   shell({
     id: 'purchase-to-ap-invoice',
     name: '구매요청 ~ 입고 ~ 매입전표',
@@ -199,7 +185,7 @@ const processes = [
       node('export-shipment-confirm', '수출출고확정', 'warehouse-easyadmin', 4, 'interface', 'WMS→ERP', '물류센터'),
       node('export-stock-minus', '재고인식(-)', 'warehouse-easyadmin', 5, 'system', 'ERP', '물류센터'),
       node('export-sales-close', '매출마감확정', 'finance', 6, 'erp', 'ERP', '재무팀'),
-      node('export-sales-posting', '매출전표생성', 'finance', 7, 'system', 'ERP', '재무팀'),
+      node('export-sales-posting', '매출전표 반영', 'finance', 7, 'system', 'ERP', '재무팀'),
     ],
     edges: chainEdges([
       'export-order-register',
@@ -241,7 +227,7 @@ const processes = [
       node('preorder-shipment-confirm', '출고확정', 'warehouse-easyadmin', 4, 'interface', 'WMS→ERP', '물류센터'),
       node('preorder-stock-minus', '재고인식(-)', 'warehouse-easyadmin', 5, 'system', 'ERP', '물류센터'),
       node('preorder-sales-close', '매출마감확정', 'finance', 6, 'erp', 'ERP', '재무팀'),
-      node('preorder-sales-posting', '매출전표생성', 'finance', 7, 'system', 'ERP', '재무팀'),
+      node('preorder-sales-posting', '매출전표 반영', 'finance', 7, 'system', 'ERP', '재무팀'),
     ],
     edges: chainEdges([
       'preorder-register',

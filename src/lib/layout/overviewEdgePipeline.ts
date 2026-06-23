@@ -2,39 +2,39 @@ import type { Edge as FlowEdge } from '@xyflow/react'
 import type { Process } from '../../types/process'
 import {
   buildBrokenFlowEdge,
-  buildOrthogonalFlowEdge,
+  buildOrthogonalFlowEdgeWithCollisionRetry,
+  accumulateEdgeLabelRect,
   type BuiltOrthogonalEdge,
 } from './buildOrthogonalFlowEdge'
 import { assertPathRespectsContentLeft } from './edgeRouter'
 import type { PlacedNode } from './laneLayout'
-import { countNodeCollisionsOnPath, isNearEdge, type Segment } from './orthogonalEdgeRouter'
-import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
+import type { Segment } from './orthogonalEdgeRouter'
+import type { LabelRect } from './edgeLabelPlacement'
 import { computeEdgeBranchContexts } from './edgeBranchRouting'
 import { logProcessFlowIssues, validateProcessFlow } from './processFlowValidation'
-import { isInterfaceRuleNode } from './interfaceRuleLayout'
 import { sortEdgesByPriority } from './laneLayoutResolver'
 
+type BuildProcessEdgesOptions = {
+  /** Cross-lane corridor·장애물 회피 — Overview·Detail 공통 orthogonal router */
+  overviewMode?: boolean
+}
+
 /** JSON edges 배열 기준 — layout/위치로 edge 삭제 금지 */
-export function buildOverviewEdges(
+export function buildProcessEdges(
   process: Process,
   placed: PlacedNode[],
   minContentX: number,
+  options: BuildProcessEdgesOptions = {},
 ): { flowEdges: FlowEdge[]; built: BuiltOrthogonalEdge[] } {
+  const overviewMode = options.overviewMode ?? true
   logProcessFlowIssues(process, validateProcessFlow(process))
 
-  const nodeById = new Map(process.nodes.map((node) => [node.id, node]))
-  const routableEdges = sortEdgesByPriority(
-    process.edges.filter((edge) => {
-      const src = nodeById.get(edge.source)
-      const tgt = nodeById.get(edge.target)
-      return !isInterfaceRuleNode(src?.type) && !isInterfaceRuleNode(tgt?.type)
-    }),
-  )
+  const routableEdges = sortEdgesByPriority(process.edges)
 
   const branchContexts = computeEdgeBranchContexts(routableEdges, placed, process)
   const placedMap = new Map(placed.map((n) => [n.id, n]))
-  const metrics = OVERVIEW_GRID_METRICS
   const existingSegments: Segment[] = []
+  const existingLabelRects: LabelRect[] = []
   const built: BuiltOrthogonalEdge[] = []
 
   for (const edge of routableEdges) {
@@ -55,12 +55,10 @@ export function buildOverviewEdges(
       continue
     }
 
-    const exclude = new Set([source.id, target.id])
     const branchContext = branchContexts.get(edge.id)
     const parallelIndex = branchContext?.parallelIndex ?? 0
-    const nearEdge = isNearEdge(source, target, process)
 
-    let result = buildOrthogonalFlowEdge(
+    const result = buildOrthogonalFlowEdgeWithCollisionRetry(
       edge,
       source,
       target,
@@ -68,57 +66,17 @@ export function buildOverviewEdges(
       parallelIndex,
       minContentX,
       existingSegments,
-      { overviewMode: true, process, branchContext },
+      { overviewMode, process, branchContext, existingLabelRects },
     )
-
-    if (
-      !nearEdge &&
-      countNodeCollisionsOnPath(result.route.points, placed, exclude, metrics.edgeNodeMargin, process) > 0
-    ) {
-      const retry = buildOrthogonalFlowEdge(
-        edge,
-        source,
-        target,
-        placed,
-        parallelIndex,
-        minContentX,
-        existingSegments,
-        { overviewMode: true, preferCorridor: true, process, branchContext },
-      )
-      if (
-        countNodeCollisionsOnPath(retry.route.points, placed, exclude, metrics.edgeNodeMargin, process) <
-        countNodeCollisionsOnPath(result.route.points, placed, exclude, metrics.edgeNodeMargin, process)
-      ) {
-        result = retry
-      }
-    }
-
-    if (
-      !nearEdge &&
-      countNodeCollisionsOnPath(result.route.points, placed, exclude, metrics.edgeNodeMargin, process) > 0
-    ) {
-      const lastResort = buildOrthogonalFlowEdge(
-        edge,
-        source,
-        target,
-        placed,
-        parallelIndex + 3,
-        minContentX,
-        existingSegments,
-        { overviewMode: true, preferCorridor: true, process, branchContext },
-      )
-      if (
-        countNodeCollisionsOnPath(lastResort.route.points, placed, exclude, metrics.edgeNodeMargin, process) <
-        countNodeCollisionsOnPath(result.route.points, placed, exclude, metrics.edgeNodeMargin, process)
-      ) {
-        result = lastResort
-      }
-    }
 
     if (result.path) assertPathRespectsContentLeft(result.path, minContentX)
     existingSegments.push(...result.segments)
+    accumulateEdgeLabelRect(existingLabelRects, result.route)
     built.push(result)
   }
 
   return { flowEdges: built.map((b) => b.flowEdge), built }
 }
+
+/** @deprecated buildProcessEdges 사용 */
+export const buildOverviewEdges = buildProcessEdges

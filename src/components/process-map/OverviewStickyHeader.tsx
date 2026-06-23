@@ -38,7 +38,9 @@ export function OverviewStickyHeader({
       className={`overview-sticky-header${editMode ? ' overview-sticky-header--edit' : ''}`}
       style={{
         width,
-        gridTemplateColumns: scaledSwimlaneGridTemplateColumns(grid, scale),
+        gridTemplateColumns: scaledSwimlaneGridTemplateColumns(grid, scale, {
+          fillWidth: contentWidth != null,
+        }),
       }}
     >
       {!hideZoneColumn && <div className="overview-sticky-header__corner" aria-hidden />}

@@ -58,7 +58,7 @@ export function buildDerivedBridgeEdges(
 
   for (const startId of visibleNodeIds) {
     const queue: BridgeQueueItem[] = [{ nodeId: startId, viaHidden: false }]
-    const visited = new Set<string>([startId])
+    const visitedHidden = new Set<string>()
 
     while (queue.length > 0) {
       const { nodeId, viaHidden, bridgeFirstEdge } = queue.shift()!
@@ -94,8 +94,8 @@ export function buildDerivedBridgeEdges(
           continue
         }
 
-        if (hiddenNodeIds.has(next) && !visited.has(next)) {
-          visited.add(next)
+        if (hiddenNodeIds.has(next) && !visitedHidden.has(next)) {
+          visitedHidden.add(next)
           queue.push({
             nodeId: next,
             viaHidden: true,

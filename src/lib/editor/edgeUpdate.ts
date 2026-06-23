@@ -36,6 +36,8 @@ const RUNTIME_EDGE_DATA_KEYS = new Set([
   'readOnly',
   'virtual',
   'bridgeEdgeIds',
+  'pathPoints',
+  'bendPoints',
 ])
 
 function normalizeSavedVirtualEdge(edge: Edge): Edge {

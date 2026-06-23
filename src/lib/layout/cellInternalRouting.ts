@@ -50,7 +50,7 @@ export function getCellGridNodeContext(node: Node, process: Process): CellGridNo
 }
 
 /**
- * cellSlot 기준 LEFT→RIGHT 열 전환 (slot 1~5 → 6~10)
+ * cellSlot 기준 LEFT→RIGHT 열 전환 (LEFT column → RIGHT column)
  * edge 순서는 cellOrder, handle은 실제 배치(col) 기준
  */
 export function isColumnTransitionEdge(

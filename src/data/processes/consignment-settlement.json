@@ -3,23 +3,23 @@
   "name": "위탁정산",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "위탁 재고·매출 마감·정산전표",
+  "description": "PDF 도형 기준 위탁 매출 정산 프로세스",
   "overviewNodeId": "settlement-posting",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "consignment-stock-status",
-      "name": "위탁재고현황",
+      "id": "consignment-settlement-step-01",
+      "name": "위탁매출마감집계",
       "type": "erp",
-      "laneId": "partnership",
+      "laneId": "finance",
       "phaseId": "p1",
       "system": "ERP",
-      "owner": "상생협력팀",
-      "description": "위탁재고현황",
+      "owner": "재무팀",
+      "description": "위탁매출마감집계",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,14 +27,14 @@
       "localOrder": 1
     },
     {
-      "id": "consignment-sales-register",
-      "name": "위탁매출마감등록",
+      "id": "consignment-settlement-step-02",
+      "name": "위탁매출마감확정",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p2",
       "system": "ERP",
-      "owner": "사업부",
-      "description": "위탁매출마감등록",
+      "owner": "재무팀",
+      "description": "위탁매출마감확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -42,14 +42,14 @@
       "localOrder": 2
     },
     {
-      "id": "consignment-sales-close",
-      "name": "위탁매출마감확정",
+      "id": "consignment-settlement-step-03",
+      "name": "예외사항처리",
       "type": "erp",
-      "laneId": "finance",
+      "laneId": "business",
       "phaseId": "p3",
       "system": "ERP",
       "owner": "사업부",
-      "description": "위탁매출마감확정",
+      "description": "예외사항처리",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -57,14 +57,14 @@
       "localOrder": 3
     },
     {
-      "id": "settlement-anomaly-check",
-      "name": "정산 이상여부",
-      "type": "decision",
+      "id": "consignment-settlement-step-04",
+      "name": "정산마감등록",
+      "type": "erp",
       "laneId": "finance",
       "phaseId": "p4",
       "system": "ERP",
-      "owner": "사업부",
-      "description": "정산 이상여부",
+      "owner": "재무팀",
+      "description": "정산마감등록",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -72,14 +72,14 @@
       "localOrder": 4
     },
     {
-      "id": "prepayment-process",
-      "name": "선수금처리",
+      "id": "consignment-settlement-step-05",
+      "name": "정산마감확정",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p5",
       "system": "ERP",
-      "owner": "사업부",
-      "description": "선수금처리",
+      "owner": "재무팀",
+      "description": "정산마감확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -87,84 +87,81 @@
       "localOrder": 5
     },
     {
-      "id": "regular-fund-execution",
-      "name": "정기자금집행",
+      "id": "consignment-settlement-step-06",
+      "name": "전표생성(미결)",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p6",
       "system": "ERP",
-      "owner": "사업부",
-      "description": "정기자금집행",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
       "localOrder": 6
-    },
-    {
-      "id": "settlement-posting",
-      "name": "정산전표처리",
-      "type": "system",
-      "laneId": "finance",
-      "phaseId": "p7",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "정산전표처리",
-      "inputs": [],
-      "outputs": [],
-      "controls": [],
-      "phaseOrder": 7,
-      "localOrder": 7
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "consignment-stock-status",
-      "target": "consignment-sales-register",
+      "id": "consignment-settlement-e01",
+      "source": "consignment-settlement-step-01",
+      "target": "consignment-settlement-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "consignment-sales-register",
-      "target": "consignment-sales-close",
+      "id": "consignment-settlement-e02",
+      "source": "consignment-settlement-step-02",
+      "target": "consignment-settlement-step-03",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e03",
-      "source": "consignment-sales-close",
-      "target": "settlement-anomaly-check",
+      "id": "consignment-settlement-e03",
+      "source": "consignment-settlement-step-03",
+      "target": "consignment-settlement-step-04",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e05",
-      "source": "settlement-anomaly-check",
-      "target": "prepayment-process",
-      "condition": "noSettlementAnomaly",
-      "label": "N",
-      "type": "condition"
-    },
-    {
-      "id": "e01",
-      "source": "prepayment-process",
-      "target": "regular-fund-execution",
+      "id": "consignment-settlement-e04",
+      "source": "consignment-settlement-step-04",
+      "target": "consignment-settlement-step-05",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "regular-fund-execution",
-      "target": "settlement-posting",
+      "id": "consignment-settlement-e05",
+      "source": "consignment-settlement-step-05",
+      "target": "consignment-settlement-step-06",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

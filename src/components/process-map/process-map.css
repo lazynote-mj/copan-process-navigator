@@ -47,7 +47,7 @@
   position: sticky;
   top: 52px;
   flex-shrink: 0;
-  height: calc(100vh - 44px - 52px);
+  height: calc(100vh - 44px - 28px - 52px);
   min-height: 280px;
   overflow: hidden;
 }
@@ -117,7 +117,7 @@
   font-size: 11px;
   font-weight: 700;
   color: #0f172a;
-  text-align: center;
+  text-align: left;
   line-height: 1.25;
 }
 
@@ -128,7 +128,8 @@
 }
 
 
-.process-map-canvas--detail-vertical {
+.process-map-canvas--detail-vertical,
+.process-map-canvas--detail-horizontal {
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -138,18 +139,27 @@
   flex: 1;
   width: 100%;
   min-height: 0;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
+}
+
+.process-map-canvas--panel-open .process-map-canvas__scroll--detail {
+  overflow-x: auto;
+}
+
+.process-map-canvas--panel-open .process-map-canvas__flow-sticky--detail {
+  overflow: visible;
 }
 
 .process-map-canvas__flow-sticky--detail {
   position: sticky;
   top: 52px;
   flex-shrink: 0;
-  height: calc(100vh - 52px);
-  min-height: 400px;
+  height: calc(100vh - 44px - 28px - 52px);
+  min-height: 280px;
   overflow: hidden;
 }
 
@@ -214,6 +224,17 @@
   pointer-events: auto;
 }
 
+.process-map-canvas .react-flow__node.process-node-flow--dimmed {
+  opacity: 0.42;
+  filter: grayscale(35%);
+}
+
+.process-map-canvas .react-flow__node.process-node-flow--dimmed.process-node-flow--highlighted,
+.process-map-canvas .react-flow__node.process-node-flow--dimmed.process-node-flow--focus {
+  opacity: 1;
+  filter: none;
+}
+
 .process-map-canvas .react-flow__node.process-node-flow--interface-rule {
   z-index: 3;
 }
@@ -228,15 +249,18 @@
 
 /* Edit Mode — connection handles */
 .process-map-canvas--edit .process-node__handle,
-.process-map-canvas--edit .decision-node__handle {
+.process-map-canvas--edit .decision-node__handle,
+.process-map-canvas--edit .interface-rule-node__handle {
   opacity: 0;
   transition: opacity 0.12s;
 }
 
 .process-map-canvas--edit .react-flow__node:hover .process-node__handle,
 .process-map-canvas--edit .react-flow__node:hover .decision-node__handle,
+.process-map-canvas--edit .react-flow__node:hover .interface-rule-node__handle,
 .process-map-canvas--edit .react-flow__node.connecting .process-node__handle,
 .process-map-canvas--edit .react-flow__node.connecting .decision-node__handle,
+.process-map-canvas--edit .react-flow__node.connecting .interface-rule-node__handle,
 .process-map-canvas--edit .react-flow__handle.connecting,
 .process-map-canvas--edit .react-flow__handle.valid {
   opacity: 1 !important;
@@ -246,49 +270,80 @@
   pointer-events: none !important;
 }
 
-/* Edge labels */
+/* Edge labels — all types use framed badge; type modifiers adjust colors only */
 .process-edge__label {
+  display: block;
   padding: 2px 7px;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
   line-height: 1.3;
-  white-space: nowrap;
-  border: 1px solid transparent;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  text-align: left;
   pointer-events: none;
   z-index: 12;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.process-map-canvas--edit .react-flow__edge.selected + .process-edge__label,
+.process-map-canvas--edit .process-edge__label {
+  cursor: grab;
+}
+
+.process-map-canvas--edit .process-edge__label:active {
+  cursor: grabbing;
 }
 
 .process-edge__label--normal {
   color: #475569;
-  background: #ffffff;
   border-color: #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .process-edge__label--condition {
   color: #6d28d9;
-  background: #ffffff;
   border-color: #ddd6fe;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .process-edge__label--exception {
   color: #e11d48;
-  background: #ffffff;
   border-color: #fecdd3;
   font-weight: 600;
 }
 
 .process-edge__label--return {
   color: #64748b;
-  background: #ffffff;
   border-color: #cbd5e1;
   font-weight: 500;
 }
 
-.process-edge__label--system {
+.process-edge__label--system,
+.process-edge__label--api {
   color: #047857;
-  background: #ffffff;
   border-color: #a7f3d0;
+}
+
+.process-edge__label--virtual {
+  color: #64748b;
+  border-color: #e2e8f0;
+  opacity: 0.92;
+}
+
+.process-edge__label--reference {
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  font-weight: 500;
+}
+
+.process-map-canvas .react-flow__edge.process-edge-flow--dimmed .react-flow__edge-path {
+  opacity: 0.18;
+}
+
+.process-edge__label--group-dimmed {
+  opacity: 0;
+  visibility: hidden;
 }

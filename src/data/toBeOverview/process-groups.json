@@ -6,26 +6,23 @@
     "overviewNodeIds": [
       "opportunity",
       "business-review",
-      "contract-approval",
       "contract-register",
+      "contract-approval",
       "project-register",
       "project-approval",
       "purchase-request",
-      "master-data-split",
       "product-check",
       "vendor-check",
       "product-register-request",
       "product-register-approval",
       "vendor-register",
       "vendor-register-approval",
-      "master-data-complete",
       "po-approval",
       "purchase-order",
       "inbound-info",
       "inbound-check",
       "inbound-register",
       "inbound-confirm",
-      "stock-plus",
       "ap-inquiry",
       "ap-close",
       "ap-voucher-pending",
@@ -37,7 +34,6 @@
       "shipment-check",
       "shipment-register",
       "shipment-confirm",
-      "stock-minus",
       "sales-inquiry",
       "sales-close",
       "sales-posting",
@@ -46,6 +42,7 @@
       "mg-deduct-check",
       "mg-offset-process",
       "settlement-posting",
+      "settlement-fi-posting",
       "regular-fund-execution"
     ],
     "overviewEdgeIds": [
@@ -57,7 +54,6 @@
       "main:e2e:06",
       "main:e2e:06b",
       "main:e2e:07",
-      "main:e2e:07b",
       "main:e2e:08",
       "main:e2e:08a",
       "main:e2e:08c",
@@ -66,7 +62,6 @@
       "main:e2e:09b",
       "main:e2e:09c",
       "main:e2e:09d",
-      "main:e2e:10",
       "main:e2e:11",
       "main:e2e:12",
       "main:e2e:14",
@@ -95,7 +90,9 @@
     "id": "sub-returns",
     "name": "반품",
     "description": "반품 처리 — Overview 대표 노드에서 상세 프로세스로 이동",
-    "overviewNodeIds": ["return-handling"],
+    "overviewNodeIds": [
+      "return-handling"
+    ],
     "overviewEdgeIds": [],
     "detailProcessId": "b2b-domestic-return"
   },
@@ -103,7 +100,9 @@
     "id": "sub-warehouse-transfer",
     "name": "재고이동",
     "description": "창고 간 재고 이동 — Overview 대표 노드에서 상세 프로세스로 이동",
-    "overviewNodeIds": ["stock-transfer-handling"],
+    "overviewNodeIds": [
+      "stock-transfer-handling"
+    ],
     "overviewEdgeIds": [],
     "detailProcessId": "stock-transfer"
   },
@@ -111,7 +110,9 @@
     "id": "sub-other-outbound",
     "name": "기타출고",
     "description": "무상증정·기타출고 — Overview 대표 노드에서 상세 프로세스로 이동",
-    "overviewNodeIds": ["other-issue-handling"],
+    "overviewNodeIds": [
+      "other-issue-handling"
+    ],
     "overviewEdgeIds": [],
     "detailProcessId": "other-issue"
   },
@@ -120,7 +121,6 @@
     "name": "위탁정산",
     "description": "위탁 재고·매출 마감 및 이상 검증",
     "overviewNodeIds": [
-      "stock-minus",
       "consignment-stock-status",
       "consignment-sales-register",
       "consignment-sales-close",
@@ -128,7 +128,8 @@
       "exception-handling",
       "prepayment-process",
       "regular-fund-execution",
-      "settlement-posting"
+      "settlement-posting",
+      "settlement-fi-posting"
     ],
     "overviewEdgeIds": [
       "sub:consignment:00",
@@ -138,7 +139,9 @@
       "sub:consignment:04",
       "sub:consignment:05",
       "sub:consignment:06",
-      "sub:consignment:07"
+      "sub:consignment:07",
+      "sub:consignment:08",
+      "sub:consignment:09"
     ],
     "detailProcessId": "consignment-settlement"
   },
@@ -151,14 +154,16 @@
       "royalty-sales-close",
       "mg-deduct-check",
       "mg-offset-process",
-      "settlement-posting"
+      "settlement-posting",
+      "settlement-fi-posting"
     ],
     "overviewEdgeIds": [
       "sub:royalty:01",
       "sub:royalty:02",
       "sub:royalty:03",
       "sub:royalty:04",
-      "sub:royalty:05"
+      "sub:royalty:05",
+      "sub:royalty:06"
     ],
     "detailProcessId": "royalty-mg-settlement"
   },
@@ -174,7 +179,9 @@
     "id": "sub-popup-concert",
     "name": "팝업/콘서트 재고·매출 동기화",
     "description": "팝업/콘서트 현장 재고이동 및 매출내역 동기화",
-    "overviewNodeIds": ["popup-concert-stock-sales-sync"],
+    "overviewNodeIds": [
+      "popup-concert-stock-sales-sync"
+    ],
     "overviewEdgeIds": [],
     "detailProcessId": "popup-concert-stock-sales-sync"
   }

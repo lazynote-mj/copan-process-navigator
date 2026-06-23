@@ -42,6 +42,8 @@ export function qualifiesForReturnFeedbackEdge(
   const sMeta = nodeMeta(source.id, process)
   const tMeta = nodeMeta(target.id, process)
   if (sMeta && tMeta && sMeta.laneId === tMeta.laneId && tMeta.cellOrder < sMeta.cellOrder) {
+    // cellOrder 역행이어도 target이 아래에 있으면 정방향 cross-zone drop — gutter 대상 아님
+    if (target.y > source.y + source.height * 0.2) return false
     return true
   }
   return false

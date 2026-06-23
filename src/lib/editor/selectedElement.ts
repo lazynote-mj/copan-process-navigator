@@ -1,10 +1,11 @@
 import type { Edge as FlowEdge } from '@xyflow/react'
 import type { Edge, Lane, Node, Process, ProcessZone } from '../../types/process'
-import type { EdgeHandleId } from '../../types/process'
+import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
 import { PROCESS_ZONES } from '../layout/overviewProcessZones'
 import type { ProcessZoneId } from '../../types/process'
 import type { ProcessEdgeData } from '../layout/elkLayout'
 import { validationToEdgeData } from '../layout/edgeRouteValidation'
+import { extractBendPoints } from '../layout/orthogonalEdgeRouter'
 import {
   createDefaultEdge,
   createDefaultLane,
@@ -12,24 +13,12 @@ import {
   createDefaultZone,
 } from './processEditor'
 import type { SelectedElement } from './selectionTypes'
+import {
+  applyRoutedHandlePatch,
+  extractRoutedHandlesFromFlowEdge,
+  shouldSyncRoutedHandles,
+} from './routedEdgeSync'
 import { hasUserSpecifiedHandles, migrateEdgeHandles, isManualRouteEdge } from './edgeHandles'
-
-function parseFlowHandleId(handle: string | null | undefined): EdgeHandleId | undefined {
-  if (!handle) return undefined
-  const match = handle.match(/(?:source|target)-(?<side>top|right|bottom|left)/)
-  return (match?.groups?.side as EdgeHandleId | undefined) ?? undefined
-}
-
-function resolveRoutedHandles(flowEdge: FlowEdge): {
-  sourceHandle?: EdgeHandleId
-  targetHandle?: EdgeHandleId
-} {
-  const data = flowEdge.data as ProcessEdgeData | undefined
-  return {
-    sourceHandle: data?.sourceHandle ?? parseFlowHandleId(flowEdge.sourceHandle),
-    targetHandle: data?.targetHandle ?? parseFlowHandleId(flowEdge.targetHandle),
-  }
-}
 
 function mergeFlowEdgeRouteData(edge: Edge, flowEdge: FlowEdge): Edge {
   const flowData = flowEdge.data as ProcessEdgeData | undefined
@@ -39,6 +28,12 @@ function mergeFlowEdgeRouteData(edge: Edge, flowEdge: FlowEdge): Edge {
     edgeType: flowData.edgeType,
     routingKind: flowData.routingKind,
     routingMode: flowData.routingMode,
+    ...(flowData.pathPoints?.length ? { pathPoints: flowData.pathPoints.map((p) => ({ ...p })) } : {}),
+    ...(flowData.bendPoints?.length
+      ? { bendPoints: flowData.bendPoints.map((p) => ({ ...p })) }
+      : flowData.pathPoints?.length
+        ? { bendPoints: extractBendPoints(flowData.pathPoints) }
+        : {}),
     ...validationToEdgeData({
       validationStatus: flowData.validationStatus ?? (flowData.broken ? 'error' : 'ok'),
       routeIssue: flowData.routeIssue,
@@ -70,8 +65,16 @@ function mergeFlowEdgeRouteData(edge: Edge, flowEdge: FlowEdge): Edge {
 export function enrichEdgeWithRoutedHandles(edge: Edge, flowEdge: FlowEdge): Edge {
   let next = mergeFlowEdgeRouteData(edge, flowEdge)
 
-  if (!hasUserSpecifiedHandles(next) && !isManualRouteEdge(next)) {
-    const routed = resolveRoutedHandles(flowEdge)
+  if (shouldSyncRoutedHandles(next)) {
+    const routed = extractRoutedHandlesFromFlowEdge(flowEdge)
+    if (routed.sourceHandle && routed.targetHandle) {
+      next = applyRoutedHandlePatch(next, {
+        sourceHandle: routed.sourceHandle,
+        targetHandle: routed.targetHandle,
+      })
+    }
+  } else if (!hasUserSpecifiedHandles(next) && !isManualRouteEdge(next)) {
+    const routed = extractRoutedHandlesFromFlowEdge(flowEdge)
     next = {
       ...next,
       ...(routed.sourceHandle ? { sourceHandle: routed.sourceHandle } : {}),
@@ -112,6 +115,77 @@ export function cloneZoneData(zone: ProcessZone): ProcessZone {
     nodeIds: [...zone.nodeIds],
     style: { ...zone.style },
   }
+}
+
+export function cloneProcessGroup(group: OverviewProcessGroup): OverviewProcessGroup {
+  return {
+    ...group,
+    overviewNodeIds: [...group.overviewNodeIds],
+    overviewEdgeIds: [...group.overviewEdgeIds],
+  }
+}
+
+export function cloneDetailProcessGroup(group: DetailProcessGroup): DetailProcessGroup {
+  return { ...group }
+}
+
+export function buildSelectedProcessGroup(group: OverviewProcessGroup): SelectedElement {
+  return { type: 'process-group', id: group.id, data: cloneProcessGroup(group) }
+}
+
+export function buildSelectedDetailProcessGroup(group: DetailProcessGroup): SelectedElement {
+  return { type: 'detail-process-group', id: group.id, data: cloneDetailProcessGroup(group) }
+}
+
+function slugifyGroupId(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export function buildNewProcessGroupSelection(processGroups: OverviewProcessGroup[] = []): SelectedElement {
+  const nextIndex = processGroups.length + 1
+  const id = `overview-group-${String(nextIndex).padStart(2, '0')}`
+  const existingIds = new Set(processGroups.map((group) => group.id))
+  let nextId = id
+  let suffix = 2
+  while (existingIds.has(nextId)) {
+    nextId = `${id}-${suffix}`
+    suffix += 1
+  }
+  const data: OverviewProcessGroup = {
+    id: nextId,
+    name: `신규 Overview 그룹 ${nextIndex}`,
+    description: '',
+    overviewNodeIds: [],
+    overviewEdgeIds: [],
+  }
+  return { type: 'new-process-group', id: data.id, data }
+}
+
+export function buildNewDetailProcessGroupSelection(
+  detailProcessGroups: DetailProcessGroup[] = [],
+  detailProcesses: Process[] = [],
+): SelectedElement {
+  const nextIndex = detailProcessGroups.length + 1
+  const process = detailProcesses[0]
+  const baseId = slugifyGroupId(process?.id ?? `detail-group-${nextIndex}`) || `detail-group-${nextIndex}`
+  const existingIds = new Set(detailProcessGroups.map((group) => group.id))
+  let nextId = `${baseId}-group`
+  let suffix = 2
+  while (existingIds.has(nextId)) {
+    nextId = `${baseId}-group-${suffix}`
+    suffix += 1
+  }
+  const data: DetailProcessGroup = {
+    id: nextId,
+    name: process?.name ?? `신규 프로세스 그룹 ${nextIndex}`,
+    description: process?.description ?? '',
+    detailProcessId: process?.id ?? '',
+  }
+  return { type: 'new-detail-process-group', id: data.id, data }
 }
 
 export function buildSelectedNode(process: Process, nodeId: string): SelectedElement | null {
@@ -179,6 +253,8 @@ export function buildNewZoneSelection(): SelectedElement {
 export function refreshSelectedElement(
   selected: SelectedElement | null,
   process: Process,
+  processGroups?: OverviewProcessGroup[],
+  detailProcessGroups?: DetailProcessGroup[],
 ): SelectedElement | null {
   if (!selected) return null
 
@@ -193,10 +269,20 @@ export function refreshSelectedElement(
       return buildSelectedZone(process, selected.id) ?? selected
     case 'overview-zone':
       return buildSelectedOverviewZone(selected.id as ProcessZoneId) ?? selected
+    case 'process-group': {
+      const group = processGroups?.find((entry) => entry.id === selected.id)
+      return group ? buildSelectedProcessGroup(group) : selected
+    }
+    case 'detail-process-group': {
+      const group = detailProcessGroups?.find((entry) => entry.id === selected.id)
+      return group ? buildSelectedDetailProcessGroup(group) : selected
+    }
     case 'new-node':
     case 'new-edge':
     case 'new-lane':
     case 'new-zone':
+    case 'new-process-group':
+    case 'new-detail-process-group':
       return selected
     default:
       return null

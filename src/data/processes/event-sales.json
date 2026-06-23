@@ -1,0 +1,515 @@
+{
+  "id": "event-sales",
+  "name": "이벤트 판매 ~ 출고 ~ 매출전표",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "Cafe24 이벤트 주문을 이지어드민에 연동한 뒤 이벤트/당첨자 여부와 수령방식에 따라 현장수령·택배발송 출고 및 매출전표까지 처리합니다.",
+  "overviewNodeId": "concert-sales",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "event-sales-step-01",
+      "name": "Cafe24 이벤트 주문 접수",
+      "type": "external",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "Cafe24",
+      "owner": "온라인몰",
+      "description": "Cafe24 이벤트 주문 접수",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "event-sales-step-02",
+      "name": "이벤트 정보 확인",
+      "type": "decision",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p2",
+      "system": "이지어드민",
+      "owner": "물류센터",
+      "description": "이벤트 정보 확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "event-sales-step-03",
+      "name": "일반 B2C 주문 프로세스",
+      "type": "linked-process",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "연결 프로세스",
+      "owner": "사업부",
+      "description": "일반 B2C 주문 프로세스",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "event-sales-step-04",
+      "name": "당첨자 여부 확인",
+      "type": "decision",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "이지어드민",
+      "owner": "물류센터",
+      "description": "당첨자 여부 확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "event-sales-step-05",
+      "name": "수령방식 구분",
+      "type": "decision",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p5",
+      "system": "이지어드민",
+      "owner": "물류센터",
+      "description": "수령방식 구분",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "event-sales-step-06",
+      "name": "현장수령 주문 별도 분리",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p6",
+      "system": "이지어드민 CS/현장수령",
+      "owner": "물류센터",
+      "description": "현장수령 주문 별도 분리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "event-sales-step-07",
+      "name": "현장수령 대상자 목록 관리",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p7",
+      "system": "이지어드민/현장운영",
+      "owner": "판매현장",
+      "description": "현장수령 대상자 목록 관리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "event-sales-step-08",
+      "name": "현장수령 수량/재고 확정",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p8",
+      "system": "ERP/이지어드민",
+      "owner": "판매현장",
+      "description": "현장수령 수량/재고 확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "event-sales-step-09",
+      "name": "행사장 재고이동 또는 현장출고 준비",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p9",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "행사장 재고이동 또는 현장출고 준비",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "event-sales-step-10",
+      "name": "현장 수령 확인",
+      "type": "pos",
+      "laneId": "retail-easychain",
+      "phaseId": "p10",
+      "system": "현장운영",
+      "owner": "판매현장",
+      "description": "현장 수령 확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 10
+    },
+    {
+      "id": "event-sales-step-11",
+      "name": "현장수령 출고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p11",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "현장수령 출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 11
+    },
+    {
+      "id": "event-sales-step-12",
+      "name": "택배발송 주문 분리",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p12",
+      "system": "이지어드민",
+      "owner": "물류센터",
+      "description": "택배발송 주문 분리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 12
+    },
+    {
+      "id": "event-sales-step-13",
+      "name": "택배 출고요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p13",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "택배 출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 13,
+      "localOrder": 13
+    },
+    {
+      "id": "event-sales-step-14",
+      "name": "물류센터 출고 처리",
+      "type": "manual",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p14",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "물류센터 출고 처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 14,
+      "localOrder": 14
+    },
+    {
+      "id": "event-sales-step-15",
+      "name": "택배 출고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p15",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "택배 출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 15,
+      "localOrder": 15
+    },
+    {
+      "id": "event-sales-step-16",
+      "name": "매출마감 대상 집계",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p16",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감 대상 집계",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 16,
+      "localOrder": 16
+    },
+    {
+      "id": "event-sales-step-17",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p17",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 17,
+      "localOrder": 17
+    },
+    {
+      "id": "event-sales-step-18",
+      "name": "매출전표 생성",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "p18",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출전표 생성",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 18,
+      "localOrder": 18
+    }
+  ],
+  "edges": [
+    {
+      "id": "event-sales-e01",
+      "source": "event-sales-step-01",
+      "target": "event-sales-step-02",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e02",
+      "source": "event-sales-step-02",
+      "target": "event-sales-step-03",
+      "condition": "없음",
+      "label": "없음",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e03",
+      "source": "event-sales-step-02",
+      "target": "event-sales-step-04",
+      "condition": "있음",
+      "label": "있음",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e04",
+      "source": "event-sales-step-04",
+      "target": "event-sales-step-12",
+      "condition": "없음",
+      "label": "없음",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e05",
+      "source": "event-sales-step-04",
+      "target": "event-sales-step-05",
+      "condition": "있음",
+      "label": "있음",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e06",
+      "source": "event-sales-step-05",
+      "target": "event-sales-step-06",
+      "condition": "현장수령",
+      "label": "현장수령",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e07",
+      "source": "event-sales-step-05",
+      "target": "event-sales-step-12",
+      "condition": "택배발송",
+      "label": "택배발송",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e08",
+      "source": "event-sales-step-06",
+      "target": "event-sales-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e09",
+      "source": "event-sales-step-07",
+      "target": "event-sales-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e10",
+      "source": "event-sales-step-08",
+      "target": "event-sales-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e11",
+      "source": "event-sales-step-09",
+      "target": "event-sales-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e12",
+      "source": "event-sales-step-10",
+      "target": "event-sales-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e13",
+      "source": "event-sales-step-11",
+      "target": "event-sales-step-16",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e14",
+      "source": "event-sales-step-12",
+      "target": "event-sales-step-13",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e15",
+      "source": "event-sales-step-13",
+      "target": "event-sales-step-14",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e16",
+      "source": "event-sales-step-14",
+      "target": "event-sales-step-15",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e17",
+      "source": "event-sales-step-15",
+      "target": "event-sales-step-16",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e18",
+      "source": "event-sales-step-16",
+      "target": "event-sales-step-17",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "event-sales-e19",
+      "source": "event-sales-step-17",
+      "target": "event-sales-step-18",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

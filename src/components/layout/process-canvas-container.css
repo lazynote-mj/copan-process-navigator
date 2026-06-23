@@ -24,9 +24,7 @@
   z-index: 100;
   border-left: 1px solid #e5e7eb;
   background: white;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
+  overflow: hidden;
   pointer-events: auto;
   display: flex;
   flex-direction: column;

@@ -9,9 +9,9 @@ export type OverviewHubNodeId = (typeof OVERVIEW_HUB_NODE_IDS)[number]
 
 /** 대표 노드 id → process group id */
 export const OVERVIEW_HUB_TO_GROUP: Record<OverviewHubNodeId, string> = {
-  'return-handling': 'sub-returns',
-  'stock-transfer-handling': 'sub-warehouse-transfer',
-  'other-issue-handling': 'sub-other-outbound',
+  'return-handling': 'pg-b2b-domestic-return',
+  'stock-transfer-handling': 'pg-stock-transfer',
+  'other-issue-handling': 'pg-other-issue',
 }
 
 export function getOverviewHubGroupId(nodeId: string): string | undefined {

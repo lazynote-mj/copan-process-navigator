@@ -1,8 +1,18 @@
 import type { Node, Process, ProcessZoneId } from '../../types/process'
 import type { LaneBand, PlacedNode } from '../layout/laneLayout'
-import { OVERVIEW_GRID_METRICS } from '../layout/overviewGridMetrics'
+import { DETAIL_GRID_METRICS, OVERVIEW_GRID_METRICS } from '../layout/overviewGridMetrics'
 import type { ZoneLayoutBand } from '../layout/overviewGridLayout'
 import { resolveNodeZone } from '../layout/overviewProcessZones'
+import {
+  DETAIL_CELL_MAX_ROWS,
+  OVERVIEW_CELL_MAX_ROWS,
+  rowColToCellSlot,
+} from '../layout/overviewCellPlacement'
+import {
+  DETAIL_HORIZONTAL_MAX_TRACK_COUNT,
+  DETAIL_HORIZONTAL_ORDER_COLUMN_WIDTH,
+  DETAIL_HORIZONTAL_ROW_PITCH,
+} from '../layout/detailHorizontalLayout'
 
 type DropRect = { x: number; y: number; width: number; height: number }
 
@@ -121,11 +131,51 @@ function resolveDetailCellOrder(
   return order
 }
 
+function resolveCellSlotFromDrop(
+  lane: LaneBand,
+  centerX: number,
+  centerY: number,
+  topY: number,
+  metrics = DETAIL_GRID_METRICS,
+  maxRows = DETAIL_CELL_MAX_ROWS,
+): number {
+  const contentLeft = lane.contentLeft
+  const contentRight = lane.contentRight
+  const contentWidth = Math.max(1, contentRight - contentLeft)
+  const col = centerX >= contentLeft + contentWidth / 2 ? 1 : 0
+  const rowStep = Math.max(metrics.rowMinHeightDecision, metrics.nodeHeight) + metrics.nodeGapY
+  const rawRow = Math.round((centerY - topY) / rowStep)
+  const row = Math.min(Math.max(rawRow, 0), maxRows - 1)
+  return rowColToCellSlot(row, col, maxRows)
+}
+
+function resolveDetailLayoutFromDrop(
+  lane: LaneBand,
+  drop: DropRect,
+): NonNullable<Node['detailLayout']> {
+  const centerX = drop.x + drop.width / 2
+  const centerY = drop.y + drop.height / 2
+  const rawColumn = Math.round((centerX - (lane.contentLeft + drop.width / 2)) / DETAIL_HORIZONTAL_ORDER_COLUMN_WIDTH) + 1
+  const rawRow = Math.round((centerY - (lane.contentTop + DETAIL_HORIZONTAL_ROW_PITCH / 2)) / DETAIL_HORIZONTAL_ROW_PITCH) + 1
+
+  return {
+    column: Math.max(1, rawColumn),
+    row: Math.min(DETAIL_HORIZONTAL_MAX_TRACK_COUNT, Math.max(1, rawRow)),
+  }
+}
+
 function hasStructuralPlacementChange(node: Node, patch: Partial<Node>): boolean {
   if (patch.laneId != null && patch.laneId !== node.laneId) return true
   if (patch.processZone != null && patch.processZone !== node.processZone) return true
   if (patch.cellOrder != null && patch.cellOrder !== (node.cellOrder ?? node.zoneOrder)) return true
   if (patch.cellSlot != null && patch.cellSlot !== node.cellSlot) return true
+  if (
+    patch.detailLayout != null &&
+    (patch.detailLayout.column !== node.detailLayout?.column ||
+      patch.detailLayout.row !== node.detailLayout?.row)
+  ) {
+    return true
+  }
   if (patch.localOrder != null && patch.localOrder !== node.localOrder) return true
   return false
 }
@@ -161,6 +211,7 @@ export function resolveNodePlacementAfterDrag(
     zoneBands?: ZoneLayoutBand[]
     placed: PlacedNode[]
     isOverview: boolean
+    detailHorizontal?: boolean
   },
 ): Partial<Node> {
   const node = process.nodes.find((n) => n.id === nodeId)
@@ -195,27 +246,82 @@ export function resolveNodePlacementAfterDrag(
       centerY,
       ctx.placed,
     )
+    const cellSlot = lane
+      ? resolveCellSlotFromDrop(
+          lane,
+          centerX,
+          centerY,
+          zone.y + OVERVIEW_GRID_METRICS.cellPaddingY,
+          OVERVIEW_GRID_METRICS,
+          OVERVIEW_CELL_MAX_ROWS,
+        )
+      : undefined
 
-    patch = { laneId, processZone, cellOrder, zoneOrder: cellOrder }
+    patch = {
+      laneId,
+      processZone,
+      cellOrder,
+      zoneOrder: cellOrder,
+      ...(cellSlot != null ? { cellSlot } : {}),
+    }
   } else if (ctx.isOverview) {
     const zone = node ? resolveNodeZone(node) : { zoneId: 'business-contract' as ProcessZoneId, zoneOrder: 0 }
+    const cellSlot = lane
+      ? resolveCellSlotFromDrop(
+          lane,
+          centerX,
+          centerY,
+          lane.contentTop,
+          OVERVIEW_GRID_METRICS,
+          OVERVIEW_CELL_MAX_ROWS,
+        )
+      : undefined
     patch = {
       laneId,
       processZone: zone.zoneId,
       cellOrder: zone.zoneOrder,
       zoneOrder: zone.zoneOrder,
+      ...(cellSlot != null ? { cellSlot } : {}),
+    }
+  } else if (ctx.detailHorizontal) {
+    const detailLayout = lane ? resolveDetailLayoutFromDrop(lane, drop) : node?.detailLayout
+    const localOrder = detailLayout?.column ?? resolveDetailLocalOrder(process, nodeId, laneId, centerX, centerY, ctx.placed)
+    patch = {
+      laneId,
+      localOrder,
+      cellOrder: Math.max(0, localOrder - 1),
+      zoneOrder: Math.max(0, localOrder - 1),
+      cellSlot: undefined,
+      ...(detailLayout ? { detailLayout } : {}),
     }
   } else {
     const cellOrder = resolveDetailCellOrder(process, nodeId, laneId, centerX, centerY, ctx.placed)
+    const cellSlot = lane
+      ? resolveCellSlotFromDrop(
+          lane,
+          centerX,
+          centerY,
+          lane.contentTop,
+          DETAIL_GRID_METRICS,
+          DETAIL_CELL_MAX_ROWS,
+        )
+      : undefined
     patch = {
       laneId,
       localOrder: resolveDetailLocalOrder(process, nodeId, laneId, centerX, centerY, ctx.placed),
       cellOrder,
       zoneOrder: cellOrder,
+      ...(cellSlot != null ? { cellSlot } : {}),
     }
   }
 
   if (node && baseline) {
+    if (patch.detailLayout != null) {
+      return { ...patch, offsetX: 0, offsetY: 0 }
+    }
+    if (patch.cellSlot != null) {
+      return { ...patch, offsetX: 0, offsetY: 0 }
+    }
     return applyOffsetAfterDrag(node, patch, drop, baseline)
   }
 

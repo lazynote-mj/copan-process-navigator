@@ -2,7 +2,7 @@ import { useViewport } from '@xyflow/react'
 import type { MouseEvent } from 'react'
 import type { Node as FlowNode } from '@xyflow/react'
 import type { Process } from '../../types/process'
-import { computeProcessZoneRects, resolveZoneLabelY, resolveZonePadding } from '../../lib/layout/processZoneLayout'
+import { computeProcessZoneRects, resolveZoneLabelPlacement, resolveZonePadding } from '../../lib/layout/processZoneLayout'
 import './process-zone-overlay.css'
 
 type ProcessZoneOverlayProps = {
@@ -36,15 +36,14 @@ export function ProcessZoneOverlay({
         const { style } = rect
         const zoneDef = process.zones?.find((zone) => zone.id === rect.zoneId)
         const { headerHeight } = zoneDef ? resolveZonePadding(zoneDef) : { headerHeight: 36 }
-        const labelY = resolveZoneLabelY(rect, headerHeight)
+        const label = resolveZoneLabelPlacement(rect, headerHeight)
 
-        const handleSelect =
-          editMode && onZoneSelect
-            ? (e: MouseEvent) => {
-                e.stopPropagation()
-                onZoneSelect(rect.zoneId)
-              }
-            : undefined
+        const handleSelect = onZoneSelect
+          ? (e: MouseEvent) => {
+              e.stopPropagation()
+              onZoneSelect(rect.zoneId)
+            }
+          : undefined
 
         return (
           <g key={rect.zoneId} className={`process-zone-group${selected ? ' is-selected' : ''}`}>
@@ -78,7 +77,7 @@ export function ProcessZoneOverlay({
                 pointerEvents="none"
               />
             )}
-            {editMode && (
+            {onZoneSelect && (
               <rect
                 className="process-zone-hit"
                 x={rect.x}
@@ -92,17 +91,21 @@ export function ProcessZoneOverlay({
                 onClick={handleSelect}
               />
             )}
-            <text
-              className="process-zone-label"
-              x={rect.x + rect.width / 2}
-              y={labelY}
-              textAnchor="middle"
-              pointerEvents={editMode ? 'auto' : 'none'}
-              style={{ cursor: editMode ? 'pointer' : undefined }}
-              onClick={handleSelect}
-            >
-              {rect.name}
-            </text>
+            {label.visible && (
+              <text
+                className="process-zone-label"
+                x={label.x}
+                y={label.y}
+                textAnchor={label.textAnchor}
+                dominantBaseline={label.dominantBaseline}
+                transform={label.transform}
+                pointerEvents={onZoneSelect ? 'auto' : 'none'}
+                style={{ cursor: onZoneSelect ? 'pointer' : undefined }}
+                onClick={handleSelect}
+              >
+                {rect.name}
+              </text>
+            )}
           </g>
         )
       })}

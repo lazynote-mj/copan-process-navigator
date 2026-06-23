@@ -3,6 +3,18 @@
   "version": "v1.0",
   "processes": [
     {
+      "id": "business-to-purchase-request",
+      "file": "business-to-purchase-request.json",
+      "name": "사업 기회 확보 ~ 구매 요청 : 제/상품",
+      "overviewNodeId": "purchase-request"
+    },
+    {
+      "id": "purchase-to-ap-invoice",
+      "file": "purchase-to-ap-invoice.json",
+      "name": "구매요청 ~ 입고 ~ 매입전표",
+      "overviewNodeId": "purchase-request"
+    },
+    {
       "id": "consignment-purchase-receipt",
       "file": "consignment-purchase-receipt.json",
       "name": "구매요청 ~ 입고 : 판매대행",
@@ -39,6 +51,30 @@
       "overviewNodeId": "order-register"
     },
     {
+      "id": "b2c-return",
+      "file": "b2c-return.json",
+      "name": "주문반품 ~ 입고 ~ 반품전표 : B2C",
+      "overviewNodeId": "return-handling"
+    },
+    {
+      "id": "popup-concert-stock-sales-sync",
+      "file": "popup-concert-stock-sales-sync.json",
+      "name": "팝업/콘서트 재고이동 및 매출내역 동기화",
+      "overviewNodeId": "popup-concert-stock-sales-sync"
+    },
+    {
+      "id": "event-sales",
+      "file": "event-sales.json",
+      "name": "이벤트 판매 ~ 출고 ~ 매출전표",
+      "overviewNodeId": "concert-sales"
+    },
+    {
+      "id": "store-sales",
+      "file": "store-sales.json",
+      "name": "매장판매 ~ 출고 ~ 매출전표",
+      "overviewNodeId": "store-sales"
+    },
+    {
       "id": "stock-transfer",
       "file": "stock-transfer.json",
       "name": "창고이동 / 재고이동",
@@ -51,22 +87,46 @@
       "overviewNodeId": "other-issue-handling"
     },
     {
-      "id": "consignment-settlement",
-      "file": "consignment-settlement.json",
-      "name": "위탁정산",
-      "overviewNodeId": "settlement-posting"
-    },
-    {
       "id": "royalty-mg-settlement",
       "file": "royalty-mg-settlement.json",
       "name": "로열티 / MG 정산",
       "overviewNodeId": "settlement-posting"
     },
     {
-      "id": "popup-concert-stock-sales-sync",
-      "file": "popup-concert-stock-sales-sync.json",
-      "name": "팝업/콘서트 재고이동 및 매출내역 동기화",
-      "overviewNodeId": "popup-concert-stock-sales-sync"
+      "id": "consignment-settlement",
+      "file": "consignment-settlement.json",
+      "name": "위탁정산",
+      "overviewNodeId": "settlement-posting"
+    },
+    {
+      "id": "revenue-share-settlement",
+      "file": "revenue-share-settlement.json",
+      "name": "수익배분 매출 정산",
+      "overviewNodeId": "settlement-posting"
+    },
+    {
+      "id": "service-business-to-expense",
+      "file": "service-business-to-expense.json",
+      "name": "사업기회 ~ 비용전표 : (서비스)",
+      "overviewNodeId": "opportunity"
+    },
+    {
+      "id": "service-purchase-to-ap",
+      "file": "service-purchase-to-ap.json",
+      "name": "구매요청 ~ 매입전표 : (서비스)",
+      "overviewNodeId": "purchase-request"
+    },
+    {
+      "id": "service-order-to-sales",
+      "file": "service-order-to-sales.json",
+      "name": "주문등록 ~ 매출전표 : (서비스)",
+      "overviewNodeId": "order-register"
+    },
+    {
+      "id": "service-project-settlement",
+      "file": "service-project-settlement.json",
+      "name": "프로젝트 정산 : (서비스)",
+      "overviewNodeId": "settlement-posting"
     }
   ]
 }

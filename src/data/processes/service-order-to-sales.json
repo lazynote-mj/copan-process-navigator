@@ -1,0 +1,167 @@
+{
+  "id": "service-order-to-sales",
+  "name": "주문등록 ~ 매출전표 : (서비스)",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 서비스 주문등록~매출마감 프로세스",
+  "overviewNodeId": "order-register",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "service-order-to-sales-step-01",
+      "name": "주문일괄등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "주문일괄등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "service-order-to-sales-step-02",
+      "name": "주문확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "주문확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "service-order-to-sales-step-03",
+      "name": "출고요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p3",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "service-order-to-sales-step-04",
+      "name": "출고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "service-order-to-sales-step-05",
+      "name": "일괄매출마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "일괄매출마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "service-order-to-sales-step-06",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    }
+  ],
+  "edges": [
+    {
+      "id": "service-order-to-sales-e01",
+      "source": "service-order-to-sales-step-01",
+      "target": "service-order-to-sales-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-order-to-sales-e02",
+      "source": "service-order-to-sales-step-02",
+      "target": "service-order-to-sales-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-order-to-sales-e03",
+      "source": "service-order-to-sales-step-03",
+      "target": "service-order-to-sales-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-order-to-sales-e04",
+      "source": "service-order-to-sales-step-04",
+      "target": "service-order-to-sales-step-05",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-order-to-sales-e05",
+      "source": "service-order-to-sales-step-05",
+      "target": "service-order-to-sales-step-06",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

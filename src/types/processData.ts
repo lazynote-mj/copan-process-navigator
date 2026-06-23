@@ -6,6 +6,11 @@ import type { Edge, Process, ProcessZone } from './process'
 import type { Node } from './process'
 import type { ProcessInstance } from './processInstance'
 import { OVERVIEW_SCOPE } from './processInstance'
+import type {
+  DetailProcessGroup,
+  OverviewProcessGroup,
+  ProcessGroup,
+} from './toBeNavigator'
 
 export type ProcessScope = typeof OVERVIEW_SCOPE | string
 
@@ -20,11 +25,97 @@ export type ProcessDataSource =
 export type ProcessData = {
   commonMasters: CommonMasters
   processes: ProcessInstance[]
+  overviewProcessGroups?: OverviewProcessGroup[]
+  detailProcessGroups?: DetailProcessGroup[]
+  /** @deprecated overviewProcessGroups */
+  processGroups?: ProcessGroup[]
   updatedAt: string
   dataSource: ProcessDataSource
   dirty: boolean
   baselineNodeCount: number
   baselineEdgeCount: number
+}
+
+function hasBrokenText(value: unknown): boolean {
+  return typeof value === 'string' && value.includes('\uFFFD')
+}
+
+function repairGroupText<T extends { id: string; name?: string; description?: string }>(
+  saved: T,
+  fallback: T,
+): T {
+  if (!hasBrokenText(saved.name) && !hasBrokenText(saved.description)) return saved
+
+  return {
+    ...saved,
+    ...(hasBrokenText(saved.name) ? { name: fallback.name } : {}),
+    ...(hasBrokenText(saved.description) ? { description: fallback.description } : {}),
+  }
+}
+
+function mergeGroupLists<T extends { id: string; name?: string; description?: string }>(
+  saved: T[] | undefined,
+  fallback: T[],
+): T[] {
+  if (!saved?.length) return fallback
+  const savedById = new Map(saved.map((group) => [group.id, group]))
+  const merged = fallback.map((base) => {
+    const savedGroup = savedById.get(base.id)
+    return savedGroup ? repairGroupText(savedGroup, base) : base
+  })
+  for (const group of saved) {
+    if (!fallback.some((base) => base.id === group.id)) {
+      merged.push(group)
+    }
+  }
+  return merged
+}
+
+export function resolveOverviewProcessGroups(
+  data: ProcessData,
+  fallback: OverviewProcessGroup[],
+): OverviewProcessGroup[] {
+  return mergeGroupLists(data.overviewProcessGroups, fallback)
+}
+
+export function resolveDetailProcessGroups(
+  data: ProcessData,
+  fallback: DetailProcessGroup[],
+): DetailProcessGroup[] {
+  return mergeGroupLists(data.detailProcessGroups, fallback)
+}
+
+/** @deprecated resolveOverviewProcessGroups */
+export function resolveProcessGroups(
+  data: ProcessData,
+  fallback: ProcessGroup[],
+): ProcessGroup[] {
+  return resolveOverviewProcessGroups(data, fallback) as ProcessGroup[]
+}
+
+export function getOverviewProcessGroupFromData(
+  data: ProcessData,
+  groupId: string,
+  fallback: OverviewProcessGroup[],
+): OverviewProcessGroup | undefined {
+  return resolveOverviewProcessGroups(data, fallback).find((group) => group.id === groupId)
+}
+
+export function getDetailProcessGroupFromData(
+  data: ProcessData,
+  groupId: string,
+  fallback: DetailProcessGroup[],
+): DetailProcessGroup | undefined {
+  return resolveDetailProcessGroups(data, fallback).find((group) => group.id === groupId)
+}
+
+/** @deprecated getOverviewProcessGroupFromData */
+export function getProcessGroupFromData(
+  data: ProcessData,
+  groupId: string,
+  fallback: ProcessGroup[],
+): ProcessGroup | undefined {
+  return resolveProcessGroups(data, fallback).find((group) => group.id === groupId)
 }
 
 export function cloneProcess(process: Process): Process {

@@ -8,17 +8,27 @@ import businessToProjectMeta from './processes/business-to-project/meta.json'
 import businessToProjectNodes from './processes/business-to-project/nodes.json'
 import businessToProjectEdges from './processes/business-to-project/edges.json'
 
+import businessToPurchaseRequest from './processes/business-to-purchase-request.json'
+import purchaseToApInvoice from './processes/purchase-to-ap-invoice.json'
 import consignmentPurchaseReceipt from './processes/consignment-purchase-receipt.json'
 import b2bDomesticOrderToSales from './processes/b2b-domestic-order-to-sales.json'
 import b2bDomesticReturn from './processes/b2b-domestic-return.json'
 import b2bExportOrderToSales from './processes/b2b-export-order-to-sales.json'
 import b2cOrderToSales from './processes/b2c-order-to-sales.json'
 import preorderToSales from './processes/preorder-to-sales.json'
+import b2cReturn from './processes/b2c-return.json'
+import popupConcertStockSalesSync from './processes/popup-concert-stock-sales-sync.json'
+import eventSales from './processes/event-sales.json'
+import storeSales from './processes/store-sales.json'
 import stockTransfer from './processes/stock-transfer.json'
 import otherIssue from './processes/other-issue.json'
-import consignmentSettlement from './processes/consignment-settlement.json'
 import royaltyMgSettlement from './processes/royalty-mg-settlement.json'
-import popupConcertStockSalesSync from './processes/popup-concert-stock-sales-sync.json'
+import consignmentSettlement from './processes/consignment-settlement.json'
+import revenueShareSettlement from './processes/revenue-share-settlement.json'
+import serviceBusinessToExpense from './processes/service-business-to-expense.json'
+import servicePurchaseToAp from './processes/service-purchase-to-ap.json'
+import serviceOrderToSales from './processes/service-order-to-sales.json'
+import serviceProjectSettlement from './processes/service-project-settlement.json'
 
 import type { Edge, Node } from '../types/process'
 
@@ -31,17 +41,27 @@ type ProcessRegistryFile = {
 const registry = registryJson as ProcessRegistryFile
 
 const scmDetailFiles: DetailProcessFile[] = [
+  businessToPurchaseRequest,
+  purchaseToApInvoice,
   consignmentPurchaseReceipt,
   b2bDomesticOrderToSales,
   b2bDomesticReturn,
   b2bExportOrderToSales,
   b2cOrderToSales,
   preorderToSales,
+  b2cReturn,
+  popupConcertStockSalesSync,
+  eventSales,
+  storeSales,
   stockTransfer,
   otherIssue,
-  consignmentSettlement,
   royaltyMgSettlement,
-  popupConcertStockSalesSync,
+  consignmentSettlement,
+  revenueShareSettlement,
+  serviceBusinessToExpense,
+  servicePurchaseToAp,
+  serviceOrderToSales,
+  serviceProjectSettlement,
 ] as DetailProcessFile[]
 
 const scmDetailProcesses = scmDetailFiles.map(loadDetailProcessFile)

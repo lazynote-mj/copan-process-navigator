@@ -83,16 +83,14 @@ export function laneOrderToStartX(
   return laneStartX(laneOrder - 1, config)
 }
 
-export function gridContentWidth(config: SwimlaneGridConfig = OVERVIEW_SWIMLANE_GRID): number {
+export function swimlaneLaneAreaWidth(config: SwimlaneGridConfig = OVERVIEW_SWIMLANE_GRID): number {
   const lanesWidth =
     config.laneCount * config.laneWidth + Math.max(0, config.laneCount - 1) * config.laneGap
-  return (
-    config.canvasPaddingX +
-    config.gridLeftOffset +
-    config.leftLabelWidth +
-    lanesWidth +
-    config.returnRouteColumnWidth
-  )
+  return config.canvasPaddingX + config.gridLeftOffset + config.leftLabelWidth + lanesWidth
+}
+
+export function gridContentWidth(config: SwimlaneGridConfig = OVERVIEW_SWIMLANE_GRID): number {
+  return swimlaneLaneAreaWidth(config) + config.returnRouteColumnWidth
 }
 
 /** Header / Body 동일 grid-template-columns */
@@ -115,8 +113,15 @@ export function scaledGridContentWidth(
 export function scaledSwimlaneGridTemplateColumns(
   config: SwimlaneGridConfig,
   scale: number,
+  options?: { fillWidth?: boolean },
 ): string {
   const left = config.leftLabelWidth * scale
+  if (options?.fillWidth) {
+    if (config.leftLabelWidth > 0) {
+      return `${left}px repeat(${config.laneCount}, 1fr)`
+    }
+    return `repeat(${config.laneCount}, 1fr)`
+  }
   const lane = config.laneWidth * scale
   if (config.leftLabelWidth > 0) {
     return `${left}px repeat(${config.laneCount}, ${lane}px)`

@@ -1,0 +1,260 @@
+{
+  "id": "revenue-share-settlement",
+  "name": "수익배분 매출 정산",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 수익배분 매출 정산 프로세스",
+  "overviewNodeId": "settlement-posting",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "revenue-share-settlement-step-01",
+      "name": "매출/비용 집계",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출/비용 집계",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "revenue-share-settlement-step-02",
+      "name": "매출/비용 확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출/비용 확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "revenue-share-settlement-step-03",
+      "name": "예외사항처리",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "예외사항처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "revenue-share-settlement-step-04",
+      "name": "MG차감여부",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "MG차감여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "revenue-share-settlement-step-05",
+      "name": "MG상계입력",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "MG상계입력",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "revenue-share-settlement-step-06",
+      "name": "MG상계처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "MG상계처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "revenue-share-settlement-step-07",
+      "name": "정산마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "정산마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "revenue-share-settlement-step-08",
+      "name": "정산마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "정산마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "revenue-share-settlement-step-09",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p9",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    }
+  ],
+  "edges": [
+    {
+      "id": "revenue-share-settlement-e01",
+      "source": "revenue-share-settlement-step-01",
+      "target": "revenue-share-settlement-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e02",
+      "source": "revenue-share-settlement-step-02",
+      "target": "revenue-share-settlement-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e03",
+      "source": "revenue-share-settlement-step-03",
+      "target": "revenue-share-settlement-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e04",
+      "source": "revenue-share-settlement-step-04",
+      "target": "revenue-share-settlement-step-05",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e05",
+      "source": "revenue-share-settlement-step-05",
+      "target": "revenue-share-settlement-step-06",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e06",
+      "source": "revenue-share-settlement-step-06",
+      "target": "revenue-share-settlement-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e07",
+      "source": "revenue-share-settlement-step-07",
+      "target": "revenue-share-settlement-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-e08",
+      "source": "revenue-share-settlement-step-08",
+      "target": "revenue-share-settlement-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "revenue-share-settlement-branch-01",
+      "source": "revenue-share-settlement-step-04",
+      "target": "revenue-share-settlement-step-07",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

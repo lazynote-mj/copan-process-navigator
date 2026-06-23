@@ -1,0 +1,260 @@
+{
+  "id": "service-project-settlement",
+  "name": "프로젝트 정산 : (서비스)",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 서비스 프로젝트 정산 프로세스",
+  "overviewNodeId": "settlement-posting",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "service-project-settlement-step-01",
+      "name": "매출/비용 마감집계",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p1",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출/비용 마감집계",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "service-project-settlement-step-02",
+      "name": "매출/비용 마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p2",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출/비용 마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "service-project-settlement-step-03",
+      "name": "예외사항처리",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p3",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "예외사항처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "service-project-settlement-step-04",
+      "name": "MG차감여부",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p4",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "MG차감여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "service-project-settlement-step-05",
+      "name": "MG상계입력",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "MG상계입력",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "service-project-settlement-step-06",
+      "name": "MG상계처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "MG상계처리",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "service-project-settlement-step-07",
+      "name": "정산마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "정산마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "service-project-settlement-step-08",
+      "name": "정산마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "정산마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "service-project-settlement-step-09",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p9",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    }
+  ],
+  "edges": [
+    {
+      "id": "service-project-settlement-e01",
+      "source": "service-project-settlement-step-01",
+      "target": "service-project-settlement-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e02",
+      "source": "service-project-settlement-step-02",
+      "target": "service-project-settlement-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e03",
+      "source": "service-project-settlement-step-03",
+      "target": "service-project-settlement-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e04",
+      "source": "service-project-settlement-step-04",
+      "target": "service-project-settlement-step-05",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e05",
+      "source": "service-project-settlement-step-05",
+      "target": "service-project-settlement-step-06",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e06",
+      "source": "service-project-settlement-step-06",
+      "target": "service-project-settlement-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e07",
+      "source": "service-project-settlement-step-07",
+      "target": "service-project-settlement-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e08",
+      "source": "service-project-settlement-step-08",
+      "target": "service-project-settlement-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-branch-01",
+      "source": "service-project-settlement-step-04",
+      "target": "service-project-settlement-step-07",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

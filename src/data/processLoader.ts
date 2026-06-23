@@ -12,6 +12,7 @@ export type ProcessMeta = {
   lastModified: string
   owner: string
   phases: Phase[]
+  zones?: import('../types/process').ProcessZone[]
 }
 
 /** JSON 파일에 lanes가 없을 때 Overview 기본 lane을 붙인다 */
@@ -39,6 +40,7 @@ export function loadProcessBundle(
     ...draft,
     nodes: normalizeProcessNodes(nodes, { ...draft, nodes }),
     edges: normalizeProcessEdges(edges),
+    ...(meta.zones?.length ? { zones: structuredClone(meta.zones) } : {}),
   }
 }
 
@@ -55,6 +57,7 @@ export type DetailProcessFile = {
   owner?: string
   phases?: Phase[]
   lanes?: Lane[]
+  zones?: import('../types/process').ProcessZone[]
   nodes: Node[]
   edges: Edge[]
 }
@@ -81,5 +84,6 @@ export function loadDetailProcessFile(data: DetailProcessFile): Process {
     ...draft,
     nodes: normalizeProcessNodes(data.nodes, { ...draft, nodes: data.nodes }),
     edges: normalizeProcessEdges(data.edges),
+    ...(data.zones?.length ? { zones: structuredClone(data.zones) } : {}),
   }
 }

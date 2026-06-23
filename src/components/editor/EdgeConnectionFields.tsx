@@ -1,6 +1,7 @@
 import type { Edge, Process } from '../../types/process'
 import type { EdgeType } from '../../types/edgeTypes'
 import { resolveEdgeType } from '../../types/edgeTypes'
+import { patchEdgeHandles, resolveEdgeSourceHandle, resolveEdgeTargetHandle } from '../../lib/editor/edgeHandles'
 import { formatNodeSelectLabel, sortNodesForSelect } from '../../lib/editor/sortNodesForSelect'
 import { HandleSelect } from './HandleSelect'
 import type { EdgeHandleId } from '../../types/process'
@@ -81,15 +82,15 @@ export function EdgeConnectionFields({
       <div className="edge-connection-fields__handles">
         <HandleSelect
           label="출발면"
-          value={(edge.sourceHandle ?? 'bottom') as EdgeHandleId}
+          value={(resolveEdgeSourceHandle(edge) ?? 'bottom') as EdgeHandleId}
           disabled={disabled}
-          onChange={(sourceHandle) => patch({ sourceHandle, routing: { mode: 'auto' } })}
+          onChange={(sourceHandle) => onChange(patchEdgeHandles(edge, { sourceHandle }))}
         />
         <HandleSelect
           label="도착면"
-          value={(edge.targetHandle ?? 'top') as EdgeHandleId}
+          value={(resolveEdgeTargetHandle(edge) ?? 'top') as EdgeHandleId}
           disabled={disabled}
-          onChange={(targetHandle) => patch({ targetHandle, routing: { mode: 'auto' } })}
+          onChange={(targetHandle) => onChange(patchEdgeHandles(edge, { targetHandle }))}
         />
       </div>
 

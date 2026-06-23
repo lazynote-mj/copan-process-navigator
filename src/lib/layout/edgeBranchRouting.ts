@@ -1,4 +1,5 @@
 import type { Edge, EdgeHandleId, Process } from '../../types/process'
+import { isReturnEdgeType, resolveEdgeType } from '../../types/edgeTypes'
 import { hasUserSpecifiedHandles, resolveEdgeSourceHandle, resolveEdgeTargetHandle } from '../editor/edgeHandles'
 import { resolveCellInternalEdgeHandles, isColumnTransitionEdge } from './cellInternalRouting'
 import { resolveConnectorEdgeHandles } from './connectorLayout'
@@ -7,10 +8,12 @@ import {
   inferFlowSourceSide,
   inferFlowTargetSide,
 } from './edgeFlowDirection'
-import { inferDecisionIncomingHandle } from './decisionAnchors'
+import { inferDecisionIncomingHandle, isBranchNodeType } from './decisionAnchors'
 import { inferDecisionOutgoingPair } from './decisionNodeLayout'
-import { isBranchNodeType } from './interfaceRuleLayout'
 import type { PlacedNode } from './laneLayout'
+import { isReturnLikeEdge } from './sameLaneReturnRouting'
+
+const SAME_COLUMN_CROSS_ZONE_X_TOLERANCE = 24
 
 export const OFFSET_STEP = 14
 
@@ -80,6 +83,79 @@ export function segmentOffsetForIndex(index: number): number {
 
 export function centeredParallelIndex(index: number, groupSize: number): number {
   return index - (groupSize - 1) / 2
+}
+
+/** 같은 lane · 인접 zone · 같은 열 bottom→top 주 flow — target top 중앙 고정 */
+function isSameColumnCrossZonePrimaryFlow(
+  edge: Edge,
+  source: PlacedNode,
+  target: PlacedNode,
+  process: Process,
+  sourceSide: EdgeHandleId,
+  targetSide: EdgeHandleId,
+): boolean {
+  if (sourceSide !== 'bottom' || targetSide !== 'top') return false
+  if (isReturnLikeEdge(edge) || isReturnEdgeType(resolveEdgeType(edge))) return false
+
+  const sNode = process.nodes.find((n) => n.id === source.id)
+  const tNode = process.nodes.find((n) => n.id === target.id)
+  if (!sNode?.processZone || !tNode?.processZone) return false
+  if (sNode.laneId !== tNode.laneId || sNode.processZone === tNode.processZone) return false
+  if (target.y <= source.y + source.height * 0.2) return false
+
+  const scx = source.x + source.width / 2
+  const tcx = target.x + target.width / 2
+  return Math.abs(scx - tcx) <= SAME_COLUMN_CROSS_ZONE_X_TOLERANCE
+}
+
+/** primary flow는 target 0.5, return·기타 incoming만 slot offset */
+function applySameColumnCrossZonePrimaryTargetAnchors(
+  placedMap: Map<string, PlacedNode>,
+  targetGroups: Map<string, Edge[]>,
+  sourceSideByEdge: Map<string, EdgeHandleId>,
+  targetSideByEdge: Map<string, EdgeHandleId>,
+  process: Process,
+  result: Map<string, EdgeBranchContext>,
+): void {
+  for (const groupEdges of targetGroups.values()) {
+    if (groupEdges.length < 2) continue
+
+    const primaryEdges = groupEdges.filter((edge) => {
+      const source = placedMap.get(edge.source)
+      const target = placedMap.get(edge.target)
+      if (!source || !target) return false
+      const sourceSide = sourceSideByEdge.get(edge.id) ?? 'bottom'
+      const targetSide = targetSideByEdge.get(edge.id) ?? 'top'
+      return isSameColumnCrossZonePrimaryFlow(edge, source, target, process, sourceSide, targetSide)
+    })
+
+    if (primaryEdges.length !== 1) continue
+
+    const primaryEdge = primaryEdges[0]!
+    const primaryCtx = result.get(primaryEdge.id)
+    if (!primaryCtx) continue
+
+    result.set(primaryEdge.id, {
+      ...primaryCtx,
+      targetAnchorRatio: 0.5,
+      targetSegmentOffset: 0,
+    })
+
+    const others = groupEdges
+      .filter((edge) => edge.id !== primaryEdge.id)
+      .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0) || a.id.localeCompare(b.id))
+
+    others.forEach((edge, index) => {
+      const ctx = result.get(edge.id)
+      if (!ctx) return
+      const slot = index + 1
+      result.set(edge.id, {
+        ...ctx,
+        targetAnchorRatio: anchorRatioForIndex(slot),
+        targetSegmentOffset: segmentOffsetForIndex(slot),
+      })
+    })
+  }
 }
 
 function normalizeToken(value: string): string {
@@ -309,12 +385,22 @@ export function computeEdgeBranchContexts(
         targetNode != null &&
         isColumnTransitionEdge(sourceNode, targetNode, process))
 
+    const isCellFanOutDown =
+      isCellInternal &&
+      sourceSide === 'bottom' &&
+      targetSide === 'top' &&
+      sourceGroupSize >= 2
+
     result.set(edge.id, {
       sourceGroupIndex: Math.max(0, sourceGroupIndex),
       sourceGroupSize,
       targetGroupIndex: Math.max(0, targetGroupIndex),
       targetGroupSize,
-      sourceAnchorRatio: isCellInternal || isDecision || isDecisionTarget ? 0.5 : anchorRatioForIndex(Math.max(0, sourceGroupIndex)),
+      sourceAnchorRatio: isCellFanOutDown
+        ? 0
+        : isCellInternal || isDecision || isDecisionTarget
+          ? 0.5
+          : anchorRatioForIndex(Math.max(0, sourceGroupIndex)),
       targetAnchorRatio: isCellInternal || isDecisionTarget ? 0.5 : anchorRatioForIndex(Math.max(0, targetGroupIndex)),
       segmentOffset:
         isCellInternal || sourceGroupSize < 2
@@ -347,6 +433,15 @@ export function computeEdgeBranchContexts(
       isConnectorFlow,
     })
   }
+
+  applySameColumnCrossZonePrimaryTargetAnchors(
+    placedMap,
+    targetGroups,
+    sourceSideByEdge,
+    targetSideByEdge,
+    process,
+    result,
+  )
 
   return result
 }

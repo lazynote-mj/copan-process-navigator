@@ -1,0 +1,395 @@
+{
+  "id": "b2c-return",
+  "name": "주문반품 ~ 입고 ~ 반품전표 : B2C",
+  "source": "SCM TO-BE",
+  "version": "v1.0",
+  "description": "PDF 도형 기준 B2C 반품~입고~반품전표 프로세스",
+  "overviewNodeId": "return-handling",
+  "status": "draft",
+  "lastModified": "2026-06-22",
+  "owner": "ERP PMO",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "b2c-return-step-01",
+      "name": "B2C(온라인커머스) 반품요청",
+      "type": "external",
+      "laneId": "business",
+      "phaseId": "p1",
+      "system": "Cafe24",
+      "owner": "온라인몰",
+      "description": "B2C(온라인커머스) 반품요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1
+    },
+    {
+      "id": "b2c-return-step-02",
+      "name": "이지어드민 주문수집",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "p2",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "이지어드민 주문수집",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2
+    },
+    {
+      "id": "b2c-return-step-03",
+      "name": "B2C 반품 입고확인",
+      "type": "manual",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p3",
+      "system": "이지어드민",
+      "owner": "물류센터",
+      "description": "B2C 반품 입고확인",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3
+    },
+    {
+      "id": "b2c-return-step-04",
+      "name": "반품입고 수량 입력",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p4",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "반품입고 수량 입력",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4
+    },
+    {
+      "id": "b2c-return-step-05",
+      "name": "위탁여부",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p5",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5
+    },
+    {
+      "id": "b2c-return-step-06",
+      "name": "위탁재고 현황",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p6",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁재고 현황",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6
+    },
+    {
+      "id": "b2c-return-step-07",
+      "name": "반품주문등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p7",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "반품주문등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7
+    },
+    {
+      "id": "b2c-return-step-08",
+      "name": "반품주문확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p8",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "반품주문확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8
+    },
+    {
+      "id": "b2c-return-step-09",
+      "name": "출고반품요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "p9",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "출고반품요청",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 9,
+      "localOrder": 9
+    },
+    {
+      "id": "b2c-return-step-10",
+      "name": "반품확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p10",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "반품확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 10
+    },
+    {
+      "id": "b2c-return-step-11",
+      "name": "입고정보",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "p11",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "입고정보",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 11
+    },
+    {
+      "id": "b2c-return-step-12",
+      "name": "일괄매출마감등록",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p12",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "일괄매출마감등록",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 12
+    },
+    {
+      "id": "b2c-return-step-13",
+      "name": "매출마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p13",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매출마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 13,
+      "localOrder": 13
+    },
+    {
+      "id": "b2c-return-step-14",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p14",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 14,
+      "localOrder": 14
+    }
+  ],
+  "edges": [
+    {
+      "id": "b2c-return-e01",
+      "source": "b2c-return-step-01",
+      "target": "b2c-return-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e02",
+      "source": "b2c-return-step-02",
+      "target": "b2c-return-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e03",
+      "source": "b2c-return-step-03",
+      "target": "b2c-return-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e04",
+      "source": "b2c-return-step-04",
+      "target": "b2c-return-step-05",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e05",
+      "source": "b2c-return-step-05",
+      "target": "b2c-return-step-06",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e06",
+      "source": "b2c-return-step-06",
+      "target": "b2c-return-step-07",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e07",
+      "source": "b2c-return-step-07",
+      "target": "b2c-return-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e08",
+      "source": "b2c-return-step-08",
+      "target": "b2c-return-step-09",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e09",
+      "source": "b2c-return-step-09",
+      "target": "b2c-return-step-10",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e10",
+      "source": "b2c-return-step-10",
+      "target": "b2c-return-step-11",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e11",
+      "source": "b2c-return-step-11",
+      "target": "b2c-return-step-12",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e12",
+      "source": "b2c-return-step-12",
+      "target": "b2c-return-step-13",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-e13",
+      "source": "b2c-return-step-13",
+      "target": "b2c-return-step-14",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2c-return-branch-01",
+      "source": "b2c-return-step-05",
+      "target": "b2c-return-step-07",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ]
+}

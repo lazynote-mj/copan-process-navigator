@@ -14,6 +14,6 @@
     { "id": "p5", "label": "출고확정", "order": 5 },
     { "id": "p6", "label": "재고차감", "order": 6 },
     { "id": "p7", "label": "매출마감", "order": 7 },
-    { "id": "p8", "label": "회계전표", "order": 8 }
+    { "id": "p8", "label": "매출전표", "order": 8 }
   ]
 }

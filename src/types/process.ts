@@ -1,6 +1,7 @@
 import type { NodeType } from './nodeTypes'
 export {
   NODE_TYPES,
+  EDITABLE_DETAIL_NODE_TYPES,
   DEFAULT_NODE_TYPE,
   NODE_TYPE_META,
   normalizeNodeType,
@@ -19,6 +20,15 @@ export {
 } from './edgeTypes'
 export type { EdgeType } from './edgeTypes'
 export type { NodeType } from './nodeTypes'
+export type { OverviewNodeType } from './overviewNodeTypes'
+export {
+  OVERVIEW_NODE_TYPES,
+  OVERVIEW_NODE_TYPE_META,
+  inferOverviewNodeType,
+  overviewTypeToDetailType,
+  getOverviewNodeTypeLabel,
+  resolveOverviewVisualClass,
+} from './overviewNodeTypes'
 
 /** @deprecated process.ts에서 직접 import — nodeTypes.ts 참조 */
 
@@ -81,6 +91,8 @@ export type ProcessZoneStyle = {
   headerHeight?: number
   /** Zone 하단 padding (px) */
   paddingBottom?: number
+  /** Zone 이름 표시 위치 */
+  labelPosition?: 'top' | 'bottom' | 'left' | 'right' | 'hidden'
   /** @deprecated headerHeight / paddingBottom 사용 */
   paddingY?: number
 }
@@ -99,18 +111,27 @@ export type Node = {
   id: string
   name: string
   type: NodeType
+  /** Overview PDF 범례 타입 — Overview 캔버스 전용 (미지정 시 type에서 추론) */
+  overviewType?: import('./overviewNodeTypes').OverviewNodeType
   laneId: string
   phaseId: string
   /** 왼쪽 → 오른쪽 업무 진행 순서 (전역 단계 설명/필터용) */
   phaseOrder?: number
   /** 스윔레인 내 좌→우 배치 순서 (Detail layout X축) */
   localOrder?: number
+  /** PDF ERP 단계 번호 (1~6) — Detail 원형 뱃지 표시용 */
+  stepBadge?: number
   /** Overview Cross-Functional Y축 업무 Zone */
   processZone?: ProcessZoneId
   /** Cell 내부 업무 흐름 순서 (edge 순서 판단) */
   cellOrder?: number
   /** Cell 내부 표시 slot (1~10, layout 배치). 미지정 시 cellOrder 순으로 자동 부여 */
   cellSlot?: number
+  /** Process Detail 가로형 전용 수동 배치 (1-based column/row). Overview cellSlot과 분리 */
+  detailLayout?: {
+    column?: number
+    row?: number
+  }
   /** @deprecated Overview는 cellOrder 사용 — 하위 호환 */
   zoneOrder?: number
   /** @deprecated Overview는 processZone 사용 */
@@ -144,6 +165,14 @@ export type EdgeHandleId = 'top' | 'right' | 'bottom' | 'left'
 
 export type EdgeRoutingPoint = { x: number; y: number }
 
+/** Edge label 수동 배치 — route 재계산과 분리해서 저장 */
+export type EdgeLabelPlacement = {
+  /** 라우터가 계산한 기본 라벨 위치 기준 offset */
+  offset?: EdgeRoutingPoint
+  /** @deprecated 이전 절대 좌표 저장값 */
+  point?: EdgeRoutingPoint
+}
+
 /** Edge 경로 편집 설정 — node 좌표는 저장하지 않음 */
 export type EdgeRoutingConfig = {
   mode: 'auto' | 'manual'
@@ -170,6 +199,8 @@ export type Edge = {
   condition: string
   /** 화면 표시용 라벨 */
   label: string
+  /** 라벨 수동 위치 */
+  labelPlacement?: EdgeLabelPlacement
   /** normal | system | condition | exception | return — edge 스타일·라우팅 */
   type?: import('./edgeTypes').EdgeType | string
   /** 출발 노드 연결면 (사용자 지정 시 router 우선) */

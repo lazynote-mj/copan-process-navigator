@@ -1,0 +1,145 @@
+[
+  {
+    "id": "ov-e2e-main",
+    "name": "E2E Main Flow",
+    "description": "사업생성 → 구매·발주 → 입고·매입 → 판매·출고·매출 → 정산·자금 (전체 맵 강조)",
+    "overviewNodeIds": [
+      "opportunity",
+      "business-review",
+      "contract-register",
+      "contract-approval",
+      "project-register",
+      "project-approval",
+      "purchase-request",
+      "product-check",
+      "vendor-check",
+      "po-approval",
+      "purchase-order",
+      "inbound-info",
+      "inbound-check",
+      "inbound-register",
+      "inbound-confirm",
+      "stock-plus",
+      "ap-inquiry",
+      "ap-close",
+      "ap-voucher-pending",
+      "fi-posting",
+      "order-register",
+      "shipment-register",
+      "sales-close",
+      "sales-posting",
+      "regular-fund-execution"
+    ],
+    "overviewEdgeIds": [
+      "main:e2e:01",
+      "main:e2e:02",
+      "main:e2e:03",
+      "main:e2e:04",
+      "main:e2e:05",
+      "main:e2e:06",
+      "main:e2e:06b",
+      "main:e2e:07",
+      "main:e2e:08",
+      "main:e2e:08a",
+      "main:e2e:08c",
+      "main:e2e:08d",
+      "main:e2e:09",
+      "main:e2e:09b",
+      "main:e2e:09c",
+      "main:e2e:09d",
+      "main:e2e:11",
+      "main:e2e:12",
+      "main:e2e:14",
+      "main:e2e:15",
+      "main:e2e:16",
+      "main:e2e:17",
+      "main:e2e:18",
+      "main:e2e:19",
+      "main:e2e:20",
+      "main:e2e:21"
+    ]
+  },
+  {
+    "id": "ov-returns",
+    "name": "반품",
+    "description": "Overview 반품 허브 — 대표 노드 강조",
+    "overviewNodeIds": ["return-handling"],
+    "overviewEdgeIds": [],
+    "linkedDetailGroupId": "pg-b2b-domestic-return"
+  },
+  {
+    "id": "ov-warehouse-transfer",
+    "name": "재고이동",
+    "description": "Overview 재고이동 허브",
+    "overviewNodeIds": ["stock-transfer-handling"],
+    "overviewEdgeIds": [],
+    "linkedDetailGroupId": "pg-stock-transfer"
+  },
+  {
+    "id": "ov-other-outbound",
+    "name": "기타출고",
+    "description": "Overview 기타출고 허브",
+    "overviewNodeIds": ["other-issue-handling"],
+    "overviewEdgeIds": [],
+    "linkedDetailGroupId": "pg-other-issue"
+  },
+  {
+    "id": "ov-consignment-settlement",
+    "name": "위탁정산",
+    "description": "Overview 위탁·정산 구간 강조",
+    "overviewNodeIds": [
+      "consignment-stock-status",
+      "consignment-sales-register",
+      "consignment-sales-close",
+      "settlement-anomaly-check",
+      "exception-handling",
+      "prepayment-process",
+      "regular-fund-execution",
+      "settlement-posting",
+      "settlement-fi-posting"
+    ],
+    "overviewEdgeIds": [
+      "sub:consignment:00",
+      "sub:consignment:01",
+      "sub:consignment:02",
+      "sub:consignment:03",
+      "sub:consignment:04",
+      "sub:consignment:05",
+      "sub:consignment:06",
+      "sub:consignment:07",
+      "sub:consignment:08",
+      "sub:consignment:09"
+    ],
+    "linkedDetailGroupId": "pg-consignment-settlement"
+  },
+  {
+    "id": "ov-royalty-mg",
+    "name": "로열티/MG정산",
+    "description": "Overview 로열티·MG 정산 구간 강조",
+    "overviewNodeIds": [
+      "royalty-sales-aggregate",
+      "royalty-sales-close",
+      "mg-deduct-check",
+      "mg-offset-process",
+      "settlement-posting",
+      "settlement-fi-posting"
+    ],
+    "overviewEdgeIds": [
+      "sub:royalty:01",
+      "sub:royalty:02",
+      "sub:royalty:03",
+      "sub:royalty:04",
+      "sub:royalty:05",
+      "sub:royalty:06"
+    ],
+    "linkedDetailGroupId": "pg-royalty-mg-settlement"
+  },
+  {
+    "id": "ov-popup-concert",
+    "name": "팝업/콘서트",
+    "description": "Overview 팝업·콘서트 허브",
+    "overviewNodeIds": ["popup-concert-stock-sales-sync"],
+    "overviewEdgeIds": [],
+    "linkedDetailGroupId": "pg-popup-concert-stock-sales-sync"
+  }
+]

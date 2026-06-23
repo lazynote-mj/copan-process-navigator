@@ -1,9 +1,38 @@
 import type { Edge, Node, Process } from '../types/process'
 import { migrateEdgeHandles } from '../lib/editor/edgeHandles'
 import { normalizeNodeType } from '../types/nodeTypes'
+import { inferOverviewNodeType } from '../types/overviewNodeTypes'
+import { resolveNodeDetailProcessIds } from './overviewDetailProcesses'
 import { normalizeEdgeType, resolveEdgeType } from '../types/edgeTypes'
 import { resolveNodePhaseOrder } from '../lib/layout/gridLayout'
 import { computeLocalOrders, normalizeAllLocalOrders } from '../lib/layout/localOrder'
+
+/** Overview 핵심 흐름 — 수동 bend/handle 고정이 남아도 로드 시 자동 라우팅으로 복원 */
+const AUTO_ROUTED_OVERVIEW_EDGE_IDS = new Set([
+  'main:e2e:06',
+  'overview:ov-cross-exec-procure',
+  'main:e2e:06b',
+  'main:e2e:07',
+  'procure-to-pay:e00',
+  'procure-to-pay:e01',
+  'main:e2e:21',
+])
+
+function normalizeCanonicalOverviewEdge(edge: Edge): Edge {
+  if (!AUTO_ROUTED_OVERVIEW_EDGE_IDS.has(edge.id)) {
+    return edge
+  }
+  const { manualRoute: _manualRoute, points: _points, bendPoints: _bendPoints, ...rest } = edge
+  return migrateEdgeHandles(
+    normalizeEdgeType({
+      ...rest,
+      routing: {
+        mode: 'auto',
+        handleAuto: true,
+      },
+    }),
+  )
+}
 
 function normalizeNode(node: Node, process: Process): Node {
   const normalizedType = normalizeNodeType(node.type, node.system)
@@ -18,18 +47,33 @@ function normalizeNode(node: Node, process: Process): Node {
     ...withType,
     phaseOrder: resolveNodePhaseOrder(withType, process),
   }
-  if (typeof withPhase.localOrder === 'number' && withPhase.localOrder > 0) {
-    return withPhase
+  const withOverview =
+    process.id === 'to-be-overview' && !withPhase.overviewType
+      ? {
+          ...withPhase,
+          overviewType: inferOverviewNodeType({
+            type: withPhase.type,
+            system: withPhase.system,
+            laneId: withPhase.laneId,
+            detailProcessIds: withPhase.detailProcessIds,
+            id: withPhase.id,
+            hasLinkedDetailProcesses:
+              resolveNodeDetailProcessIds(withPhase).length > 0,
+          }),
+        }
+      : withPhase
+  if (typeof withOverview.localOrder === 'number' && withOverview.localOrder > 0) {
+    return withOverview
   }
-  const computed = computeLocalOrders(process).get(withPhase.id)
+  const computed = computeLocalOrders(process).get(withOverview.id)
   if (computed !== undefined) {
-    return { ...withPhase, localOrder: computed }
+    return { ...withOverview, localOrder: computed }
   }
   const lanePeers = process.nodes
-    .filter((n) => n.laneId === withPhase.laneId)
+    .filter((n) => n.laneId === withOverview.laneId)
     .sort((a, b) => a.id.localeCompare(b.id))
-  const index = lanePeers.findIndex((n) => n.id === withPhase.id)
-  return { ...withPhase, localOrder: index >= 0 ? index + 1 : 1 }
+  const index = lanePeers.findIndex((n) => n.id === withOverview.id)
+  return { ...withOverview, localOrder: index >= 0 ? index + 1 : 1 }
 }
 
 export function normalizeProcessNodes(nodes: Node[], process?: Process): Node[] {
@@ -43,7 +87,16 @@ export function normalizeProcessNodes(nodes: Node[], process?: Process): Node[] 
 }
 
 export function normalizeProcessEdges(edges: Edge[]): Edge[] {
-  return edges.map((edge) => migrateEdgeHandles(normalizeEdgeType(edge)))
+  const seen = new Set<string>()
+  const deduped: Edge[] = []
+  for (const edge of edges) {
+    if (seen.has(edge.id)) continue
+    seen.add(edge.id)
+    deduped.push(edge)
+  }
+  return deduped.map((edge) =>
+    normalizeCanonicalOverviewEdge(migrateEdgeHandles(normalizeEdgeType(edge))),
+  )
 }
 
 export function serializeEdgeForExport(edge: Edge) {
@@ -89,6 +142,7 @@ export function buildProcessExport(process: Process) {
         processZone,
         cellOrder,
         cellSlot,
+        detailLayout,
         zoneOrder,
         globalStep,
         system,
@@ -100,6 +154,7 @@ export function buildProcessExport(process: Process) {
         detailProcessIds,
         interfaceRuleAnchor,
         connectorSubType,
+        overviewType,
         role,
         displayLevel,
         offsetX,
@@ -121,6 +176,7 @@ export function buildProcessExport(process: Process) {
         ...(processZone != null ? { processZone } : {}),
         ...(cellOrder != null ? { cellOrder } : {}),
         ...(cellSlot != null ? { cellSlot } : {}),
+        ...(detailLayout?.column != null || detailLayout?.row != null ? { detailLayout } : {}),
         ...(zoneOrder != null && cellOrder == null ? { zoneOrder } : {}),
         ...(globalStep != null ? { globalStep } : {}),
         system,
@@ -132,6 +188,7 @@ export function buildProcessExport(process: Process) {
         ...(detailProcessIds?.length ? { detailProcessIds } : {}),
         ...(interfaceRuleAnchor ? { interfaceRuleAnchor } : {}),
         ...(connectorSubType ? { connectorSubType } : {}),
+        ...(overviewType ? { overviewType } : {}),
         ...(role ? { role } : {}),
         ...(displayLevel ? { displayLevel } : {}),
         ...(offsetX != null && offsetX !== 0 ? { offsetX } : {}),

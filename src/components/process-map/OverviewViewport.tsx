@@ -11,7 +11,7 @@ type OverviewViewportProps = {
   scrollRef?: RefObject<HTMLDivElement | null>
 }
 
-/** Overview — width 기준 scale. Panel open으로 인한 viewport 축소는 무시(부모 viewport 기준). */
+/** Overview — width 기준 scale. Panel open 시 scale 유지, 가로 스크롤로 패널 뒤 영역 탐색. */
 export function OverviewViewport({
   trigger,
   canvasBounds,
@@ -42,8 +42,9 @@ export function OverviewViewport({
       const prevScrollTop = container.scrollTop
       const prevScrollHeight = container.scrollHeight
       const layoutWidth = Math.max(canvasBounds.width, gridContentWidth(OVERVIEW_SWIMLANE_GRID))
+      const fitWidth = Math.max(320, vw)
 
-      const nextScale = Math.min(1, vw / layoutWidth)
+      const nextScale = Math.min(1, fitWidth / layoutWidth)
       onScaleChange?.(nextScale)
 
       if (preserveScroll && prevScrollHeight > 0) {

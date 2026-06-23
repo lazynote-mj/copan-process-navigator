@@ -3,23 +3,23 @@
   "name": "구매요청 ~ 입고 ~ 매입전표",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "구매요청부터 입고·재고인식·매입마감·회계전표까지",
+  "description": "PDF 도형 기준 제/상품 구매~입고~매입전표 프로세스",
   "overviewNodeId": "purchase-request",
   "status": "draft",
-  "lastModified": "2026-06-15",
+  "lastModified": "2026-06-22",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
   "nodes": [
     {
-      "id": "purchase-request",
+      "id": "purchase-to-ap-invoice-step-01",
       "name": "구매요청",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p1",
       "system": "ERP",
       "owner": "사업부",
-      "description": "프로젝트 또는 운영 단위 구매 요청을 등록합니다.",
+      "description": "구매요청",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -27,244 +27,462 @@
       "localOrder": 1
     },
     {
-      "id": "vendor-check",
-      "name": "거래처 확인",
-      "type": "decision",
-      "laneId": "partnership",
+      "id": "purchase-to-ap-invoice-step-02",
+      "name": "구매요청확정",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p2",
       "system": "ERP",
-      "owner": "상생협력팀",
-      "description": "거래처 등록 여부를 확인합니다.",
+      "owner": "사업부",
+      "description": "구매요청확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 1
+      "localOrder": 2
     },
     {
-      "id": "vendor-register",
-      "name": "거래처등록요청",
+      "id": "purchase-to-ap-invoice-step-03",
+      "name": "발주등록",
       "type": "erp",
       "laneId": "partnership",
       "phaseId": "p3",
       "system": "ERP",
       "owner": "상생협력팀",
-      "description": "신규 거래처 등록을 요청합니다.",
+      "description": "발주등록",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 2
+      "localOrder": 3
     },
     {
-      "id": "po-approval",
-      "name": "발주품의",
-      "type": "approval",
-      "laneId": "partnership",
+      "id": "purchase-to-ap-invoice-step-04",
+      "name": "구매발주 품의(G/W)",
+      "type": "decision",
+      "laneId": "business",
       "phaseId": "p4",
-      "system": "groupware",
-      "owner": "상생협력팀",
-      "description": "발주 품의를 상신하고 승인받습니다.",
+      "system": "G/W",
+      "owner": "사업부",
+      "description": "구매발주 품의(G/W)",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 3
+      "localOrder": 4
     },
     {
-      "id": "purchase-order",
-      "name": "계약/발주등록",
+      "id": "purchase-to-ap-invoice-step-05",
+      "name": "발주확정",
       "type": "erp",
       "laneId": "partnership",
       "phaseId": "p5",
       "system": "ERP",
       "owner": "상생협력팀",
-      "description": "승인된 발주 정보를 등록합니다.",
+      "description": "발주확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 4
+      "localOrder": 5
     },
     {
-      "id": "inbound-info",
-      "name": "입고정보전달",
-      "type": "interface",
-      "laneId": "partnership",
+      "id": "purchase-to-ap-invoice-step-06",
+      "name": "입고요청",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
       "phaseId": "p6",
-      "system": "ERP→WMS API",
-      "owner": "상생협력팀",
-      "description": "발주 정보를 WMS로 전달합니다.",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "입고요청",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 5
+      "localOrder": 6
     },
     {
-      "id": "inbound-check",
-      "name": "입고확인",
-      "type": "erp",
-      "laneId": "warehouse-easyadmin",
+      "id": "purchase-to-ap-invoice-step-07",
+      "name": "이지어드민 입고 정보",
+      "type": "database",
+      "laneId": "business",
       "phaseId": "p7",
-      "system": "WMS",
-      "owner": "물류센터",
-      "description": "입고 예정 물량을 확인합니다.",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "이지어드민 입고 정보",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 1
+      "localOrder": 7
     },
     {
-      "id": "inbound-confirm",
-      "name": "입고확정",
-      "type": "interface",
+      "id": "purchase-to-ap-invoice-step-08",
+      "name": "입고 처리",
+      "type": "manual",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p8",
-      "system": "WMS→ERP API",
+      "system": "이지어드민",
       "owner": "물류센터",
-      "description": "입고 확정 결과를 ERP로 전송합니다.",
+      "description": "입고 처리",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 8,
-      "localOrder": 2
+      "localOrder": 8
     },
     {
-      "id": "stock-plus",
-      "name": "재고인식(+)",
-      "type": "system",
+      "id": "purchase-to-ap-invoice-step-09",
+      "name": "입고 요청 확인",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p9",
-      "system": "ERP",
+      "system": "이지어드민/WMS",
       "owner": "물류센터",
-      "description": "입고에 따른 재고 증가를 반영합니다.",
+      "description": "입고 요청 확인",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 3
+      "localOrder": 9
     },
     {
-      "id": "ap-close",
-      "name": "매입마감확정",
-      "type": "erp",
-      "laneId": "finance",
+      "id": "purchase-to-ap-invoice-step-10",
+      "name": "입고 수량 입력",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
       "phaseId": "p10",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매입 마감을 확정합니다.",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "입고 수량 입력",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 10,
-      "localOrder": 1
+      "localOrder": 10
     },
     {
-      "id": "fi-posting",
-      "name": "회계전표 반영",
-      "type": "system",
-      "laneId": "finance",
+      "id": "purchase-to-ap-invoice-step-11",
+      "name": "입고확정",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
       "phaseId": "p11",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매입 전표를 회계에 반영합니다.",
+      "system": "이지어드민/WMS",
+      "owner": "물류센터",
+      "description": "입고확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 11,
-      "localOrder": 2
+      "localOrder": 11
+    },
+    {
+      "id": "purchase-to-ap-invoice-step-12",
+      "name": "ERP 재고",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "p12",
+      "system": "DATABASE",
+      "owner": "시스템",
+      "description": "ERP 재고",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 12
+    },
+    {
+      "id": "purchase-to-ap-invoice-step-13",
+      "name": "매입마감조회",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p13",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매입마감조회",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 13,
+      "localOrder": 13
+    },
+    {
+      "id": "purchase-to-ap-invoice-step-14",
+      "name": "매입마감확정",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p14",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "매입마감확정",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 14,
+      "localOrder": 14
+    },
+    {
+      "id": "purchase-to-ap-invoice-step-15",
+      "name": "전표생성(미결)",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "p15",
+      "system": "ERP",
+      "owner": "재무팀",
+      "description": "전표생성(미결)",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 15,
+      "localOrder": 15
+    },
+    {
+      "id": "purchase-to-ap-invoice-step-16",
+      "name": "위탁여부",
+      "type": "decision",
+      "laneId": "business",
+      "phaseId": "p16",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁여부",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 16,
+      "localOrder": 16
+    },
+    {
+      "id": "purchase-to-ap-invoice-step-17",
+      "name": "위탁재고 현황",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "p17",
+      "system": "ERP",
+      "owner": "사업부",
+      "description": "위탁재고 현황",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 17,
+      "localOrder": 17
     }
   ],
   "edges": [
     {
-      "id": "e01",
-      "source": "purchase-request",
-      "target": "vendor-check",
+      "id": "purchase-to-ap-invoice-e01",
+      "source": "purchase-to-ap-invoice-step-01",
+      "target": "purchase-to-ap-invoice-step-02",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e02",
-      "source": "vendor-check",
-      "target": "vendor-register",
-      "condition": "newVendor",
-      "label": "신규",
-      "type": "condition"
-    },
-    {
-      "id": "e03",
-      "source": "vendor-check",
-      "target": "po-approval",
-      "condition": "existingVendor",
-      "label": "기존",
-      "type": "condition"
-    },
-    {
-      "id": "e04",
-      "source": "vendor-register",
-      "target": "po-approval",
+      "id": "purchase-to-ap-invoice-e02",
+      "source": "purchase-to-ap-invoice-step-02",
+      "target": "purchase-to-ap-invoice-step-03",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e05",
-      "source": "po-approval",
-      "target": "purchase-order",
+      "id": "purchase-to-ap-invoice-e03",
+      "source": "purchase-to-ap-invoice-step-03",
+      "target": "purchase-to-ap-invoice-step-04",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e06",
-      "source": "purchase-order",
-      "target": "inbound-info",
-      "condition": "",
-      "label": "",
-      "type": "normal"
+      "id": "purchase-to-ap-invoice-e04",
+      "source": "purchase-to-ap-invoice-step-04",
+      "target": "purchase-to-ap-invoice-step-05",
+      "condition": "Y",
+      "label": "Y",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e07",
-      "source": "inbound-info",
-      "target": "inbound-check",
+      "id": "purchase-to-ap-invoice-e05",
+      "source": "purchase-to-ap-invoice-step-05",
+      "target": "purchase-to-ap-invoice-step-06",
       "condition": "",
       "label": "",
-      "type": "system"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e08",
-      "source": "inbound-check",
-      "target": "inbound-confirm",
-      "condition": "",
-      "label": "",
-      "type": "system"
+      "id": "purchase-to-ap-invoice-e06",
+      "source": "purchase-to-ap-invoice-step-06",
+      "target": "purchase-to-ap-invoice-step-07",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e09",
-      "source": "inbound-confirm",
-      "target": "stock-plus",
+      "id": "purchase-to-ap-invoice-e07",
+      "source": "purchase-to-ap-invoice-step-07",
+      "target": "purchase-to-ap-invoice-step-08",
       "condition": "",
       "label": "",
-      "type": "system"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e10",
-      "source": "stock-plus",
-      "target": "ap-close",
+      "id": "purchase-to-ap-invoice-e08",
+      "source": "purchase-to-ap-invoice-step-08",
+      "target": "purchase-to-ap-invoice-step-09",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     },
     {
-      "id": "e11",
-      "source": "ap-close",
-      "target": "fi-posting",
+      "id": "purchase-to-ap-invoice-e09",
+      "source": "purchase-to-ap-invoice-step-09",
+      "target": "purchase-to-ap-invoice-step-10",
       "condition": "",
       "label": "",
-      "type": "normal"
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e10",
+      "source": "purchase-to-ap-invoice-step-10",
+      "target": "purchase-to-ap-invoice-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e11",
+      "source": "purchase-to-ap-invoice-step-11",
+      "target": "purchase-to-ap-invoice-step-12",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e12",
+      "source": "purchase-to-ap-invoice-step-12",
+      "target": "purchase-to-ap-invoice-step-13",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e13",
+      "source": "purchase-to-ap-invoice-step-13",
+      "target": "purchase-to-ap-invoice-step-14",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e14",
+      "source": "purchase-to-ap-invoice-step-14",
+      "target": "purchase-to-ap-invoice-step-15",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e15",
+      "source": "purchase-to-ap-invoice-step-15",
+      "target": "purchase-to-ap-invoice-step-16",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-e16",
+      "source": "purchase-to-ap-invoice-step-16",
+      "target": "purchase-to-ap-invoice-step-17",
+      "condition": "API",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-branch-01",
+      "source": "purchase-to-ap-invoice-step-04",
+      "target": "purchase-to-ap-invoice-step-03",
+      "condition": "N",
+      "label": "N",
+      "type": "return",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "purchase-to-ap-invoice-branch-02",
+      "source": "purchase-to-ap-invoice-step-16",
+      "target": "purchase-to-ap-invoice-step-13",
+      "condition": "N",
+      "label": "N",
+      "type": "condition",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
     }
   ]
 }

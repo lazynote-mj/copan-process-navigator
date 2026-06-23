@@ -6,12 +6,12 @@ import './layout.css'
 export type DetailHeaderInfo = {
   processLabel: string
   title: string
+  groupNumber?: string
 }
 
 type ToolbarProps = {
   viewMode: ViewMode
   appMode: AppMode
-  mapDisplayMode: 'business' | 'system'
   saveStatus: SaveStatus
   isLeftOpen: boolean
   isRightOpen: boolean
@@ -20,7 +20,6 @@ type ToolbarProps = {
   onToggleRight: () => void
   onViewModeChange: (mode: ViewMode) => void
   onAppModeChange: (mode: AppMode) => void
-  onMapDisplayModeChange: (mode: 'business' | 'system') => void
   onBackToOverview: () => void
   onAddNode: () => void
   onAddEdge: () => void
@@ -32,7 +31,6 @@ type ToolbarProps = {
 export function Toolbar({
   viewMode,
   appMode,
-  mapDisplayMode,
   saveStatus,
   isLeftOpen,
   isRightOpen,
@@ -41,7 +39,6 @@ export function Toolbar({
   onToggleRight,
   onViewModeChange,
   onAppModeChange,
-  onMapDisplayModeChange,
   onBackToOverview,
   onAddNode,
   onAddEdge,
@@ -72,6 +69,9 @@ export function Toolbar({
       <div className="toolbar__center">
         {detailHeader ? (
           <div className="toolbar__page-heading">
+            {detailHeader.groupNumber ? (
+              <span className="toolbar__page-index">{detailHeader.groupNumber}</span>
+            ) : null}
             <h1 className="toolbar__page-title">{detailHeader.title}</h1>
             <span className="toolbar__page-divider" aria-hidden>
               |
@@ -95,22 +95,6 @@ export function Toolbar({
             onClick={() => onViewModeChange('detail')}
           >
             프로세스 상세
-          </button>
-        </div>
-        <div className="toolbar__mode-group toolbar__mode-group--secondary">
-          <button
-            type="button"
-            className={`toolbar__mode-btn toolbar__mode-btn--small ${mapDisplayMode === 'business' ? 'toolbar__mode-btn--active' : ''}`}
-            onClick={() => onMapDisplayModeChange('business')}
-          >
-            업무
-          </button>
-          <button
-            type="button"
-            className={`toolbar__mode-btn toolbar__mode-btn--small ${mapDisplayMode === 'system' ? 'toolbar__mode-btn--active' : ''}`}
-            onClick={() => onMapDisplayModeChange('system')}
-          >
-            시스템
           </button>
         </div>
         <div className="toolbar__mode-group toolbar__mode-group--secondary">

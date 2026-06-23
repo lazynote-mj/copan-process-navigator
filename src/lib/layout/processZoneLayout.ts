@@ -1,6 +1,8 @@
 import type { Node as FlowNode } from '@xyflow/react'
 import type { Process, ProcessZone, ProcessZoneStyle } from '../../types/process'
 
+export type ZoneLabelPosition = NonNullable<ProcessZoneStyle['labelPosition']>
+
 export const DEFAULT_ZONE_PADDING_X = 24
 export const DEFAULT_ZONE_HEADER_HEIGHT = 36
 export const DEFAULT_ZONE_PADDING_BOTTOM = 32
@@ -21,7 +23,14 @@ export const PROCESS_ZONE_PADDING = {
 export const DEFAULT_ZONE_STYLE: Required<
   Pick<
     ProcessZoneStyle,
-    'showBackground' | 'showBorder' | 'borderStyle' | 'visible' | 'opacity' | 'fill' | 'stroke'
+    | 'showBackground'
+    | 'showBorder'
+    | 'borderStyle'
+    | 'visible'
+    | 'opacity'
+    | 'fill'
+    | 'stroke'
+    | 'labelPosition'
   >
 > = {
   showBackground: true,
@@ -31,6 +40,7 @@ export const DEFAULT_ZONE_STYLE: Required<
   opacity: 0.12,
   fill: '#94a3b8',
   stroke: '#64748b',
+  labelPosition: 'top',
 }
 
 export type ProcessZoneRect = {
@@ -52,6 +62,7 @@ export function resolveZoneStyle(zone: ProcessZone): typeof DEFAULT_ZONE_STYLE {
     opacity: zone.style.opacity ?? DEFAULT_ZONE_STYLE.opacity,
     fill: zone.style.fill ?? DEFAULT_ZONE_STYLE.fill,
     stroke: zone.style.stroke ?? DEFAULT_ZONE_STYLE.stroke,
+    labelPosition: zone.style.labelPosition ?? DEFAULT_ZONE_STYLE.labelPosition,
   }
 }
 
@@ -233,4 +244,61 @@ export function computeProcessZoneRects(
 
 export function resolveZoneLabelY(rect: ProcessZoneRect, headerHeight = DEFAULT_ZONE_HEADER_HEIGHT): number {
   return rect.y + Math.min(headerHeight * 0.5, 18)
+}
+
+export function resolveZoneLabelPlacement(
+  rect: ProcessZoneRect,
+  headerHeight = DEFAULT_ZONE_HEADER_HEIGHT,
+): {
+  visible: boolean
+  x: number
+  y: number
+  textAnchor: 'start' | 'middle' | 'end'
+  dominantBaseline: 'middle'
+  transform?: string
+} {
+  const position = rect.style.labelPosition
+  const inset = 14
+  const midX = rect.x + rect.width / 2
+  const midY = rect.y + rect.height / 2
+
+  switch (position) {
+    case 'hidden':
+      return { visible: false, x: midX, y: resolveZoneLabelY(rect, headerHeight), textAnchor: 'middle', dominantBaseline: 'middle' }
+    case 'bottom':
+      return {
+        visible: true,
+        x: midX,
+        y: rect.y + rect.height - Math.min(Math.max(inset, headerHeight * 0.45), 24),
+        textAnchor: 'middle',
+        dominantBaseline: 'middle',
+      }
+    case 'left':
+      return {
+        visible: true,
+        x: rect.x + inset,
+        y: midY,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle',
+        transform: `rotate(-90 ${rect.x + inset} ${midY})`,
+      }
+    case 'right':
+      return {
+        visible: true,
+        x: rect.x + rect.width - inset,
+        y: midY,
+        textAnchor: 'middle',
+        dominantBaseline: 'middle',
+        transform: `rotate(90 ${rect.x + rect.width - inset} ${midY})`,
+      }
+    case 'top':
+    default:
+      return {
+        visible: true,
+        x: midX,
+        y: resolveZoneLabelY(rect, headerHeight),
+        textAnchor: 'middle',
+        dominantBaseline: 'middle',
+      }
+  }
 }

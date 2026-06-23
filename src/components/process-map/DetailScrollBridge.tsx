@@ -1,69 +1,83 @@
 import { useEffect, useRef } from 'react'
 import { useReactFlow } from '@xyflow/react'
-import type { CanvasBounds } from '../../lib/layout/elkLayout'
 import { shouldMapConsumeWheel } from '../../lib/ui/panelEventShield'
 
 type DetailScrollBridgeProps = {
   trigger: string
-  canvasBounds: CanvasBounds
+  scale: number
+  contentHeight: number
   scrollRef: React.RefObject<HTMLDivElement | null>
 }
 
 /**
- * Process Detail — 외부 scroll container와 viewport 동기화 (zoom = 1).
- * 세로: flow-sticky 고정 → scrollTop만 viewport.y에 반영.
- * 가로: DOM scroll만 사용, viewport.x = 0.
+ * Process Detail — 외부 scroll container와 viewport 동기화.
+ * 세로: flow-sticky 고정 → scrollTop → viewport.y (scale 반영).
+ * 가로: scroll-content DOM scroll (panel open padding-right) — viewport.x = 0.
  */
 export function DetailScrollBridge({
   trigger,
-  canvasBounds,
+  scale,
+  contentHeight,
   scrollRef,
 }: DetailScrollBridgeProps) {
   const { setViewport } = useReactFlow()
-  const appliedTriggerRef = useRef('')
+  const scaleRef = useRef(scale)
+  scaleRef.current = scale
 
   useEffect(() => {
-    if (!trigger || canvasBounds.height <= 0) return
-    if (appliedTriggerRef.current === trigger) return
-
     const scrollEl = scrollRef.current
-    if (!scrollEl) return
+    if (!scrollEl || contentHeight <= 0) return
 
     const syncViewport = () => {
+      const currentScale = scaleRef.current
+      if (currentScale <= 0) return
       setViewport(
         {
           x: 0,
-          y: -scrollEl.scrollTop,
-          zoom: 1,
+          y: -scrollEl.scrollTop / currentScale,
+          zoom: currentScale,
         },
         { duration: 0 },
       )
     }
 
-    syncViewport()
-    scrollEl.addEventListener('scroll', syncViewport, { passive: true })
-
     const pane = scrollEl.querySelector<HTMLElement>('.react-flow__pane')
     const onWheel = (event: WheelEvent) => {
       if (!shouldMapConsumeWheel(event)) return
       if (event.ctrlKey || event.metaKey) return
-      if (Math.abs(event.deltaY) >= Math.abs(event.deltaX)) {
-        scrollEl.scrollTop += event.deltaY
-      } else {
+      if (event.shiftKey && event.deltaY !== 0) {
+        scrollEl.scrollLeft += event.deltaY
+      } else if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
         scrollEl.scrollLeft += event.deltaX
+      } else {
+        scrollEl.scrollTop += event.deltaY
       }
       event.preventDefault()
     }
 
+    syncViewport()
+    scrollEl.addEventListener('scroll', syncViewport, { passive: true })
     pane?.addEventListener('wheel', onWheel, { passive: false })
-    appliedTriggerRef.current = trigger
 
     return () => {
       scrollEl.removeEventListener('scroll', syncViewport)
       pane?.removeEventListener('wheel', onWheel)
-      appliedTriggerRef.current = ''
     }
-  }, [trigger, canvasBounds.height, scrollRef, setViewport])
+  }, [trigger, contentHeight, scrollRef, setViewport])
+
+  useEffect(() => {
+    const scrollEl = scrollRef.current
+    if (!scrollEl || scale <= 0) return
+
+    setViewport(
+      {
+        x: 0,
+        y: -scrollEl.scrollTop / scale,
+        zoom: scale,
+      },
+      { duration: 0 },
+    )
+  }, [scale, scrollRef, setViewport])
 
   return null
 }

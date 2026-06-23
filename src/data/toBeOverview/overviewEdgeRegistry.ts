@@ -1,6 +1,8 @@
 import type { Edge } from '../../types/process'
-import type { ProcessGroup } from '../../types/toBeNavigator'
+import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
+import detailProcessGroupsJson from './detail-process-groups.json'
 import e2eMainFlowJson from './e2e-main-flow.json'
+import overviewProcessGroupsJson from './overview-process-groups.json'
 import subProcessFlowsJson from './sub-process-flows.json'
 
 type FlowLink = {
@@ -56,26 +58,12 @@ export function buildOverviewEdgesFromSequence(): Edge[] {
   return [...e2eMainFlow.links, ...subLinks].map(toEdge)
 }
 
-export function buildOverviewProcessGroups(): ProcessGroup[] {
-  const mainGroup: ProcessGroup = {
-    id: e2eMainFlow.id,
-    name: e2eMainFlow.name,
-    description: e2eMainFlow.description,
-    overviewNodeIds: e2eMainFlow.nodeIds,
-    overviewEdgeIds: e2eMainFlowEdgeIds,
-    detailProcessId: 'business-to-project',
-  }
+export function buildOverviewProcessGroups(): OverviewProcessGroup[] {
+  return structuredClone(overviewProcessGroupsJson as OverviewProcessGroup[])
+}
 
-  const subGroups: ProcessGroup[] = subProcessFlows.groups.map((group) => ({
-    id: group.id,
-    name: group.name,
-    description: group.description,
-    overviewNodeIds: group.nodeIds,
-    overviewEdgeIds: group.links.map((link) => link.id),
-    detailProcessId: group.detailProcessId,
-  }))
-
-  return [mainGroup, ...subGroups]
+export function buildDetailProcessGroups(): DetailProcessGroup[] {
+  return structuredClone(detailProcessGroupsJson as DetailProcessGroup[])
 }
 
 export function validateOverviewEdgeEndpoints(nodeIds: Set<string>, edges: Edge[]): void {

@@ -1,11 +1,20 @@
 import type { CommonMasters } from '../types/commonMasters'
 import type { Process } from '../types/process'
 import type { ProcessInstance } from '../types/processInstance'
+import type {
+  DetailProcessGroup,
+  OverviewProcessGroup,
+  ProcessGroup,
+} from '../types/toBeNavigator'
 import {
   extractCommonMastersFromOverview,
   processToInstance,
   type ProcessData,
 } from '../types/processData'
+import {
+  buildDetailProcessGroups,
+  buildOverviewProcessGroups,
+} from './toBeOverview/overviewEdgeRegistry'
 
 export type ProcessDataFilePayloadV1 = {
   kind: 'copan-process-navigator-state'
@@ -21,6 +30,10 @@ export type ProcessDataFilePayloadV2 = {
   exportedAt: string
   commonMasters: CommonMasters
   processes: ProcessInstance[]
+  overviewProcessGroups?: OverviewProcessGroup[]
+  detailProcessGroups?: DetailProcessGroup[]
+  /** @deprecated */
+  processGroups?: ProcessGroup[]
 }
 
 export type ProcessDataFilePayload = ProcessDataFilePayloadV1 | ProcessDataFilePayloadV2
@@ -51,6 +64,20 @@ export function migrateV1ToV2(payload: ProcessDataFilePayloadV1): ProcessDataFil
   }
 }
 
+export function ensureProcessGroupFields(data: ProcessData): ProcessData {
+  const overviewProcessGroups = data.overviewProcessGroups?.length
+    ? data.overviewProcessGroups
+    : structuredClone(buildOverviewProcessGroups())
+  const detailProcessGroups = data.detailProcessGroups?.length
+    ? data.detailProcessGroups
+    : structuredClone(buildDetailProcessGroups())
+  return {
+    ...data,
+    overviewProcessGroups,
+    detailProcessGroups,
+  }
+}
+
 export function buildProcessDataFromPayload(
   payload: ProcessDataFilePayload,
   dataSource: ProcessData['dataSource'],
@@ -67,7 +94,7 @@ export function buildProcessDataFromPayload(
     nodeCount: processes.reduce((n, p) => n + p.nodes.length, 0),
     edgeCount: processes.reduce((n, p) => n + p.edges.length, 0),
   }
-  return {
+  const base: ProcessData = {
     commonMasters,
     processes,
     updatedAt: v2.exportedAt,
@@ -76,6 +103,18 @@ export function buildProcessDataFromPayload(
     baselineNodeCount: summary.nodeCount,
     baselineEdgeCount: summary.edgeCount,
   }
+  if (v2.overviewProcessGroups?.length || v2.detailProcessGroups?.length) {
+    return ensureProcessGroupFields({
+      ...base,
+      overviewProcessGroups: v2.overviewProcessGroups
+        ? structuredClone(v2.overviewProcessGroups)
+        : undefined,
+      detailProcessGroups: v2.detailProcessGroups
+        ? structuredClone(v2.detailProcessGroups)
+        : undefined,
+    })
+  }
+  return ensureProcessGroupFields(base)
 }
 
 export function createInitialProcessData(
@@ -89,7 +128,7 @@ export function createInitialProcessData(
   ]
   const nodeCount = processes.reduce((n, p) => n + p.nodes.length, 0)
   const edgeCount = processes.reduce((n, p) => n + p.edges.length, 0)
-  return {
+  return ensureProcessGroupFields({
     commonMasters,
     processes,
     updatedAt: new Date().toISOString(),
@@ -97,15 +136,18 @@ export function createInitialProcessData(
     dirty: false,
     baselineNodeCount: nodeCount,
     baselineEdgeCount: edgeCount,
-  }
+  })
 }
 
 export function processDataToFilePayload(data: ProcessData): ProcessDataFilePayloadV2 {
+  const normalized = ensureProcessGroupFields(data)
   return {
     kind: 'copan-process-navigator-state',
     version: 2,
-    exportedAt: data.updatedAt,
-    commonMasters: structuredClone(data.commonMasters),
-    processes: data.processes.map((p) => structuredClone(p)),
+    exportedAt: normalized.updatedAt,
+    commonMasters: structuredClone(normalized.commonMasters),
+    processes: normalized.processes.map((p) => structuredClone(p)),
+    overviewProcessGroups: structuredClone(normalized.overviewProcessGroups ?? []),
+    detailProcessGroups: structuredClone(normalized.detailProcessGroups ?? []),
   }
 }

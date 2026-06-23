@@ -34,23 +34,20 @@ export const OVERVIEW_NODE_ZONES: Record<string, ZonePlacement> = {
 
   // 구매·발주
   'purchase-request': { zoneId: 'purchase-order', zoneOrder: 0 },
-  'master-data-split': { zoneId: 'purchase-order', zoneOrder: 1 },
   'product-check': { zoneId: 'purchase-order', zoneOrder: 2 },
   'vendor-check': { zoneId: 'purchase-order', zoneOrder: 2 },
   'product-register-request': { zoneId: 'purchase-order', zoneOrder: 2 },
   'product-register-approval': { zoneId: 'purchase-order', zoneOrder: 3 },
   'vendor-register': { zoneId: 'purchase-order', zoneOrder: 2 },
   'vendor-register-approval': { zoneId: 'purchase-order', zoneOrder: 3 },
-  'master-data-complete': { zoneId: 'purchase-order', zoneOrder: 4 },
-  'purchase-order': { zoneId: 'purchase-order', zoneOrder: 5 },
-  'po-approval': { zoneId: 'purchase-order', zoneOrder: 6 },
+  'po-approval': { zoneId: 'purchase-order', zoneOrder: 5 },
+  'purchase-order': { zoneId: 'purchase-order', zoneOrder: 6 },
   'inbound-info': { zoneId: 'purchase-order', zoneOrder: 7 },
 
   // 입고·재고·매입
   'inbound-check': { zoneId: 'inbound-inventory', zoneOrder: 0 },
   'inbound-confirm': { zoneId: 'inbound-inventory', zoneOrder: 1 },
-  'stock-plus': { zoneId: 'inbound-inventory', zoneOrder: 2 },
-  'ap-close': { zoneId: 'inbound-inventory', zoneOrder: 3 },
+  'ap-close': { zoneId: 'inbound-inventory', zoneOrder: 2 },
   'ap-voucher-pending': { zoneId: 'inbound-inventory', zoneOrder: 4 },
   'fi-posting': { zoneId: 'inbound-inventory', zoneOrder: 5 },
 
@@ -61,13 +58,12 @@ export const OVERVIEW_NODE_ZONES: Record<string, ZonePlacement> = {
   'shipment-request': { zoneId: 'sales-shipment', zoneOrder: 3 },
   'shipment-check': { zoneId: 'sales-shipment', zoneOrder: 4 },
   'shipment-confirm': { zoneId: 'sales-shipment', zoneOrder: 5 },
-  'stock-minus': { zoneId: 'sales-shipment', zoneOrder: 6 },
   'store-sales': { zoneId: 'sales-shipment', zoneOrder: 0 },
   'popup-sales': { zoneId: 'sales-shipment', zoneOrder: 1 },
   'concert-sales': { zoneId: 'sales-shipment', zoneOrder: 2 },
   'pos-easychain-sync': { zoneId: 'sales-shipment', zoneOrder: 3 },
   'popup-concert-stock-sales-sync': { zoneId: 'sales-shipment', zoneOrder: 4 },
-  'sales-inquiry': { zoneId: 'sales-shipment', zoneOrder: 7 },
+  'sales-inquiry': { zoneId: 'sales-shipment', zoneOrder: 6 },
   'sales-close': { zoneId: 'sales-shipment', zoneOrder: 8 },
   'sales-posting': { zoneId: 'sales-shipment', zoneOrder: 9 },
 
@@ -88,7 +84,8 @@ export const OVERVIEW_NODE_ZONES: Record<string, ZonePlacement> = {
   'mg-deduct-check': { zoneId: 'settlement-close', zoneOrder: 12 },
   'mg-offset-process': { zoneId: 'settlement-close', zoneOrder: 13 },
   'settlement-posting': { zoneId: 'settlement-close', zoneOrder: 14 },
-  'regular-fund-execution': { zoneId: 'settlement-close', zoneOrder: 15 },
+  'settlement-fi-posting': { zoneId: 'settlement-close', zoneOrder: 15 },
+  'regular-fund-execution': { zoneId: 'settlement-close', zoneOrder: 16 },
 }
 
 const ZONE_ORDER_INDEX = new Map(PROCESS_ZONES.map((z) => [z.id, z.order]))

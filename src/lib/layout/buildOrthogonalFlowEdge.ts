@@ -14,12 +14,20 @@ import {
   ARROW_MARKER_WIDTH,
   type OrthogonalRouteResult,
   type Segment,
+  type Point,
   countOrthogonalBends,
+  countNodeCollisionsOnPath,
+  isNearEdge,
 } from './orthogonalEdgeRouter'
+import type { LabelRect } from './edgeLabelPlacement'
+import {
+  ROUTING_EDGE_NODE_MARGIN,
+  ROUTING_OVERVIEW_EDGE_NODE_MARGIN,
+} from './routingMetrics'
 import type { EdgeBranchContext } from './edgeBranchRouting'
 import type { ProcessEdgeData } from './elkLayout'
 import { isDerivedDisplayEdge } from '../nodeVisibility'
-import { getHandlePoint, pointsToPath, type Point } from './orthogonalEdgeRouter'
+import { getHandlePoint, pointsToPath } from './orthogonalEdgeRouter'
 import {
   buildEdgeDisplayStyle,
   resolveEdgeRouteValidation,
@@ -62,11 +70,22 @@ function buildFlowEdgeData(
       pathEmpty: route.points.length < 2,
     })
 
+  const labelPoint =
+    edge.labelPlacement?.offset && route.labelPoint
+      ? {
+          x: route.labelPoint.x + edge.labelPlacement.offset.x,
+          y: route.labelPoint.y + edge.labelPlacement.offset.y,
+        }
+      : edge.labelPlacement?.point ?? route.labelPoint
+
   return {
     edgeType,
     routingKind,
     elkPath: route.path,
-    labelPoint: route.labelPoint,
+    routeLabelPoint: route.labelPoint,
+    labelPoint,
+    labelPlacement: edge.labelPlacement,
+    labelRect: route.labelRect,
     parallelIndex: effectiveParallelIndex,
     bendPoints: route.bendPoints,
     routingMode: edge.routing?.mode ?? 'auto',
@@ -88,6 +107,93 @@ export type BuildOrthogonalFlowEdgeOptions = {
   detailLaneOrder?: Map<string, number>
   process?: import('../../types/process').Process
   branchContext?: EdgeBranchContext
+  /** collision 검사 margin — 기본값은 overviewMode에 따라 routingMetrics에서 결정 */
+  edgeNodeMargin?: number
+  /** 이미 배치된 edge 라벨 bbox — 겹침 방지 */
+  existingLabelRects?: LabelRect[]
+}
+
+function resolveCollisionMargin(options: BuildOrthogonalFlowEdgeOptions): number {
+  return (
+    options.edgeNodeMargin ??
+    (options.overviewMode ? ROUTING_OVERVIEW_EDGE_NODE_MARGIN : ROUTING_EDGE_NODE_MARGIN)
+  )
+}
+
+function countCollisions(
+  points: Point[],
+  placed: PlacedNode[],
+  exclude: Set<string>,
+  margin: number,
+  process?: import('../../types/process').Process,
+): number {
+  return countNodeCollisionsOnPath(points, placed, exclude, margin, process)
+}
+
+export function buildOrthogonalFlowEdgeWithCollisionRetry(
+  edge: Edge,
+  source: PlacedNode,
+  target: PlacedNode,
+  placed: PlacedNode[],
+  parallelIndex: number,
+  minContentX: number,
+  existingSegments: Segment[],
+  options: BuildOrthogonalFlowEdgeOptions = {},
+): BuiltOrthogonalEdge {
+  const exclude = new Set([source.id, target.id])
+  const margin = resolveCollisionMargin(options)
+  const nearEdge = isNearEdge(source, target, options.process)
+
+  let result = buildOrthogonalFlowEdge(
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex,
+    minContentX,
+    existingSegments,
+    options,
+  )
+
+  if (!nearEdge && countCollisions(result.route.points, placed, exclude, margin, options.process) > 0) {
+    const retry = buildOrthogonalFlowEdge(
+      edge,
+      source,
+      target,
+      placed,
+      parallelIndex,
+      minContentX,
+      existingSegments,
+      { ...options, preferCorridor: true },
+    )
+    if (
+      countCollisions(retry.route.points, placed, exclude, margin, options.process) <
+      countCollisions(result.route.points, placed, exclude, margin, options.process)
+    ) {
+      result = retry
+    }
+  }
+
+  if (!nearEdge && countCollisions(result.route.points, placed, exclude, margin, options.process) > 0) {
+    const lastResort = buildOrthogonalFlowEdge(
+      edge,
+      source,
+      target,
+      placed,
+      parallelIndex + 3,
+      minContentX,
+      existingSegments,
+      { ...options, preferCorridor: true },
+    )
+    if (
+      countCollisions(lastResort.route.points, placed, exclude, margin, options.process) <
+      countCollisions(result.route.points, placed, exclude, margin, options.process)
+    ) {
+      result = lastResort
+    }
+  }
+
+  return result
 }
 
 export function buildOrthogonalFlowEdge(
@@ -116,6 +222,7 @@ export function buildOrthogonalFlowEdge(
     preferCorridor: options.preferCorridor,
     detailDocumentMode: options.detailDocumentMode,
     process: options.process,
+    existingLabelRects: options.existingLabelRects,
   })
 
   const routingKind: EdgeRoutingType = 'orthogonal'
@@ -250,6 +357,12 @@ export function buildBrokenFlowEdge(
   }
 }
 
+export function accumulateEdgeLabelRect(existingLabelRects: LabelRect[], route: OrthogonalRouteResult): void {
+  if (!route.labelHidden && route.labelRect) {
+    existingLabelRects.push(route.labelRect)
+  }
+}
+
 export function buildAllOrthogonalFlowEdges(
   edges: Edge[],
   placed: PlacedNode[],
@@ -259,6 +372,7 @@ export function buildAllOrthogonalFlowEdges(
 ): BuiltOrthogonalEdge[] {
   const placedMap = new Map(placed.map((n) => [n.id, n]))
   const existingSegments: Segment[] = []
+  const existingLabelRects: LabelRect[] = []
   const built: BuiltOrthogonalEdge[] = []
 
   for (const edge of edges) {
@@ -281,7 +395,7 @@ export function buildAllOrthogonalFlowEdges(
     }
 
     const branchContext = branchContexts.get(edge.id)
-    const result = buildOrthogonalFlowEdge(
+    const result = buildOrthogonalFlowEdgeWithCollisionRetry(
       edge,
       source,
       target,
@@ -289,9 +403,10 @@ export function buildAllOrthogonalFlowEdges(
       branchContext?.parallelIndex ?? 0,
       minContentX,
       existingSegments,
-      { ...options, branchContext },
+      { ...options, branchContext, existingLabelRects },
     )
     existingSegments.push(...result.segments)
+    accumulateEdgeLabelRect(existingLabelRects, result.route)
     built.push(result)
   }
 

@@ -4,6 +4,7 @@ import type { EdgeType } from '../../types/edgeTypes'
 import type { EdgeHandleId } from '../../types/process'
 import type { EdgeValidationStatus } from './edgeRouteValidation'
 import { getDetailGridLayout, rebuildDetailLayoutEdges } from './detailGridLayout'
+import { getDetailHorizontalLayout, rebuildDetailHorizontalLayoutEdges } from './detailHorizontalLayout'
 import { getOverviewVerticalLayout } from './overviewVerticalLayout'
 import { buildOverviewEdges } from './overviewEdgePipeline'
 import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
@@ -17,7 +18,10 @@ export type ProcessEdgeData = {
   edgeType: EdgeType
   routingKind: import('./edgeClassification').EdgeRoutingType
   elkPath?: string
+  routeLabelPoint?: { x: number; y: number }
   labelPoint?: { x: number; y: number }
+  labelPlacement?: import('../../types/process').EdgeLabelPlacement
+  labelRect?: { x: number; y: number; width: number; height: number }
   parallelIndex?: number
   bendPoints?: Array<{ x: number; y: number }>
   pathPoints?: Array<{ x: number; y: number }>
@@ -25,6 +29,9 @@ export type ProcessEdgeData = {
   sourceHandle?: EdgeHandleId
   targetHandle?: EdgeHandleId
   labelHidden?: boolean
+  groupFocus?: boolean
+  groupDimmed?: boolean
+  groupHighlighted?: boolean
   broken?: boolean
   brokenReason?: string
   missingNodeId?: string
@@ -57,16 +64,28 @@ export type ProcessNodeData = {
   phaseLabel: string
   phaseOrder: number
   localOrder: number
+  /** PDF ERP 단계 번호 — Detail 뱃지 (미지정 시 뱃지 숨김) */
+  stepBadge?: number
   compact?: boolean
   system?: string
   decisionSubtitle?: string
   connectorSubType?: import('../../types/connectorTypes').ConnectorSubType
+  /** Overview 1행 — 반품확정(auto) */
+  displayName?: string
+  overviewType?: import('../../types/overviewNodeTypes').OverviewNodeType
+  overviewVisualClass?: string
   /** 3열 cell 내부 좁은 노드 */
   cell3Col?: boolean
+  /** 렌더러가 React Flow 측정 전에도 layout bbox와 같은 크기를 쓰도록 전달 */
+  layoutWidth?: number
+  layoutHeight?: number
+  /** 프로세스 상세 — phaseOrder 원형 뱃지 (Overview는 false) */
+  showStepBadge?: boolean
 }
 
 export type LayoutOptions = {
   overviewVertical?: boolean
+  detailHorizontal?: boolean
 }
 
 export type LayoutResult = {
@@ -82,12 +101,15 @@ export type LayoutResult = {
 export function rebuildLayoutEdges(
   process: Process,
   placed: PlacedNode[],
-  options: { overviewVertical?: boolean; laneBands?: LaneBand[] },
+  options: { overviewVertical?: boolean; detailHorizontal?: boolean; laneBands?: LaneBand[] },
 ): FlowEdge[] {
   if (options.overviewVertical) {
     const minContentX =
       options.laneBands?.[0]?.contentLeft ?? OVERVIEW_GRID_METRICS.zoneLabelColumnWidth
     return buildOverviewEdges(process, placed, minContentX).flowEdges
+  }
+  if (options.detailHorizontal) {
+    return rebuildDetailHorizontalLayoutEdges(process, placed)
   }
   return rebuildDetailLayoutEdges(process, placed)
 }
@@ -105,13 +127,15 @@ export function getLayoutedElements(process: Process, options?: LayoutOptions): 
     }
   }
 
-  const detail = getDetailGridLayout(process)
+  const detail = options?.detailHorizontal
+    ? getDetailHorizontalLayout(process)
+    : getDetailGridLayout(process)
   return {
     nodes: detail.nodes,
     edges: detail.edges,
     laneBands: detail.laneBands,
     canvasBounds: detail.canvasBounds,
-    layoutOrientation: 'vertical',
+    layoutOrientation: detail.layoutOrientation,
   }
 }
 

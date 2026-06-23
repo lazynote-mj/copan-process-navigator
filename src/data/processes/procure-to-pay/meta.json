@@ -17,6 +17,6 @@
     { "id": "p8", "label": "입고확정", "order": 8 },
     { "id": "p9", "label": "재고인식", "order": 9 },
     { "id": "p10", "label": "매입마감", "order": 10 },
-    { "id": "p11", "label": "회계전표", "order": 11 }
+    { "id": "p11", "label": "매입전표", "order": 11 }
   ]
 }
