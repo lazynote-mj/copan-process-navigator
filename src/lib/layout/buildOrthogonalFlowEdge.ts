@@ -52,6 +52,10 @@ function edgeHandleProps(sourceHandle: string, targetHandle: string): Record<str
   }
 }
 
+function isFinitePoint(point: Point | null | undefined): point is Point {
+  return Boolean(point && Number.isFinite(point.x) && Number.isFinite(point.y))
+}
+
 function buildFlowEdgeData(
   edge: Edge,
   route: OrthogonalRouteResult,
@@ -71,12 +75,14 @@ function buildFlowEdgeData(
     })
 
   const labelPoint =
-    edge.labelPlacement?.offset && route.labelPoint
+    isFinitePoint(edge.labelPlacement?.offset) && isFinitePoint(route.labelPoint)
       ? {
           x: route.labelPoint.x + edge.labelPlacement.offset.x,
           y: route.labelPoint.y + edge.labelPlacement.offset.y,
         }
-      : edge.labelPlacement?.point ?? route.labelPoint
+      : isFinitePoint(edge.labelPlacement?.point)
+        ? edge.labelPlacement.point
+        : route.labelPoint
 
   return {
     edgeType,
@@ -269,7 +275,7 @@ export function buildOrthogonalFlowEdge(
   }
 }
 
-/** JSON edge는 유지 — endpoint가 layout에 없을 때 broken indicator */
+/** @deprecated invalid edge는 diagnostics로만 남기고 화면에는 그리지 않는다. */
 export function buildBrokenFlowEdge(
   edge: Edge,
   missingNodeId: string,
@@ -389,8 +395,7 @@ export function buildAllOrthogonalFlowEdges(
     if (!source || !target) {
       const missingId = !source ? edge.source : edge.target
       const role = !source ? 'source' : 'target'
-      const broken = buildBrokenFlowEdge(edge, missingId, role, { source, target })
-      built.push(broken)
+      console.warn(`[ProcessNavigator] Missing ${role} node: ${missingId} (edge ${edge.id})`)
       continue
     }
 

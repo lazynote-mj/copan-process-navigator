@@ -70,7 +70,29 @@ function touchData(data: ProcessData, updater: (current: ProcessData) => Process
   }
 }
 
+function markDataTouched(data: ProcessData): ProcessData {
+  return {
+    ...data,
+    updatedAt: new Date().toISOString(),
+    dirty: true,
+  }
+}
+
+function isStructurallyEqual(a: unknown, b: unknown): boolean {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b)
+  } catch {
+    return false
+  }
+}
+
 export type DetailProcessFallback = (processId: string) => Process | undefined
+
+export type CloneDetailProcessResult = {
+  data: ProcessData
+  processId: string
+  groupId: string
+}
 
 function resolveDetailFallback(
   fallback?: DetailProcessFallback,
@@ -90,49 +112,116 @@ function updateCommonMasters(
   }))
 }
 
+function slugifyProcessId(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function buildUniqueId(baseId: string, existingIds: Set<string>): string {
+  const fallbackBase = baseId || 'process'
+  let nextId = fallbackBase
+  let suffix = 2
+  while (existingIds.has(nextId)) {
+    nextId = `${fallbackBase}-${suffix}`
+    suffix += 1
+  }
+  existingIds.add(nextId)
+  return nextId
+}
+
+function remapOwnedId(
+  oldId: string,
+  sourceProcessId: string,
+  targetProcessId: string,
+  fallbackPrefix: string,
+  index: number,
+  existingIds: Set<string>,
+): string {
+  const base =
+    oldId.startsWith(sourceProcessId)
+      ? oldId.replace(sourceProcessId, targetProcessId)
+      : `${targetProcessId}-${fallbackPrefix}-${String(index + 1).padStart(2, '0')}`
+  return buildUniqueId(base, existingIds)
+}
+
+function processToDetailInstance(process: Process): ProcessInstance {
+  return {
+    id: process.id,
+    type: 'detail',
+    name: process.name,
+    description: process.description,
+    version: process.version,
+    status: process.status,
+    lastModified: process.lastModified,
+    owner: process.owner,
+    nodes: process.nodes,
+    edges: process.edges,
+    zones: process.zones,
+    overviewNodeId: process.overviewNodeId,
+    source: process.source,
+  }
+}
+
+function resolveProcessInstanceForClone(
+  data: ProcessData,
+  sourceProcessId: string,
+  fallback?: DetailProcessFallback,
+): ProcessInstance | undefined {
+  const existing = data.processes.find((process) => process.id === sourceProcessId && process.type === 'detail')
+  if (existing) return existing
+  const fallbackProcess = fallback?.(sourceProcessId)
+  return fallbackProcess ? processToDetailInstance(fallbackProcess) : undefined
+}
+
 function updateProcessInstance(
   data: ProcessData,
   scope: ProcessScope,
   updater: (instance: ProcessInstance) => ProcessInstance,
   fallback?: DetailProcessFallback,
 ): ProcessData {
-  return touchData(data, (current) => {
-    const idx = findProcessIndex(current, scope)
-    if (idx >= 0) {
-      const processes = [...current.processes]
-      processes[idx] = normalizeProcessInstance(
-        updater(structuredClone(current.processes[idx])),
-        current.commonMasters,
-      )
-      return { ...current, processes }
-    }
-
-    if (scope === 'overview') return current
-
-    const existing = resolveDetailFallback(fallback, scope)
-    if (!existing) return current
-
-    const instance = normalizeProcessInstance(
-      {
-        id: existing.id,
-        type: 'detail',
-        name: existing.name,
-        description: existing.description,
-        version: existing.version,
-        status: existing.status,
-        lastModified: existing.lastModified,
-        owner: existing.owner,
-        nodes: existing.nodes,
-        edges: existing.edges,
-        zones: existing.zones,
-        overviewNodeId: existing.overviewNodeId,
-        source: existing.source,
-      },
-      current.commonMasters,
+  const idx = findProcessIndex(data, scope)
+  if (idx >= 0) {
+    const currentInstance = data.processes[idx]
+    const updated = normalizeProcessInstance(
+      updater(structuredClone(currentInstance)),
+      data.commonMasters,
     )
-    const updated = normalizeProcessInstance(updater(instance), current.commonMasters)
-    return { ...current, processes: [...current.processes, updated] }
-  })
+
+    if (isStructurallyEqual(updated, currentInstance)) return data
+
+    const processes = [...data.processes]
+    processes[idx] = updated
+    return markDataTouched({ ...data, processes })
+  }
+
+  if (scope === 'overview') return data
+
+  const existing = resolveDetailFallback(fallback, scope)
+  if (!existing) return data
+
+  const instance = normalizeProcessInstance(
+    {
+      id: existing.id,
+      type: 'detail',
+      name: existing.name,
+      description: existing.description,
+      version: existing.version,
+      status: existing.status,
+      lastModified: existing.lastModified,
+      owner: existing.owner,
+      nodes: existing.nodes,
+      edges: existing.edges,
+      zones: existing.zones,
+      overviewNodeId: existing.overviewNodeId,
+      source: existing.source,
+    },
+    data.commonMasters,
+  )
+  const updated = normalizeProcessInstance(updater(instance), data.commonMasters)
+  return markDataTouched({ ...data, processes: [...data.processes, updated] })
 }
 
 export function ensureDetailProcess(
@@ -141,7 +230,7 @@ export function ensureDetailProcess(
   fallback?: Process,
 ): ProcessData {
   if (!fallback || findProcessIndex(data, processId) >= 0) return data
-  return touchData(data, (current) => ensureDetailProcessInStore(current, processId, fallback))
+  return ensureDetailProcessInStore(data, processId, fallback)
 }
 
 export function updateNode(
@@ -208,6 +297,26 @@ export function saveNode(
       nodes: isNew
         ? [...instance.nodes, node]
         : instance.nodes.map((existing) => (existing.id === node.id ? node : existing)),
+    }),
+    fallback,
+  )
+}
+
+export function addNodesAndEdges(
+  data: ProcessData,
+  scope: ProcessScope,
+  nodes: Node[],
+  edges: Edge[],
+  fallback?: DetailProcessFallback,
+): ProcessData {
+  if (nodes.length === 0 && edges.length === 0) return data
+  return updateProcessInstance(
+    data,
+    scope,
+    (instance) => ({
+      ...instance,
+      nodes: [...instance.nodes, ...nodes],
+      edges: [...instance.edges, ...edges.map((edge) => normalizeEdgeForStorage(edge))],
     }),
     fallback,
   )
@@ -294,6 +403,94 @@ export function saveZone(
   )
 }
 
+export function cloneDetailProcess(
+  data: ProcessData,
+  sourceProcessId: string,
+  requestedName: string,
+  fallback?: DetailProcessFallback,
+): CloneDetailProcessResult {
+  const source = resolveProcessInstanceForClone(data, sourceProcessId, fallback)
+  const name = requestedName.trim()
+  if (!source || source.type !== 'detail' || !name) {
+    return { data, processId: sourceProcessId, groupId: '' }
+  }
+
+  const existingProcessIds = new Set(data.processes.map((process) => process.id))
+  const existingNodeIds = new Set(data.processes.flatMap((process) => process.nodes.map((node) => node.id)))
+  const existingEdgeIds = new Set(data.processes.flatMap((process) => process.edges.map((edge) => edge.id)))
+  const existingZoneIds = new Set(data.processes.flatMap((process) => (process.zones ?? []).map((zone) => zone.id)))
+  const existingGroupIds = new Set((data.detailProcessGroups ?? []).map((group) => group.id))
+
+  const processId = buildUniqueId(
+    slugifyProcessId(name) || `${source.id}-copy`,
+    existingProcessIds,
+  )
+  const groupId = buildUniqueId(`${processId}-group`, existingGroupIds)
+
+  const nodeIdMap = new Map<string, string>()
+  const nodes = source.nodes.map((node, index) => {
+    const id = remapOwnedId(node.id, source.id, processId, 'step', index, existingNodeIds)
+    nodeIdMap.set(node.id, id)
+    return {
+      ...structuredClone(node),
+      id,
+    }
+  })
+
+  const edges = source.edges.flatMap((edge, index) => {
+    const sourceId = nodeIdMap.get(edge.source)
+    const targetId = nodeIdMap.get(edge.target)
+    if (!sourceId || !targetId) return []
+    return [{
+      ...structuredClone(edge),
+      id: remapOwnedId(edge.id, source.id, processId, 'edge', index, existingEdgeIds),
+      source: sourceId,
+      target: targetId,
+      ...(edge.processId ? { processId } : {}),
+    }]
+  }).map((edge) => normalizeEdgeForStorage(edge))
+
+  const zones = (source.zones ?? []).map((zone, index) => ({
+    ...structuredClone(zone),
+    id: remapOwnedId(zone.id, source.id, processId, 'zone', index, existingZoneIds),
+    nodeIds: zone.nodeIds.map((nodeId) => nodeIdMap.get(nodeId)).filter((id): id is string => Boolean(id)),
+  }))
+
+  const clonedProcess: ProcessInstance = normalizeProcessInstance(
+    {
+      ...structuredClone(source),
+      id: processId,
+      type: 'detail',
+      name,
+      description: source.description ?? '',
+      status: 'draft',
+      lastModified: new Date().toISOString(),
+      nodes,
+      edges,
+      zones,
+      overviewNodeId: source.overviewNodeId,
+    },
+    data.commonMasters,
+  )
+
+  const clonedGroup: DetailProcessGroup = {
+    id: groupId,
+    name,
+    description: source.description ?? '',
+    detailProcessId: processId,
+  }
+
+  return {
+    data: markDataTouched({
+      ...data,
+      processes: [...data.processes, clonedProcess],
+      detailProcessGroups: [...(data.detailProcessGroups ?? []), clonedGroup],
+    }),
+    processId,
+    groupId,
+  }
+}
+
 export function deleteNode(
   data: ProcessData,
   scope: ProcessScope,
@@ -307,6 +504,35 @@ export function deleteNode(
       const resolved = resolveProcessWithMasters(instance, data.commonMasters)
       const next = deleteNodeFromProcess(resolved, nodeId)
       return { ...instance, nodes: next.nodes, edges: next.edges, zones: next.zones }
+    },
+    fallback,
+  )
+}
+
+export function deleteElements(
+  data: ProcessData,
+  scope: ProcessScope,
+  selection: { nodeIds?: string[]; edgeIds?: string[] },
+  fallback?: DetailProcessFallback,
+): ProcessData {
+  const nodeIds = new Set(selection.nodeIds ?? [])
+  const edgeIds = new Set(selection.edgeIds ?? [])
+  if (nodeIds.size === 0 && edgeIds.size === 0) return data
+
+  return updateProcessInstance(
+    data,
+    scope,
+    (instance) => {
+      const resolved = resolveProcessWithMasters(instance, data.commonMasters)
+      const nextNodes = resolved.nodes.filter((node) => !nodeIds.has(node.id))
+      const nextEdges = resolved.edges.filter(
+        (edge) => !edgeIds.has(edge.id) && !nodeIds.has(edge.source) && !nodeIds.has(edge.target),
+      )
+      const nextZones = (resolved.zones ?? []).map((zone) => ({
+        ...zone,
+        nodeIds: zone.nodeIds.filter((id) => !nodeIds.has(id)),
+      }))
+      return { ...instance, nodes: nextNodes, edges: nextEdges, zones: nextZones }
     },
     fallback,
   )

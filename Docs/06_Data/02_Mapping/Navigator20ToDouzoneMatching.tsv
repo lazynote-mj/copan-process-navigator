@@ -1,0 +1,21 @@
+Navigator No	Navigator Process	detailProcessId	Matched Douzone SCM No	Matched Douzone Process	Douzone Page	Match Type	Match Confidence	Title Change Summary	Gap / Review Point
+01	사업 기회 확보 ~ 구매 요청 : 제/상품	business-to-purchase-request	D-SCM-001 / D-SCM-003 / D-SCM-006 / D-SCM-007	품목 등록 / 거래처 등록 / 계약 등록 / 구매 입고	46,48,51-53	Combined Lifecycle	High	더존 기준정보/계약/구매입고 일부를 Copan SCM Lifecycle 시작점으로 재구성	품목/거래처/계약을 별도 Process Group으로 분리할지 검토
+02	구매 요청 ~ 입고 ~ 매입 전표 : 제/상품	purchase-to-ap-invoice	D-SCM-007	구매 입고 PROCESS	53	1:1 Title Changed	High	구매 입고를 구매요청-입고-매입전표 흐름으로 표현	구매반품(D-SCM-008)은 별도 미반영
+03	주문 등록 ~ 출고 ~ 매출 전표 : B2B 국내	b2b-domestic-order-to-sales	D-SCM-014	국내 B2B 판매 PROCESS	62	1:1 Title Changed	High	국내 B2B 판매를 주문-출고-매출전표 흐름으로 표현	없음
+04	주문 반품 ~ 입고 ~ 반품 전표 : B2B 국내	b2b-domestic-return	D-SCM-015	B2B 판매 반품 PROCESS	63	1:1 Title Changed	High	B2B 판매 반품을 반품입고/반품전표 흐름으로 표현	없음
+05	주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외	b2b-export-order-to-sales	D-SCM-016 / D-SCM-017	자사 재고 해외 B2B / 위탁 재고 해외 B2B	64-65	Combined	High	자사/위탁 해외 B2B를 하나의 수출 판매 Process로 통합	지사 판매(D-SCM-031)와는 별도
+06	주문 등록 ~ 출고 ~ 매출 전표 : B2C	b2c-order-to-sales	D-SCM-012	B2C 판매 PROCESS	60	1:1 Title Changed	High	B2C 판매를 온라인몰-EasyAdmin-ERP 흐름으로 표현	없음
+07	예약 판매 ~ 출고 ~ 매출전표 : B2C	preorder-to-sales	D-SCM-012	B2C 판매 PROCESS	60	Copan Variant	High	B2C 판매에서 예약판매/선수금/PG 흐름을 별도화	더존 별도 Process는 아니며 Copan 운영 파생
+08	주문 반품 ~ 입고 ~ 반품전표 : B2C	b2c-return	D-SCM-013	B2C 판매 반품 PROCESS	61	1:1 Title Changed	High	B2C 반품을 EasyAdmin OMS/WMS 반품 흐름으로 표현	없음
+09	공연장/팝업 판매 ~ 출고 ~ 매출전표 : 제/상품	popup-concert-stock-sales-sync	D-SCM-020	공연장(행사장) 팝업 PROCESS	68	1:1 Title Changed	High	공연장/팝업을 현장판매-출고-매출전표 흐름으로 표현	없음
+10	이벤트 : 제/상품	event-sales	D-SCM-021	이벤트 PROCESS	69	1:1 Title Changed	High	이벤트를 당첨자/현장수령/택배발송 분기로 확장	없음
+11	매장 판매 ~ 출고 ~ 매출전표 : 제/상품	store-sales	D-SCM-022	매장 출고 PROCESS	70	1:1 Title Changed	High	매장 출고를 매장판매-POS/EasyChain-매출전표 흐름으로 표현	없음
+12	매장 간 재고이동 : 제/상품	stock-transfer	D-SCM-025 / D-SCM-026	재고이동 / 매장 재고이동	73-74	Combined / Partial	Medium	재고이동과 매장재고이동을 매장 간 이동 중심으로 통합	일반 재고이동 분리 여부 검토
+13	기타 출고 : 제/상품	other-issue	D-SCM-023	기타 출고 PROCESS	71,75	1:1 Title Changed	High	기타 출고를 무상증정/기타출고 운영 흐름으로 표현	기타 입고(D-SCM-024)는 별도 미반영
+14	기획사 로열티 정산 : 제/상품	royalty-mg-settlement	D-SCM-028	판매 로열티 정산 PROCESS	77	1:1 Title Changed	High	판매 로열티 정산을 기획사 로열티/MG 정산으로 표현	없음
+15	위탁 매출 정산	consignment-settlement	D-SCM-027	위탁 매출 정산 PROCESS	76	1:1 Title Changed	High	위탁 매출 정산을 Copan 위탁정산 기준으로 표현	없음
+16	수익배분 매출 정산	revenue-share-settlement	D-SCM-027 / D-SCM-028	위탁 매출 정산 / 판매 로열티 정산	76-77	Derived	Medium	위탁/로열티 정산에서 수익배분 계약 유형을 파생	더존 별도 Process는 아니며 Copan 운영 파생
+17	사업기회 ~ 비용 전표 생성 : 서비스	service-business-to-expense	D-SCM-006 / Non-SCM Source	계약 등록 / 비용청구관리	51-52, 9-10	Derived / Partial	Medium	서비스 사업의 계약-프로젝트-비용전표 흐름으로 재구성	비용청구관리는 SCM 페이지 밖 Source
+18	구매 요청 ~ 매입 전표 생성 : 서비스	service-purchase-to-ap	D-SCM-007	구매 입고 PROCESS	53	Copan Variant	Medium	구매 입고를 서비스 구매/검수/매입전표 흐름으로 변형	서비스 매입 기준 현업 확인 필요
+19	주문 등록 ~ 매출 전표 생성 : 서비스	service-order-to-sales	D-SCM-018 / D-SCM-019	플랫폼 비재고 매출 / 콘텐츠 비재고 매출	66-67	Combined	High	플랫폼/콘텐츠 비재고 매출을 서비스 매출로 통합	콘텐츠 비재고를 분리할지 검토
+20	프로젝트 정산 : 서비스	service-project-settlement	D-SCM-019 / D-SCM-027 / D-SCM-028	콘텐츠 비재고 매출 / 위탁 매출 정산 / 판매 로열티 정산	67,76-77	Derived	Medium	서비스 프로젝트 정산을 매출/정산 Source 조합으로 구성	더존 1:1 Source는 아님

@@ -1,0 +1,323 @@
+{
+  "id": "stock-movement",
+  "name": "일반 재고이동",
+  "source": "Douzone SCM TO-BE",
+  "version": "v1.0",
+  "description": "D-SCM-025 재고이동 PROCESS 기준. 매장 간 이동과 구분되는 일반 창고/저장위치 간 재고이동 프로세스 초안.",
+  "overviewNodeId": "stock-transfer-handling",
+  "status": "draft",
+  "lastModified": "2026-06-30",
+  "owner": "혁신팀",
+  "lifecycleGroup": "inventory",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "stock-movement-step-01",
+      "name": "출고요청 등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "order-to-cash::p3",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 출고요청입력. 일반 재고이동을 위해 출고 창고 기준 이동 요청을 등록한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "출고요청 등록",
+      "erpMenu": "출고요청입력",
+      "processingType": "Manual"
+    },
+    {
+      "id": "stock-movement-step-02",
+      "name": "재고요청 처리",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "inventory::movement-info",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 재고요청처리. 출고창고/입고창고 및 이동 수량을 확인한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "재고요청 처리",
+      "erpMenu": "재고요청처리",
+      "processingType": "Manual"
+    },
+    {
+      "id": "stock-movement-step-03",
+      "name": "이지어드민 연동현황",
+      "type": "wms-oms",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "inventory::movement-info",
+      "system": "EasyAdmin WMS",
+      "owner": "물류센터",
+      "description": "더존 원문: 이지어드민연동현황. 입/출고요청 및 입/출고처리 연동 상태를 확인한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "이지어드민 연동현황",
+      "erpMenu": "",
+      "processingType": "Manual"
+    },
+    {
+      "id": "stock-movement-step-04",
+      "name": "재고이동 등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "inventory::movement-info",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문 도형은 기타출고입력으로 추출되나, D-SCM-025 재고이동 PROCESS 의미에 맞춰 Copan에서는 재고이동 등록으로 관리한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "재고이동 등록",
+      "erpMenu": "재고이동입력",
+      "processingType": "Manual"
+    },
+    {
+      "id": "stock-movement-step-05",
+      "name": "위탁 여부",
+      "type": "interface-rule",
+      "laneId": "business",
+      "phaseId": "overview::return",
+      "system": "System Rule",
+      "owner": "사업부",
+      "description": "더존 원문: 위탁 여부. 이동 대상 재고가 자사재고인지 위탁재고인지 판단한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "위탁 여부",
+      "erpMenu": "",
+      "processingType": "API"
+    },
+    {
+      "id": "stock-movement-step-06",
+      "name": "입/출고정보",
+      "type": "database",
+      "laneId": "warehouse-easyadmin",
+      "phaseId": "inventory::movement-info",
+      "system": "EasyAdmin WMS",
+      "owner": "물류센터",
+      "description": "더존 원문: 입/출고요청 API / 입/출고처리 API. 재고이동 입출고 요청/처리 정보를 저장한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 6,
+      "localOrder": 6,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "입/출고정보",
+      "erpMenu": "",
+      "processingType": "Auto"
+    },
+    {
+      "id": "stock-movement-step-07",
+      "name": "출고창고 재고(-)",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "order-to-cash::p6",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 출고창고 재고(-). 재고이동 확정 시 출고 창고 재고가 차감된다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7,
+      "cellOrder": 5,
+      "zoneOrder": 5,
+      "detailLayout": {
+        "column": 6,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "출고창고 재고(-)",
+      "erpMenu": "",
+      "processingType": "Auto"
+    },
+    {
+      "id": "stock-movement-step-08",
+      "name": "입고창고 재고(+)",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "procure-to-pay::p9",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 입고창고 재고(+). 재고이동 확정 시 입고 창고 재고가 증가한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 8,
+      "localOrder": 8,
+      "cellOrder": 6,
+      "zoneOrder": 6,
+      "detailLayout": {
+        "column": 7,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "입고창고 재고(+)",
+      "erpMenu": "",
+      "processingType": "Auto"
+    }
+  ],
+  "edges": [
+    {
+      "id": "stock-movement-e01",
+      "source": "stock-movement-step-01",
+      "target": "stock-movement-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e02",
+      "source": "stock-movement-step-02",
+      "target": "stock-movement-step-04",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e03",
+      "source": "stock-movement-step-04",
+      "target": "stock-movement-step-05",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e04",
+      "source": "stock-movement-step-05",
+      "target": "stock-movement-step-06",
+      "condition": "",
+      "label": "N",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e05",
+      "source": "stock-movement-step-05",
+      "target": "stock-movement-step-07",
+      "condition": "",
+      "label": "Y",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e06",
+      "source": "stock-movement-step-07",
+      "target": "stock-movement-step-08",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e07",
+      "source": "stock-movement-step-02",
+      "target": "stock-movement-step-03",
+      "condition": "",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "stock-movement-e08",
+      "source": "stock-movement-step-03",
+      "target": "stock-movement-step-06",
+      "condition": "",
+      "label": "입/출고요청/처리",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ],
+  "zones": []
+}

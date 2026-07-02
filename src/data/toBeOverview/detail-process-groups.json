@@ -12,12 +12,6 @@
     "detailProcessId": "purchase-to-ap-invoice"
   },
   {
-    "id": "pg-consignment-purchase-receipt",
-    "name": "구매 요청 ~ 입고 : 판매 대행",
-    "description": "판매대행(위탁) 구매요청부터 입고·재고인식까지",
-    "detailProcessId": "consignment-purchase-receipt"
-  },
-  {
     "id": "pg-b2b-domestic-order-to-sales",
     "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2B 국내",
     "description": "B2B 국내 주문등록·출고·매출마감·매출전표",
@@ -130,5 +124,29 @@
     "name": "프로젝트 정산 : (서비스)",
     "description": "서비스 프로젝트 정산·전표·회계반영",
     "detailProcessId": "service-project-settlement"
+  },
+  {
+    "id": "pg-storage-location-master",
+    "name": "저장위치 등록",
+    "description": "Candidate: Douzone 저장위치 등록 PROCESS 기준 신규 작성 대상",
+    "detailProcessId": "storage-location-master"
+  },
+  {
+    "id": "pg-purchase-return",
+    "name": "구매반품",
+    "description": "Candidate: Douzone 구매 반품 PROCESS 기준 신규 작성 대상",
+    "detailProcessId": "purchase-return"
+  },
+  {
+    "id": "pg-other-receipt",
+    "name": "기타입고",
+    "description": "Candidate: Douzone 기타 입고 PROCESS 기준 신규 작성 대상",
+    "detailProcessId": "other-receipt"
+  },
+  {
+    "id": "pg-stock-movement",
+    "name": "일반 재고이동",
+    "description": "Candidate: Douzone 재고이동 PROCESS 기준 신규 작성 대상",
+    "detailProcessId": "stock-movement"
   }
 ]

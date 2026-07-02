@@ -1,0 +1,34 @@
+Douzone SCM No	Douzone Process	Douzone Page	Douzone Capability / Area	Navigator No	Navigator Process	detailProcessId	Match Type	Match Confidence	Current Judgment	Recommended Action	Remark
+D-SCM-001	품목 등록 PROCESS	46	기준정보관리	01	사업 기회 확보 ~ 구매 요청 : 제/상품	business-to-purchase-request	Absorbed	High	Navigator 01 안의 기준정보 연결 흐름으로 포함	기준정보 전용 Process Group 분리 여부 검토	현재는 품목/거래처 기준정보를 구매요청 전 선행 Activity로 표현
+D-SCM-002	메뉴 등록 PROCESS	47	기준정보관리 / 메뉴관리	-	-	-	Reference Only	Medium	SCM Navigator 20개에는 없음	ERP 교육/권한/공통 설정 범위로 둘지 검토	SCM 작성자 페이지이나 업무 Process Asset 대상인지 확인 필요
+D-SCM-003	거래처 등록 PROCESS	48	기준정보관리	01	사업 기회 확보 ~ 구매 요청 : 제/상품	business-to-purchase-request	Absorbed	High	Navigator 01 안의 기준정보 연결 흐름으로 포함	기준정보 전용 Process Group 분리 여부 검토	품목등록과 함께 기준정보 관리 후보
+D-SCM-004	매장 등록 PROCESS	49	기준정보관리 / 매장관리	-	-	-	Missing / Review	Medium	Navigator 20개에는 명시 Process 없음	매장/POS 기준정보 Process로 추가할지 검토	매장 판매/재고이동의 선행 Master 성격
+D-SCM-005	저장위치 등록 PROCESS	50	기준정보관리 / 저장위치관리	-	-	-	Missing / Review	Medium	Navigator 20개에는 명시 Process 없음	창고/저장위치 기준정보 Process로 추가할지 검토	입고/출고/재고이동 전체에 영향
+D-SCM-006	계약 등록 PROCESS	51-52	계약/프로젝트관리	01 / 17	사업 기회 확보 ~ 구매 요청 : 제/상품 / 사업기회 ~ 비용 전표 생성 : 서비스	business-to-purchase-request / service-business-to-expense	Absorbed / Split	High	제/상품과 서비스 Lifecycle 시작점으로 재해석	현재 01 중심 유지, 서비스 범위는 18에서 보완	더존 1개 Process를 Copan 사업유형별로 재구성
+D-SCM-007	구매 입고 PROCESS	53	구매관리 / 매입입고관리	02 / 17	구매 요청 ~ 입고 ~ 매입 전표 : 제/상품 / 구매 요청 ~ 매입 전표 생성 : 서비스	purchase-to-ap-invoice / service-purchase-to-ap	Split	High	재고/서비스 구매로 분리 반영. 판매대행/위탁 입고 Detail Process는 삭제됨	현재 20개 번호체계 유지	더존 표준 구매입고를 Copan 사업유형별로 분리하되, 판매대행/위탁 입고는 별도 Process로 유지하지 않음
+D-SCM-008	구매 반품 PROCESS	54	구매관리 / 구매반품관리	-	-	-	Missing	High	Navigator 20개에는 별도 구매반품 Process 없음	신규 Process Group 추가 후보	기존 03 삭제 후 구매반품은 신규 Process Group 추가 후보로 관리
+D-SCM-009	원/부자재 구매 입고 PROCESS	55	구매관리 / 원부자재	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	Copan 적용 대상 여부 확인	제조/원부자재 운영 여부에 따라 Reference Only 가능
+D-SCM-010	원/부자재 구매 반품 PROCESS	56	구매관리 / 원부자재	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	Copan 적용 대상 여부 확인	원부자재 구매입고가 제외되면 함께 Reference Only 가능
+D-SCM-011	수입 관리 PROCESS	59	구매관리 / 수입관리	-	-	-	Missing / Review	Medium	Navigator 20개에는 명시 Process 없음	해외 구매/수입관리 Process 추가 여부 검토	05는 해외 B2B 판매/수출 중심이며 수입 구매와는 다름
+D-SCM-012	B2C 판매 PROCESS	60	영업관리 / B2C	06 / 07	주문 등록 ~ 출고 ~ 매출 전표 : B2C / 예약 판매 ~ 출고 ~ 매출전표 : B2C	b2c-order-to-sales / preorder-to-sales	Split	High	B2C 일반판매와 예약판매로 분리	현재 구조 유지	예약판매는 Copan 운영상 선수금/PG 흐름 때문에 별도화
+D-SCM-013	B2C 판매 반품 PROCESS	61	영업관리 / B2C 반품	08	주문 반품 ~ 입고 ~ 반품전표 : B2C	b2c-return	1:1 Title Changed	High	Navigator 09로 반영	현재 구조 유지	EasyAdmin OMS/WMS 반품 흐름 추가
+D-SCM-014	국내 B2B 판매 PROCESS	62	영업관리 / 국내 B2B	03	주문 등록 ~ 출고 ~ 매출 전표 : B2B 국내	b2b-domestic-order-to-sales	1:1 Title Changed	High	Navigator 04로 반영	현재 구조 유지	타이틀을 Copan 업무 흐름형으로 변경
+D-SCM-015	B2B 판매 반품 PROCESS	63	영업관리 / B2B 반품	04	주문 반품 ~ 입고 ~ 반품 전표 : B2B 국내	b2b-domestic-return	1:1 Title Changed	High	Navigator 05로 반영	현재 구조 유지	반품 전표/재고반영 흐름 보완 대상
+D-SCM-016	자사 재고 해외 B2B PROCESS	64	영업관리 / 해외 B2B	05	주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외	b2b-export-order-to-sales	Combined	High	Navigator 06 안에 통합	현재 구조 유지	자사재고와 위탁재고 해외 B2B를 하나의 해외 Process로 통합
+D-SCM-017	위탁 재고 해외 B2B PROCESS	65	영업관리 / 해외 B2B	05	주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외	b2b-export-order-to-sales	Combined	High	Navigator 06 안에 통합	현재 구조 유지	위탁여부/위탁재고 현황 분기로 표현
+D-SCM-018	플랫폼 비재고 매출 PROCESS	66	영업관리 / 플랫폼 비재고	19	주문 등록 ~ 매출 전표 생성 : 서비스	service-order-to-sales	1:1 / Combined	High	Navigator 20으로 반영	현재 구조 유지	서비스/플랫폼 비재고 매출로 재해석
+D-SCM-019	콘텐츠 비재고 매출 PROCESS	67	영업관리 / 콘텐츠 비재고	19 / 20	주문 등록 ~ 매출 전표 생성 : 서비스 / 프로젝트 정산 : 서비스	service-order-to-sales / service-project-settlement	Split / Partial	Medium	20에 매출, 21에 정산 관점 반영	콘텐츠 매출과 서비스 매출 분리 필요 여부 검토	콘텐츠 특화 흐름이 있으면 별도 Process 후보
+D-SCM-020	공연장(행사장) 팝업 PROCESS	68	영업관리 / 공연장팝업	09	공연장/팝업 판매 ~ 출고 ~ 매출전표 : 제/상품	popup-concert-stock-sales-sync	1:1 Title Changed	High	Navigator 10으로 반영	현재 구조 유지	현장판매/잔여재고 복귀 흐름 추가
+D-SCM-021	이벤트 PROCESS	69	영업관리 / 이벤트	10	이벤트 : 제/상품	event-sales	1:1 Title Changed	High	Navigator 11로 반영	현재 구조 유지	당첨자/현장수령/택배발송 분기 추가
+D-SCM-022	매장 출고 PROCESS	70	영업관리 / 매장출고	11	매장 판매 ~ 출고 ~ 매출전표 : 제/상품	store-sales	1:1 Title Changed	High	Navigator 12로 반영	현재 구조 유지	POS/EasyChain 매출연동 반영
+D-SCM-023	기타 출고 PROCESS	71,75	재고관리 / 기타출고	13	기타 출고 : 제/상품	other-issue	1:1 Title Changed	High	Navigator 14로 반영	현재 구조 유지	무상증정/폐기/기부 등 유형 검토 필요
+D-SCM-024	기타 입고 PROCESS	72	재고관리 / 기타입고	-	-	-	Missing	High	Navigator 20개에는 별도 기타입고 Process 없음	신규 Process Group 추가 후보	재고실사/기타입고가 운영상 필요하면 추가 필요
+D-SCM-025	재고이동 PROCESS	73	재고관리 / 재고이동	12	매장 간 재고이동 : 제/상품	stock-transfer	Partial / Combined	Medium	Navigator 13에 일부 포함	일반 창고이동과 매장 간 이동 분리 검토	현재 13은 매장 간 이동 성격이 강함
+D-SCM-026	매장 재고이동 PROCESS	74	재고관리 / 매장재고이동	12	매장 간 재고이동 : 제/상품	stock-transfer	1:1 Title Changed	High	Navigator 13으로 반영	현재 구조 유지	일반 재고이동과 같이 묶여 있음
+D-SCM-027	위탁 매출 정산 PROCESS	76	정산관리 / 위탁매출	15 / 16 / 20	위탁 매출 정산 / 수익배분 매출 정산 / 프로젝트 정산	consignment-settlement / revenue-share-settlement / service-project-settlement	Split / Derived	High	위탁/수익배분/서비스 프로젝트 정산으로 재해석	현재 구조 유지	수익배분은 더존 Process 조합에서 파생
+D-SCM-028	판매 로열티 정산 PROCESS	77	정산관리 / 로열티	14 / 16 / 20	기획사 로열티 정산 / 수익배분 매출 정산 / 프로젝트 정산	royalty-mg-settlement / revenue-share-settlement / service-project-settlement	Split / Derived	High	로열티/MG/수익배분/서비스 정산으로 재해석	현재 구조 유지	MG 차감 여부와 정산마감 기준 반영
+D-SCM-029	지사 구매 입고 PROCESS	78	구매관리 / 일본미국지사	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	해외지사 운영 대상 여부 확인 후 추가 검토	해외 B2B 판매와 다르며 지사 구매입고 흐름
+D-SCM-030	지사 구매 반품 PROCESS	79	구매관리 / 일본미국지사	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	해외지사 운영 대상 여부 확인 후 추가 검토	지사 구매입고가 대상이면 함께 필요
+D-SCM-031	지사 판매 PROCESS	80	영업관리 / 일본미국지사	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	해외지사 판매 운영 대상 여부 확인	05 B2B 해외 수출과 별도 지사 판매 프로세스
+D-SCM-032	지사 판매 반품 PROCESS	81	영업관리 / 일본미국지사	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	해외지사 판매반품 운영 대상 여부 확인	해외지사 판매를 포함하면 반품도 필요
+D-SCM-033	지사 기타 출고 PROCESS	82	재고관리 / 일본미국지사	-	-	-	Missing / Review	Medium	Navigator 20개에는 없음	해외지사 기타출고 운영 대상 여부 확인	해외지사 재고 운영 범위 결정 필요

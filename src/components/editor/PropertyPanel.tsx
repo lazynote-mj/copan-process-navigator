@@ -1,22 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import type { Edge, Lane, Node, Process, ProcessZone, ProcessZoneId } from '../../types/process'
 import {
   EDITABLE_DETAIL_NODE_TYPES,
+  NODE_REVIEWERS,
+  getDefaultSystemForNodeType,
   getNodeTypeLabel,
   getLaneById,
   getPhaseLabel,
   NODE_TYPE_META,
 } from '../../types/process'
-import type { EdgeType } from '../../types/edgeTypes'
+import type { NodeReviewStatus } from '../../types/process'
 import type { NodeType } from '../../types/nodeTypes'
 import {
   getOverviewNodeTypeLabel,
-  OVERVIEW_NODE_TYPE_META,
-  overviewTypeToDetailType,
-  type OverviewNodeType,
 } from '../../types/overviewNodeTypes'
 import { formatOverviewNodePrimaryLabel, resolveOverviewNodeType } from '../../lib/overviewNodeDisplay'
-import { OVERVIEW_EDGE_LABEL_PRESETS } from '../../lib/overviewEdgeLabels'
 import { PROCESS_ZONES, type ProcessZoneDef } from '../../lib/layout/overviewProcessZones'
 import {
   isNodeInOverviewZone,
@@ -34,7 +32,6 @@ import {
   listCellSlotOptions,
 } from '../../lib/layout/overviewCellPlacement'
 import { normalizeNodeLocalOrder } from '../../lib/layout/localOrder'
-import { resolveEdgeType } from '../../types/edgeTypes'
 import {
   canDeleteLane,
   validateEdge,
@@ -44,6 +41,7 @@ import {
 } from '../../lib/editor/processEditor'
 import type { AppMode, SelectedElement } from '../../lib/editor/selectionTypes'
 import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
+import { PROCESS_LIFECYCLE_GROUPS } from '../../data/processLifecycleGroups'
 import { panelEventShieldProps } from '../../lib/ui/panelEventShield'
 import {
   cloneDetailProcessGroup,
@@ -58,13 +56,13 @@ import { withEdgeHandleDefaults } from '../../lib/editor/edgeHandles'
 import { isDerivedDisplayEdge, isReadOnlyDisplayEdge, createSavedVirtualEdgeFromDerived } from '../../lib/nodeVisibility'
 import { formatNodeSelectLabel, sortNodesForSelect } from '../../lib/editor/sortNodesForSelect'
 import { isConnectorNode, resolveConnectorSubType } from '../../lib/layout/connectorLayout'
+import { EdgeConnectionFields } from './EdgeConnectionFields'
 import { NodeConnectionsPanel } from './NodeConnectionsPanel'
 import { DetailProcessLinks } from './DetailProcessLinks'
 import { ListEditor } from './ListEditor'
 import './property-panel.css'
 import './node-connections-panel.css'
 
-const CONDITION_PRESETS = ['Y', 'N', '신규', '기존']
 const DETAIL_LAYOUT_MAX_COLUMNS = 24
 const DETAIL_LAYOUT_MAX_ROWS = 5
 
@@ -74,20 +72,62 @@ const NODE_FORM_TYPES: { value: NodeType; label: string }[] = EDITABLE_DETAIL_NO
   label: NODE_TYPE_META[type].label,
 }))
 
-/** Overview PDF 범례 8종 (+ layout 전용) */
-const OVERVIEW_NODE_FORM_TYPES: { value: OverviewNodeType; label: string }[] = (
-  Object.values(OVERVIEW_NODE_TYPE_META) as (typeof OVERVIEW_NODE_TYPE_META)[OverviewNodeType][]
-).map(({ id, label }) => ({ value: id, label }))
+const NODE_TYPE_USER_HELP: Partial<Record<NodeType, string>> = {
+  erp: 'ERP에서 입력, 등록, 조회, 확정하는 업무입니다.',
+  'wms-oms': '이지어드민, WMS, OMS에서 처리하는 물류/주문 업무입니다.',
+  pos: '이지체인, POS, 매장 등 판매현장에서 처리하는 업무입니다.',
+  manual: '시스템이 아니라 사람이 직접 확인하거나 처리하는 업무입니다.',
+  approval: '품의, 결재, 승인처럼 확인 절차가 필요한 업무입니다.',
+  decision: 'Y/N, 승인 여부, 위탁 여부처럼 다음 흐름이 갈라지는 판단 지점입니다.',
+  database: '주문정보, 재고현황처럼 데이터가 저장되거나 조회되는 위치입니다.',
+  system: '사용자가 직접 입력하지 않고 시스템이 자동으로 처리하는 단계입니다.',
+  interface: '서로 다른 시스템 간 데이터가 전달되는 연동 구간입니다.',
+  'interface-rule': '시스템 연동 중 조건을 판단하는 규칙입니다. 사용 시스템은 비워둘 수 있습니다.',
+  'linked-process': '다른 상세 프로세스로 이어지는 연결점입니다.',
+  external: '협력사, PG사, 고객사 등 외부 주체가 처리하는 업무입니다.',
+  exception: '보류, 불일치, 재처리처럼 정상 흐름에서 벗어난 예외 처리입니다.',
+}
 
-const EDGE_FORM_TYPES: { value: EdgeType; label: string }[] = [
-  { value: 'normal', label: 'flow (normal)' },
-  { value: 'condition', label: 'approval / condition' },
-  { value: 'api', label: 'api (cross-system)' },
-  { value: 'exception', label: 'exception' },
-  { value: 'return', label: 'return' },
-  { value: 'virtual', label: '가상 연결 (virtual)' },
-  { value: 'reference', label: '참조 관계 (reference)' },
+const NODE_REVIEW_STATUS_OPTIONS: Array<{ value: NodeReviewStatus; label: string }> = [
+  { value: 'not-reviewed', label: 'Not Reviewed' },
+  { value: 'ok', label: 'OK' },
+  { value: 'review-required', label: 'Review Required' },
 ]
+
+function formatReviewDate(value: string | undefined): string {
+  if (!value) return '자동'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function updateNodeReview(
+  node: Node,
+  patch: Partial<NonNullable<Node['review']>>,
+): Node {
+  const current = node.review ?? { status: 'not-reviewed' as NodeReviewStatus }
+  const next = {
+    ...current,
+    ...patch,
+  }
+  if (next.status === 'not-reviewed') {
+    const { reviewedAt: _removed, ...rest } = next
+    return { ...node, review: rest }
+  }
+  return {
+    ...node,
+    review: {
+      ...next,
+      reviewedAt: new Date().toISOString(),
+    },
+  }
+}
 
 function normalizeDetailLayoutValue(raw: string, max: number): number | undefined {
   if (raw === '') return undefined
@@ -126,11 +166,70 @@ function patchDetailRow(node: Node, raw: string): Node {
   return patchDetailLayout(node, { row: normalizeDetailLayoutValue(raw, DETAIL_LAYOUT_MAX_ROWS) })
 }
 
+function formatReadonlyValue(value: string | number | undefined | null): string {
+  if (value == null || value === '') return '-'
+  return String(value)
+}
+
+function resolveNodeMasterLabel(node: Node): string {
+  return `${getNodeTypeLabel(node.type)} (${node.type})`
+}
+
+function resolveGeneratorRuleLabel(viewMode: 'overview' | 'detail'): string {
+  return viewMode === 'overview'
+    ? 'Overview legacy adapter'
+    : 'Process Detail legacy adapter'
+}
+
+function resolveZoneLabel(node: Node): string {
+  if (!node.processZone) return '-'
+  return PROCESS_ZONES.find((zone) => zone.id === node.processZone)?.label ?? node.processZone
+}
+
+function resolveNodeDiagnostics(process: Process, node: Node): string {
+  const warnings: string[] = []
+
+  if (node.phaseId && !process.phases.some((phase) => phase.id === node.phaseId)) {
+    warnings.push('Process Stage master 미연결')
+  }
+  if (node.offsetX != null && !Number.isFinite(node.offsetX)) {
+    warnings.push('Offset X invalid')
+  }
+  if (node.offsetY != null && !Number.isFinite(node.offsetY)) {
+    warnings.push('Offset Y invalid')
+  }
+  if (node.laneId && !process.lanes.some((lane) => lane.id === node.laneId)) {
+    warnings.push('Swimlane master 미연결')
+  }
+
+  return warnings.length > 0 ? warnings.join(', ') : 'OK'
+}
+
+function resolveProcessGroupMemberships(
+  node: Node,
+  process: Process,
+  viewMode: 'overview' | 'detail',
+  overviewProcessGroups?: OverviewProcessGroup[],
+  detailProcessGroups?: DetailProcessGroup[],
+): string {
+  const groupIds =
+    viewMode === 'overview'
+      ? overviewProcessGroups
+          ?.filter((group) => group.overviewNodeIds.includes(node.id))
+          .map((group) => group.id)
+      : detailProcessGroups
+          ?.filter((group) => group.detailProcessId === process.id)
+          .map((group) => group.id)
+
+  return groupIds && groupIds.length > 0 ? groupIds.join(', ') : '-'
+}
+
 type PropertyPanelProps = {
   appMode: AppMode
   selectedElement: SelectedElement | null
   process: Process
   viewMode: 'overview' | 'detail'
+  reviewMode?: boolean
   detailProcesses?: Process[]
   overviewProcessGroups?: OverviewProcessGroup[]
   detailProcessGroups?: DetailProcessGroup[]
@@ -202,6 +301,9 @@ function EditItemActions({
         </div>
       </div>
       {error && <p className="property-panel__error">{error}</p>}
+      <p className="property-panel__hint property-panel__save-hint">
+        ⓘ 변경사항은 전체 저장 후 적용됩니다.
+      </p>
     </div>
   )
 }
@@ -233,6 +335,9 @@ function NewItemActions({
         </div>
       </div>
       {error && <p className="property-panel__error">{error}</p>}
+      <p className="property-panel__hint property-panel__save-hint">
+        ⓘ 변경사항은 전체 저장 후 적용됩니다.
+      </p>
     </div>
   )
 }
@@ -242,12 +347,20 @@ function NodeForm({
   process,
   disabled,
   viewMode,
+  connections,
+  overviewProcessGroups,
+  detailProcessGroups,
+  reviewMode = false,
   onChange,
 }: {
   node: Node
   process: Process
   disabled: boolean
   viewMode: 'overview' | 'detail'
+  connections?: ReactNode
+  overviewProcessGroups?: OverviewProcessGroup[]
+  detailProcessGroups?: DetailProcessGroup[]
+  reviewMode?: boolean
   onChange: (node: Node) => void
 }) {
   const sortedLanes = [...process.lanes].sort((a, b) => a.order - b.order)
@@ -255,17 +368,72 @@ function NodeForm({
   const isConnector = isConnectorNode(node)
   const connectorSubType = isConnector ? resolveConnectorSubType(node) : undefined
   const overviewNodeType = viewMode === 'overview' ? resolveOverviewNodeType(node) : undefined
+  const [legacyStageEditable, setLegacyStageEditable] = useState(false)
+  const stageMetadata = node as Node & {
+    inferredStageId?: string
+    generatorStage?: string
+  }
+  const processGroupMemberships = resolveProcessGroupMemberships(
+    node,
+    process,
+    viewMode,
+    overviewProcessGroups,
+    detailProcessGroups,
+  )
+  const nodeTypeOptions = NODE_FORM_TYPES.some((option) => option.value === node.type)
+    ? NODE_FORM_TYPES
+    : [
+        ...NODE_FORM_TYPES,
+        {
+          value: node.type,
+          label: getNodeTypeLabel(node.type),
+        },
+      ]
+
+  const patchNodeType = (nextType: NodeType): Node => {
+    const nextSystem = getDefaultSystemForNodeType(nextType)
+    if (nextType === 'manual') {
+      const {
+        connectorSubType: _removed,
+        overviewType: _overview,
+        stepBadge: _stepBadge,
+        ...rest
+      } = node
+      return { ...rest, type: nextType, system: nextSystem } as Node
+    }
+    if (nextType === 'linked-process') {
+      const {
+        connectorSubType: _removed,
+        overviewType: _overview,
+        stepBadge: _stepBadge,
+        ...rest
+      } = node
+      return { ...rest, type: nextType, system: nextSystem } as Node
+    }
+    if (nextType === 'connector') {
+      const { overviewType: _overview, ...rest } = node
+      return {
+        ...rest,
+        type: nextType,
+        system: nextSystem,
+        connectorSubType: node.connectorSubType ?? 'split',
+      }
+    }
+    const { connectorSubType: _removed, overviewType: _overview, ...rest } = node
+    return { ...rest, type: nextType, system: nextSystem } as Node
+  }
 
   return (
     <>
       <div className="property-panel__section">
-        <h3 className="property-panel__section-title">기본정보</h3>
+        <h3 className="property-panel__section-title">기본 정보</h3>
         <div className="property-panel__field">
-          <label className="property-panel__label">Node ID</label>
-          <input className="property-panel__input" value={node.id} disabled readOnly />
+          <label className="property-panel__label">현재 프로세스</label>
+          <input className="property-panel__input" value={process.name} disabled readOnly />
+          <p className="property-panel__hint">지금 수정 중인 상세 프로세스입니다. 노드에서 직접 바꾸지 않습니다.</p>
         </div>
         <div className="property-panel__field">
-          <label className="property-panel__label">이름</label>
+          <label className="property-panel__label">업무명</label>
           <input
             className="property-panel__input"
             value={node.name}
@@ -274,75 +442,24 @@ function NodeForm({
           />
         </div>
         <div className="property-panel__field">
-          <label className="property-panel__label">{viewMode === 'overview' ? 'Overview Type' : 'Node Type'}</label>
+          <label className="property-panel__label">노드 유형</label>
           <select
             className="property-panel__select"
-            value={viewMode === 'overview' ? overviewNodeType : node.type}
+            value={node.type}
             disabled={disabled}
             onChange={(e) => {
-              if (viewMode === 'overview') {
-                const nextOverviewType = e.target.value as OverviewNodeType
-                const nextDetailType = overviewTypeToDetailType(nextOverviewType)
-                if (nextDetailType === 'manual') {
-                  const { connectorSubType: _removed, stepBadge: _stepBadge, ...rest } = node
-                  onChange({
-                    ...rest,
-                    overviewType: nextOverviewType,
-                    type: nextDetailType,
-                  } as Node)
-                  return
-                }
-                if (nextDetailType === 'connector') {
-                  onChange({
-                    ...node,
-                    overviewType: nextOverviewType,
-                    type: nextDetailType,
-                    connectorSubType: node.connectorSubType ?? 'split',
-                  })
-                  return
-                }
-                const { connectorSubType: _removed, ...rest } = node
-                onChange({
-                  ...rest,
-                  overviewType: nextOverviewType,
-                  type: nextDetailType,
-                } as Node)
-                return
-              }
-              const nextType = e.target.value as NodeType
-              if (nextType === 'manual') {
-                const { connectorSubType: _removed, overviewType: _overview, stepBadge: _stepBadge, ...rest } = node
-                onChange({ ...rest, type: nextType } as Node)
-                return
-              }
-              if (nextType === 'linked-process') {
-                const {
-                  connectorSubType: _removed,
-                  overviewType: _overview,
-                  stepBadge: _stepBadge,
-                  ...rest
-                } = node
-                onChange({ ...rest, type: nextType, system: node.system || '연결 프로세스' } as Node)
-                return
-              }
-              if (nextType === 'connector') {
-                onChange({
-                  ...node,
-                  type: nextType,
-                  connectorSubType: node.connectorSubType ?? 'split',
-                })
-                return
-              }
-              const { connectorSubType: _removed, overviewType: _overview, ...rest } = node
-              onChange({ ...rest, type: nextType } as Node)
+              onChange(patchNodeType(e.target.value as NodeType))
             }}
           >
-            {(viewMode === 'overview' ? OVERVIEW_NODE_FORM_TYPES : NODE_FORM_TYPES).map(({ value, label }) => (
+            {nodeTypeOptions.map(({ value, label }) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
           </select>
+          <p className="property-panel__hint">
+            {NODE_TYPE_USER_HELP[node.type] ?? NODE_TYPE_META[node.type]?.description ?? '업무 성격에 맞는 노드 유형을 선택합니다.'}
+          </p>
         </div>
         {viewMode === 'overview' && overviewNodeType ? (
           <p className="property-panel__hint">
@@ -356,7 +473,7 @@ function NodeForm({
         ) : null}
         {isConnector && (
           <div className="property-panel__field">
-            <label className="property-panel__label">Type</label>
+            <label className="property-panel__label">연결점 유형</label>
             <select
               className="property-panel__select"
               value={connectorSubType}
@@ -376,38 +493,40 @@ function NodeForm({
         )}
         {viewMode === 'detail' && (
           <div className="property-panel__field">
-            <label className="property-panel__label">노드 순서</label>
-            <input
-              type="number"
-              min={0}
-              className="property-panel__input"
-              value={node.type === 'manual' || node.type === 'linked-process' ? 0 : node.stepBadge ?? ''}
-              disabled={disabled || node.type === 'manual' || node.type === 'linked-process'}
-              placeholder="자동"
-              onChange={(e) => {
-                const raw = e.target.value
-                if (raw === '') {
-                  const { stepBadge: _removed, ...rest } = node
-                  onChange(rest as Node)
-                  return
-                }
-                const value = Number.parseInt(raw, 10)
-                if (!Number.isNaN(value) && value >= 0) {
-                  onChange({ ...node, stepBadge: value })
-                }
-              }}
-            />
+            <label className="property-panel__label">화면 번호</label>
             <p className="property-panel__hint">
-              비워두면 자동 번호, 0이면 숨김. Manual/Linked Process 노드는 번호를 표시하지 않습니다.
+              연결 흐름 기준으로 자동 표시됩니다. 자동 번호는 저장하지 않으며, 번호 제외 노드는 표시하지 않습니다.
             </p>
           </div>
         )}
       </div>
 
       <div className="property-panel__section">
-        <h3 className="property-panel__section-title">위치 정보</h3>
+        <h3 className="property-panel__section-title">담당/시스템</h3>
         <div className="property-panel__field">
-          <label className="property-panel__label">Swimlane</label>
+          <label className="property-panel__label">담당 조직</label>
+          <input
+            className="property-panel__input"
+            value={node.owner}
+            disabled={disabled}
+            onChange={(e) => onChange({ ...node, owner: e.target.value })}
+          />
+        </div>
+        <div className="property-panel__field">
+          <label className="property-panel__label">사용 시스템</label>
+          <input
+            className="property-panel__input"
+            value={node.system}
+            disabled={disabled}
+            onChange={(e) => onChange({ ...node, system: e.target.value })}
+          />
+        </div>
+      </div>
+
+      <div className="property-panel__section">
+        <h3 className="property-panel__section-title">위치</h3>
+        <div className="property-panel__field">
+          <label className="property-panel__label">담당 영역</label>
           <select
             className="property-panel__select"
             value={node.laneId}
@@ -423,7 +542,7 @@ function NodeForm({
         </div>
         {viewMode === 'overview' && (
           <div className="property-panel__field">
-            <label className="property-panel__label">Zone</label>
+            <label className="property-panel__label">프로세스 구역</label>
             <select
               className="property-panel__select"
               value={node.processZone ?? 'business-contract'}
@@ -436,38 +555,36 @@ function NodeForm({
                 </option>
               ))}
             </select>
-            <p className="property-panel__hint">Overview 업무 구간 (Y축 Zone)</p>
-          </div>
-        )}
-        {process.phases.length > 0 && (
-          <div className="property-panel__field">
-            <label className="property-panel__label">단계 (Phase)</label>
-            <select
-              className="property-panel__select"
-              value={node.phaseId}
-              disabled={disabled}
-              onChange={(e) => {
-                const phase = process.phases.find((p) => p.id === e.target.value)
-                onChange({
-                  ...node,
-                  phaseId: e.target.value,
-                  ...(phase ? { phaseOrder: phase.order } : {}),
-                })
-              }}
-            >
-              {[...process.phases]
-                .sort((a, b) => a.order - b.order)
-                .map((phase) => (
-                  <option key={phase.id} value={phase.id}>
-                    {phase.label} ({phase.id})
-                  </option>
-                ))}
-            </select>
+            <p className="property-panel__hint">Overview에서 업무가 속한 큰 구간입니다.</p>
           </div>
         )}
         <div className="property-panel__field">
+          <label className="property-panel__label">표시 순서</label>
+          <input
+            type="number"
+            min={0}
+            className="property-panel__input"
+            value={node.cellOrder ?? ''}
+            disabled={disabled || isConnector}
+            placeholder="자동"
+            onChange={(e) => {
+              const raw = e.target.value
+              if (raw === '') {
+                const { cellOrder: _removed, ...rest } = node
+                onChange(rest as Node)
+                return
+              }
+              const value = Number.parseInt(raw, 10)
+              if (!Number.isNaN(value) && value >= 0) {
+                onChange({ ...node, cellOrder: value })
+              }
+            }}
+          />
+          <p className="property-panel__hint">같은 담당 영역 안에서 왼쪽에서 오른쪽으로 이어지는 업무 순서를 정합니다.</p>
+        </div>
+        <div className="property-panel__field">
           <label className="property-panel__label">
-            {viewMode === 'detail' ? '상세 위치' : '셀 내 위치 (cellSlot)'}
+            행/열 위치
           </label>
           {viewMode === 'detail' ? (
             <div className="property-panel__inline-controls">
@@ -524,8 +641,8 @@ function NodeForm({
           )}
           <p className="property-panel__hint">
             {viewMode === 'detail'
-              ? `프로세스 상세에서는 가로형 기준 열(진행 위치)과 1~${DETAIL_LAYOUT_MAX_ROWS}행 트랙을 지정합니다. 자동이면 노드 유형과 순서 기준으로 배치합니다.`
-              : `LEFT 1~${OVERVIEW_CELL_MAX_ROWS}행 / RIGHT ${OVERVIEW_CELL_MAX_ROWS + 1}~${OVERVIEW_CELL_SLOT_MAX}행 (2열 최대). 미지정 시 자동 배치`}
+              ? `프로세스 상세에서는 열(진행 위치)과 1~${DETAIL_LAYOUT_MAX_ROWS}행을 지정합니다. 자동이면 노드 유형과 순서 기준으로 배치합니다.`
+              : `Overview에서는 좌/우 영역의 표시 위치입니다. 미지정 시 자동 배치합니다.`}
           </p>
           {cellSlotWarning && (
             <p className="property-panel__hint property-panel__hint--warn">{cellSlotWarning}</p>
@@ -536,26 +653,66 @@ function NodeForm({
         </div>
       </div>
 
+      {connections}
+
+      {reviewMode ? (
+        <div className="property-panel__section property-panel__section--review">
+          <h3 className="property-panel__section-title">Internal Review</h3>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Review Status</label>
+            <select
+              className="property-panel__select"
+              value={node.review?.status ?? 'not-reviewed'}
+              disabled={disabled}
+              onChange={(e) => onChange(updateNodeReview(node, { status: e.target.value as NodeReviewStatus }))}
+            >
+              {NODE_REVIEW_STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Reviewer</label>
+            <select
+              className="property-panel__select"
+              value={node.review?.reviewer ?? ''}
+              disabled={disabled}
+              onChange={(e) => onChange(updateNodeReview(node, { reviewer: e.target.value || undefined }))}
+            >
+              <option value="">선택</option>
+              {NODE_REVIEWERS.map((reviewer) => (
+                <option key={reviewer} value={reviewer}>
+                  {reviewer}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Comment</label>
+            <textarea
+              className="property-panel__textarea"
+              value={node.review?.comment ?? ''}
+              disabled={disabled}
+              onChange={(e) => onChange(updateNodeReview(node, { comment: e.target.value }))}
+            />
+          </div>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Reviewed Date</label>
+            <input
+              className="property-panel__input"
+              value={formatReviewDate(node.review?.reviewedAt)}
+              disabled
+              readOnly
+            />
+            <p className="property-panel__hint">OK 또는 Review Required로 저장할 때 자동으로 기록됩니다.</p>
+          </div>
+        </div>
+      ) : null}
+
       <div className="property-panel__section">
-        <h3 className="property-panel__section-title">업무 정보</h3>
-        <div className="property-panel__field">
-          <label className="property-panel__label">담당 조직</label>
-          <input
-            className="property-panel__input"
-            value={node.owner}
-            disabled={disabled}
-            onChange={(e) => onChange({ ...node, owner: e.target.value })}
-          />
-        </div>
-        <div className="property-panel__field">
-          <label className="property-panel__label">사용 시스템</label>
-          <input
-            className="property-panel__input"
-            value={node.system}
-            disabled={disabled}
-            onChange={(e) => onChange({ ...node, system: e.target.value })}
-          />
-        </div>
+        <h3 className="property-panel__section-title">설명/메모</h3>
         <div className="property-panel__field">
           <label className="property-panel__label">설명</label>
           <textarea
@@ -564,12 +721,129 @@ function NodeForm({
             disabled={disabled}
             onChange={(e) => onChange({ ...node, description: e.target.value })}
           />
+          <p className="property-panel__hint">현업 검토 시 이 업무에서 확인해야 할 내용을 적습니다.</p>
         </div>
       </div>
 
-      <ListEditor label="입력값" items={node.inputs} disabled={disabled} onChange={(inputs) => onChange({ ...node, inputs })} />
-      <ListEditor label="출력값" items={node.outputs} disabled={disabled} onChange={(outputs) => onChange({ ...node, outputs })} />
-      <ListEditor label="통제" items={node.controls} disabled={disabled} onChange={(controls) => onChange({ ...node, controls })} />
+      <details className="property-panel__advanced">
+        <summary className="property-panel__advanced-summary">Advanced / Developer</summary>
+        <div className="property-panel__section property-panel__section--advanced">
+          <h3 className="property-panel__section-title">Documentation Metadata</h3>
+          <p className="property-panel__hint">
+            입력값, 출력값, 통제는 현재 layout/routing/generator의 핵심 입력이 아닌 업무 설명용 metadata입니다.
+          </p>
+          <ListEditor label="입력값" items={node.inputs} disabled={disabled} onChange={(inputs) => onChange({ ...node, inputs })} />
+          <ListEditor label="출력값" items={node.outputs} disabled={disabled} onChange={(outputs) => onChange({ ...node, outputs })} />
+          <ListEditor label="통제" items={node.controls} disabled={disabled} onChange={(controls) => onChange({ ...node, controls })} />
+        </div>
+        <div className="property-panel__section property-panel__section--advanced">
+          <h3 className="property-panel__section-title">Business Activity</h3>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Activity</label>
+            <input className="property-panel__input" value={node.name} disabled readOnly />
+          </div>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Node Master</label>
+            <input className="property-panel__input" value={resolveNodeMasterLabel(node)} disabled readOnly />
+          </div>
+          <div className="property-panel__field">
+            <label className="property-panel__label">Generator</label>
+            <input className="property-panel__input" value={resolveGeneratorRuleLabel(viewMode)} disabled readOnly />
+          </div>
+        </div>
+        <div className="property-panel__section property-panel__section--advanced">
+          <h3 className="property-panel__section-title">Legacy Stage Metadata</h3>
+          <p className="property-panel__hint">
+            현재 Stage 값은 내부 보조 정보이며, 화면 배치는 담당 영역 / 프로세스 구역 / 표시 순서 / 행·열 위치 기준으로 결정됩니다.
+          </p>
+          <label className="property-panel__checkbox-item property-panel__field--inline">
+            <input
+              type="checkbox"
+              checked={legacyStageEditable}
+              disabled={disabled}
+              onChange={(e) => setLegacyStageEditable(e.target.checked)}
+            />
+            <span>Edit legacy stage metadata</span>
+          </label>
+          <div className="property-panel__field">
+            <label className="property-panel__label">phaseId</label>
+            {legacyStageEditable && process.phases.length > 0 ? (
+              <select
+                className="property-panel__select"
+                value={node.phaseId}
+                disabled={disabled}
+                onChange={(e) => {
+                  const phase = process.phases.find((p) => p.id === e.target.value)
+                  onChange({
+                    ...node,
+                    phaseId: e.target.value,
+                    ...(phase ? { phaseOrder: phase.order } : {}),
+                  })
+                }}
+              >
+                {[...process.phases]
+                  .sort((a, b) => a.order - b.order)
+                  .map((phase) => (
+                    <option key={phase.id} value={phase.id}>
+                      {phase.label} ({phase.id})
+                    </option>
+                  ))}
+              </select>
+            ) : (
+              <input className="property-panel__input" value={formatReadonlyValue(node.phaseId)} disabled readOnly />
+            )}
+          </div>
+          <div className="property-panel__field">
+            <label className="property-panel__label">phaseOrder</label>
+            <input
+              type={legacyStageEditable ? 'number' : 'text'}
+              min={0}
+              className="property-panel__input"
+              value={legacyStageEditable ? node.phaseOrder ?? '' : formatReadonlyValue(node.phaseOrder)}
+              disabled={disabled || !legacyStageEditable}
+              readOnly={!legacyStageEditable}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  const { phaseOrder: _removed, ...rest } = node
+                  onChange(rest as Node)
+                  return
+                }
+                const value = Number.parseInt(e.target.value, 10)
+                if (!Number.isNaN(value) && value >= 0) {
+                  onChange({ ...node, phaseOrder: value })
+                }
+              }}
+            />
+          </div>
+          <dl className="property-panel__dl property-panel__dl--compact">
+            <div className="property-panel__dl-row"><dt>currentPhaseLabel</dt><dd>{getPhaseLabel(process, node.phaseId)}</dd></div>
+            <div className="property-panel__dl-row"><dt>inferredStageId</dt><dd>{formatReadonlyValue(stageMetadata.inferredStageId)}</dd></div>
+            <div className="property-panel__dl-row"><dt>generatorStage</dt><dd>{formatReadonlyValue(stageMetadata.generatorStage)}</dd></div>
+            <div className="property-panel__dl-row"><dt>stage diagnostics</dt><dd>{resolveNodeDiagnostics(process, node)}</dd></div>
+          </dl>
+        </div>
+        <div className="property-panel__section property-panel__section--advanced">
+          <h3 className="property-panel__section-title">Developer Info</h3>
+          <dl className="property-panel__dl property-panel__dl--compact">
+            <div className="property-panel__dl-row"><dt>nodeId</dt><dd>{node.id}</dd></div>
+            <div className="property-panel__dl-row"><dt>businessActivityId</dt><dd>-</dd></div>
+            <div className="property-panel__dl-row"><dt>nodeMasterId</dt><dd>{node.type}</dd></div>
+            <div className="property-panel__dl-row"><dt>processId</dt><dd>{process.id}</dd></div>
+            <div className="property-panel__dl-row"><dt>phaseId</dt><dd>{formatReadonlyValue(node.phaseId)}</dd></div>
+            <div className="property-panel__dl-row"><dt>phaseOrder</dt><dd>{formatReadonlyValue(node.phaseOrder)}</dd></div>
+            <div className="property-panel__dl-row"><dt>zoneId</dt><dd>{formatReadonlyValue(node.processZone)}</dd></div>
+            <div className="property-panel__dl-row"><dt>zone</dt><dd>{resolveZoneLabel(node)}</dd></div>
+            <div className="property-panel__dl-row"><dt>processGroupIds</dt><dd>{processGroupMemberships}</dd></div>
+            <div className="property-panel__dl-row"><dt>cellOrder</dt><dd>{formatReadonlyValue(node.cellOrder)}</dd></div>
+            <div className="property-panel__dl-row"><dt>cellSlot</dt><dd>{formatReadonlyValue(node.cellSlot)}</dd></div>
+            <div className="property-panel__dl-row"><dt>detailColumn</dt><dd>{formatReadonlyValue(node.detailLayout?.column)}</dd></div>
+            <div className="property-panel__dl-row"><dt>detailRow</dt><dd>{formatReadonlyValue(node.detailLayout?.row)}</dd></div>
+            <div className="property-panel__dl-row"><dt>offsetX</dt><dd>{formatReadonlyValue(node.offsetX)}</dd></div>
+            <div className="property-panel__dl-row"><dt>offsetY</dt><dd>{formatReadonlyValue(node.offsetY)}</dd></div>
+            <div className="property-panel__dl-row"><dt>diagnostics</dt><dd>{resolveNodeDiagnostics(process, node)}</dd></div>
+          </dl>
+        </div>
+      </details>
     </>
   )
 }
@@ -578,12 +852,14 @@ function NodeView({
   node,
   process,
   viewMode,
+  reviewMode = false,
   detailProcesses,
   onOpenDetailProcess,
 }: {
   node: Node
   process: Process
   viewMode: 'overview' | 'detail'
+  reviewMode?: boolean
   detailProcesses?: Process[]
   onOpenDetailProcess?: (processId: string) => void
 }) {
@@ -603,11 +879,24 @@ function NodeView({
       <h2 className="property-panel__view-name">{displayName}</h2>
       <p className="property-panel__view-desc">{node.description || '설명 없음'}</p>
       <dl className="property-panel__dl">
-        <div className="property-panel__dl-row"><dt>Lane</dt><dd>{lane?.name ?? node.laneId}</dd></div>
-        <div className="property-panel__dl-row"><dt>단계</dt><dd>{getPhaseLabel(process, node.phaseId)}</dd></div>
+        <div className="property-panel__dl-row"><dt>담당 영역</dt><dd>{lane?.name ?? node.laneId}</dd></div>
         <div className="property-panel__dl-row"><dt>담당</dt><dd>{node.owner || '-'}</dd></div>
         <div className="property-panel__dl-row"><dt>시스템</dt><dd>{node.system || '-'}</dd></div>
       </dl>
+      {reviewMode ? (
+        <div className="property-panel__section property-panel__section--review">
+          <h3 className="property-panel__section-title">Internal Review</h3>
+          <dl className="property-panel__dl property-panel__dl--compact">
+            <div className="property-panel__dl-row">
+              <dt>Status</dt>
+              <dd>{NODE_REVIEW_STATUS_OPTIONS.find((option) => option.value === (node.review?.status ?? 'not-reviewed'))?.label}</dd>
+            </div>
+            <div className="property-panel__dl-row"><dt>Reviewer</dt><dd>{node.review?.reviewer ?? '-'}</dd></div>
+            <div className="property-panel__dl-row"><dt>Reviewed Date</dt><dd>{formatReviewDate(node.review?.reviewedAt)}</dd></div>
+            <div className="property-panel__dl-row"><dt>Comment</dt><dd>{node.review?.comment || '-'}</dd></div>
+          </dl>
+        </div>
+      ) : null}
       {viewMode === 'overview' && detailProcesses && onOpenDetailProcess ? (
         <DetailProcessLinks
           node={node}
@@ -623,7 +912,7 @@ function EdgeForm({
   edge,
   process,
   disabled,
-  viewMode,
+  viewMode: _viewMode,
   onChange,
 }: {
   edge: Edge
@@ -632,14 +921,8 @@ function EdgeForm({
   viewMode: 'overview' | 'detail'
   onChange: (edge: Edge) => void
 }) {
-  const labelPresets =
-    viewMode === 'overview' ? [...OVERVIEW_EDGE_LABEL_PRESETS] : [...CONDITION_PRESETS]
-  const edgeType = resolveEdgeType(edge)
   const isDerived = isDerivedDisplayEdge(edge)
-  const isVirtualType = resolveEdgeType(edge) === 'virtual'
   const readOnly = disabled || isReadOnlyDisplayEdge(edge)
-  const patch = (partial: Partial<Edge>) => onChange(withEdgeHandleDefaults({ ...edge, ...partial }))
-  const nodeOptions = sortNodesForSelect(process.nodes)
 
   return (
     <>
@@ -648,74 +931,30 @@ function EdgeForm({
           업무 보기에서 API 숨김으로 생성된 임시 연결선입니다. 시스템 보기에서 원본 연결선을 수정하세요.
         </p>
       )}
-      {isVirtualType && !isDerived && (
+      {edge.type === 'virtual' && !isDerived && (
         <p className="property-panel__hint">
-          표시 전용 가상 연결선입니다. source/target, handle, label을 수정하고 저장할 수 있습니다.
+          표시 전용 연결선입니다. 이전 업무, 다음 업무, 연결 라벨을 수정하고 저장할 수 있습니다.
         </p>
       )}
       <div className="property-panel__section">
-        <h3 className="property-panel__section-title">Edge 설정</h3>
-        <div className="property-panel__field"><label className="property-panel__label">Edge ID</label><input className="property-panel__input" value={edge.id} disabled readOnly /></div>
-        <div className="property-panel__field">
-          <label className="property-panel__label">Source Node</label>
-          <select className="property-panel__select" value={edge.source} disabled={readOnly} onChange={(e) => patch({ source: e.target.value })}>
-            <option value="">선택…</option>
-            {nodeOptions.map((n) => (<option key={n.id} value={n.id}>{formatNodeSelectLabel(n)}</option>))}
-          </select>
-        </div>
-        <div className="property-panel__field">
-          <label className="property-panel__label">Target Node</label>
-          <select className="property-panel__select" value={edge.target} disabled={readOnly} onChange={(e) => patch({ target: e.target.value })}>
-            <option value="">선택…</option>
-            {nodeOptions.map((n) => (<option key={n.id} value={n.id}>{formatNodeSelectLabel(n)}</option>))}
-          </select>
-        </div>
-        <div className="property-panel__field">
-          <label className="property-panel__label">Edge Type</label>
-          <select className="property-panel__select" value={edgeType} disabled={disabled} onChange={(e) => patch({ type: e.target.value as EdgeType })}>
-            {EDGE_FORM_TYPES.map(({ value, label }) => (<option key={value} value={value}>{label}</option>))}
-          </select>
-        </div>
-        <div className="property-panel__field">
-          <label className="property-panel__label">Label</label>
-          <textarea
-            className="property-panel__textarea"
-            value={edge.label}
-            disabled={disabled}
-            onChange={(e) => patch({ label: e.target.value })}
-          />
-          {labelPresets.length > 0 && (
-            <select
-              className="property-panel__select"
-              value=""
-              disabled={disabled}
-              onChange={(e) => {
-                if (e.target.value) patch({ label: e.target.value })
-              }}
-            >
-              <option value="">라벨 프리셋 선택…</option>
-              {labelPresets.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          )}
-          <p className="property-panel__hint">Enter로 줄바꿈할 수 있습니다. 선택한 연결선의 라벨은 화면에서 드래그해 위치를 조정할 수 있습니다.</p>
-          {edge.labelPlacement?.point && (
-            <button
-              type="button"
-              className="property-panel__button"
-              disabled={disabled}
-              onClick={() => patch({ labelPlacement: undefined })}
-            >
-              라벨 위치 자동
-            </button>
-          )}
-        </div>
-        <div className="property-panel__field">
-          <label className="property-panel__label">Condition</label>
-          <input className="property-panel__input" list="edge-condition-presets" value={edge.condition} disabled={disabled} onChange={(e) => patch({ condition: e.target.value })} />
-          <datalist id="edge-condition-presets">{CONDITION_PRESETS.map((c) => (<option key={c} value={c} />))}</datalist>
-        </div>
+        <h3 className="property-panel__section-title">연결 관계</h3>
+        <EdgeConnectionFields
+          edge={edge}
+          process={process}
+          disabled={readOnly}
+          direction="both"
+          onChange={(nextEdge) => onChange(withEdgeHandleDefaults(nextEdge))}
+        />
+        {edge.labelPlacement?.point && (
+          <button
+            type="button"
+            className="property-panel__button"
+            disabled={readOnly}
+            onClick={() => onChange(withEdgeHandleDefaults({ ...edge, labelPlacement: undefined }))}
+          >
+            라벨 위치 자동
+          </button>
+        )}
       </div>
     </>
   )
@@ -769,6 +1008,33 @@ function ProcessGroupForm({
         />
       </div>
       <div className="property-panel__field">
+        <label className="property-panel__label">Lifecycle Group</label>
+        <select
+          className="property-panel__select"
+          value={group.lifecycleGroupId ?? ''}
+          disabled={disabled}
+          onChange={(e) => {
+            const value = e.target.value
+            if (!value) {
+              const { lifecycleGroupId: _removed, ...rest } = group
+              onChange(rest)
+              return
+            }
+            onChange({ ...group, lifecycleGroupId: value as OverviewProcessGroup['lifecycleGroupId'] })
+          }}
+        >
+          <option value="">연결 상세 기준 자동 배치</option>
+          {PROCESS_LIFECYCLE_GROUPS.map((lifecycleGroup) => (
+            <option key={lifecycleGroup.id} value={lifecycleGroup.id}>
+              {lifecycleGroup.label}
+            </option>
+          ))}
+        </select>
+        <p className="property-panel__hint">
+          Overview 메뉴에서 이 그룹이 표시될 상위 Lifecycle입니다. 비우면 연결된 상세 프로세스 기준으로 자동 배치됩니다.
+        </p>
+      </div>
+      <div className="property-panel__field">
         <label className="property-panel__label">그룹 ID</label>
         <input className="property-panel__input" value={group.id} disabled readOnly />
       </div>
@@ -803,7 +1069,7 @@ function ProcessGroupForm({
         </p>
       </div>
       <div className="property-panel__field">
-        <label className="property-panel__label">포함 Node</label>
+        <label className="property-panel__label">포함 업무</label>
         <p className="property-panel__hint">
           노드를 추가하면 해당 노드와 직접 연결되고 양쪽 끝점이 모두 포함된 연결선만 추가됩니다. 저장 버튼으로 확정하세요.
         </p>
@@ -949,9 +1215,9 @@ function LaneForm({ lane, disabled, onChange }: { lane: Lane; disabled: boolean;
   return (
     <>
       <div className="property-panel__section">
-        <h3 className="property-panel__section-title">Lane 설정</h3>
-        <div className="property-panel__field"><label className="property-panel__label">Lane 이름</label><input className="property-panel__input" value={lane.name} disabled={disabled} onChange={(e) => onChange({ ...lane, name: e.target.value })} /></div>
-        <div className="property-panel__field"><label className="property-panel__label">Lane ID</label><input className="property-panel__input" value={lane.id} disabled readOnly /></div>
+        <h3 className="property-panel__section-title">담당 영역 설정</h3>
+        <div className="property-panel__field"><label className="property-panel__label">담당 영역 이름</label><input className="property-panel__input" value={lane.name} disabled={disabled} onChange={(e) => onChange({ ...lane, name: e.target.value })} /></div>
+        <div className="property-panel__field"><label className="property-panel__label">담당 영역 ID</label><input className="property-panel__input" value={lane.id} disabled readOnly /></div>
         <div className="property-panel__field"><label className="property-panel__label">표시 순서</label><input type="number" min={1} className="property-panel__input" value={lane.order} disabled={disabled} onChange={(e) => { const v = Number.parseInt(e.target.value, 10); if (!Number.isNaN(v) && v > 0) onChange({ ...lane, order: v }) }} /></div>
         <div className="property-panel__field"><label className="property-panel__label">관련 조직</label><input className="property-panel__input" value={lane.ownerDepartment} disabled={disabled} onChange={(e) => onChange({ ...lane, ownerDepartment: e.target.value })} /></div>
         <div className="property-panel__field"><label className="property-panel__label">높이</label><input className="property-panel__input" value="자동 (레이아웃)" disabled readOnly /></div>
@@ -984,18 +1250,18 @@ function OverviewZoneForm({
 
   return (
     <div className="property-panel__section">
-      <h3 className="property-panel__section-title">업무 Zone 설정</h3>
+        <h3 className="property-panel__section-title">업무 구역 설정</h3>
       <div className="property-panel__field">
-        <label className="property-panel__label">Zone 이름</label>
+        <label className="property-panel__label">구역 이름</label>
         <input className="property-panel__input" value={zoneDef.label} disabled readOnly />
       </div>
       <div className="property-panel__field">
-        <label className="property-panel__label">Zone ID</label>
+        <label className="property-panel__label">구역 ID</label>
         <input className="property-panel__input" value={zoneDef.id} disabled readOnly />
       </div>
       <div className="property-panel__field">
-        <label className="property-panel__label">포함 Node</label>
-        <p className="property-panel__hint">체크 변경 시 즉시 반영되며 Zone 영역 높이가 재계산됩니다.</p>
+        <label className="property-panel__label">포함 업무</label>
+        <p className="property-panel__hint">체크 변경 시 즉시 반영되며 구역 높이가 재계산됩니다.</p>
         <div className="property-panel__checkbox-list">
           {selectableNodes.map((node) => (
             <label key={node.id} className="property-panel__checkbox-item">
@@ -1025,8 +1291,8 @@ function ProcessZoneList({
 
   return (
     <div className="property-panel__section">
-      <h3 className="property-panel__section-title">Process Zone 목록</h3>
-      <p className="property-panel__hint">생성된 Zone을 클릭하면 이름·포함 노드·스타일을 수정할 수 있습니다.</p>
+      <h3 className="property-panel__section-title">프로세스 구역 목록</h3>
+      <p className="property-panel__hint">생성된 구역을 클릭하면 이름·포함 업무·표시 방식을 수정할 수 있습니다.</p>
       <ul className="property-panel__zone-list">
         {zones.map((zone) => (
           <li key={zone.id}>
@@ -1076,9 +1342,9 @@ function ZoneForm({
 
   return (
     <div className="property-panel__section">
-      <h3 className="property-panel__section-title">Process Zone 설정</h3>
+      <h3 className="property-panel__section-title">프로세스 구역 설정</h3>
       <div className="property-panel__field">
-        <label className="property-panel__label">Zone 이름</label>
+        <label className="property-panel__label">구역 이름</label>
         <input
           className="property-panel__input"
           value={zone.name}
@@ -1087,11 +1353,11 @@ function ZoneForm({
         />
       </div>
       <div className="property-panel__field">
-        <label className="property-panel__label">Zone ID</label>
+        <label className="property-panel__label">구역 ID</label>
         <input className="property-panel__input" value={zone.id} disabled readOnly />
       </div>
       <div className="property-panel__field">
-        <label className="property-panel__label">Zone 이름 위치</label>
+        <label className="property-panel__label">구역 이름 위치</label>
         <select
           className="property-panel__select"
           value={style.labelPosition ?? 'top'}
@@ -1114,8 +1380,8 @@ function ZoneForm({
         </select>
       </div>
       <div className="property-panel__field">
-        <label className="property-panel__label">포함 Node</label>
-        <p className="property-panel__hint">체크 변경 시 Process Zone 영역이 즉시 갱신됩니다.</p>
+        <label className="property-panel__label">포함 업무</label>
+        <p className="property-panel__hint">체크 변경 시 프로세스 구역이 즉시 갱신됩니다.</p>
         <div className="property-panel__checkbox-list">
           {selectableNodes.map((node) => (
             <label key={node.id} className="property-panel__checkbox-item">
@@ -1281,6 +1547,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     selectedElement,
     process,
     viewMode,
+    reviewMode,
     detailProcesses,
     onOpenDetailProcess,
     onSaveNode,
@@ -1353,6 +1620,15 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
   }, [selectedElement])
 
   const selectionKey = selectedElementKey(selectedElement)
+  const processGroupMembershipKey =
+    selectedElement.type === 'process-group' || selectedElement.type === 'new-process-group'
+      ? [
+          selectedElement.type,
+          selectedElement.id,
+          selectedElement.data.overviewNodeIds.join('|'),
+          selectedElement.data.overviewEdgeIds.join('|'),
+        ].join(':')
+      : ''
 
   useEffect(() => {
     setError(null)
@@ -1377,6 +1653,14 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     // Re-init draft only when selection identity changes — not on every process sync.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectionKey])
+
+  useEffect(() => {
+    if (selectedElement.type === 'process-group' || selectedElement.type === 'new-process-group') {
+      setDraftProcessGroup(cloneProcessGroup(selectedElement.data as OverviewProcessGroup))
+    }
+    // Re-sync group membership changes from canvas clicks without resetting text edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [processGroupMembershipKey])
 
   const commitNode = useCallback(
     (node: Node) => {
@@ -1487,7 +1771,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       <div className="property-panel">
         {isNewNode ? (
           <NewItemActions
-            targetLabel="Node"
+            targetLabel="업무"
             error={error}
             onSave={() => {
               const normalized = normalizeNodeLocalOrder(draftNode, process)
@@ -1501,7 +1785,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           />
         ) : isEditMode ? (
           <EditItemActions
-            targetLabel="Node"
+            targetLabel="업무"
             error={error}
             onSave={() => commitNode(draftNode)}
             onCancel={reloadFromSelected}
@@ -1520,20 +1804,28 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
               process={process}
               disabled={!isEditMode}
               viewMode={viewMode}
+              overviewProcessGroups={props.overviewProcessGroups}
+              detailProcessGroups={props.detailProcessGroups}
+              reviewMode={reviewMode}
+              connections={
+                isEditMode && !isNewNode ? (
+                  <div className="property-panel__section">
+                    <h3 className="property-panel__section-title">연결 관계</h3>
+                    <NodeConnectionsPanel
+                      node={draftNode}
+                      process={process}
+                      disabled={!isEditMode}
+                      incomingTitle={isConnectorNode(draftNode) ? '들어오는 연결' : '이전 업무'}
+                      outgoingTitle={isConnectorNode(draftNode) ? '나가는 연결' : '다음 업무'}
+                      onSaveEdge={(edge, isNew) => onSaveEdge(withEdgeHandleDefaults(edge), isNew, { keepNodeId: draftNode.id })}
+                      onDeleteEdge={(edgeId) => onDeleteEdge(edgeId, { keepNodeId: draftNode.id })}
+                      onSelectEdge={onSelectEdge}
+                    />
+                  </div>
+                ) : null
+              }
               onChange={setDraftNode}
             />
-            {isEditMode && !isNewNode && (
-              <NodeConnectionsPanel
-                node={draftNode}
-                process={process}
-                disabled={!isEditMode}
-                incomingTitle={isConnectorNode(draftNode) ? 'Input' : '이전 노드'}
-                outgoingTitle={isConnectorNode(draftNode) ? 'Output' : '다음 노드'}
-                onSaveEdge={(edge, isNew) => onSaveEdge(withEdgeHandleDefaults(edge), isNew, { keepNodeId: draftNode.id })}
-                onDeleteEdge={(edgeId) => onDeleteEdge(edgeId, { keepNodeId: draftNode.id })}
-                onSelectEdge={onSelectEdge}
-              />
-            )}
           </>
         ) : (
           <>
@@ -1542,6 +1834,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
               node={draftNode}
               process={process}
               viewMode={viewMode}
+              reviewMode={reviewMode}
               detailProcesses={detailProcesses}
               onOpenDetailProcess={onOpenDetailProcess}
             />
@@ -1559,7 +1852,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       <div className="property-panel">
         {isNewEdge ? (
           <NewItemActions
-            targetLabel="Edge"
+            targetLabel="연결선"
             error={error}
             onSave={() => {
               const normalized = withEdgeHandleDefaults(draftEdge)
@@ -1602,7 +1895,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           </>
         ) : (
           <EditItemActions
-            targetLabel="Edge"
+            targetLabel="연결선"
             error={error}
             onSave={() => commitEdge(draftEdge)}
             onCancel={reloadFromSelected}
@@ -1628,7 +1921,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       <div className="property-panel">
         {isNewLane ? (
           <NewItemActions
-            targetLabel="Lane"
+            targetLabel="담당 영역"
             error={error}
             onSave={() => {
               const r = validateLane(draftLane)
@@ -1640,7 +1933,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           />
         ) : (
           <EditItemActions
-            targetLabel="Lane"
+            targetLabel="담당 영역"
             error={error}
             onSave={() => commitLane(draftLane)}
             onCancel={reloadFromSelected}
@@ -1667,14 +1960,14 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       <div className="property-panel">
         {isNewGroup ? (
           <NewItemActions
-            targetLabel="Process Group"
+            targetLabel="Overview 그룹"
             error={error}
             onSave={() => commitProcessGroup(draftProcessGroup)}
             onCancel={onCancelNew}
           />
         ) : isEditMode ? (
           <EditItemActions
-            targetLabel="Process Group"
+            targetLabel="Overview 그룹"
             error={error}
             onSave={() => commitProcessGroup(draftProcessGroup)}
             onCancel={() => {
@@ -1711,14 +2004,14 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       <div className="property-panel">
         {isNewGroup ? (
           <NewItemActions
-            targetLabel="Detail Group"
+            targetLabel="상세 프로세스 그룹"
             error={error}
             onSave={() => commitDetailProcessGroup(draftDetailProcessGroup)}
             onCancel={onCancelNew}
           />
         ) : isEditMode ? (
           <EditItemActions
-            targetLabel="Detail Group"
+            targetLabel="상세 프로세스 그룹"
             error={error}
             onSave={() => commitDetailProcessGroup(draftDetailProcessGroup)}
             onCancel={() => {
@@ -1763,7 +2056,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       <div className="property-panel">
         {isNewZone ? (
           <NewItemActions
-            targetLabel="Zone"
+            targetLabel="프로세스 구역"
             error={error}
             onSave={() => {
               const r = validateZone(draftZone, process)
@@ -1775,13 +2068,13 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           />
         ) : isEditMode ? (
           <EditItemActions
-            targetLabel="Zone"
+            targetLabel="프로세스 구역"
             error={error}
             onSave={() => commitZone(draftZone)}
             onCancel={reloadFromSelected}
             canDelete
             onDelete={() => {
-              if (window.confirm('이 Process Zone을 삭제하시겠습니까?')) onDeleteZone(draftZone.id)
+              if (window.confirm('이 프로세스 구역을 삭제하시겠습니까?')) onDeleteZone(draftZone.id)
             }}
           />
         ) : (
@@ -1818,8 +2111,8 @@ export function PropertyPanel(props: PropertyPanelProps) {
       <div className="property-panel node-detail-panel" {...panelEventShieldProps}>
         <p className="property-panel__empty">
           {isEditMode
-            ? '편집할 항목을 선택하세요. 노드·연결선·스윔레인·Process Zone(점선 박스)을 클릭하거나 상단 + 버튼으로 추가할 수 있습니다.'
-            : '프로세스맵에서 노드 또는 Process Zone을 클릭하면 상세 정보가 표시됩니다.'}
+            ? '편집할 항목을 선택하세요. 업무·연결선·담당 영역·프로세스 구역을 클릭하거나 상단 + 버튼으로 추가할 수 있습니다.'
+            : '프로세스맵에서 업무 또는 프로세스 구역을 클릭하면 상세 정보가 표시됩니다.'}
         </p>
         {onSelectZone && processZones.length > 0 && (
           <ProcessZoneList zones={processZones} onSelect={onSelectZone} />

@@ -4,6 +4,8 @@ import { useProcessDataStore } from '../../data/processDataStore'
 import { getActiveProcessData, resolveDetailProcessesForMenu } from '../../data/activeProcessData'
 import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
+import { getLifecycleGroupForDetailProcess } from '../../data/processLifecycleGroups'
+import { APP_CONFIG } from '../../config/appConfig'
 import { canDeleteLane } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
 import {
@@ -27,13 +29,39 @@ import {
   refreshSelectedElement,
 } from '../../lib/editor/selectedElement'
 import {
+  isNodeInProcessGroup,
   resolveFocusEdgeIdsForNode,
+  resolveProcessGroupEdgeIds,
   resolveRelatedNodeIdsForFocus,
+  setProcessGroupNodeMembership,
 } from '../../lib/editor/processGroupMembership'
 import { withEdgeHandleDefaults } from '../../lib/editor/edgeHandles'
 import { applyRoutedHandlePatch, type RoutedHandlePatch } from '../../lib/editor/routedEdgeSync'
 import { normalizeEdgeForStorage } from '../../lib/editor/edgeUpdate'
+import {
+  validateRouterData,
+  type RouterValidationIssue,
+  type RouterValidationReport,
+} from '../../lib/editor/routerValidation'
 import { selectedElementToObject } from '../../lib/editor/selectionManager'
+import {
+  isEditableShortcutTarget,
+  isShortcutEvent,
+} from '../../lib/editor/shortcutManager'
+import { type ClipboardPayload } from '../../clipboard'
+import {
+  createCommandDispatcher,
+  createCommandRegistry,
+  editorCommands,
+  type CommandContext,
+} from '../../commands'
+import {
+  createSelectionManager,
+  edgeSelectionItems,
+  nodeSelectionItems,
+  type SelectionChangeOptions,
+  type SelectionSnapshot,
+} from '../../selection'
 import type { AppMode, SelectedElement } from '../../lib/editor/selectionTypes'
 import type { OverviewHighlight, ViewMode } from '../../lib/editor/viewModeTypes'
 import type { Edge, Lane, Node, Process, ProcessZone } from '../../types/process'
@@ -48,6 +76,7 @@ import { resolveOverviewNodeType } from '../../lib/overviewNodeDisplay'
 import { DataStatusBar } from './DataStatusBar'
 import { Drawer } from './Drawer'
 import { ProcessGroupMenu, resolveHighlightMode } from './ProcessGroupMenu'
+import { RouterHealthDashboard } from './RouterHealthDashboard'
 import { Toolbar } from './Toolbar'
 import { ProcessMapCanvas } from '../process-map/ProcessMapCanvas'
 import { PropertyPanel } from '../editor/PropertyPanel'
@@ -55,20 +84,122 @@ import { ProcessCanvasContainer, PROPERTY_PANEL_WIDTH } from './ProcessCanvasCon
 import '../layout/node-detail.css'
 import './layout.css'
 
+const editorCommandRegistry = createCommandRegistry(editorCommands)
+
+function pushShortcutDebug(event: string, payload: Record<string, unknown>): void {
+  if (!import.meta.env.DEV) return
+  const target = globalThis as typeof globalThis & {
+    __PROCESS_NAV_DEBUG__?: Array<Record<string, unknown>>
+  }
+  const entry = {
+    source: 'AppLayout',
+    event,
+    at: new Date().toISOString(),
+    ...payload,
+  }
+  target.__PROCESS_NAV_DEBUG__ = [...(target.__PROCESS_NAV_DEBUG__ ?? []), entry].slice(-100)
+}
+
+function describeShortcutTarget(target: EventTarget | null): Record<string, unknown> {
+  const element = target as HTMLElement | null
+  return {
+    tag: element?.tagName ?? null,
+    className: element?.getAttribute('class') ?? null,
+    role: element?.getAttribute('role') ?? null,
+  }
+}
+
+type SaveReportToast = {
+  id: number
+  kind: 'success' | 'warning' | 'error'
+  title: string
+  summary: string
+  issues: RouterValidationIssue[]
+}
+
+const ROUTER_ISSUE_LABELS: Record<string, string> = {
+  'manual-handle-auto': '수동 라우팅과 자동 handle 충돌 정리',
+  'auto-edge-bend-points': '자동 연결선의 legacy bendPoints 제거',
+  'auto-edge-points': '자동 연결선의 legacy points 제거',
+  'invalid-routing-point': '유효하지 않은 routing point 정리',
+  'detail-offset': '위치 보정값 확인',
+  'invalid-handle': '유효하지 않은 연결면 자동 수정',
+  'invalid-cell-slot': '유효하지 않은 행/열 위치 보정',
+  'broken-edge': '깨진 연결선',
+  'orphan-bend': '연결 대상 없는 bend point',
+}
+
+function issueTitle(issue: RouterValidationIssue): string {
+  return ROUTER_ISSUE_LABELS[issue.code] ?? issue.code
+}
+
+function issueDetail(issue: RouterValidationIssue): string {
+  const target = issue.edgeId ? `edge ${issue.edgeId}` : issue.nodeId ? `node ${issue.nodeId}` : ''
+  return [issue.processName, target, issue.fix ?? issue.message].filter(Boolean).join(' · ')
+}
+
+function buildSaveReportToast(report: RouterValidationReport | undefined, ok: boolean, error?: string): SaveReportToast {
+  const issues = report?.issues ?? []
+  const errors = issues.filter((issue) => issue.severity === 'error')
+  const fixed = issues.filter((issue) => issue.severity === 'fixed')
+  const warnings = issues.filter((issue) => issue.severity === 'warning')
+  if (!ok) {
+    return {
+      id: Date.now(),
+      kind: 'error',
+      title: '저장 실패',
+      summary: errors.length > 0
+        ? `치명 오류 ${errors.length}건이 있어 저장하지 않았습니다.`
+        : error ?? '저장하지 않았습니다.',
+      issues: errors.length > 0 ? errors : issues,
+    }
+  }
+  return {
+    id: Date.now(),
+    kind: warnings.length > 0 ? 'warning' : 'success',
+    title: '저장 완료',
+    summary: `자동 보정 ${fixed.length}건${warnings.length > 0 ? ` · 경고 ${warnings.length}건` : ''}`,
+    issues: [...fixed, ...warnings],
+  }
+}
+
+function buildOpenRouterCheckToast(processName: string, issues: RouterValidationIssue[]): SaveReportToast {
+  const errors = issues.filter((issue) => issue.severity === 'error')
+  const warnings = issues.filter((issue) => issue.severity !== 'error')
+  return {
+    id: Date.now(),
+    kind: errors.length > 0 ? 'error' : 'warning',
+    title: 'Router Check',
+    summary: `${processName} · 오류 ${errors.length}건 · 경고 ${warnings.length}건`,
+    issues,
+  }
+}
+
 export function AppLayout() {
   const store = useProcessDataStore()
   const { processData, summary, saveStatus, persistAll } = store
+  const viewerOnly = APP_CONFIG.deployment.viewerOnly
   const propertyPanelRef = useRef<HTMLElement>(null)
   usePanelNativeEventShield(propertyPanelRef)
 
   const [isLeftOpen, setIsLeftOpen] = useState(false)
   const [isRightOpen, setIsRightOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>(() => readUiPreferences().viewMode ?? 'overview')
-  const [appMode, setAppMode] = useState<AppMode>(() => readUiPreferences().appMode ?? 'view')
+  const [appMode, setAppMode] = useState<AppMode>('view')
+  const [reviewMode, setReviewMode] = useState(false)
+  const [showNodeNumbers, setShowNodeNumbers] = useState(true)
   const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null)
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([])
+  const [selectedEdgeIds, setSelectedEdgeIds] = useState<string[]>([])
+  const [nodeClipboard, setNodeClipboard] = useState<ClipboardPayload | null>(null)
+  const [renderSyncRevision, setRenderSyncRevision] = useState(0)
+  const [saveReportToast, setSaveReportToast] = useState<SaveReportToast | null>(null)
+  const selectionManagerRef = useRef(createSelectionManager())
+  const openRouterCheckKeyRef = useRef('')
 
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [relatedOnly, setRelatedOnly] = useState(false)
+  const [detailCloneNotice, setDetailCloneNotice] = useState<string | null>(null)
   const [overviewHomeKey, setOverviewHomeKey] = useState(0)
   const [detailProcessId, setDetailProcessId] = useState<string>(() =>
     readUiPreferences().detailProcessId
@@ -78,6 +209,47 @@ export function AppLayout() {
   )
 
   const activeScope: ProcessScope = viewMode === 'overview' ? 'overview' : detailProcessId
+
+  const applySelectionSnapshot = useCallback((snapshot: SelectionSnapshot) => {
+    setSelectedNodeIds(snapshot.items.filter((item) => item.type === 'node').map((item) => item.id))
+    setSelectedEdgeIds(snapshot.items.filter((item) => item.type === 'edge').map((item) => item.id))
+  }, [])
+
+  const setNodeSelection = useCallback(
+    (nodeIds: string[], options?: SelectionChangeOptions) => {
+      const items = nodeSelectionItems(nodeIds)
+      const snapshot = options?.toggle
+        ? selectionManagerRef.current.toggleSelection(items, options)
+        : options?.additive || options?.range
+          ? selectionManagerRef.current.addSelection(items, options)
+          : selectionManagerRef.current.setSelection(items, options)
+      applySelectionSnapshot(snapshot)
+      return {
+        snapshot,
+        nodeIds: snapshot.items.filter((item) => item.type === 'node').map((item) => item.id),
+        primaryNodeId: snapshot.primary?.type === 'node' ? snapshot.primary.id : null,
+      }
+    },
+    [applySelectionSnapshot],
+  )
+
+  const setEdgeSelection = useCallback(
+    (edgeIds: string[], options?: SelectionChangeOptions) => {
+      const items = edgeSelectionItems(edgeIds)
+      const snapshot = options?.toggle
+        ? selectionManagerRef.current.toggleSelection(items, options)
+        : options?.additive || options?.range
+          ? selectionManagerRef.current.addSelection(items, options)
+          : selectionManagerRef.current.setSelection(items, options)
+      applySelectionSnapshot(snapshot)
+      return {
+        snapshot,
+        edgeIds: snapshot.items.filter((item) => item.type === 'edge').map((item) => item.id),
+        primaryEdgeId: snapshot.primary?.type === 'edge' ? snapshot.primary.id : null,
+      }
+    },
+    [applySelectionSnapshot],
+  )
 
   useEffect(() => {
     if (viewMode === 'detail' && detailProcessId) {
@@ -109,6 +281,22 @@ export function AppLayout() {
     () => (appMode === 'edit' ? activeProcess : displayProcess),
     [appMode, activeProcess, displayProcess],
   )
+
+  const reviewSummary = useMemo(() => {
+    const reviewableNodes = canvasProcess.nodes.filter(
+      (node) => node.type !== 'phase-connector' && node.type !== 'merge' && node.type !== 'connector',
+    )
+    const ok = reviewableNodes.filter((node) => node.review?.status === 'ok').length
+    const reviewRequired = reviewableNodes.filter((node) => node.review?.status === 'review-required').length
+    const notReviewed = reviewableNodes.length - ok - reviewRequired
+    return {
+      total: reviewableNodes.length,
+      ok,
+      reviewRequired,
+      notReviewed,
+      ready: reviewableNodes.length > 0 && reviewRequired === 0 && notReviewed === 0,
+    }
+  }, [canvasProcess.nodes])
 
   const allDetailProcesses = useMemo(
     () => resolveDetailProcessesForMenu(processData, toBeNavigator.detailProcesses),
@@ -172,10 +360,13 @@ export function AppLayout() {
       return { groupId: null, nodeIds: new Set(), edgeIds: new Set(), mode: 'all' }
     }
     const overview = getOverviewProcess(processData)
+    const edgeIds = overview
+      ? resolveProcessGroupEdgeIds(highlightGroup, overview.edges)
+      : highlightGroup.overviewEdgeIds
     const base: OverviewHighlight = {
       groupId: highlightGroup.id,
       nodeIds: new Set(highlightGroup.overviewNodeIds),
-      edgeIds: new Set(highlightGroup.overviewEdgeIds),
+      edgeIds: new Set(edgeIds),
       mode,
     }
     if (!focusNodeId) return base
@@ -195,18 +386,19 @@ export function AppLayout() {
 
   const detailHeader = useMemo(() => {
     if (viewMode === 'overview') return null
-    const processLabel = [activeProcess.version, activeProcess.status].filter(Boolean).join(' ')
-    const groupIndex = detailProcessGroups.findIndex((group) => group.detailProcessId === activeProcess.id)
+    const detailGroup = detailProcessGroups.find((group) => group.detailProcessId === activeProcess.id)
+    const lifecycleGroup = getLifecycleGroupForDetailProcess(activeProcess.id)
     return {
-      groupNumber: groupIndex >= 0 ? String(groupIndex + 1).padStart(2, '0') : undefined,
-      processLabel,
-      title: activeProcess.name,
+      breadcrumbs: [APP_CONFIG.processRootLabel, lifecycleGroup.label],
+      processLabel: '',
+      title: detailGroup?.name ?? activeProcess.name,
     }
   }, [viewMode, activeProcess, detailProcessGroups])
 
   useEffect(() => {
     setSelectedElement(null)
-  }, [viewMode, detailProcessId])
+    applySelectionSnapshot(selectionManagerRef.current.clearSelection({ source: 'programmatic' }))
+  }, [viewMode, detailProcessId, applySelectionSnapshot])
 
   useEffect(() => {
     setSelectedElement((prev) =>
@@ -224,6 +416,27 @@ export function AppLayout() {
       appMode,
     })
   }, [viewMode, detailProcessId, selectedGroupId, isLeftOpen, isRightOpen, appMode])
+
+  useEffect(() => {
+    if (appMode !== 'edit') return
+    const key = `${viewMode}:${activeProcess.id}`
+    if (openRouterCheckKeyRef.current === key) return
+    openRouterCheckKeyRef.current = key
+    const report = validateRouterData(processData, { autofix: false }).report
+    const processIssues = report.issues.filter((issue) => issue.processId === activeProcess.id)
+    if (processIssues.length === 0) return
+    setSaveReportToast(buildOpenRouterCheckToast(activeProcess.name, processIssues))
+  }, [activeProcess.id, activeProcess.name, appMode, processData, viewMode])
+
+  useEffect(() => {
+    if (!saveReportToast) return
+    if (saveReportToast.kind === 'error') return
+    const delay = saveReportToast.kind === 'warning' ? 3000 : 1000
+    const timeout = window.setTimeout(() => {
+      setSaveReportToast((current) => (current?.id === saveReportToast.id ? null : current))
+    }, delay)
+    return () => window.clearTimeout(timeout)
+  }, [saveReportToast])
 
 
   const handleOpenDetailProcess = useCallback((processId: string) => {
@@ -261,6 +474,7 @@ export function AppLayout() {
         detailProcessGroups.find((entry) => entry.id === groupId)
         ?? getDetailProcessGroupById(groupId)
       if (!group) return
+      setDetailCloneNotice(null)
       setSelectedGroupId(group.id)
       handleOpenDetailProcess(group.detailProcessId)
     },
@@ -277,14 +491,39 @@ export function AppLayout() {
       const group = overviewProcessGroups.find((entry) => entry.id === groupId)
       if (group) {
         setSelectedElement(buildSelectedProcessGroup(group))
-        setIsRightOpen(true)
+        setIsRightOpen(appMode === 'edit')
       }
     },
-    [overviewProcessGroups],
+    [appMode, overviewProcessGroups],
   )
 
   const handleSelectElement = useCallback(
     (next: SelectedElement | null) => {
+      if (
+        viewMode === 'overview' &&
+        appMode === 'edit' &&
+        next?.type === 'node' &&
+        (selectedElement?.type === 'process-group' || selectedElement?.type === 'new-process-group')
+      ) {
+        const node = activeProcess.nodes.find((entry) => entry.id === next.id)
+        if (!node || node.type === 'phase-connector' || node.type === 'merge') return
+        const include = !isNodeInProcessGroup(selectedElement.data, node.id)
+        const group = setProcessGroupNodeMembership(
+          selectedElement.data,
+          node.id,
+          include,
+          activeProcess.edges,
+        )
+        setSelectedElement({
+          type: selectedElement.type,
+          id: selectedElement.id,
+          data: cloneProcessGroup(group),
+        })
+        if (selectedElement.type === 'process-group') setSelectedGroupId(group.id)
+        setIsRightOpen(true)
+        return
+      }
+
       if (viewMode === 'overview' && appMode === 'view' && next?.type === 'node') {
         const node = activeProcess.nodes.find((entry) => entry.id === next.id)
         if (node && resolveOverviewNodeType(node) === 'linked-process') {
@@ -298,25 +537,151 @@ export function AppLayout() {
       setSelectedElement(next)
       if (next) setIsRightOpen(true)
     },
-    [viewMode, appMode, activeProcess.nodes, handleOpenDetailProcess],
+    [viewMode, appMode, selectedElement, activeProcess.nodes, activeProcess.edges, handleOpenDetailProcess],
   )
 
   const handleClearSelection = useCallback(() => {
     setSelectedElement(null)
-  }, [])
+    applySelectionSnapshot(selectionManagerRef.current.clearSelection({ source: 'canvas' }))
+  }, [applySelectionSnapshot])
+
+  const handleCanvasPaneBodyClick = useCallback(() => {
+    if (
+      viewMode === 'overview' &&
+      (selectedGroupId || selectedElement?.type === 'process-group' || selectedElement?.type === 'new-process-group')
+    ) {
+      setIsLeftOpen(false)
+      setIsRightOpen(false)
+    }
+  }, [selectedElement, selectedGroupId, viewMode])
+
+  const clearCommandSelection = useCallback(
+    (options?: SelectionChangeOptions) => {
+      applySelectionSnapshot(selectionManagerRef.current.clearSelection(options))
+    },
+    [applySelectionSnapshot],
+  )
+
+  const commandContext = useMemo<CommandContext>(
+    () => ({
+      appMode,
+      viewMode,
+      activeProcess,
+      activeScope,
+      selectedElement,
+      selectedNodeIds,
+      selectedEdgeIds,
+      selectionManager: selectionManagerRef.current,
+      clipboard: {
+        get: () => nodeClipboard,
+        set: setNodeClipboard,
+      },
+      store,
+      setNodeSelection,
+      clearSelection: clearCommandSelection,
+      selectNode: (node) => {
+        setSelectedElement({ type: 'node', id: node.id, data: cloneNodeData(node) })
+      },
+      clearSelectedElement: () => setSelectedElement(null),
+      openPropertyPanel: () => setIsRightOpen(true),
+    }),
+    [
+      appMode,
+      viewMode,
+      activeProcess,
+      activeScope,
+      selectedElement,
+      selectedNodeIds,
+      selectedEdgeIds,
+      nodeClipboard,
+      store,
+      setNodeSelection,
+      clearCommandSelection,
+    ],
+  )
+
+  const commandDispatcher = useMemo(
+    () => createCommandDispatcher(editorCommandRegistry, () => commandContext),
+    [commandContext],
+  )
+
+  const handleCopyNodes = useCallback(
+    (explicitNodeIds?: string[]) => {
+      return commandDispatcher.execute(
+        'copyNodes',
+        explicitNodeIds?.length ? { nodeIds: explicitNodeIds } : undefined,
+      )
+    },
+    [commandDispatcher],
+  )
+
+  const handlePasteNodes = useCallback(
+    () => commandDispatcher.execute('pasteNodes'),
+    [commandDispatcher],
+  )
+
+  const handleCanvasNodeSelectionChange = useCallback(
+    (nodeIds: string[], options?: SelectionChangeOptions) => {
+      setNodeSelection(nodeIds, options)
+    },
+    [setNodeSelection],
+  )
+
+  const handleCanvasEdgeSelectionChange = useCallback(
+    (edgeIds: string[], options?: SelectionChangeOptions) => {
+      setEdgeSelection(edgeIds, options)
+    },
+    [setEdgeSelection],
+  )
+
+  const handleDuplicateNodes = useCallback(
+    (explicitNodeIds?: string[]) => {
+      return commandDispatcher.execute(
+        'duplicateNodes',
+        explicitNodeIds?.length ? { nodeIds: explicitNodeIds } : undefined,
+      )
+    },
+    [commandDispatcher],
+  )
+
+  const handleCopySelection = useCallback(() => {
+    return handleCopyNodes()
+  }, [handleCopyNodes])
+
+  const handlePasteSelection = useCallback(() => {
+    return handlePasteNodes()
+  }, [handlePasteNodes])
+
+  const handleSelectAllNodes = useCallback(() => {
+    if (activeProcess.nodes.length === 0) return false
+    const ids = activeProcess.nodes.map((node) => node.id)
+    setNodeSelection(ids, { source: 'shortcut' })
+    const first = activeProcess.nodes[0]
+    setSelectedElement({ type: 'node', id: first.id, data: cloneNodeData(first) })
+    setIsRightOpen(true)
+    return true
+  }, [activeProcess.nodes, setNodeSelection])
 
   const handleStartNew = useCallback(
     (kind: 'new-node' | 'new-edge' | 'new-lane' | 'new-zone', laneId?: string | null) => {
+      if (viewerOnly) return
       setAppMode('edit')
       if (kind === 'new-node') handleSelectElement(buildNewNodeSelection(activeProcess, laneId ?? undefined))
       if (kind === 'new-edge') handleSelectElement(buildNewEdgeSelection(activeProcess))
       if (kind === 'new-lane') handleSelectElement(buildNewLaneSelection(activeProcess))
       if (kind === 'new-zone') handleSelectElement(buildNewZoneSelection())
     },
-    [activeProcess, handleSelectElement],
+    [activeProcess, handleSelectElement, viewerOnly],
   )
 
   const handleAppModeChange = (mode: AppMode) => {
+    if (viewerOnly) {
+      setAppMode('view')
+      setReviewMode(false)
+      setIsRightOpen(false)
+      setSelectedElement(null)
+      return
+    }
     setAppMode(mode)
     if (mode === 'view') {
       setIsRightOpen(false)
@@ -325,8 +690,9 @@ export function AppLayout() {
   }
 
   const handleRequestEditMode = useCallback(() => {
+    if (viewerOnly) return
     setAppMode('edit')
-  }, [])
+  }, [viewerOnly])
 
   const handleConnectEdge = useCallback(
     (edge: Edge) => {
@@ -339,6 +705,14 @@ export function AppLayout() {
   const handleNodePlacementChange = useCallback(
     (nodeId: string, patch: Partial<Node>) => {
       store.updateNode(activeScope, nodeId, patch)
+    },
+    [store, activeScope],
+  )
+
+  const handleNodePlacementChanges = useCallback(
+    (patches: Array<{ nodeId: string; patch: Partial<Node> }>) => {
+      if (patches.length === 0) return
+      store.updateNodes(activeScope, patches)
     },
     [store, activeScope],
   )
@@ -382,6 +756,7 @@ export function AppLayout() {
 
   const handleRoutedHandlesSync = useCallback(
     (patches: RoutedHandlePatch[]) => {
+      if (!processData.dirty && saveStatus !== 'modified') return
       const currentProcess = store.getActiveProcess(activeScope)
       if (!currentProcess) return
       for (const patch of patches) {
@@ -390,7 +765,7 @@ export function AppLayout() {
         store.updateEdge(activeScope, patch.edgeId, applyRoutedHandlePatch(current, patch))
       }
     },
-    [store, activeScope],
+    [store, activeScope, processData.dirty, saveStatus],
   )
 
   const handleSaveEdge = (edge: Edge, isNew: boolean, options?: { keepNodeId?: string }) => {
@@ -479,11 +854,12 @@ export function AppLayout() {
   }, [])
 
   const handleAddOverviewProcessGroup = useCallback(() => {
+    if (viewerOnly) return
     setAppMode('edit')
     setSelectedGroupId(null)
     setSelectedElement(buildNewProcessGroupSelection(overviewProcessGroups))
     setIsRightOpen(true)
-  }, [overviewProcessGroups])
+  }, [overviewProcessGroups, viewerOnly])
 
   const handleEditOverviewProcessGroup = useCallback(
     (groupId: string) => {
@@ -497,6 +873,7 @@ export function AppLayout() {
   )
 
   const handleAddDetailProcessGroup = useCallback(() => {
+    if (viewerOnly) return
     setAppMode('edit')
     const currentFirst = [
       ...allDetailProcesses.filter((process) => process.id === detailProcessId),
@@ -504,7 +881,7 @@ export function AppLayout() {
     ]
     setSelectedElement(buildNewDetailProcessGroupSelection(detailProcessGroups, currentFirst))
     setIsRightOpen(true)
-  }, [detailProcessGroups, allDetailProcesses, detailProcessId])
+  }, [detailProcessGroups, allDetailProcesses, detailProcessId, viewerOnly])
 
   const handleEditDetailProcessGroup = useCallback(
     (groupId: string) => {
@@ -517,6 +894,34 @@ export function AppLayout() {
     [detailProcessGroups],
   )
 
+  const handleCloneDetailProcessGroup = useCallback(
+    (groupId: string, name: string) => {
+      if (viewerOnly) return false
+      const group = detailProcessGroups.find((entry) => entry.id === groupId)
+      if (!group) return false
+      const trimmed = name.trim()
+      if (!trimmed) return false
+
+      const result = store.cloneDetailProcess(group.detailProcessId, trimmed)
+      if (!result) {
+        setDetailCloneNotice('프로세스를 복제하지 못했습니다.')
+        return false
+      }
+
+      setAppMode('edit')
+      setViewMode('detail')
+      setDetailProcessId(result.processId)
+      setSelectedGroupId(result.groupId)
+      setSelectedElement(null)
+      applySelectionSnapshot(selectionManagerRef.current.clearSelection({ source: 'programmatic' }))
+      setIsLeftOpen(true)
+      setIsRightOpen(false)
+      setDetailCloneNotice('복제된 프로세스가 열렸습니다. 수정 후 전체 저장을 눌러주세요. Overview 연결은 별도로 설정해야 합니다.')
+      return true
+    },
+    [applySelectionSnapshot, detailProcessGroups, store, viewerOnly],
+  )
+
   const linkedDetailProcessIdForPanel = useMemo(() => {
     if (!savedSelectedOverviewGroup) return undefined
     return resolveLinkedDetailProcessId(savedSelectedOverviewGroup)
@@ -526,8 +931,9 @@ export function AppLayout() {
     (nodeId: string) => {
       store.deleteNode(activeScope, nodeId)
       setSelectedElement(null)
+      applySelectionSnapshot(selectionManagerRef.current.clearSelection({ source: 'shortcut' }))
     },
-    [store, activeScope],
+    [store, activeScope, applySelectionSnapshot],
   )
 
   const handleDeleteEdge = useCallback(
@@ -540,8 +946,9 @@ export function AppLayout() {
       } else {
         setSelectedElement(null)
       }
+      applySelectionSnapshot(selectionManagerRef.current.clearSelection({ source: 'shortcut' }))
     },
-    [store, activeScope],
+    [store, activeScope, applySelectionSnapshot],
   )
 
   const handleDeleteLane = useCallback(
@@ -560,52 +967,206 @@ export function AppLayout() {
     [store, activeScope],
   )
 
+  const handleDeleteSelection = useCallback(() => {
+    if (commandDispatcher.execute('deleteSelection')) return true
+
+    const selected = selectedElementToObject(selectedElement)
+    if (!selected.type || !selected.id) return false
+
+    if (selected.type === 'lane') {
+      const c = canDeleteLane(activeProcess, selected.id)
+      if (!c.ok) {
+        window.alert(c.message)
+        return false
+      }
+      if (window.confirm('이 스윔레인을 삭제하시겠습니까?')) {
+        void handleDeleteLane(selected.id)
+        return true
+      }
+      return false
+    }
+    if (selected.type === 'zone') {
+      if (window.confirm('이 Process Zone을 삭제하시겠습니까?')) {
+        void handleDeleteZone(selected.id)
+        return true
+      }
+    }
+    return false
+  }, [activeProcess, commandDispatcher, handleDeleteLane, handleDeleteZone, selectedElement])
+
   useEffect(() => {
     if (appMode !== 'edit') return
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Delete' && event.key !== 'Backspace') return
-      const tag = (event.target as HTMLElement | null)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-
-      const selected = selectedElementToObject(selectedElement)
-      if (!selected.type || !selected.id) return
-
+    const handledEvents = new WeakSet<KeyboardEvent>()
+    const consumeShortcutEvent = (event: KeyboardEvent) => {
       event.preventDefault()
-      if (selected.type === 'node') {
-        if (window.confirm('이 노드를 삭제하면 연결된 연결선도 함께 삭제됩니다. 계속하시겠습니까?')) {
-          void handleDeleteNode(selected.id)
-        }
-      } else if (selected.type === 'edge') {
-        void handleDeleteEdge(selected.id)
-      } else if (selected.type === 'lane') {
-        const c = canDeleteLane(activeProcess, selected.id)
-        if (!c.ok) {
-          window.alert(c.message)
-          return
-        }
-        if (window.confirm('이 스윔레인을 삭제하시겠습니까?')) {
-          void handleDeleteLane(selected.id)
-        }
-      } else if (selected.type === 'zone') {
-        if (window.confirm('이 Process Zone을 삭제하시겠습니까?')) {
-          void handleDeleteZone(selected.id)
-        }
+      event.stopPropagation()
+      event.stopImmediatePropagation()
+    }
+    const consumeInputEvent = (event: InputEvent) => {
+      event.preventDefault()
+      event.stopPropagation()
+      event.stopImmediatePropagation()
+    }
+    const runUndo = () => {
+      const applied = commandDispatcher.execute('undo')
+      pushShortcutDebug('store.undo-result', {
+        applied,
+        activeProcessId: activeProcess.id,
+        activeNodeCount: activeProcess.nodes.length,
+      })
+    }
+    const runRedo = () => {
+      const applied = commandDispatcher.execute('redo')
+      pushShortcutDebug('store.redo-result', {
+        applied,
+        activeProcessId: activeProcess.id,
+        activeNodeCount: activeProcess.nodes.length,
+      })
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (handledEvents.has(event)) return
+      const editableBlocked = isEditableShortcutTarget(event.target)
+      const undoShortcut = isShortcutEvent(event, 'undo')
+      const redoShortcut = isShortcutEvent(event, 'redo')
+      const duplicateShortcut = isShortcutEvent(event, 'duplicate')
+      if (undoShortcut || redoShortcut || duplicateShortcut) {
+        pushShortcutDebug('keydown-received', {
+          key: event.key,
+          code: event.code,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          shiftKey: event.shiftKey,
+          altKey: event.altKey,
+          editableBlocked,
+          undoShortcut,
+          redoShortcut,
+          duplicateShortcut,
+          activeProcessId: activeProcess.id,
+          activeNodeCount: activeProcess.nodes.length,
+          target: describeShortcutTarget(event.target),
+        })
+      }
+      if (editableBlocked) return
+
+      if (undoShortcut) {
+        handledEvents.add(event)
+        consumeShortcutEvent(event)
+        pushShortcutDebug('shortcut-parsed-undo', {
+          activeProcessId: activeProcess.id,
+          activeNodeCount: activeProcess.nodes.length,
+        })
+        runUndo()
+        return
+      }
+      if (redoShortcut) {
+        handledEvents.add(event)
+        consumeShortcutEvent(event)
+        pushShortcutDebug('shortcut-parsed-redo', {
+          activeProcessId: activeProcess.id,
+          activeNodeCount: activeProcess.nodes.length,
+        })
+        runRedo()
+        return
+      }
+      if (isShortcutEvent(event, 'copy')) {
+        if (handleCopySelection()) event.preventDefault()
+        return
+      }
+      if (isShortcutEvent(event, 'paste')) {
+        if (handlePasteSelection()) event.preventDefault()
+        return
+      }
+      if (isShortcutEvent(event, 'selectAll')) {
+        if (handleSelectAllNodes()) event.preventDefault()
+        return
+      }
+      if (duplicateShortcut) {
+        handleDuplicateNodes()
+        event.preventDefault()
+        return
+      }
+      if (isShortcutEvent(event, 'addEdge')) {
+        handleStartNew('new-edge')
+        event.preventDefault()
+        return
+      }
+
+      if (!isShortcutEvent(event, 'delete')) return
+
+      if (handleDeleteSelection()) event.preventDefault()
+    }
+
+    const onBeforeInput = (event: InputEvent) => {
+      const editableBlocked = isEditableShortcutTarget(event.target)
+      if (event.inputType === 'historyUndo' || event.inputType === 'historyRedo') {
+        pushShortcutDebug('beforeinput-received', {
+          inputType: event.inputType,
+          editableBlocked,
+          activeProcessId: activeProcess.id,
+          activeNodeCount: activeProcess.nodes.length,
+          target: describeShortcutTarget(event.target),
+        })
+      }
+      if (editableBlocked) return
+      if (event.inputType === 'historyUndo') {
+        consumeInputEvent(event)
+        pushShortcutDebug('beforeinput-parsed-undo', {
+          activeProcessId: activeProcess.id,
+          activeNodeCount: activeProcess.nodes.length,
+        })
+        runUndo()
+        return
+      }
+      if (event.inputType === 'historyRedo') {
+        consumeInputEvent(event)
+        pushShortcutDebug('beforeinput-parsed-redo', {
+          activeProcessId: activeProcess.id,
+          activeNodeCount: activeProcess.nodes.length,
+        })
+        runRedo()
       }
     }
 
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [appMode, selectedElement, activeProcess, handleDeleteNode, handleDeleteEdge, handleDeleteLane, handleDeleteZone])
+    document.addEventListener('keydown', onKeyDown, true)
+    document.addEventListener('beforeinput', onBeforeInput, true)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown, true)
+      document.removeEventListener('beforeinput', onBeforeInput, true)
+    }
+  }, [
+    appMode,
+    selectedElement,
+    activeProcess,
+    handleCopySelection,
+    handleDuplicateNodes,
+    handlePasteSelection,
+    handleSelectAllNodes,
+    handleStartNew,
+    handleDeleteSelection,
+    commandDispatcher,
+  ])
 
   const handleSaveAll = useCallback(async () => {
     const result = await persistAll()
     if (result.ok) {
-      window.alert('전체 저장 완료')
+      if (result.data) {
+        const refreshedProcess = getActiveProcessData(result.data, viewMode, detailProcessId)
+        const refreshedOverviewGroups = resolveOverviewProcessGroups(result.data, toBeNavigator.overviewProcessGroups)
+        const refreshedDetailGroups = resolveDetailProcessGroups(result.data, toBeNavigator.detailProcessGroups)
+        if (refreshedProcess) {
+          setSelectedElement((prev) =>
+            refreshSelectedElement(prev, refreshedProcess, refreshedOverviewGroups, refreshedDetailGroups),
+          )
+        }
+      }
+      setRenderSyncRevision((revision) => revision + 1)
+      setSaveReportToast(buildSaveReportToast(result.routerReport, true))
     } else if (result.error) {
-      window.alert(result.error)
+      setSaveReportToast(buildSaveReportToast(result.routerReport, false, result.error))
     }
-  }, [persistAll])
+  }, [detailProcessId, persistAll, viewMode])
 
   const resetToFullOverview = useCallback(() => {
     setViewMode('overview')
@@ -661,27 +1222,106 @@ export function AppLayout() {
   const selectedLaneId = selectedElement?.type === 'lane' ? selectedElement.id : null
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${reviewMode ? ' app-shell--review' : ''}`}>
       <Toolbar
         viewMode={viewMode}
         appMode={appMode}
+        reviewMode={reviewMode}
+        showNodeNumbers={showNodeNumbers}
         saveStatus={saveStatus}
         isLeftOpen={isLeftOpen}
         isRightOpen={isRightOpen}
+        viewerOnly={viewerOnly}
         detailHeader={detailHeader}
         onToggleLeft={() => setIsLeftOpen((prev) => !prev)}
         onToggleRight={() => setIsRightOpen((prev) => !prev)}
         onViewModeChange={handleViewModeChange}
         onAppModeChange={handleAppModeChange}
+        onReviewModeChange={setReviewMode}
+        onShowNodeNumbersChange={setShowNodeNumbers}
         onBackToOverview={handleBackToOverview}
         onAddNode={() => handleStartNew('new-node', selectedLaneId)}
         onAddEdge={() => handleStartNew('new-edge')}
         onAddLane={() => handleStartNew('new-lane')}
         onAddZone={() => handleStartNew('new-zone')}
+        onCopy={() => {
+          handleCopySelection()
+        }}
+        onPaste={() => {
+          handlePasteSelection()
+        }}
+        onDuplicate={() => handleDuplicateNodes()}
+        onDelete={() => {
+          handleDeleteSelection()
+        }}
+        canCopy={commandDispatcher.canExecute('copyNodes')}
+        canPaste={commandDispatcher.canExecute('pasteNodes')}
+        canDuplicate={commandDispatcher.canExecute('duplicateNodes')}
+        canDelete={
+          appMode === 'edit' &&
+          (selectedNodeIds.length > 0 ||
+            selectedEdgeIds.length > 0 ||
+            selectedElement?.type === 'node' ||
+            selectedElement?.type === 'edge' ||
+            selectedElement?.type === 'lane' ||
+            selectedElement?.type === 'zone')
+        }
         onSaveAll={() => {
           void handleSaveAll()
         }}
       />
+
+      {reviewMode ? (
+        <div className="review-dashboard" role="status" aria-label="Internal Review Summary">
+          <div className="review-dashboard__title">
+            <span>Internal Review</span>
+            <strong>{activeProcess.name}</strong>
+          </div>
+          <div className="review-dashboard__metrics">
+            <span>Nodes <strong>{reviewSummary.total}</strong></span>
+            <span>Reviewed <strong>{reviewSummary.ok}</strong></span>
+            <span>Review Required <strong>{reviewSummary.reviewRequired}</strong></span>
+            <span>Not Reviewed <strong>{reviewSummary.notReviewed}</strong></span>
+            <span className={reviewSummary.ready ? 'review-dashboard__ready' : 'review-dashboard__not-ready'}>
+              Ready {reviewSummary.ready ? 'Yes' : 'No'}
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      {saveReportToast ? (
+        <section
+          key={saveReportToast.id}
+          className={`save-report save-report--${saveReportToast.kind}`}
+          style={{ right: isRightOpen ? PROPERTY_PANEL_WIDTH + 18 : undefined }}
+          role="status"
+          aria-label="저장 결과"
+        >
+          <div className="save-report__header">
+            <strong>{saveReportToast.title}</strong>
+            <button type="button" onClick={() => setSaveReportToast(null)} aria-label="저장 결과 닫기">
+              <X size={14} />
+            </button>
+          </div>
+          <p className="save-report__summary">{saveReportToast.summary}</p>
+          {saveReportToast.issues.length > 0 ? (
+            <ul className="save-report__list">
+              {saveReportToast.issues.slice(0, 5).map((issue, index) => (
+                <li key={`${issue.processId}:${issue.edgeId ?? issue.nodeId ?? issue.code}:${index}`}>
+                  <span>{issueTitle(issue)}</span>
+                  <small>{issueDetail(issue)}</small>
+                </li>
+              ))}
+              {saveReportToast.issues.length > 5 ? (
+                <li>
+                  <span>추가 항목</span>
+                  <small>{saveReportToast.issues.length - 5}건 더 있습니다.</small>
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
 
       <div className={`app-body${viewMode === 'detail' ? ' app-body--detail' : ''}`}>
         <ProcessCanvasContainer
@@ -707,6 +1347,7 @@ export function AppLayout() {
                   selectedElement={selectedElement}
                   process={activeProcess}
                   detailProcesses={allDetailProcesses}
+                  reviewMode={reviewMode}
                   overviewProcessGroups={overviewProcessGroups}
                   detailProcessGroups={detailProcessGroups}
                   onOpenDetailProcess={handleOpenDetailProcess}
@@ -738,19 +1379,40 @@ export function AppLayout() {
             viewMode={viewMode}
             appMode={appMode}
             selectedElement={selectedElement}
+            reviewMode={reviewMode}
+            selectedNodeIds={selectedNodeIds}
+            selectedEdgeIds={selectedEdgeIds}
             overviewHighlight={overviewHighlight}
             overviewHomeKey={overviewHomeKey}
+            renderSyncRevision={renderSyncRevision}
+            showNodeNumbers={showNodeNumbers}
             panelInsetRight={isRightOpen ? PROPERTY_PANEL_WIDTH : 0}
             onSelectElement={handleSelectElement}
+            onSelectedNodeIdsChange={handleCanvasNodeSelectionChange}
+            onSelectedEdgeIdsChange={handleCanvasEdgeSelectionChange}
+            onCopyNodes={(nodeIds) => {
+              handleCopyNodes(nodeIds)
+            }}
+            onPasteClipboard={() => {
+              handlePasteSelection()
+            }}
+            onDuplicateNodes={handleDuplicateNodes}
+            onDeleteSelection={() => {
+              handleDeleteSelection()
+            }}
             onClearSelection={handleClearSelection}
+            onPaneBodyClick={handleCanvasPaneBodyClick}
             onEdgeRoutingChange={handleEdgeRoutingChange}
             onEdgeLabelPlacementChange={handleEdgeLabelPlacementChange}
-            onConnectEdge={handleConnectEdge}
-            onNodePlacementChange={handleNodePlacementChange}
-            onRoutedHandlesSync={handleRoutedHandlesSync}
-          />
+                  onConnectEdge={handleConnectEdge}
+                  onNodePlacementChange={handleNodePlacementChange}
+                  onNodePlacementChanges={handleNodePlacementChanges}
+                  onRoutedHandlesSync={handleRoutedHandlesSync}
+                />
         </ProcessCanvasContainer>
       </div>
+
+      <RouterHealthDashboard processData={processData} />
 
       <DataStatusBar processData={processData} nodeCount={summary.nodeCount} edgeCount={summary.edgeCount} />
 
@@ -766,8 +1428,8 @@ export function AppLayout() {
             onSelectGroup={handleSelectOverviewGroup}
             onRelatedOnlyChange={setRelatedOnly}
             onOpenDetail={handleOpenDetailFromOverview}
-            onAddGroup={handleAddOverviewProcessGroup}
-            onEditGroup={handleEditOverviewProcessGroup}
+            onAddGroup={appMode === 'edit' ? handleAddOverviewProcessGroup : undefined}
+            onEditGroup={appMode === 'edit' ? handleEditOverviewProcessGroup : undefined}
           />
         ) : (
           <ProcessGroupMenu
@@ -778,8 +1440,10 @@ export function AppLayout() {
             }
             detailProcesses={allDetailProcesses}
             onSelectGroup={handleOpenDetailFromDetailMenu}
-            onAddGroup={handleAddDetailProcessGroup}
-            onEditGroup={handleEditDetailProcessGroup}
+            onAddGroup={appMode === 'edit' ? handleAddDetailProcessGroup : undefined}
+            onEditGroup={appMode === 'edit' ? handleEditDetailProcessGroup : undefined}
+            onCloneGroup={appMode === 'edit' ? handleCloneDetailProcessGroup : undefined}
+            cloneNotice={detailCloneNotice}
           />
         )}
       </Drawer>

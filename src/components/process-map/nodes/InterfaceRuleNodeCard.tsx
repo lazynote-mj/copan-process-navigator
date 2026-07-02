@@ -7,18 +7,33 @@ import { getDecisionHandleOffset } from '../../../lib/layout/decisionAnchors'
 import './process-node.css'
 import './interface-rule-node.css'
 import { NodeStepBadge } from './NodeStepBadge'
+import { NodeReviewBadge } from './NodeReviewBadge'
+
+function finiteOr(value: number | undefined, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function finiteStylePoint(value: number, fallback: number): number {
+  return Number.isFinite(value) ? value : fallback
+}
 
 function InterfaceRuleNodeCard({ data, selected, width, height }: NodeProps & { data: ProcessNodeData }) {
-  const boxW = typeof width === 'number' ? width : data.layoutWidth ?? NODE_LAYOUT.decision.width
-  const boxH = typeof height === 'number' ? height : data.layoutHeight ?? NODE_LAYOUT.decision.height
+  const boxW = finiteOr(width, finiteOr(data.layoutWidth, NODE_LAYOUT.decision.width))
+  const boxH = finiteOr(height, finiteOr(data.layoutHeight, NODE_LAYOUT.decision.height))
   const layoutSpec = resolveDecisionLayoutForSize(boxW, boxH)
   const compact = data.compact === true
-  const badgeStep = data.stepBadge ?? 0
-  const showStepBadge = data.showStepBadge !== false && badgeStep > 0
+  const badgeStep = data.stepBadge
+  const showStepBadge = data.showStepBadge !== false && badgeStep != null && String(badgeStep).trim() !== ''
 
   const sides = (['top', 'left', 'right', 'bottom'] as const).map((id) => {
     const offset = getDecisionHandleOffset(boxW, boxH, id)
-    return { id, style: { left: offset.left, top: offset.top } }
+    return {
+      id,
+      style: {
+        left: finiteStylePoint(offset.left, boxW / 2),
+        top: finiteStylePoint(offset.top, boxH / 2),
+      },
+    }
   })
 
   return (
@@ -27,6 +42,7 @@ function InterfaceRuleNodeCard({ data, selected, width, height }: NodeProps & { 
       style={{ width: boxW, height: boxH }}
     >
       {showStepBadge ? <NodeStepBadge step={badgeStep} /> : null}
+      <NodeReviewBadge reviewMode={data.reviewMode} status={data.reviewStatus} />
       <svg
         className="interface-rule-node__diamond"
         viewBox={`0 0 ${layoutSpec.layoutWidth} ${layoutSpec.layoutHeight}`}

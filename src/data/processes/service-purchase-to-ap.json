@@ -1,75 +1,92 @@
 {
   "id": "service-purchase-to-ap",
-  "name": "구매요청 ~ 매입전표 : (서비스)",
-  "source": "SCM TO-BE",
+  "type": "detail",
+  "name": "구매 요청 ~ 매입 전표 생성 : 서비스",
+  "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
   "version": "v1.0",
-  "description": "PDF 도형 기준 서비스 구매요청~매입전표 프로세스",
-  "overviewNodeId": "purchase-request",
-  "status": "draft",
-  "lastModified": "2026-06-22",
-  "owner": "ERP PMO",
-  "phases": [],
-  "lanes": [],
+  "status": "review",
+  "lastModified": "2026-06-29",
+  "owner": "혁신팀",
   "nodes": [
     {
       "id": "service-purchase-to-ap-step-01",
       "name": "구매요청",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p1",
-      "system": "ERP",
+      "phaseId": "procure-to-pay::p1",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "구매요청",
+      "description": "서비스 제공 또는 외주/용역 구매를 위해 사업부가 구매요청을 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 1,
-      "localOrder": 1
+      "localOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-02",
       "name": "구매요청확정",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p2",
-      "system": "ERP",
+      "phaseId": "procure-to-pay::p1",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "구매요청확정",
+      "description": "사업부가 서비스 구매요청을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 2
+      "localOrder": 2,
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-03",
-      "name": "구매발주 품의(G/W)",
+      "name": "구매발주 품의",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p3",
-      "system": "G/W",
+      "phaseId": "procure-to-pay::p4",
+      "system": "Groupware",
       "owner": "사업부",
-      "description": "구매발주 품의(G/W)",
+      "description": "서비스 발주 조건에 대해 사업부가 품의를 진행한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-04",
       "name": "발주등록",
       "type": "erp",
       "laneId": "partnership",
-      "phaseId": "p4",
-      "system": "ERP",
+      "phaseId": "procure-to-pay::p5",
+      "system": "OmniEsol ERP",
       "owner": "상생협력팀",
-      "description": "발주등록",
+      "description": "상생협력팀이 서비스 구매 발주를 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-05",
@@ -77,89 +94,185 @@
       "type": "erp",
       "laneId": "partnership",
       "phaseId": "p5",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "상생협력팀",
-      "description": "발주확정",
+      "description": "서비스 구매 발주를 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-06",
       "name": "입고요청",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p6",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "입고요청",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "서비스는 물류 입고 대신 부분권한/검수 기준으로 입고요청을 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 4
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-07",
       "name": "입고확정",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p7",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "입고확정",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "사업부가 서비스 제공 또는 검수 완료를 기준으로 입고확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 7
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 4
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-08",
       "name": "매입마감조회",
       "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p8",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매입마감조회",
+      "laneId": "partnership",
+      "phaseId": "procure-to-pay::p10",
+      "system": "OmniEsol ERP",
+      "owner": "상생협력팀",
+      "description": "상생협력팀이 서비스 매입마감 대상을 조회한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 8,
-      "localOrder": 8
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-09",
       "name": "매입마감확정",
       "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p9",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매입마감확정",
+      "laneId": "partnership",
+      "phaseId": "procure-to-pay::p10",
+      "system": "OmniEsol ERP",
+      "owner": "상생협력팀",
+      "description": "상생협력팀이 서비스 매입마감을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 9
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-purchase-to-ap-step-10",
       "name": "전표생성(미결)",
-      "type": "erp",
-      "laneId": "finance",
+      "type": "system",
+      "laneId": "partnership",
       "phaseId": "p10",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "전표생성(미결)",
+      "system": "OmniEsol ERP",
+      "owner": "상생협력팀",
+      "description": "매입마감확정 후 ERP가 매입전표를 미결 상태로 자동 생성한다. Auto Node Owner Rule에 따라 Owner는 상생협력팀으로 유지한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 10,
-      "localOrder": 10
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "service-purchase-to-ap-step-11",
+      "name": "전표조회승인",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance-accounting::p2",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "재무관리팀이 미결 서비스 매입전표를 조회하고 승인한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 6,
+      "cellOrder": 5,
+      "zoneOrder": 5,
+      "detailLayout": {
+        "column": 6,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
+    },
+    {
+      "id": "service-purchase-to-ap-step-12",
+      "name": "매입전기처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance-accounting::p3",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "승인된 서비스 매입전표를 전기 처리한다. 회계 상세 업무는 Reference Only로 관리한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 6,
+      "cellOrder": 5,
+      "zoneOrder": 5,
+      "detailLayout": {
+        "column": 6,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
     }
   ],
   "edges": [
@@ -172,8 +285,10 @@
       "type": "normal",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-purchase-to-ap-e02",
@@ -184,8 +299,10 @@
       "type": "normal",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-purchase-to-ap-e03",
@@ -197,7 +314,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-purchase-to-ap-e04",
@@ -209,7 +328,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-purchase-to-ap-e05",
@@ -221,7 +342,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-purchase-to-ap-e06",
@@ -233,7 +356,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-purchase-to-ap-e07",
@@ -245,7 +370,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-purchase-to-ap-e08",
@@ -257,7 +384,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-purchase-to-ap-e09",
@@ -269,7 +398,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-purchase-to-ap-branch-01",
@@ -279,9 +410,74 @@
       "label": "N",
       "type": "return",
       "routing": {
+        "mode": "manual",
+        "handlesLocked": true,
+        "points": [
+          {
+            "x": 741,
+            "y": 48
+          },
+          {
+            "x": 521,
+            "y": 48
+          }
+        ]
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -7.079999999999984,
+          "y": 29
+        }
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e10",
+      "source": "service-purchase-to-ap-step-10",
+      "target": "service-purchase-to-ap-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "service-purchase-to-ap-e11",
+      "source": "service-purchase-to-ap-step-11",
+      "target": "service-purchase-to-ap-step-12",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
         "mode": "auto",
         "handleAuto": true
       }
     }
-  ]
+  ],
+  "zones": [
+    {
+      "id": "zone-mqq9oc9w-n2bcy",
+      "name": "자동프로세스",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "service-purchase-to-ap-step-05",
+        "service-purchase-to-ap-step-06"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "left"
+      }
+    }
+  ],
+  "overviewNodeId": "purchase-request",
+  "source": "SCM TO-BE"
 }

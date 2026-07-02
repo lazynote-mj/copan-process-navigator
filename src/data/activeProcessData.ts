@@ -74,8 +74,8 @@ function normalizeProcessInstanceWithMasters(
     ...instance,
     nodes: [...nodes, ...normalizedExtraNodes],
     edges,
-    zones: options?.preserveZonesFrom?.zones?.length
-      ? structuredClone(options.preserveZonesFrom.zones)
+    zones: options?.preserveZonesFrom
+      ? structuredClone(options.preserveZonesFrom.zones ?? [])
       : instance.zones,
   }
 }

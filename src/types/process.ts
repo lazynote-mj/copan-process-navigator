@@ -6,6 +6,7 @@ export {
   NODE_TYPE_META,
   normalizeNodeType,
   getNodeTypeLabel,
+  getDefaultSystemForNodeType,
   isSystemLikeNodeType,
   NODE_TYPE_COLORS,
 } from './nodeTypes'
@@ -35,6 +36,18 @@ export {
 /** 프로세스 상태 */
 export const PROCESS_STATUSES = ['draft', 'review', 'approved'] as const
 export type ProcessStatus = (typeof PROCESS_STATUSES)[number]
+
+export const NODE_REVIEW_STATUSES = ['not-reviewed', 'ok', 'review-required'] as const
+export type NodeReviewStatus = (typeof NODE_REVIEW_STATUSES)[number]
+export const NODE_REVIEWERS = ['김민정', '김은영', '박정웅'] as const
+export type NodeReviewer = (typeof NODE_REVIEWERS)[number]
+
+export type NodeReview = {
+  status: NodeReviewStatus
+  reviewer?: NodeReviewer | string
+  comment?: string
+  reviewedAt?: string
+}
 
 /**
  * 향후 { id, name, type } 구조로 확장 예정.
@@ -119,7 +132,7 @@ export type Node = {
   phaseOrder?: number
   /** 스윔레인 내 좌→우 배치 순서 (Detail layout X축) */
   localOrder?: number
-  /** PDF ERP 단계 번호 (1~6) — Detail 원형 뱃지 표시용 */
+  /** @deprecated legacy 수동 번호. Detail 원형 번호는 렌더링 시 Flow Execution Order 기준으로 자동 계산 */
   stepBadge?: number
   /** Overview Cross-Functional Y축 업무 Zone */
   processZone?: ProcessZoneId
@@ -158,6 +171,8 @@ export type Node = {
   /** cellSlot 기준 미세 위치 조정 (layout 계산 후 적용) */
   offsetX?: number
   offsetY?: number
+  /** Builder Review Mode — Internal Review metadata */
+  review?: NodeReview
 }
 
 /** 노드 handle — edge 연결점 (사면 중앙) */

@@ -1,49 +1,77 @@
-import { PanelLeft, PanelRight, Plus, Save, GitBranch, Layers, ArrowLeft, BoxSelect } from 'lucide-react'
+import { PanelLeft, PanelRight, Plus, Save, GitBranch, Layers, ArrowLeft, BoxSelect, Copy } from 'lucide-react'
 import type { AppMode, SaveStatus } from '../../lib/editor/selectionTypes'
 import type { ViewMode } from '../../lib/editor/viewModeTypes'
+import { getShortcut } from '../../lib/editor/shortcutManager'
+import { APP_CONFIG } from '../../config/appConfig'
 import './layout.css'
 
 export type DetailHeaderInfo = {
   processLabel: string
   title: string
-  groupNumber?: string
+  breadcrumbs?: string[]
 }
 
 type ToolbarProps = {
   viewMode: ViewMode
   appMode: AppMode
+  reviewMode: boolean
+  showNodeNumbers: boolean
   saveStatus: SaveStatus
   isLeftOpen: boolean
   isRightOpen: boolean
+  viewerOnly?: boolean
   detailHeader?: DetailHeaderInfo | null
   onToggleLeft: () => void
   onToggleRight: () => void
   onViewModeChange: (mode: ViewMode) => void
   onAppModeChange: (mode: AppMode) => void
+  onReviewModeChange: (enabled: boolean) => void
+  onShowNodeNumbersChange: (enabled: boolean) => void
   onBackToOverview: () => void
   onAddNode: () => void
   onAddEdge: () => void
   onAddLane: () => void
   onAddZone: () => void
+  onCopy: () => void
+  onPaste: () => void
+  onDuplicate: () => void
+  onDelete: () => void
+  canCopy: boolean
+  canPaste: boolean
+  canDuplicate: boolean
+  canDelete: boolean
   onSaveAll: () => void
 }
 
 export function Toolbar({
   viewMode,
   appMode,
+  reviewMode,
+  showNodeNumbers,
   saveStatus,
   isLeftOpen,
   isRightOpen,
+  viewerOnly = false,
   detailHeader,
   onToggleLeft,
   onToggleRight,
   onViewModeChange,
   onAppModeChange,
+  onReviewModeChange,
+  onShowNodeNumbersChange,
   onBackToOverview,
   onAddNode,
   onAddEdge,
   onAddLane,
   onAddZone,
+  onCopy,
+  onPaste,
+  onDuplicate,
+  onDelete,
+  canCopy,
+  canPaste,
+  canDuplicate,
+  canDelete,
   onSaveAll,
 }: ToolbarProps) {
   return (
@@ -69,17 +97,23 @@ export function Toolbar({
       <div className="toolbar__center">
         {detailHeader ? (
           <div className="toolbar__page-heading">
-            {detailHeader.groupNumber ? (
-              <span className="toolbar__page-index">{detailHeader.groupNumber}</span>
+            {detailHeader.breadcrumbs?.length ? (
+              <span className="toolbar__breadcrumb">
+                {detailHeader.breadcrumbs.join(' > ')}
+              </span>
             ) : null}
             <h1 className="toolbar__page-title">{detailHeader.title}</h1>
-            <span className="toolbar__page-divider" aria-hidden>
-              |
-            </span>
-            <span className="toolbar__page-label">{detailHeader.processLabel}</span>
+            {detailHeader.processLabel ? (
+              <>
+                <span className="toolbar__page-divider" aria-hidden>
+                  |
+                </span>
+                <span className="toolbar__page-label">{detailHeader.processLabel}</span>
+              </>
+            ) : null}
           </div>
         ) : (
-          <h1 className="toolbar__title">Copan ERP Process Navigator</h1>
+          <h1 className="toolbar__title">{APP_CONFIG.appName}</h1>
         )}
         <div className="toolbar__mode-group">
           <button
@@ -103,18 +137,40 @@ export function Toolbar({
             className={`toolbar__mode-btn toolbar__mode-btn--small ${appMode === 'view' ? 'toolbar__mode-btn--active' : ''}`}
             onClick={() => onAppModeChange('view')}
           >
-            보기
+            Viewer
           </button>
+          {!viewerOnly ? (
+            <button
+              type="button"
+              className={`toolbar__mode-btn toolbar__mode-btn--small ${appMode === 'edit' ? 'toolbar__mode-btn--active' : ''}`}
+              onClick={() => onAppModeChange('edit')}
+            >
+              Builder
+            </button>
+          ) : null}
+        </div>
+        {!viewerOnly ? (
           <button
             type="button"
-            className={`toolbar__mode-btn toolbar__mode-btn--small ${appMode === 'edit' ? 'toolbar__mode-btn--active' : ''}`}
-            onClick={() => onAppModeChange('edit')}
+            className={`toolbar__mode-btn toolbar__mode-btn--small toolbar__review-toggle ${reviewMode ? 'toolbar__mode-btn--active' : ''}`}
+            onClick={() => onReviewModeChange(!reviewMode)}
+            aria-pressed={reviewMode}
           >
-            편집
+            Review Mode {reviewMode ? 'ON' : 'OFF'}
           </button>
-        </div>
+        ) : null}
+        {appMode === 'edit' && viewMode === 'detail' ? (
+          <button
+            type="button"
+            className={`toolbar__mode-btn toolbar__mode-btn--small ${showNodeNumbers ? 'toolbar__mode-btn--active' : ''}`}
+            onClick={() => onShowNodeNumbersChange(!showNodeNumbers)}
+            aria-pressed={showNodeNumbers}
+          >
+            번호 {showNodeNumbers ? 'ON' : 'OFF'}
+          </button>
+        ) : null}
         {saveStatus === 'saving' && <span className="toolbar__status toolbar__status--saving">저장 중…</span>}
-        {saveStatus === 'modified' && <span className="toolbar__status toolbar__status--modified">저장 필요</span>}
+        {saveStatus === 'modified' && <span className="toolbar__status toolbar__status--modified">변경사항 있음</span>}
         {saveStatus === 'saved' && <span className="toolbar__status toolbar__status--saved">저장 완료</span>}
         {saveStatus === 'error' && <span className="toolbar__status toolbar__status--error">저장 실패</span>}
       </div>
@@ -122,6 +178,27 @@ export function Toolbar({
       <div className="toolbar__right">
         {appMode === 'edit' && (
           <>
+            <details className="toolbar__menu">
+              <summary className="toolbar__btn">Edit</summary>
+              <div className="toolbar__menu-popover">
+                <button type="button" onClick={onCopy} disabled={!canCopy}>
+                  <span>Copy</span>
+                  <kbd>{getShortcut('copy')}</kbd>
+                </button>
+                <button type="button" onClick={onPaste} disabled={!canPaste}>
+                  <span>Paste</span>
+                  <kbd>{getShortcut('paste')}</kbd>
+                </button>
+                <button type="button" onClick={onDuplicate} disabled={!canDuplicate}>
+                  <span>Duplicate</span>
+                  <kbd>{getShortcut('duplicate')}</kbd>
+                </button>
+                <button type="button" onClick={onDelete} disabled={!canDelete}>
+                  <span>Delete</span>
+                  <kbd>{getShortcut('delete')}</kbd>
+                </button>
+              </div>
+            </details>
             <button type="button" className="toolbar__btn" onClick={onAddNode}>
               <Plus size={16} />
               <span>노드</span>
@@ -136,7 +213,11 @@ export function Toolbar({
             </button>
             <button type="button" className="toolbar__btn" onClick={onAddZone}>
               <BoxSelect size={16} />
-              <span>Zone</span>
+              <span>구역</span>
+            </button>
+            <button type="button" className="toolbar__btn" onClick={onDuplicate} disabled={!canDuplicate}>
+              <Copy size={16} />
+              <span>Duplicate</span>
             </button>
             <button
               type="button"

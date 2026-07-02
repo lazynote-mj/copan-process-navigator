@@ -30,6 +30,26 @@ type ProcessEdgeBaseProps = EdgeProps & {
 const EDGE_LABEL_MIN_WRAP_CHARS = 14
 const EDGE_LABEL_MAX_WIDTH = 180
 
+function pointerCapture(target: HTMLDivElement, pointerId: number) {
+  try {
+    target.setPointerCapture(pointerId)
+  } catch {
+    // The label can be re-rendered while React Flow updates its portal layer.
+  }
+}
+
+function releasePointerCapture(target: HTMLDivElement, pointerId: number) {
+  try {
+    if (target.hasPointerCapture(pointerId)) target.releasePointerCapture(pointerId)
+  } catch {
+    // Ignore stale pointer capture after the label portal has changed.
+  }
+}
+
+function isFinitePoint(point: { x: number; y: number } | null | undefined): point is { x: number; y: number } {
+  return Boolean(point && Number.isFinite(point.x) && Number.isFinite(point.y))
+}
+
 function getLabelText(label: EdgeProps['label']): string {
   return typeof label === 'string' || typeof label === 'number' ? String(label) : ''
 }
@@ -63,7 +83,8 @@ export function ProcessEdgeBase({
   const [draftLabelPoint, setDraftLabelPoint] = useState<{ x: number; y: number } | null>(null)
   const draftLabelPointRef = useRef(draftLabelPoint)
   draftLabelPointRef.current = draftLabelPoint
-  const { appMode, onEdgeLabelPlacementChange } = useEdgeEditContext()
+  const dragStartPointRef = useRef<{ x: number; y: number } | null>(null)
+  const { appMode, onEdgeSelect, onEdgeLabelPlacementChange } = useEdgeEditContext()
   const { screenToFlowPosition } = useReactFlow()
   const edgeData = data as ProcessEdgeData | undefined
   const edgeType = edgeData?.edgeType ?? defaultEdgeType
@@ -94,16 +115,16 @@ export function ProcessEdgeBase({
 
   let labelX: number
   let labelY: number
-  if (draftLabelPoint) {
+  if (isFinitePoint(draftLabelPoint)) {
     labelX = draftLabelPoint.x
     labelY = draftLabelPoint.y
-  } else if (edgeData?.labelPoint) {
+  } else if (isFinitePoint(edgeData?.labelPoint)) {
     labelX = edgeData.labelPoint.x
     labelY = edgeData.labelPoint.y
   } else if (pathPoints.length >= 2) {
     const mid = pathPoints[Math.floor(pathPoints.length / 2)]
-    labelX = mid.x
-    labelY = mid.y + labelOffsetY
+    labelX = Number.isFinite(mid.x) ? mid.x : 0
+    labelY = Number.isFinite(mid.y) ? mid.y + labelOffsetY : 0
   } else {
     labelX = 0
     labelY = 0
@@ -137,8 +158,10 @@ export function ProcessEdgeBase({
       event.stopPropagation()
       event.preventDefault()
       setDraggingLabel(true)
-      setDraftLabelPoint({ x: labelX, y: labelY })
-      event.currentTarget.setPointerCapture(event.pointerId)
+      const point = { x: labelX, y: labelY }
+      dragStartPointRef.current = point
+      setDraftLabelPoint(point)
+      pointerCapture(event.currentTarget, event.pointerId)
     },
     [canDragLabel, labelX, labelY],
   )
@@ -147,7 +170,9 @@ export function ProcessEdgeBase({
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingLabel) return
       event.stopPropagation()
+      if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return
       const flowPos = screenToFlowPosition({ x: event.clientX, y: event.clientY })
+      if (!isFinitePoint(flowPos)) return
       setDraftLabelPoint({ x: Math.round(flowPos.x), y: Math.round(flowPos.y) })
     },
     [draggingLabel, screenToFlowPosition],
@@ -157,13 +182,21 @@ export function ProcessEdgeBase({
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!draggingLabel) return
       event.stopPropagation()
+      releasePointerCapture(event.currentTarget, event.pointerId)
       setDraggingLabel(false)
       const point = draftLabelPointRef.current
-      if (point) {
+      const dragStart = dragStartPointRef.current
+      dragStartPointRef.current = null
+      setDraftLabelPoint(null)
+      if (!point || (dragStart && point.x === dragStart.x && point.y === dragStart.y)) {
+        onEdgeSelect(id)
+        return
+      }
+      if (isFinitePoint(point)) {
         const routePoint = edgeData?.routeLabelPoint
         onEdgeLabelPlacementChange(
           id,
-          routePoint
+          isFinitePoint(routePoint)
             ? {
                 offset: {
                   x: point.x - routePoint.x,
@@ -174,7 +207,7 @@ export function ProcessEdgeBase({
         )
       }
     },
-    [draggingLabel, edgeData?.routeLabelPoint, id, onEdgeLabelPlacementChange],
+    [draggingLabel, edgeData?.routeLabelPoint, id, onEdgeLabelPlacementChange, onEdgeSelect],
   )
 
   return (

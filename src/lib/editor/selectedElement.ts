@@ -159,6 +159,7 @@ export function buildNewProcessGroupSelection(processGroups: OverviewProcessGrou
     id: nextId,
     name: `신규 Overview 그룹 ${nextIndex}`,
     description: '',
+    lifecycleGroupId: 'sales',
     overviewNodeIds: [],
     overviewEdgeIds: [],
   }

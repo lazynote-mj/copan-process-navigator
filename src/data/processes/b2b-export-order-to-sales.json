@@ -1,30 +1,78 @@
 {
   "id": "b2b-export-order-to-sales",
-  "name": "주문등록 ~ 수출출고 ~ 매출전표 : B2B 해외",
+  "name": "주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "PDF 도형 기준 B2B 해외 수출 주문~출고~매출전표 프로세스",
+  "description": "해외 B2B 자사/위탁재고 주문등록, 수출 이동지시, 송장/B/L/통관, 해외 가상창고 재고이동, 매출마감, 전표생성까지의 Copan 운영 프로세스",
   "overviewNodeId": "order-register",
-  "status": "draft",
-  "lastModified": "2026-06-22",
+  "status": "review",
+  "lastModified": "2026-06-28",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
+  "zones": [
+    {
+      "id": "zone-mqq56joj-hbyzu",
+      "name": "사업부 자동/ERP 처리",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "b2b-export-order-to-sales-step-03",
+        "b2b-export-order-to-sales-step-04",
+        "b2b-export-order-to-sales-step-15"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "left"
+      }
+    },
+    {
+      "id": "zone-mqq5748j-42akc",
+      "name": "해외 가상창고 재고이동",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "b2b-export-order-to-sales-step-08",
+        "b2b-export-order-to-sales-step-09"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    }
+  ],
   "nodes": [
     {
       "id": "b2b-export-order-to-sales-step-01",
-      "name": "주문입력",
+      "name": "주문등록",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p1",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "주문입력",
+      "description": "해외 B2B 자사/위탁재고 주문 또는 수주 정보를 ERP에 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 1,
-      "localOrder": 1
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      }
     },
     {
       "id": "b2b-export-order-to-sales-step-02",
@@ -33,28 +81,46 @@
       "laneId": "business",
       "phaseId": "p2",
       "system": "DATABASE",
-      "owner": "시스템",
-      "description": "출고정보",
+      "owner": "사업부",
+      "description": "수출이동지시와 송장 기준 출고 요청 정보가 WMS/포워딩 처리에 참조되도록 저장된다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 2
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "stepBadge": 0
     },
     {
       "id": "b2b-export-order-to-sales-step-03",
-      "name": "주문처리",
+      "name": "수주처리",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p3",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "주문처리",
+      "description": "해외 B2B 주문의 자사재고/위탁재고 여부와 수출 처리 조건을 확인한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 2
     },
     {
       "id": "b2b-export-order-to-sales-step-04",
@@ -62,119 +128,190 @@
       "type": "erp",
       "laneId": "business",
       "phaseId": "p4",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "수출이동지시",
+      "description": "출고창고에서 해외 가상창고로 재고를 이동하기 위한 수출 이동지시를 생성한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 3
     },
     {
       "id": "b2b-export-order-to-sales-step-05",
-      "name": "출고 요청 확인",
+      "name": "출고요청 확인",
       "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p5",
-      "system": "이지어드민/WMS",
+      "system": "EasyAdmin WMS",
       "owner": "물류센터",
-      "description": "출고 요청 확인",
+      "description": "물류센터가 수출 출고 요청 정보를 확인한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 4
     },
     {
       "id": "b2b-export-order-to-sales-step-06",
-      "name": "B2B 출고 처리",
-      "type": "manual",
+      "name": "B2B 출고처리",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p6",
-      "system": "이지어드민",
+      "system": "EasyAdmin WMS",
       "owner": "물류센터",
-      "description": "B2B 출고 처리",
+      "description": "물류센터가 해외 B2B 수출 대상 물품을 실제 출고 처리한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 5,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "b2b-export-order-to-sales-step-07",
-      "name": "출고 수량 입력",
+      "name": "출고수량 입력",
       "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p7",
-      "system": "이지어드민/WMS",
+      "system": "EasyAdmin WMS",
       "owner": "물류센터",
-      "description": "출고 수량 입력",
+      "description": "수출 출고 수량을 WMS에 입력하고 출고 처리 결과를 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 7
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 6,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 5
     },
     {
       "id": "b2b-export-order-to-sales-step-08",
       "name": "출고처리(창고이동)",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p8",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "출고처리(창고이동)",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "수출 송장 기준으로 출고창고 재고를 차감하고 해외 가상창고 재고를 증가시키는 창고이동을 ERP에 반영한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 8,
-      "localOrder": 8
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 7,
+        "row": 2
+      },
+      "stepBadge": 6
     },
     {
       "id": "b2b-export-order-to-sales-step-09",
-      "name": "자동 입/출고정보",
+      "name": "입/출고정보",
       "type": "database",
       "laneId": "business",
       "phaseId": "p9",
       "system": "DATABASE",
-      "owner": "시스템",
-      "description": "자동 입/출고정보",
+      "owner": "사업부",
+      "description": "창고이동 결과가 입/출고정보로 저장된다. Auto Node Owner는 직전 창고이동 업무 Owner인 사업부를 따른다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 9
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 8,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
     },
     {
       "id": "b2b-export-order-to-sales-step-10",
       "name": "수출출고지시",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p10",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "수출출고지시",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "통관과 B/L 처리를 위한 수출출고지시를 생성한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 10,
-      "localOrder": 10
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 9,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 7
     },
     {
       "id": "b2b-export-order-to-sales-step-11",
-      "name": "B/L 기준 출고",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "name": "B/L 기준 출고확정",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p11",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "B/L 기준 출고",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "B/L 입력 결과를 기준으로 해외 B2B 수출 출고를 ERP에서 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 11,
-      "localOrder": 11
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 13,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 8
     },
     {
       "id": "b2b-export-order-to-sales-step-12",
@@ -182,70 +319,269 @@
       "type": "erp",
       "laneId": "business",
       "phaseId": "p12",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "일괄매출등록",
+      "description": "B/L 기준 출고확정 결과를 바탕으로 해외 B2B 매출을 일괄 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 12,
-      "localOrder": 12
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 14,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 9
     },
     {
       "id": "b2b-export-order-to-sales-step-13",
-      "name": "매출전기처리",
+      "name": "매출마감확정",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p13",
-      "system": "ERP",
+      "phaseId": "order-to-cash::p7",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "매출전기처리",
+      "description": "수출 매출마감 대상과 금액을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 13,
-      "localOrder": 13
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 15,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 10
     },
     {
       "id": "b2b-export-order-to-sales-step-14",
-      "name": "전표조회승인",
-      "type": "erp",
-      "laneId": "finance",
+      "name": "전표생성(미결)",
+      "type": "system",
+      "laneId": "business",
       "phaseId": "p14",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "전표조회승인",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "매출마감확정 후 ERP가 매출전표를 미결 상태로 자동 생성한다. Auto Node Owner는 직전 매출마감확정 Owner인 사업부를 따른다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 14,
-      "localOrder": 14
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 16,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 11
+    },
+    {
+      "id": "node-mqq59t67-swyut",
+      "name": "ERP 재고현황",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "business-to-project::p1",
+      "phaseOrder": 1,
+      "localOrder": 2,
+      "owner": "사업부",
+      "system": "OmniEsol ERP",
+      "description": "출고창고 재고(-), 해외 가상창고 재고(+) 및 최종 수출출고 후 ERP 재고 반영 결과를 조회한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 9,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
+    },
+    {
+      "id": "b2b-export-order-to-sales-step-15",
+      "name": "송장입력",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "overseas-export::invoice",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "수출 출고와 통관 처리를 위한 송장 정보를 ERP에 입력한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 5,
+      "localOrder": 5,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "b2b-export-order-to-sales-step-16",
+      "name": "통관입력",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "overseas-export::customs-input",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "수출 통관에 필요한 통관 정보를 ERP에 입력한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 11,
+      "cellOrder": 9,
+      "zoneOrder": 9,
+      "detailLayout": {
+        "column": 10,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "b2b-export-order-to-sales-step-17",
+      "name": "수출통관처리",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "overseas-export::customs-clearance",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "수출 통관 결과를 처리하고 B/L 입력 기준으로 연결한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 12,
+      "cellOrder": 10,
+      "zoneOrder": 10,
+      "detailLayout": {
+        "column": 11,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "b2b-export-order-to-sales-step-18",
+      "name": "B/L 입력",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "overseas-export::bl-input",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "수출 선적 B/L 정보를 ERP에 입력한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 13,
+      "localOrder": 13,
+      "cellOrder": 11,
+      "zoneOrder": 11,
+      "detailLayout": {
+        "column": 12,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "b2b-export-order-to-sales-step-19",
+      "name": "전표조회승인",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance::voucher-approval",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "미결 매출전표를 재무관리팀이 검토하고 승인한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 15,
+      "localOrder": 15,
+      "cellOrder": 16,
+      "zoneOrder": 16,
+      "detailLayout": {
+        "column": 17,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "b2b-export-order-to-sales-step-20",
+      "name": "매출전기처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance::sales-posting",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "승인된 해외 B2B 매출전표를 회계에 전기 처리한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 16,
+      "localOrder": 16,
+      "cellOrder": 17,
+      "zoneOrder": 17,
+      "detailLayout": {
+        "column": 18,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     }
   ],
   "edges": [
     {
       "id": "b2b-export-order-to-sales-e01",
-      "source": "b2b-export-order-to-sales-step-01",
+      "source": "b2b-export-order-to-sales-step-15",
       "target": "b2b-export-order-to-sales-step-02",
-      "condition": "",
-      "label": "",
-      "type": "normal",
+      "condition": "API",
+      "label": "출고요청 API",
+      "type": "api",
       "routing": {
         "mode": "auto",
         "handleAuto": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -15.75,
+          "y": 59.360000000000014
+        }
       }
     },
     {
       "id": "b2b-export-order-to-sales-e02",
       "source": "b2b-export-order-to-sales-step-02",
-      "target": "b2b-export-order-to-sales-step-03",
-      "condition": "",
-      "label": "",
-      "type": "normal",
+      "target": "b2b-export-order-to-sales-step-05",
+      "condition": "API",
+      "label": "출고요청 API",
+      "type": "api",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "b2b-export-order-to-sales-e03",
@@ -257,19 +593,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
-    },
-    {
-      "id": "b2b-export-order-to-sales-e04",
-      "source": "b2b-export-order-to-sales-step-04",
-      "target": "b2b-export-order-to-sales-step-05",
-      "condition": "API",
-      "label": "API",
-      "type": "api",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "b2b-export-order-to-sales-e05",
@@ -281,7 +607,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "b2b-export-order-to-sales-e06",
@@ -293,19 +621,23 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "b2b-export-order-to-sales-e07",
       "source": "b2b-export-order-to-sales-step-07",
-      "target": "b2b-export-order-to-sales-step-08",
-      "condition": "",
-      "label": "",
-      "type": "normal",
+      "target": "b2b-export-order-to-sales-step-02",
+      "condition": "API",
+      "label": "출고처리 API",
+      "type": "api",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "right"
     },
     {
       "id": "b2b-export-order-to-sales-e08",
@@ -317,31 +649,53 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "b2b-export-order-to-sales-e09",
       "source": "b2b-export-order-to-sales-step-09",
       "target": "b2b-export-order-to-sales-step-10",
-      "condition": "",
-      "label": "",
-      "type": "normal",
+      "condition": "Auto",
+      "label": "출고창고 재고(-)\n해외 가상창고 재고(+)",
+      "type": "api",
       "routing": {
-        "mode": "auto",
-        "handleAuto": true
+        "mode": "manual",
+        "handleAuto": true,
+        "points": [
+          {
+            "x": 842,
+            "y": 282
+          },
+          {
+            "x": 842,
+            "y": 214
+          }
+        ]
+      },
+      "sourceHandle": "left",
+      "targetHandle": "right",
+      "labelPlacement": {
+        "offset": {
+          "x": 226.39999999999998,
+          "y": 72
+        }
       }
     },
     {
       "id": "b2b-export-order-to-sales-e10",
       "source": "b2b-export-order-to-sales-step-10",
-      "target": "b2b-export-order-to-sales-step-11",
+      "target": "b2b-export-order-to-sales-step-16",
       "condition": "",
       "label": "",
       "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "b2b-export-order-to-sales-e11",
@@ -353,7 +707,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "b2b-export-order-to-sales-e12",
@@ -365,15 +721,145 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "b2b-export-order-to-sales-e13",
       "source": "b2b-export-order-to-sales-step-13",
       "target": "b2b-export-order-to-sales-step-14",
-      "condition": "",
-      "label": "",
+      "condition": "Auto",
+      "label": "Auto",
       "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "edge-mqq544or-y6c6b",
+      "source": "b2b-export-order-to-sales-step-01",
+      "target": "b2b-export-order-to-sales-step-03",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqq58dx1-emfiy",
+      "source": "b2b-export-order-to-sales-step-02",
+      "target": "b2b-export-order-to-sales-step-08",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "api",
+      "label": "포워딩 업체\n수출 서류 전달",
+      "condition": "API",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqq5ah2z-5h4bf",
+      "source": "b2b-export-order-to-sales-step-11",
+      "target": "node-mqq59t67-swyut",
+      "sourceHandle": "top",
+      "targetHandle": "bottom",
+      "type": "api",
+      "label": "ERP 재고(-)",
+      "condition": "Auto",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-export-order-to-sales-e14",
+      "source": "b2b-export-order-to-sales-step-04",
+      "target": "b2b-export-order-to-sales-step-15",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-export-order-to-sales-e15",
+      "source": "b2b-export-order-to-sales-step-16",
+      "target": "b2b-export-order-to-sales-step-17",
+      "type": "normal",
+      "label": "수출 통관",
+      "condition": "",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-export-order-to-sales-e16",
+      "source": "b2b-export-order-to-sales-step-17",
+      "target": "b2b-export-order-to-sales-step-18",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-export-order-to-sales-e17",
+      "source": "b2b-export-order-to-sales-step-18",
+      "target": "b2b-export-order-to-sales-step-11",
+      "type": "normal",
+      "label": "B/L",
+      "condition": "",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-export-order-to-sales-e18",
+      "source": "b2b-export-order-to-sales-step-14",
+      "target": "b2b-export-order-to-sales-step-19",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "b2b-export-order-to-sales-e19",
+      "source": "b2b-export-order-to-sales-step-19",
+      "target": "b2b-export-order-to-sales-step-20",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "sourceHandle": "right",
+      "targetHandle": "left",
       "routing": {
         "mode": "auto",
         "handleAuto": true

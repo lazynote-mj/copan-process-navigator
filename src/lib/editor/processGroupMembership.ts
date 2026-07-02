@@ -70,15 +70,31 @@ function dedupeEdgeIds(edgeIds: string[]): string[] {
   })
 }
 
-/** overviewEdgeIds에서 멤버십을 벗어난 연결선만 제거 (명시 목록 유지) */
+/** 저장된 edge와 현재 그룹 노드 사이 실제 edge를 합산 */
+export function resolveProcessGroupEdgeIds(
+  group: OverviewProcessGroup,
+  overviewEdges: Edge[],
+): string[] {
+  const nodeSet = new Set(group.overviewNodeIds)
+  const edgeIds = new Set(group.overviewEdgeIds.map(resolveStoredEdgeId))
+
+  for (const edge of overviewEdges) {
+    if (!nodeSet.has(edge.source) || !nodeSet.has(edge.target)) continue
+    edgeIds.add(resolveStoredEdgeId(edge.id))
+  }
+
+  return dedupeEdgeIds([...edgeIds])
+}
+
+/** overviewEdgeIds를 현재 멤버 노드 사이 연결선으로 정규화 */
 export function pruneProcessGroupEdgesFromNodes(
   group: OverviewProcessGroup,
   overviewEdges: Edge[],
 ): OverviewProcessGroup {
   const nodeSet = new Set(group.overviewNodeIds)
-  const edgeIds = group.overviewEdgeIds.filter((edgeId) => {
+  const edgeIds = resolveProcessGroupEdgeIds(group, overviewEdges).filter((edgeId) => {
     const edge = findOverviewEdgeById(edgeId, overviewEdges)
-    if (!edge) return true
+    if (!edge) return false
     return nodeSet.has(edge.source) && nodeSet.has(edge.target)
   })
   return { ...group, overviewEdgeIds: dedupeEdgeIds(edgeIds) }
@@ -134,8 +150,9 @@ export function resolveFocusEdgeIdsForNode(
 ): Set<string> {
   const focus = new Set<string>()
   const groupNodeIds = new Set(group.overviewNodeIds)
+  const groupEdgeIds = resolveProcessGroupEdgeIds(group, overviewEdges)
   for (const edge of overviewEdges) {
-    const inGroup = group.overviewEdgeIds.some((gid) => edgeMatchesGroupId(edge.id, gid))
+    const inGroup = groupEdgeIds.some((gid) => edgeMatchesGroupId(edge.id, gid))
     if (!inGroup) continue
     if (!groupNodeIds.has(edge.source) || !groupNodeIds.has(edge.target)) continue
     if (edge.source === nodeId || edge.target === nodeId) {

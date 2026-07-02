@@ -1,165 +1,252 @@
 {
   "id": "business-to-purchase-request",
+  "type": "detail",
   "name": "사업 기회 확보 ~ 구매 요청 : 제/상품",
-  "source": "SCM TO-BE",
+  "description": "사업기회, 사업참여검토, 계약등록, 사업계약품의, 프로젝트등록, WBS, 프로젝트 상태관리, 기준정보 연결, 구매요청까지 이어지는 SCM Lifecycle 시작 프로세스",
   "version": "v1.0",
-  "description": "PDF 도형 기준 제/상품 사업기회~구매요청 프로세스",
-  "overviewNodeId": "purchase-request",
-  "status": "draft",
-  "lastModified": "2026-06-22",
-  "owner": "ERP PMO",
-  "phases": [],
-  "lanes": [],
+  "status": "review",
+  "lastModified": "2026-06-29",
+  "owner": "혁신팀",
   "nodes": [
     {
       "id": "business-to-purchase-request-step-01",
       "name": "사업기회확보",
       "type": "manual",
       "laneId": "business",
-      "phaseId": "p1",
+      "phaseId": "business-to-project::p1",
       "system": "수작업",
       "owner": "사업부",
-      "description": "사업기회확보",
+      "description": "사업부가 신규 제/상품 사업기회와 판매 가능성을 식별한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 1,
-      "localOrder": 1
+      "localOrder": 1,
+      "cellSlot": 2,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      }
     },
     {
       "id": "business-to-purchase-request-step-02",
       "name": "사업참여검토",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p2",
-      "system": "ERP",
+      "phaseId": "business-to-project::p2",
+      "system": "Groupware",
       "owner": "사업부",
-      "description": "사업참여검토",
+      "description": "사업부가 사업 참여 가능성과 진행 여부를 검토한다. 반려 시 사업기회 단계로 되돌린다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 2
+      "localOrder": 11,
+      "cellSlot": 3,
+      "stepBadge": 0,
+      "cellOrder": 10,
+      "zoneOrder": 10,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 2
+      }
     },
     {
       "id": "business-to-purchase-request-step-03",
-      "name": "계약등록",
+      "name": "계약등록(미결)",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p3",
-      "system": "ERP",
+      "phaseId": "business-to-project::p3",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "계약등록",
+      "description": "사업참여가 가능하면 ERP에 계약 정보를 미결 상태로 우선 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 1,
+      "detailLayout": {
+        "column": 1,
+        "row": 3
+      }
     },
     {
       "id": "business-to-purchase-request-step-04",
       "name": "사업계약품의",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p4",
-      "system": "G/W",
+      "phaseId": "business-to-project::p4",
+      "system": "Groupware",
       "owner": "사업부",
-      "description": "사업계약품의",
+      "description": "계약 체결을 위한 사업계약품의를 진행한다. 반려 시 계약등록(미결)을 보완한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 2,
+      "detailLayout": {
+        "column": 1,
+        "row": 4
+      }
     },
     {
       "id": "business-to-purchase-request-step-05",
       "name": "프로젝트실행품의입력",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p5",
-      "system": "ERP",
+      "phaseId": "business-to-project::p6",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "프로젝트실행품의입력",
+      "description": "계약 확정 후 프로젝트 실행품의 정보를 ERP에 입력한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 4,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      }
     },
     {
       "id": "business-to-purchase-request-step-06",
-      "name": "프로젝트 실행품의(G/W)",
+      "name": "프로젝트 실행품의",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p6",
-      "system": "G/W",
+      "phaseId": "business-to-project::p6",
+      "system": "Groupware",
       "owner": "사업부",
-      "description": "프로젝트 실행품의(G/W)",
+      "description": "프로젝트 실행 여부를 품의한다. 반려 시 실행품의 입력을 보완한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 5,
+      "detailLayout": {
+        "column": 3,
+        "row": 3
+      }
     },
     {
       "id": "business-to-purchase-request-step-07",
       "name": "프로젝트등록",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p7",
-      "system": "ERP",
+      "phaseId": "business-to-project::p5",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "프로젝트등록",
+      "description": "승인된 계약/실행품의 기준으로 ERP 프로젝트를 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 7
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 6,
+      "detailLayout": {
+        "column": 3,
+        "row": 4
+      }
     },
     {
       "id": "business-to-purchase-request-step-08",
       "name": "WBS코드등록",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p8",
-      "system": "ERP",
+      "phaseId": "business-to-project::p5",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "WBS코드등록",
+      "description": "프로젝트 실행과 구매요청 관리를 위한 WBS 코드를 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 8,
-      "localOrder": 8
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 7,
+      "detailLayout": {
+        "column": 3,
+        "row": 5
+      }
     },
     {
       "id": "business-to-purchase-request-step-09",
-      "name": "상품 등록 PROCESS",
+      "name": "품목 등록 PROCESS",
       "type": "linked-process",
       "laneId": "business",
       "phaseId": "p9",
       "system": "연결 프로세스",
-      "owner": "사업부",
-      "description": "상품 등록 PROCESS",
+      "owner": "사업부 / 상생협력팀",
+      "description": "구매요청 전 품목 Master가 필요한 경우 품목 등록 프로세스로 연결한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 9
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 5,
+        "row": 4
+      }
     },
     {
       "id": "business-to-purchase-request-step-10",
       "name": "구매요청",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p10",
-      "system": "ERP",
+      "phaseId": "procure-to-pay::p1",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "구매요청",
+      "description": "계약, 프로젝트, WBS, 기준정보가 준비되면 구매요청을 등록하여 구매관리 Capability로 연결한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 10,
-      "localOrder": 10
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 8,
+      "detailLayout": {
+        "column": 4,
+        "row": 4
+      }
     },
     {
       "id": "business-to-purchase-request-step-11",
@@ -168,13 +255,139 @@
       "laneId": "business",
       "phaseId": "p11",
       "system": "연결 프로세스",
-      "owner": "사업부",
-      "description": "거래처 등록 PROCESS",
+      "owner": "사업부 / 상생협력팀",
+      "description": "구매요청 전 거래처 Master가 필요한 경우 거래처 등록 프로세스로 연결한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 11,
-      "localOrder": 11
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 5,
+        "row": 5
+      }
+    },
+    {
+      "id": "node-mqq2hit5-4qlv8",
+      "name": "프로젝트등록(미결)",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p5",
+      "phaseOrder": 1,
+      "localOrder": 3,
+      "owner": "사업부",
+      "system": "OmniEsol ERP",
+      "description": "계약 확정 후 프로젝트 정보를 미결 상태로 생성한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "name": "계약서 날인",
+      "type": "manual",
+      "laneId": "business",
+      "phaseId": "business-to-project::p1",
+      "system": "수작업",
+      "owner": "사업부",
+      "description": "승인된 계약서에 날인을 완료한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 2,
+        "row": 4
+      },
+      "id": "node-mqx3th3c-dzy9p"
+    },
+    {
+      "name": "날인 계약서 첨부(PDF)",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p3",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "날인 완료 계약서를 ERP 계약 정보에 PDF로 첨부한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 5
+      },
+      "id": "node-mqx3xjga-2flti"
+    },
+    {
+      "name": "계약등록(확정)",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p3",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "날인 계약서 첨부 후 ERP 계약 정보를 확정한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "id": "node-mqx4457u-8btfh"
+    },
+    {
+      "id": "business-to-purchase-request-step-12",
+      "name": "프로젝트 상태관리",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p5",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "프로젝트 상태를 미결 → 진행 → 종료 기준으로 관리한다. 구매요청은 프로젝트가 진행 가능한 상태일 때 생성한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 12,
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0,
+      "detailLayout": {
+        "column": 4,
+        "row": 3
+      }
     }
   ],
   "edges": [
@@ -188,7 +401,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "business-to-purchase-request-e02",
@@ -200,7 +415,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "business-to-purchase-request-e03",
@@ -212,19 +429,22 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "business-to-purchase-request-e04",
-      "source": "business-to-purchase-request-step-04",
-      "target": "business-to-purchase-request-step-05",
+      "source": "node-mqx4457u-8btfh",
+      "target": "node-mqq2hit5-4qlv8",
       "condition": "Y",
-      "label": "Y",
-      "type": "condition",
+      "label": "",
+      "type": "normal",
       "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+        "mode": "auto"
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "business-to-purchase-request-e05",
@@ -236,7 +456,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "business-to-purchase-request-e06",
@@ -247,8 +469,10 @@
       "type": "condition",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "business-to-purchase-request-e07",
@@ -260,43 +484,23 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
-    },
-    {
-      "id": "business-to-purchase-request-e08",
-      "source": "business-to-purchase-request-step-08",
-      "target": "business-to-purchase-request-step-09",
-      "condition": "",
-      "label": "",
-      "type": "normal",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "business-to-purchase-request-e09",
       "source": "business-to-purchase-request-step-09",
       "target": "business-to-purchase-request-step-10",
-      "condition": "",
-      "label": "",
+      "condition": "품목 기준정보 보완",
+      "label": "보완",
       "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
-    },
-    {
-      "id": "business-to-purchase-request-e10",
-      "source": "business-to-purchase-request-step-10",
-      "target": "business-to-purchase-request-step-11",
-      "condition": "",
-      "label": "",
-      "type": "normal",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+      },
+      "sourceHandle": "left",
+      "targetHandle": "right"
     },
     {
       "id": "business-to-purchase-request-branch-01",
@@ -307,8 +511,10 @@
       "type": "return",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left"
     },
     {
       "id": "business-to-purchase-request-branch-02",
@@ -319,7 +525,15 @@
       "type": "return",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
+        "handlesLocked": true
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": 0.49500000000000455,
+          "y": 31
+        }
       }
     },
     {
@@ -331,8 +545,246 @@
       "type": "return",
       "routing": {
         "mode": "auto",
+        "handlesLocked": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "right"
+    },
+    {
+      "id": "edge-mqp20ylu-3bl7r",
+      "source": "business-to-purchase-request-step-12",
+      "target": "business-to-purchase-request-step-10",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "normal",
+      "label": "정상",
+      "condition": "프로젝트 상태 정상",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqp21ag5-2tgv2",
+      "source": "business-to-purchase-request-step-11",
+      "target": "business-to-purchase-request-step-10",
+      "sourceHandle": "left",
+      "targetHandle": "right",
+      "type": "normal",
+      "label": "보완",
+      "condition": "거래처 기준정보 보완",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      },
+      "labelPlacement": {
+        "offset": {
+          "x": 6,
+          "y": 7.350000000000023
+        }
+      }
+    },
+    {
+      "id": "edge-mqx3p2ya-h0c9j",
+      "source": "node-mqq2hit5-4qlv8",
+      "target": "business-to-purchase-request-step-05",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqx3ttof-d8sen",
+      "source": "business-to-purchase-request-step-04",
+      "target": "node-mqx4457u-8btfh",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "condition",
+      "label": "Y",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      }
+    },
+    {
+      "id": "edge-mqx3y21g-99v2u",
+      "source": "node-mqx3th3c-dzy9p",
+      "target": "node-mqx3xjga-2flti",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqx4fmyn-22enm",
+      "source": "node-mqx4457u-8btfh",
+      "target": "node-mqx3th3c-dzy9p",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqx4ft76-e2yrk",
+      "source": "node-mqx3xjga-2flti",
+      "target": "node-mqx4457u-8btfh",
+      "sourceHandle": "right",
+      "targetHandle": "bottom",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      }
+    },
+    {
+      "id": "business-to-purchase-request-e08",
+      "source": "business-to-purchase-request-step-08",
+      "target": "business-to-purchase-request-step-12",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
         "handleAuto": true
       }
     }
-  ]
+  ],
+  "zones": [
+    {
+      "id": "zone-mqouv9n5-lktgr",
+      "name": "사업부 ",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [],
+      "style": {
+        "showBackground": true,
+        "showBorder": true,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    },
+    {
+      "id": "zone-mqouvjo9-k6s1l",
+      "name": "사업부 선택영역",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "business-to-purchase-request-step-01",
+        "business-to-purchase-request-step-02"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    },
+    {
+      "id": "zone-mqozbfoz-m1cqv",
+      "name": "자동프로세스",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "business-to-purchase-request-step-07",
+        "business-to-purchase-request-step-08"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "left"
+      }
+    },
+    {
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "top"
+      },
+      "id": "business-to-purchase-request-zone-contract",
+      "name": "계약 등록/확정",
+      "nodeIds": [
+        "business-to-purchase-request-step-03",
+        "business-to-purchase-request-step-04",
+        "node-mqx4457u-8btfh",
+        "node-mqx3th3c-dzy9p",
+        "node-mqx3xjga-2flti"
+      ]
+    },
+    {
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "top"
+      },
+      "id": "business-to-purchase-request-zone-project",
+      "name": "프로젝트/WBS/상태관리",
+      "nodeIds": [
+        "node-mqq2hit5-4qlv8",
+        "business-to-purchase-request-step-05",
+        "business-to-purchase-request-step-06",
+        "business-to-purchase-request-step-07",
+        "business-to-purchase-request-step-08",
+        "business-to-purchase-request-step-12"
+      ]
+    },
+    {
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "top"
+      },
+      "id": "business-to-purchase-request-zone-master-data",
+      "name": "기준정보 연결",
+      "nodeIds": [
+        "business-to-purchase-request-step-09",
+        "business-to-purchase-request-step-11"
+      ]
+    }
+  ],
+  "overviewNodeId": "purchase-request",
+  "source": "SCM TO-BE"
 }

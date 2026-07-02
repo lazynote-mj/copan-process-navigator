@@ -59,10 +59,10 @@
     {
       "id": "other-issue-step-04",
       "name": "위탁 여부",
-      "type": "decision",
+      "type": "interface-rule",
       "laneId": "business",
       "phaseId": "p4",
-      "system": "ERP",
+      "system": "",
       "owner": "사업부",
       "description": "위탁 여부",
       "inputs": [],
@@ -118,11 +118,11 @@
     },
     {
       "id": "other-issue-step-08",
-      "name": "이지어드민 연동현황",
+      "name": "연동현황",
       "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p8",
-      "system": "이지어드민/WMS",
+      "system": "이지어드민",
       "owner": "물류센터",
       "description": "이지어드민 연동현황",
       "inputs": [],
@@ -203,9 +203,9 @@
       "id": "other-issue-e04",
       "source": "other-issue-step-04",
       "target": "other-issue-step-05",
-      "condition": "Y",
-      "label": "Y",
-      "type": "condition",
+      "condition": "위탁재고 출고",
+      "label": "위탁",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
@@ -287,9 +287,9 @@
       "id": "other-issue-branch-02",
       "source": "other-issue-step-04",
       "target": "other-issue-step-05",
-      "condition": "N",
-      "label": "N",
-      "type": "condition",
+      "condition": "자사재고 출고",
+      "label": "자사",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true

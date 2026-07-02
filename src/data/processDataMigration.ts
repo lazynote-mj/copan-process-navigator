@@ -15,6 +15,8 @@ import {
   buildDetailProcessGroups,
   buildOverviewProcessGroups,
 } from './toBeOverview/overviewEdgeRegistry'
+import { filterEdgesByExistingEndpoints } from './processExport'
+import { normalizeEdgeForStorage } from '../lib/editor/edgeUpdate'
 
 export type ProcessDataFilePayloadV1 = {
   kind: 'copan-process-navigator-state'
@@ -47,6 +49,34 @@ export function isV2Payload(
 function normalizeV1Details(details: ProcessDataFilePayloadV1['details']): Process[] {
   if (Array.isArray(details)) return details
   return Object.values(details ?? {})
+}
+
+function normalizeProcessInstanceEdges(instance: ProcessInstance): ProcessInstance {
+  const normalizedEdges = structuredClone(instance.edges).map(normalizeEdgeForStorage)
+  const { edges, removed } = filterEdgesByExistingEndpoints(instance.nodes, normalizedEdges)
+  if (removed.length > 0) {
+    console.warn(
+      `[ProcessNavigator] Removed ${removed.length} invalid edge(s) during data migration (${instance.id}): ${removed.map((edge) => edge.id).join(', ')}`,
+    )
+  }
+  return {
+    ...instance,
+    nodes: structuredClone(instance.nodes),
+    edges,
+    zones: instance.zones ? structuredClone(instance.zones) : undefined,
+  }
+}
+
+function processToNormalizedInstance(process: Process, type: 'overview' | 'detail'): ProcessInstance {
+  return normalizeProcessInstanceEdges(
+    processToInstance(
+      {
+        ...process,
+        edges: process.edges.map(normalizeEdgeForStorage),
+      },
+      type,
+    ),
+  )
 }
 
 export function migrateV1ToV2(payload: ProcessDataFilePayloadV1): ProcessDataFilePayloadV2 {
@@ -83,12 +113,7 @@ export function buildProcessDataFromPayload(
   dataSource: ProcessData['dataSource'],
 ): ProcessData {
   const v2 = isV2Payload(payload) ? payload : migrateV1ToV2(payload)
-  const processes = v2.processes.map((instance) => ({
-    ...instance,
-    nodes: structuredClone(instance.nodes),
-    edges: structuredClone(instance.edges),
-    zones: instance.zones ? structuredClone(instance.zones) : undefined,
-  }))
+  const processes = v2.processes.map(normalizeProcessInstanceEdges)
   const commonMasters = structuredClone(v2.commonMasters)
   const summary = {
     nodeCount: processes.reduce((n, p) => n + p.nodes.length, 0),
@@ -123,8 +148,8 @@ export function createInitialProcessData(
 ): ProcessData {
   const commonMasters = extractCommonMastersFromOverview(overview)
   const processes: ProcessInstance[] = [
-    processToInstance(overview, 'overview'),
-    ...detailProcesses.map((p) => processToInstance(p, 'detail')),
+    processToNormalizedInstance(overview, 'overview'),
+    ...detailProcesses.map((p) => processToNormalizedInstance(p, 'detail')),
   ]
   const nodeCount = processes.reduce((n, p) => n + p.nodes.length, 0)
   const edgeCount = processes.reduce((n, p) => n + p.edges.length, 0)
@@ -146,7 +171,7 @@ export function processDataToFilePayload(data: ProcessData): ProcessDataFilePayl
     version: 2,
     exportedAt: normalized.updatedAt,
     commonMasters: structuredClone(normalized.commonMasters),
-    processes: normalized.processes.map((p) => structuredClone(p)),
+    processes: normalized.processes.map((p) => normalizeProcessInstanceEdges(structuredClone(p))),
     overviewProcessGroups: structuredClone(normalized.overviewProcessGroups ?? []),
     detailProcessGroups: structuredClone(normalized.detailProcessGroups ?? []),
   }

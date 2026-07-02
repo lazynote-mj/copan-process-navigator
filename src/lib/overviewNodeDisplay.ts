@@ -55,10 +55,11 @@ export function formatOverviewNodeSubtitle(node: Node, process?: Process): strin
   }
 
   if (overviewType === 'linked-process') {
+    if (system) return system
     const detailIds = resolveNodeDetailProcessIds(node)
     if (detailIds.length === 1) return detailIds[0]
-    if (detailIds.length > 1) return `Detail ${detailIds.length}건`
-    return system
+    if (detailIds.length > 1) return ''
+    return ''
   }
 
   if (system) return system

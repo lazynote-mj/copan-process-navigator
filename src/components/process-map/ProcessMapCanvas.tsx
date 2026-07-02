@@ -4,6 +4,7 @@ import {
   Background,
   Controls,
   MiniMap,
+  useViewport,
   useNodesState,
   useEdgesState,
   useUpdateNodeInternals,
@@ -17,7 +18,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
-import type { Edge as ProcessEdge, Process, ProcessZoneId } from '../../types/process'
+import type { Edge as ProcessEdge, NodeReviewStatus, Process, ProcessZoneId } from '../../types/process'
 import type { EdgeHandleId } from '../../types/process'
 import { NODE_TYPE_COLORS, DEFAULT_NODE_TYPE } from '../../types/process'
 import { EDGE_STROKE_WIDTH } from '../../types/edgeTypes'
@@ -31,14 +32,23 @@ import {
 } from '../../lib/editor/selectedElement'
 import { collectRoutedHandleSyncPatches, type RoutedHandlePatch } from '../../lib/editor/routedEdgeSync'
 import { EditorContextProvider } from '../../lib/editor/EditorContext'
-import { resolveNodePlacementAfterDrag } from '../../lib/editor/resolveDragPlacement'
+import {
+  resolveDropPlacementPreview,
+  resolveNodePlacementPatchesAfterDrag,
+  type DropPlacementPreview,
+  type NodePlacementPatch,
+} from '../../lib/editor/resolveDragPlacement'
 import type { OverviewHighlight, ViewMode } from '../../lib/editor/viewModeTypes'
 import { isEdgeGroupHighlighted } from '../../lib/editor/processGroupMembership'
 import { createDefaultEdge } from '../../lib/editor/processEditor'
+import { getShortcut } from '../../lib/editor/shortcutManager'
 import { compensatePanelScroll } from '../../lib/layout/panelScrollCompensation'
 import { getLayoutedElements, rebuildLayoutEdges, type CanvasBounds, type LaneBand, type ProcessNodeData } from '../../lib/layout/elkLayout'
 import { buildProcessFlowNode } from '../../lib/buildProcessFlowNode'
+import { buildAutoNodeNumberResult } from '../../lib/nodeNumbering'
 import { getProcessEdgeRoutingKey, getProcessNodeLayoutKey } from '../../lib/layout/processLayoutKey'
+import { runLegacyShadowEngine } from '../../engine/legacyShadowRun'
+import type { SelectionChangeOptions } from '../../selection'
 import type { PlacedNode } from '../../lib/layout/laneLayout'
 import type { ZoneLayoutBand } from '../../lib/layout/overviewGridLayout'
 import {
@@ -97,21 +107,53 @@ const edgeTypes = {
   returnEdge: ReturnEdge,
 }
 
+function OverviewDropPreview({ preview }: { preview: DropPlacementPreview | null }) {
+  const viewport = useViewport()
+  if (!preview) return null
+
+  return (
+    <div
+      className="overview-drop-preview nodrag nopan"
+      style={{
+        width: preview.rect.width,
+        height: preview.rect.height,
+        transform: `translate(${preview.rect.x * viewport.zoom + viewport.x}px, ${preview.rect.y * viewport.zoom + viewport.y}px) scale(${viewport.zoom})`,
+      }}
+    >
+      <span>{preview.label}</span>
+    </div>
+  )
+}
+
 type ProcessMapCanvasProps = {
   process: Process
   viewMode: ViewMode
   appMode: AppMode
   selectedElement: SelectedElement | null
+  reviewMode?: boolean
+  selectedNodeIds?: string[]
+  selectedEdgeIds?: string[]
   overviewHighlight?: OverviewHighlight | null
   /** Overview 홈(전체 보기) 복귀 시 viewport 리셋 트리거 */
   overviewHomeKey?: number
+  renderSyncRevision?: number
+  showNodeNumbers?: boolean
   panelInsetRight?: number
   onSelectElement: (element: SelectedElement | null) => void
+  onSelectedNodeIdsChange?: (nodeIds: string[], options?: SelectionChangeOptions) => { nodeIds: string[]; primaryNodeId: string | null } | void
+  onSelectedEdgeIdsChange?: (edgeIds: string[], options?: SelectionChangeOptions) => { edgeIds: string[]; primaryEdgeId: string | null } | void
+  onCopyNodes?: (nodeIds: string[]) => void
+  onCopyEdge?: (edgeId: string) => void
+  onPasteClipboard?: () => void
+  onDuplicateNodes?: (nodeIds: string[]) => void
+  onDeleteSelection?: () => void
   onClearSelection: () => void
+  onPaneBodyClick?: () => void
   onEdgeRoutingChange: (edgeId: string, routing: ProcessEdge['routing']) => void
   onEdgeLabelPlacementChange: (edgeId: string, labelPlacement: ProcessEdge['labelPlacement']) => void
   onConnectEdge: (edge: ProcessEdge) => void
   onNodePlacementChange: (nodeId: string, patch: Partial<import('../../types/process').Node>) => void
+  onNodePlacementChanges?: (patches: NodePlacementPatch[]) => void
   /** layout 후 handleAuto edge의 router handle을 process JSON에 반영 */
   onRoutedHandlesSync?: (patches: RoutedHandlePatch[]) => void
 }
@@ -174,6 +216,43 @@ function stripEdgeHighlightClassName(className?: string): string {
     .split(' ')
     .filter((token) => token && !token.startsWith('process-edge-flow--'))
     .join(' ')
+}
+
+function shallowRecordMatches(a?: Record<string, unknown>, b?: Record<string, unknown>): boolean {
+  const left = a ?? {}
+  const right = b ?? {}
+  const leftKeys = Object.keys(left)
+  const rightKeys = Object.keys(right)
+  if (leftKeys.length !== rightKeys.length) return false
+  return leftKeys.every((key) => left[key] === right[key])
+}
+
+function flowNodeViewStateMatches(
+  current: Node<ProcessNodeData>,
+  next: Node<ProcessNodeData>,
+): boolean {
+  return (
+    current.selected === next.selected &&
+    current.draggable === next.draggable &&
+    current.selectable === next.selectable &&
+    current.connectable === next.connectable &&
+    current.zIndex === next.zIndex &&
+    current.className === next.className &&
+    shallowRecordMatches(current.style as Record<string, unknown> | undefined, next.style as Record<string, unknown> | undefined) &&
+    shallowRecordMatches(current.data as Record<string, unknown> | undefined, next.data as Record<string, unknown> | undefined)
+  )
+}
+
+function flowEdgeViewStateMatches(current: Edge, next: Edge): boolean {
+  return (
+    current.selected === next.selected &&
+    current.selectable === next.selectable &&
+    current.focusable === next.focusable &&
+    current.zIndex === next.zIndex &&
+    current.className === next.className &&
+    shallowRecordMatches(current.style as Record<string, unknown> | undefined, next.style as Record<string, unknown> | undefined) &&
+    shallowRecordMatches(current.data as Record<string, unknown> | undefined, next.data as Record<string, unknown> | undefined)
+  )
 }
 
 function applyEdgeHighlightStyle(
@@ -247,25 +326,80 @@ function flowNodeDataMatches(flowData: ProcessNodeData, nextData: ProcessNodeDat
     flowData.phaseLabel === nextData.phaseLabel &&
     flowData.phaseOrder === nextData.phaseOrder &&
     flowData.stepBadge === nextData.stepBadge &&
+    flowData.showStepBadge === nextData.showStepBadge &&
     flowData.localOrder === nextData.localOrder &&
-    flowData.decisionSubtitle === nextData.decisionSubtitle
+    flowData.decisionSubtitle === nextData.decisionSubtitle &&
+    flowData.reviewMode === nextData.reviewMode &&
+    flowData.reviewStatus === nextData.reviewStatus
   )
 }
 
+function applyReviewModeToNodes(
+  flowNodes: Node<ProcessNodeData>[],
+  process: Process,
+  reviewMode: boolean,
+): Node<ProcessNodeData>[] {
+  const reviewById = new Map<string, NodeReviewStatus>(
+    process.nodes.map((node) => [node.id, node.review?.status ?? 'not-reviewed']),
+  )
+  let changed = false
+  const next = flowNodes.map((flowNode) => {
+    const nextStatus = reviewById.get(flowNode.id) ?? 'not-reviewed'
+    if (flowNode.data.reviewMode === reviewMode && flowNode.data.reviewStatus === nextStatus) {
+      return flowNode
+    }
+    changed = true
+    return {
+      ...flowNode,
+      data: {
+        ...flowNode.data,
+        reviewMode,
+        reviewStatus: nextStatus,
+      },
+    }
+  })
+  return changed ? next : flowNodes
+}
+
 function flowNodeToPlaced(flowNode: Node<ProcessNodeData>): PlacedNode & { cell3Col?: boolean } {
+  const styleWidth = numericStyleSize(flowNode.style?.width)
+  const styleHeight = numericStyleSize(flowNode.style?.height)
   return {
     id: flowNode.id,
     laneId: flowNode.data.laneId,
     x: flowNode.position.x,
     y: flowNode.position.y,
-    width: flowNode.measured?.width ?? flowNode.width ?? 180,
-    height: flowNode.measured?.height ?? flowNode.height ?? 56,
+    width: flowNode.data.layoutWidth ?? styleWidth ?? flowNode.width ?? 180,
+    height: flowNode.data.layoutHeight ?? styleHeight ?? flowNode.height ?? 56,
     cell3Col: flowNode.data.cell3Col,
   }
 }
 
 function flowNodesToPlaced(nodes: Node<ProcessNodeData>[]): PlacedNode[] {
   return nodes.map((node) => flowNodeToPlaced(node))
+}
+
+function numericStyleSize(value: unknown): number | undefined {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+  if (typeof value !== 'string') return undefined
+  const parsed = Number.parseFloat(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+function isFinitePoint(point: { x: number; y: number } | null | undefined): point is { x: number; y: number } {
+  return Boolean(point && Number.isFinite(point.x) && Number.isFinite(point.y))
+}
+
+function edgeSelectionDataMatches(
+  current: ProcessMapCanvasProps['selectedElement'],
+  next: ReturnType<typeof buildSelectedEdgeFromFlow>,
+): boolean {
+  if (!current || !next || current.type !== 'edge' || current.id !== next.id) return false
+  try {
+    return JSON.stringify(current.data) === JSON.stringify(next.data)
+  } catch {
+    return false
+  }
 }
 
 type DetailEdgeRefreshProps = {
@@ -299,20 +433,36 @@ export function ProcessMapCanvas({
   viewMode,
   appMode,
   selectedElement,
+  reviewMode = false,
+  selectedNodeIds = [],
+  selectedEdgeIds = [],
   overviewHighlight,
   overviewHomeKey = 0,
+  renderSyncRevision = 0,
+  showNodeNumbers = true,
   panelInsetRight = 0,
   onSelectElement,
+  onSelectedNodeIdsChange,
+  onSelectedEdgeIdsChange,
+  onCopyNodes,
+  onCopyEdge,
+  onPasteClipboard,
+  onDuplicateNodes,
+  onDeleteSelection,
   onClearSelection,
+  onPaneBodyClick,
   onEdgeRoutingChange,
   onEdgeLabelPlacementChange,
   onConnectEdge,
   onNodePlacementChange,
+  onNodePlacementChanges,
   onRoutedHandlesSync,
 }: ProcessMapCanvasProps) {
   const isEditMode = appMode === 'edit'
   const selectedNodeId = selectedElement?.type === 'node' ? selectedElement.id : null
+  const selectedNodeIdSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds])
   const selectedEdgeId = selectedElement?.type === 'edge' ? selectedElement.id : null
+  const selectedEdgeIdSet = useMemo(() => new Set(selectedEdgeIds), [selectedEdgeIds])
   const selectedLaneId = selectedElement?.type === 'lane' ? selectedElement.id : null
   const selectedZoneId =
     selectedElement?.type === 'zone' || selectedElement?.type === 'new-zone'
@@ -337,6 +487,18 @@ export function ProcessMapCanvas({
   const [overviewScale, setOverviewScale] = useState(1)
   const [detailScale, setDetailScale] = useState(1)
   const [detailEdgeRefreshKey, setDetailEdgeRefreshKey] = useState(0)
+  const [dropPreview, setDropPreview] = useState<DropPlacementPreview | null>(null)
+  const [nodeContextMenu, setNodeContextMenu] = useState<{
+    nodeId: string
+    nodeIds: string[]
+    x: number
+    y: number
+  } | null>(null)
+  const [edgeContextMenu, setEdgeContextMenu] = useState<{
+    edgeId: string
+    x: number
+    y: number
+  } | null>(null)
 
   const laneBandsRef = useRef<LaneBand[]>([])
   const zoneBandsRef = useRef<ZoneLayoutBand[]>([])
@@ -349,21 +511,46 @@ export function ProcessMapCanvas({
   const isOverview = viewMode === 'overview'
   const useDetailHorizontal = !isOverview
   const isDetailVertical = !isOverview && !useDetailHorizontal
+  const isEditingOverviewProcessGroup =
+    isOverview &&
+    isEditMode &&
+    (selectedElement?.type === 'process-group' || selectedElement?.type === 'new-process-group')
   const detailUsedLaneIds = useMemo(
     () => new Set(layoutProcess.nodes.map((node) => node.laneId)),
     [layoutProcess.nodes],
   )
 
-  const nodeLayoutKey = useMemo(() => getProcessNodeLayoutKey(layoutProcess), [layoutProcess])
+  const nodeTopologyKey = useMemo(() => getProcessNodeLayoutKey(layoutProcess), [layoutProcess])
   const edgeRoutingKey = useMemo(() => getProcessEdgeRoutingKey(layoutProcess), [layoutProcess])
-  const flowInstanceKey = `${viewMode}:${layoutProcess.id}`
+  const autoNodeNumberMap = useMemo(
+    () => (!isOverview && showNodeNumbers ? buildAutoNodeNumberResult(layoutProcess).numbers : new Map<string, number | string>()),
+    [isOverview, layoutProcess, showNodeNumbers],
+  )
+  const autoNodeNumberKey = useMemo(
+    () => (
+      showNodeNumbers
+        ? Array.from(autoNodeNumberMap.entries()).map(([nodeId, number]) => `${nodeId}:${number}`).join('|')
+        : 'off'
+    ),
+    [autoNodeNumberMap, showNodeNumbers],
+  )
+  const flowInstanceKey = `${viewMode}:${layoutProcess.id}:sync:${renderSyncRevision}`
 
   const highlightKey = `${overviewHighlight?.groupId ?? 'all'}:${overviewHighlight?.mode ?? 'all'}`
-  const structureKey = `${nodeLayoutKey}|${viewMode}|${highlightKey}`
+  const structureKey = `${nodeTopologyKey}|${viewMode}|${highlightKey}|numbers:${autoNodeNumberKey}|sync:${renderSyncRevision}`
 
   const prevStructureKeyRef = useRef('')
   const prevEdgeRoutingKeyRef = useRef('')
+  const prevShadowRunKeyRef = useRef('')
   const layoutInitializedRef = useRef(false)
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || isOverview) return
+    const target = globalThis as typeof globalThis & {
+      __PROCESS_NAV_NODE_NUMBERS__?: ReturnType<typeof buildAutoNodeNumberResult>['debug']
+    }
+    target.__PROCESS_NAV_NODE_NUMBERS__ = buildAutoNodeNumberResult(layoutProcess).debug
+  }, [isOverview, layoutProcess])
 
   const emitRoutedHandleSync = useCallback(
     (flowEdges: Edge[]) => {
@@ -374,10 +561,61 @@ export function ProcessMapCanvas({
     [layoutProcess.edges, onRoutedHandlesSync],
   )
 
+  const applyAutoNodeNumbers = useCallback(
+    (flowNodes: Node<ProcessNodeData>[]): Node<ProcessNodeData>[] => {
+      let changed = false
+      const next = flowNodes.map((flowNode) => {
+        const nextStepBadge = !isOverview && showNodeNumbers ? autoNodeNumberMap.get(flowNode.id) : undefined
+        const nextShowStepBadge = Boolean(nextStepBadge)
+        if (flowNode.data.stepBadge === nextStepBadge && flowNode.data.showStepBadge === nextShowStepBadge) {
+          return flowNode
+        }
+        changed = true
+        return {
+          ...flowNode,
+          data: {
+            ...flowNode.data,
+            stepBadge: nextStepBadge,
+            showStepBadge: nextShowStepBadge,
+          },
+        }
+      })
+      return changed ? next : flowNodes
+    },
+    [autoNodeNumberMap, isOverview, showNodeNumbers],
+  )
+
   useEffect(() => {
     if (!isOverview) return
-    setFitTrigger(`${nodeLayoutKey}-${viewMode}-${highlightKey}-home${overviewHomeKey}`)
-  }, [overviewHomeKey, isOverview, nodeLayoutKey, viewMode, highlightKey])
+    setFitTrigger(`${nodeTopologyKey}-${viewMode}-${highlightKey}-home${overviewHomeKey}-sync${renderSyncRevision}`)
+  }, [overviewHomeKey, isOverview, nodeTopologyKey, viewMode, highlightKey, renderSyncRevision])
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const shadowRunKey = `${layoutProcess.id}:${viewMode}:${structureKey}:${edgeRoutingKey}`
+    if (prevShadowRunKeyRef.current === shadowRunKey) return
+    prevShadowRunKeyRef.current = shadowRunKey
+
+    try {
+      const result = runLegacyShadowEngine(layoutProcess, {
+        layoutOptions: {
+          overviewVertical: isOverview,
+          detailHorizontal: useDetailHorizontal,
+        },
+      })
+      if (result.diagnostics.length === 0) return
+
+      const errorCount = result.diagnostics.filter((item) => item.severity === 'error').length
+      const warningCount = result.diagnostics.filter((item) => item.severity === 'warning').length
+      console.groupCollapsed(
+        `[Navigator Shadow Engine] ${layoutProcess.id} diagnostics: ${errorCount} error, ${warningCount} warning`,
+      )
+      console.table(result.diagnostics)
+      console.groupEnd()
+    } catch (error) {
+      console.warn(`[Navigator Shadow Engine] ${layoutProcess.id} failed`, error)
+    }
+  }, [edgeRoutingKey, isOverview, layoutProcess, structureKey, useDetailHorizontal, viewMode])
 
   useEffect(() => {
     const structureChanged =
@@ -393,7 +631,13 @@ export function ProcessMapCanvas({
         overviewVertical: isOverview,
         detailHorizontal: useDetailHorizontal,
       })
-      const styledNodes = result.nodes.map((node) => applyNodeHighlightStyle(node, overviewHighlight))
+      const styledNodes = applyAutoNodeNumbers(
+        applyReviewModeToNodes(
+          result.nodes.map((node) => applyNodeHighlightStyle(node, overviewHighlight)),
+          layoutProcess,
+          reviewMode,
+        ),
+      )
       const styledEdges = result.edges.map((edge) => applyEdgeHighlightStyle(edge, overviewHighlight))
 
       nodesRef.current = styledNodes
@@ -406,7 +650,7 @@ export function ProcessMapCanvas({
       zoneBandsRef.current = result.zoneBands ?? []
       setCanvasBounds(result.canvasBounds)
       setLayoutOrientation(result.layoutOrientation ?? 'horizontal')
-      setFitTrigger(`${nodeLayoutKey}-${viewMode}-${highlightKey}-home${overviewHomeKey}`)
+      setFitTrigger(`${nodeTopologyKey}-${viewMode}-${highlightKey}-home${overviewHomeKey}-sync${renderSyncRevision}`)
       emitRoutedHandleSync(styledEdges)
       if (!isOverview) setDetailEdgeRefreshKey((key) => key + 1)
       return
@@ -425,11 +669,28 @@ export function ProcessMapCanvas({
       edgesRef.current = styledEdges
       setEdges(styledEdges)
       emitRoutedHandleSync(styledEdges)
+      return
+    }
+
+    const placed = flowNodesToPlaced(nodesRef.current)
+    if (placed.length === 0) return
+
+    const refreshedEdges = rebuildLayoutEdges(layoutProcess, placed, {
+      overviewVertical: isOverview,
+      detailHorizontal: useDetailHorizontal,
+      laneBands: laneBandsRef.current,
+    })
+    const styledEdges = refreshedEdges.map((edge) => applyEdgeHighlightStyle(edge, overviewHighlight))
+    edgesRef.current = styledEdges
+    setEdges(styledEdges)
+    emitRoutedHandleSync(styledEdges)
+    if (!isOverview) {
+      setDetailEdgeRefreshKey((key) => key + 1)
     }
   }, [
     structureKey,
     edgeRoutingKey,
-    nodeLayoutKey,
+    nodeTopologyKey,
     highlightKey,
     layoutProcess,
     overviewHighlight,
@@ -437,9 +698,11 @@ export function ProcessMapCanvas({
     isOverview,
     useDetailHorizontal,
     viewMode,
+    renderSyncRevision,
     setNodes,
     setEdges,
     emitRoutedHandleSync,
+    applyAutoNodeNumbers,
   ])
 
   const detailRefreshNodeIds = useMemo(() => nodes.map((node) => node.id), [nodes])
@@ -470,12 +733,14 @@ export function ProcessMapCanvas({
         const currentData = flowEdge.data as import('../../lib/layout/elkLayout').ProcessEdgeData | undefined
         const routeLabelPoint = currentData?.routeLabelPoint
         const nextLabelPoint =
-          source.labelPlacement?.offset && routeLabelPoint
+          isFinitePoint(source.labelPlacement?.offset) && isFinitePoint(routeLabelPoint)
             ? {
                 x: routeLabelPoint.x + source.labelPlacement.offset.x,
                 y: routeLabelPoint.y + source.labelPlacement.offset.y,
               }
-            : source.labelPlacement?.point
+            : isFinitePoint(source.labelPlacement?.point)
+              ? source.labelPlacement.point
+              : undefined
         const currentPoint = currentData?.labelPoint
         const sameLabelPoint =
           (!nextLabelPoint && !source.labelPlacement && currentData?.labelPlacement == null) ||
@@ -509,14 +774,34 @@ export function ProcessMapCanvas({
           flowNodeToPlaced(flowNode),
           flowNode.data.compact,
           isOverview ? 'overview' : 'detail',
+          autoNodeNumberMap.get(source.id),
+          showNodeNumbers,
         )
-        if (flowNodeDataMatches(flowNode.data, rebuilt.data)) return flowNode
+        if (
+          flowNode.type === rebuilt.type &&
+          flowNode.className === rebuilt.className &&
+          flowNode.zIndex === rebuilt.zIndex &&
+          shallowRecordMatches(
+            flowNode.style as Record<string, unknown> | undefined,
+            rebuilt.style as Record<string, unknown> | undefined,
+          ) &&
+          flowNodeDataMatches(flowNode.data, rebuilt.data)
+        ) {
+          return flowNode
+        }
         changed = true
-        return { ...flowNode, data: rebuilt.data }
+        return {
+          ...flowNode,
+          type: rebuilt.type,
+          className: rebuilt.className,
+          style: rebuilt.style,
+          zIndex: rebuilt.zIndex,
+          data: rebuilt.data,
+        }
       })
-      return changed ? next : current
+      return changed ? applyReviewModeToNodes(next, layoutProcess, reviewMode) : applyReviewModeToNodes(current, layoutProcess, reviewMode)
     })
-  }, [layoutProcess, setNodes, isOverview])
+  }, [autoNodeNumberMap, layoutProcess, setNodes, isOverview, reviewMode, showNodeNumbers])
 
   useEffect(() => {
     nodesRef.current = nodes
@@ -532,8 +817,8 @@ export function ProcessMapCanvas({
     const flowEdge = edges.find((edge) => edge.id === selectedEdgeId)
     if (!flowEdge) return
     const next = buildSelectedEdgeFromFlow(process, flowEdge)
-    if (next) onSelectElement(next)
-  }, [edges, selectedEdgeId, isEditMode, process, onSelectElement])
+    if (next && !edgeSelectionDataMatches(selectedElement, next)) onSelectElement(next)
+  }, [edges, selectedEdgeId, selectedElement, isEditMode, process, onSelectElement])
 
   useEffect(() => {
     if (!panelInsetRight) return
@@ -555,72 +840,177 @@ export function ProcessMapCanvas({
   }, [panelInsetRight, selectedNodeId, isOverview, fitTrigger, detailScale, overviewScale])
 
   useEffect(() => {
-    setNodes((current) =>
-      current.map((node) => ({
-        ...applyNodeHighlightStyle(node, overviewHighlight),
-        selected: node.id === selectedNodeId,
-        draggable: isEditMode,
-        selectable: isEditMode,
-        connectable: isEditMode,
-        zIndex: node.id === selectedNodeId ? 4 : 3,
-      })),
-    )
-  }, [selectedNodeId, overviewHighlight, isEditMode, setNodes])
+    setNodes((current) => {
+      let changed = false
+      const next = current.map((node) => {
+        const styled = applyNodeHighlightStyle(node, overviewHighlight)
+        const reviewStatus =
+          layoutProcess.nodes.find((entry) => entry.id === node.id)?.review?.status ?? 'not-reviewed'
+        const updated = {
+          ...styled,
+          data: {
+            ...styled.data,
+            reviewMode,
+            reviewStatus,
+          },
+          selected: selectedNodeIdSet.has(node.id),
+          draggable: isEditMode && !isEditingOverviewProcessGroup,
+          selectable: isEditMode && !isEditingOverviewProcessGroup,
+          connectable: isEditMode && !isEditingOverviewProcessGroup,
+          zIndex: selectedNodeIdSet.has(node.id) || node.id === selectedNodeId ? 4 : 3,
+        }
+        if (flowNodeViewStateMatches(node, updated)) return node
+        changed = true
+        return updated
+      })
+      return changed ? next : current
+    })
+  }, [selectedNodeId, selectedNodeIdSet, overviewHighlight, isEditMode, isEditingOverviewProcessGroup, setNodes, reviewMode, layoutProcess.nodes])
 
   useEffect(() => {
-    setEdges((current) =>
-      current.map((edge) => ({
-        ...applyEdgeHighlightStyle(edge, overviewHighlight),
-        selected: edge.id === selectedEdgeId,
-        selectable: isEditMode,
-        focusable: isEditMode,
-        zIndex: edge.id === selectedEdgeId ? 4 : 2,
-      })),
-    )
-  }, [selectedEdgeId, overviewHighlight, isEditMode, setEdges])
+    setEdges((current) => {
+      let changed = false
+      const next = current.map((edge) => {
+        const styled = applyEdgeHighlightStyle(edge, overviewHighlight)
+        const updated = {
+          ...styled,
+          selectable: isEditMode,
+          focusable: isEditMode,
+          selected: selectedEdgeIdSet.has(edge.id),
+          zIndex: selectedEdgeIdSet.has(edge.id) || edge.id === selectedEdgeId ? 4 : 2,
+        }
+        if (flowEdgeViewStateMatches(edge, updated)) return edge
+        changed = true
+        return updated
+      })
+      return changed ? next : current
+    })
+  }, [selectedEdgeId, selectedEdgeIdSet, overviewHighlight, isEditMode, setEdges])
 
   const onSelectionChange: OnSelectionChangeFunc = useCallback(
     ({ nodes: selectedNodes, edges: selectedEdges }) => {
       if (!isEditMode) return
+      if (isEditingOverviewProcessGroup) return
       if (selectedNodes.length > 0) {
-        const next = buildSelectedNode(process, selectedNodes[0].id)
-        if (next) onSelectElement(next)
+        // Node selection is owned by SelectionManager. ReactFlow emits a single-node
+        // selection after click; using it here would collapse Ctrl/Cmd multi-selection.
         return
       }
       if (selectedEdges.length > 0) {
+        if (selectedEdges[0].id === selectedEdgeId) return
+        onSelectedEdgeIdsChange?.([selectedEdges[0].id], { source: 'canvas' })
         const flowEdge =
           edgesRef.current.find((edge) => edge.id === selectedEdges[0].id) ?? selectedEdges[0]
         const next = buildSelectedEdgeFromFlow(process, flowEdge)
         if (next) onSelectElement(next)
       }
     },
-    [isEditMode, process, onSelectElement],
+    [
+      isEditMode,
+      isEditingOverviewProcessGroup,
+      selectedNodeId,
+      selectedEdgeId,
+      process,
+      onSelectElement,
+      onSelectedEdgeIdsChange,
+    ],
   )
 
   const onNodeClick: NodeMouseHandler = useCallback(
     (event, node) => {
       event.stopPropagation()
-      const next = buildSelectedNode(process, node.id)
+      setNodeContextMenu(null)
+      const snapshot = onSelectedNodeIdsChange?.([node.id], {
+        source: 'canvas',
+        toggle: event.ctrlKey || event.metaKey,
+        additive: event.shiftKey,
+        range: event.shiftKey,
+      })
+      const nextSelectedNodeId =
+        event.ctrlKey || event.metaKey
+          ? (snapshot?.nodeIds.includes(node.id) ? node.id : snapshot?.primaryNodeId)
+          : node.id
+      if (!nextSelectedNodeId) {
+        onSelectElement(null)
+        return
+      }
+      const next = buildSelectedNode(process, nextSelectedNodeId)
       if (!next) return
       onSelectElement(next)
     },
-    [process, onSelectElement],
+    [process, onSelectElement, onSelectedNodeIdsChange],
+  )
+
+  const onNodeContextMenu: NodeMouseHandler = useCallback(
+    (event, node) => {
+      if (!isEditMode || isEditingOverviewProcessGroup) return
+      event.preventDefault()
+      event.stopPropagation()
+      const nodeIds = selectedNodeIdSet.has(node.id) && selectedNodeIds.length > 0
+        ? selectedNodeIds
+        : [node.id]
+      if (!selectedNodeIdSet.has(node.id)) onSelectedNodeIdsChange?.([node.id], { source: 'canvas' })
+      const next = buildSelectedNode(process, node.id)
+      if (next) onSelectElement(next)
+      setNodeContextMenu({ nodeId: node.id, nodeIds, x: event.clientX, y: event.clientY })
+    },
+    [isEditMode, isEditingOverviewProcessGroup, onSelectElement, onSelectedNodeIdsChange, process, selectedNodeIdSet, selectedNodeIds],
   )
 
   const onEdgeClick: EdgeMouseHandler = useCallback(
     (event, flowEdge) => {
       if (!isEditMode) return
+      if (isEditingOverviewProcessGroup) return
       event.stopPropagation()
+      setNodeContextMenu(null)
+      setEdgeContextMenu(null)
+      onSelectedEdgeIdsChange?.([flowEdge.id], {
+        source: 'canvas',
+        toggle: event.ctrlKey || event.metaKey,
+        additive: event.shiftKey,
+        range: event.shiftKey,
+      })
       const next = buildSelectedEdgeFromFlow(process, flowEdge)
       if (next) onSelectElement(next)
     },
-    [isEditMode, process, onSelectElement],
+    [isEditMode, isEditingOverviewProcessGroup, process, onSelectElement, onSelectedEdgeIdsChange],
+  )
+
+  const onEdgeContextMenu: EdgeMouseHandler = useCallback(
+    (event, flowEdge) => {
+      if (!isEditMode || isEditingOverviewProcessGroup) return
+      event.preventDefault()
+      event.stopPropagation()
+      setNodeContextMenu(null)
+      onSelectedEdgeIdsChange?.([flowEdge.id], { source: 'canvas' })
+      const next = buildSelectedEdgeFromFlow(process, flowEdge)
+      if (next) onSelectElement(next)
+      setEdgeContextMenu({ edgeId: flowEdge.id, x: event.clientX, y: event.clientY })
+    },
+    [isEditMode, isEditingOverviewProcessGroup, onSelectElement, onSelectedEdgeIdsChange, process],
+  )
+
+  const handleEdgeLabelSelect = useCallback(
+    (edgeId: string) => {
+      if (!isEditMode || isEditingOverviewProcessGroup) return
+      const flowEdge = edgesRef.current.find((edge) => edge.id === edgeId)
+      if (!flowEdge) return
+      onSelectedEdgeIdsChange?.([edgeId], { source: 'canvas' })
+      const next = buildSelectedEdgeFromFlow(process, flowEdge)
+      if (next && !edgeSelectionDataMatches(selectedElement, next)) onSelectElement(next)
+    },
+    [isEditMode, isEditingOverviewProcessGroup, process, selectedElement, onSelectElement, onSelectedEdgeIdsChange],
   )
 
   const onPaneClick = useCallback(() => {
+    onPaneBodyClick?.()
     if (!isEditMode) return
+    if (isEditingOverviewProcessGroup) return
+    setNodeContextMenu(null)
+    setEdgeContextMenu(null)
+    onSelectedNodeIdsChange?.([], { source: 'canvas' })
     onClearSelection()
-  }, [isEditMode, onClearSelection])
+  }, [isEditMode, isEditingOverviewProcessGroup, onClearSelection, onPaneBodyClick, onSelectedNodeIdsChange])
 
   const onLaneClick = useCallback(
     (laneId: string) => {
@@ -651,11 +1041,12 @@ export function ProcessMapCanvas({
   const onNodeDragStop: OnNodeDrag<Node<ProcessNodeData>> = useCallback(
     (_event, node) => {
       if (!isEditMode) return
+      setDropPreview(null)
       const placed = flowNodesToPlaced(nodesRef.current)
       const self = placed.find((p) => p.id === node.id)
       if (!self) return
 
-      const patch = resolveNodePlacementAfterDrag(
+      const placementPatches = resolveNodePlacementPatchesAfterDrag(
         process,
         node.id,
         {
@@ -672,11 +1063,80 @@ export function ProcessMapCanvas({
           detailHorizontal: useDetailHorizontal,
         },
       )
-      if (Object.keys(patch).length > 0) {
-        onNodePlacementChange(node.id, patch)
+      if (placementPatches.length > 0) {
+        if (onNodePlacementChanges) {
+          onNodePlacementChanges(placementPatches)
+        } else {
+          const first = placementPatches[0]
+          if (first) onNodePlacementChange(first.nodeId, first.patch)
+        }
       }
+
+      const placedForEdges = placed.map((entry) =>
+        entry.id === node.id
+          ? {
+              ...entry,
+              x: node.position.x,
+              y: node.position.y,
+            }
+          : entry,
+      )
+      nodesRef.current = nodesRef.current.map((entry) =>
+        entry.id === node.id
+          ? {
+              ...entry,
+              position: {
+                x: node.position.x,
+                y: node.position.y,
+              },
+            }
+          : entry,
+      )
+      const refreshedEdges = rebuildLayoutEdges(layoutProcess, placedForEdges, {
+        overviewVertical: isOverview,
+        detailHorizontal: useDetailHorizontal,
+        laneBands: laneBandsRef.current,
+      }).map((edge) => applyEdgeHighlightStyle(edge, overviewHighlight))
+      edgesRef.current = refreshedEdges
+      setEdges(refreshedEdges)
+      emitRoutedHandleSync(refreshedEdges)
     },
-    [isEditMode, process, isOverview, onNodePlacementChange, useDetailHorizontal],
+    [
+      emitRoutedHandleSync,
+      isEditMode,
+      isOverview,
+      layoutProcess,
+      onNodePlacementChange,
+      onNodePlacementChanges,
+      overviewHighlight,
+      setEdges,
+      useDetailHorizontal,
+      process,
+    ],
+  )
+
+  const onNodeDrag: OnNodeDrag<Node<ProcessNodeData>> = useCallback(
+    (_event, node) => {
+      if (!isEditMode || !isOverview || isEditingOverviewProcessGroup) return
+      const placed = flowNodesToPlaced(nodesRef.current)
+      const self = placed.find((p) => p.id === node.id)
+      if (!self) return
+      const preview = resolveDropPlacementPreview(
+        {
+          x: node.position.x,
+          y: node.position.y,
+          width: self.width,
+          height: self.height,
+        },
+        {
+          laneBands: laneBandsRef.current,
+          zoneBands: zoneBandsRef.current,
+          isOverview,
+        },
+      )
+      setDropPreview(preview)
+    },
+    [isEditMode, isOverview, isEditingOverviewProcessGroup],
   )
 
   const onConnect: OnConnect = useCallback(
@@ -701,12 +1161,13 @@ export function ProcessMapCanvas({
     () => ({
       appMode,
       selectedEdgeId,
+      onEdgeSelect: handleEdgeLabelSelect,
       onEdgeRoutingChange: ({ edgeId, routing }: { edgeId: string; routing: ProcessEdge['routing'] }) => {
         onEdgeRoutingChange(edgeId, routing)
       },
       onEdgeLabelPlacementChange,
     }),
-    [appMode, selectedEdgeId, onEdgeRoutingChange, onEdgeLabelPlacementChange],
+    [appMode, selectedEdgeId, handleEdgeLabelSelect, onEdgeRoutingChange, onEdgeLabelPlacementChange],
   )
 
   const overviewLayout = useMemo(() => {
@@ -792,9 +1253,12 @@ export function ProcessMapCanvas({
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       onNodeClick={onNodeClick}
+      onNodeContextMenu={onNodeContextMenu}
       onEdgeClick={onEdgeClick}
+      onEdgeContextMenu={onEdgeContextMenu}
       onSelectionChange={onSelectionChange}
       onPaneClick={onPaneClick}
+      onNodeDrag={onNodeDrag}
       onNodeDragStop={onNodeDragStop}
       onConnect={onConnect}
       defaultEdgeOptions={defaultEdgeOptions}
@@ -803,11 +1267,11 @@ export function ProcessMapCanvas({
       proOptions={{ hideAttribution: true }}
       elevateEdgesOnSelect={false}
       elevateNodesOnSelect
-      nodesDraggable={isEditMode}
-      nodesConnectable={isEditMode}
-      elementsSelectable={isEditMode}
+      nodesDraggable={isEditMode && !isEditingOverviewProcessGroup}
+      nodesConnectable={isEditMode && !isEditingOverviewProcessGroup}
+      elementsSelectable={isEditMode && !isEditingOverviewProcessGroup}
       nodesFocusable
-      edgesFocusable={isEditMode}
+      edgesFocusable={isEditMode && !isEditingOverviewProcessGroup}
       deleteKeyCode={null}
       selectNodesOnDrag={false}
       connectionRadius={24}
@@ -821,7 +1285,7 @@ export function ProcessMapCanvas({
       {isOverview && overviewLayout && (
         <>
           <LayoutViewportSync
-            nodeLayoutKey={nodeLayoutKey}
+            nodeLayoutKey={nodeTopologyKey}
             edgeRoutingKey={edgeRoutingKey}
             scrollRef={overviewScrollRef}
           />
@@ -847,7 +1311,7 @@ export function ProcessMapCanvas({
             onRefresh={refreshDetailEdgesAfterPaint}
           />
           <LayoutViewportSync
-            nodeLayoutKey={nodeLayoutKey}
+            nodeLayoutKey={nodeTopologyKey}
             edgeRoutingKey={edgeRoutingKey}
             scrollRef={detailScrollRef}
           />
@@ -893,6 +1357,91 @@ export function ProcessMapCanvas({
         onZoneSelect={onZoneClick}
       />
       <Background gap={24} size={1} color="#e8edf2" />
+      {isOverview && <OverviewDropPreview preview={dropPreview} />}
+      {nodeContextMenu && (
+        <div
+          className="process-map-context-menu nodrag nopan"
+          style={{ left: nodeContextMenu.x, top: nodeContextMenu.y }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              onCopyNodes?.(nodeContextMenu.nodeIds)
+              setNodeContextMenu(null)
+            }}
+          >
+            <span>복사</span>
+            <kbd>{getShortcut('copy')}</kbd>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onPasteClipboard?.()
+              setNodeContextMenu(null)
+            }}
+          >
+            <span>붙여넣기</span>
+            <kbd>{getShortcut('paste')}</kbd>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onDuplicateNodes?.(nodeContextMenu.nodeIds)
+              setNodeContextMenu(null)
+            }}
+          >
+            <span>복제</span>
+            <kbd>{getShortcut('duplicate')}</kbd>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onDeleteSelection?.()
+              setNodeContextMenu(null)
+            }}
+          >
+            <span>삭제</span>
+            <kbd>{getShortcut('delete')}</kbd>
+          </button>
+        </div>
+      )}
+      {edgeContextMenu && (
+        <div
+          className="process-map-context-menu nodrag nopan"
+          style={{ left: edgeContextMenu.x, top: edgeContextMenu.y }}
+        >
+          {onCopyEdge && (
+            <button
+              type="button"
+              onClick={() => {
+                onCopyEdge(edgeContextMenu.edgeId)
+                setEdgeContextMenu(null)
+              }}
+            >
+              <span>복사</span>
+              <kbd>{getShortcut('copy')}</kbd>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              onDeleteSelection?.()
+              setEdgeContextMenu(null)
+            }}
+          >
+            <span>삭제</span>
+            <kbd>{getShortcut('delete')}</kbd>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEdgeContextMenu(null)
+            }}
+          >
+            <span>Handle 변경</span>
+          </button>
+        </div>
+      )}
       {!isOverview && <Controls showInteractive={false} />}
       {!isOverview && (
         <MiniMap

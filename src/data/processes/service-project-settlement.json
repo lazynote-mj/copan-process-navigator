@@ -1,75 +1,104 @@
 {
   "id": "service-project-settlement",
-  "name": "프로젝트 정산 : (서비스)",
-  "source": "SCM TO-BE",
+  "type": "detail",
+  "name": "프로젝트 정산 : 서비스",
+  "description": "서비스 프로젝트 매출/비용 집계, 재무 마감확정, MG 차감 여부, 정산마감, ERP 자동 전표생성/자동승인까지의 Copan 프로젝트 정산 프로세스",
   "version": "v1.0",
-  "description": "PDF 도형 기준 서비스 프로젝트 정산 프로세스",
-  "overviewNodeId": "settlement-posting",
-  "status": "draft",
-  "lastModified": "2026-06-22",
+  "status": "review",
+  "lastModified": "2026-06-29",
   "owner": "ERP PMO",
-  "phases": [],
-  "lanes": [],
   "nodes": [
     {
       "id": "service-project-settlement-step-01",
-      "name": "매출/비용 마감집계",
+      "name": "프로젝트 매출/비용 집계",
       "type": "erp",
-      "laneId": "finance",
+      "laneId": "business",
       "phaseId": "p1",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매출/비용 마감집계",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "사업부가 서비스 프로젝트별 매출, 비용, 계약 조건을 집계한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 1,
-      "localOrder": 1
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-02",
-      "name": "매출/비용 마감확정",
+      "name": "프로젝트 마감확정",
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p2",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매출/비용 마감확정",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "재무관리팀이 프로젝트 매출/비용 집계와 정산 Rule을 검증하고 마감을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 2
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-03",
       "name": "예외사항처리",
       "type": "erp",
-      "laneId": "business",
+      "laneId": "finance",
       "phaseId": "p3",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "예외사항처리",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "정산 기준과 다른 예외사항, 조정 영역, 검증 필요 사항을 반영한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-04",
-      "name": "MG차감여부",
+      "name": "MG 차감여부 판단",
       "type": "decision",
-      "laneId": "business",
+      "laneId": "finance",
       "phaseId": "p4",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "MG차감여부",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "프로젝트 정산에서 MG 차감 대상인지 재무관리팀이 판단한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-05",
@@ -77,14 +106,22 @@
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p5",
-      "system": "ERP",
-      "owner": "재무팀",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
       "description": "MG상계입력",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-06",
@@ -92,14 +129,22 @@
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p6",
-      "system": "ERP",
-      "owner": "재무팀",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
       "description": "MG상계처리",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-07",
@@ -107,14 +152,22 @@
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p7",
-      "system": "ERP",
-      "owner": "재무팀",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
       "description": "정산마감등록",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 7
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-08",
@@ -122,29 +175,93 @@
       "type": "erp",
       "laneId": "finance",
       "phaseId": "p8",
-      "system": "ERP",
-      "owner": "재무팀",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
       "description": "정산마감확정",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 8,
-      "localOrder": 8
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-project-settlement-step-09",
       "name": "전표생성(미결)",
-      "type": "erp",
+      "type": "system",
       "laneId": "finance",
       "phaseId": "p9",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "전표생성(미결)",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "정산마감확정 후 ERP가 정산전표를 미결 상태로 자동 생성한다. Auto Node Owner Rule에 따라 Owner는 직전 마감확정 Owner인 재무관리팀으로 유지한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 9
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "service-project-settlement-step-10",
+      "name": "전표자동승인",
+      "type": "system",
+      "laneId": "finance",
+      "phaseId": "finance-accounting::p2",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "정산전표 자동승인 대상은 ERP 기준에 따라 자동 승인 처리한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 6,
+      "cellOrder": 5,
+      "zoneOrder": 5,
+      "detailLayout": {
+        "column": 6,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
+    },
+    {
+      "id": "service-project-settlement-step-11",
+      "name": "회계마감 반영",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance-accounting::p3",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "자동승인된 정산전표를 회계 마감 기준에 반영한다. 회계 상세 업무는 Reference Only로 관리한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 6,
+      "cellOrder": 6,
+      "zoneOrder": 6,
+      "detailLayout": {
+        "column": 7,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
     }
   ],
   "edges": [
@@ -158,7 +275,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-project-settlement-e02",
@@ -170,7 +289,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-project-settlement-e03",
@@ -182,7 +303,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-project-settlement-e04",
@@ -193,7 +316,15 @@
       "type": "condition",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
+        "handlesLocked": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -4.4950000000000045,
+          "y": -5
+        }
       }
     },
     {
@@ -206,19 +337,23 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-project-settlement-e06",
       "source": "service-project-settlement-step-06",
-      "target": "service-project-settlement-step-07",
+      "target": "service-project-settlement-step-09",
       "condition": "",
       "label": "",
       "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-project-settlement-e07",
@@ -230,7 +365,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-project-settlement-e08",
@@ -242,7 +379,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-project-settlement-branch-01",
@@ -253,7 +392,61 @@
       "type": "condition",
       "routing": {
         "mode": "auto",
+        "handlesLocked": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "left"
+    },
+    {
+      "id": "service-project-settlement-e-auto-approval",
+      "source": "service-project-settlement-step-09",
+      "target": "service-project-settlement-step-10",
+      "condition": "",
+      "label": "자동승인",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
         "handleAuto": true
+      }
+    },
+    {
+      "id": "service-project-settlement-e-accounting-close",
+      "source": "service-project-settlement-step-10",
+      "target": "service-project-settlement-step-11",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ],
+  "overviewNodeId": "settlement-posting",
+  "source": "SCM TO-BE",
+  "zones": [
+    {
+      "id": "service-project-settlement-zone-finance-close",
+      "name": "재무 정산/전표 자동처리",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "service-project-settlement-step-02",
+        "service-project-settlement-step-03",
+        "service-project-settlement-step-07",
+        "service-project-settlement-step-08",
+        "service-project-settlement-step-09",
+        "service-project-settlement-step-10",
+        "service-project-settlement-step-11"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12,
+        "labelPosition": "top"
       }
     }
   ]

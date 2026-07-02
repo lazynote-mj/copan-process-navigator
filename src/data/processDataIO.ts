@@ -11,6 +11,7 @@ import { buildProcessDataFromPayload, processDataToFilePayload } from './process
 import type { ProcessDataFilePayload } from './processDataMigration'
 import { normalizeProcessEdges, normalizeProcessNodes } from './processExport'
 import { formatTimestamp } from './workingStateStats'
+import { formatRouterValidationMessage, validateRouterData } from '../lib/editor/routerValidation'
 
 export type { ProcessDataFilePayload } from './processDataMigration'
 export { processDataToFilePayload } from './processDataMigration'
@@ -180,6 +181,13 @@ export function validatePreExport(data: ProcessData): PreExportValidationResult 
     return {
       ok: false,
       message: `source/target 없는 연결선 ${broken.length}개가 있습니다. 저장을 중단합니다.`,
+    }
+  }
+  const routerValidation = validateRouterData(data, { autofix: false })
+  if (!routerValidation.report.ok) {
+    return {
+      ok: false,
+      message: formatRouterValidationMessage(routerValidation.report),
     }
   }
 

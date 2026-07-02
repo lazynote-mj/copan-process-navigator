@@ -15,12 +15,6 @@
       "overviewNodeId": "purchase-request"
     },
     {
-      "id": "consignment-purchase-receipt",
-      "file": "consignment-purchase-receipt.json",
-      "name": "구매요청 ~ 입고 : 판매대행",
-      "overviewNodeId": "purchase-request"
-    },
-    {
       "id": "b2b-domestic-order-to-sales",
       "file": "b2b-domestic-order-to-sales.json",
       "name": "주문등록 ~ 출고 ~ 매출전표 : B2B 국내",
@@ -127,6 +121,30 @@
       "file": "service-project-settlement.json",
       "name": "프로젝트 정산 : (서비스)",
       "overviewNodeId": "settlement-posting"
+    },
+    {
+      "id": "storage-location-master",
+      "file": "storage-location-master.json",
+      "name": "저장위치 등록",
+      "overviewNodeId": "purchase-request"
+    },
+    {
+      "id": "purchase-return",
+      "file": "purchase-return.json",
+      "name": "구매반품",
+      "overviewNodeId": "return-handling"
+    },
+    {
+      "id": "other-receipt",
+      "file": "other-receipt.json",
+      "name": "기타입고",
+      "overviewNodeId": "inbound-info"
+    },
+    {
+      "id": "stock-movement",
+      "file": "stock-movement.json",
+      "name": "일반 재고이동",
+      "overviewNodeId": "stock-transfer-handling"
     }
   ]
 }

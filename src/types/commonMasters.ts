@@ -1,5 +1,5 @@
 import type { EdgeType } from './edgeTypes'
-import type { Lane, Phase } from './process'
+import type { Lane, Phase, ProcessZoneStyle } from './process'
 import type { NodeType } from './nodeTypes'
 
 /** Layout engine 공통 규칙 */
@@ -36,12 +36,65 @@ export type ViewModeConfig = {
   label: string
 }
 
+export type NodeMaster = {
+  id: NodeType
+  label: string
+  description: string
+  defaultSystem?: string
+  defaultRole?: string
+  color?: string
+  dashedBorder?: boolean
+}
+
+export type EdgeMaster = {
+  id: EdgeType
+  label: string
+  description?: string
+  color?: string
+  dashed?: boolean
+  arrow?: boolean
+}
+
+export type LaneMaster = Lane
+
+export type PhaseMaster = Phase
+
+export type ZoneMaster = {
+  id: string
+  name: string
+  type: 'process-zone'
+  description?: string
+  style?: ProcessZoneStyle
+}
+
+export type LayoutRuleMaster = {
+  id: 'overview' | 'detail'
+  label: string
+  maxCellColumns: number
+  maxCellRows: number
+  positionFromSlot: boolean
+  rowAlignment: 'stable-slot' | 'compact'
+  columnAlignment: 'lane-center' | 'cell-center'
+  zoneAffectsNodePlacement: boolean
+}
+
+export type MasterLayer = {
+  version: 1
+  nodeMaster: NodeMaster[]
+  edgeMaster: EdgeMaster[]
+  laneMaster: LaneMaster[]
+  phaseMaster: PhaseMaster[]
+  zoneMaster: ZoneMaster[]
+  layoutRuleMaster: LayoutRuleMaster[]
+}
+
 /** Overview + 모든 Detail이 공유하는 마스터 설정 */
 export type CommonMasters = {
   lanes: Lane[]
   phases: Phase[]
   nodeTypes?: NodeType[]
   edgeTypes?: EdgeType[]
+  masterLayer?: MasterLayer
   handleRules?: HandleRules
   layoutRules?: LayoutRules
   routerRules?: RouterRules

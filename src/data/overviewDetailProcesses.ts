@@ -4,7 +4,6 @@ import type { Node, Process } from '../types/process'
 export const OVERVIEW_NODE_DETAIL_PROCESS_IDS: Record<string, string[]> = {
   'purchase-request': [
     'business-to-project',
-    'consignment-purchase-receipt',
   ],
   'order-register': [
     'b2b-domestic-order-to-sales',

@@ -5,7 +5,7 @@ import { isDerivedDisplayEdge, isSavedVirtualEdge } from '../nodeVisibility'
 
 /** 연결선 수정 시 currentData.edges에 반영할 필드를 일관되게 병합한다. */
 export function applyEdgeUpdate(existing: Edge, update: Partial<Edge>): Edge {
-  return migrateEdgeHandles(
+  return normalizeEdgeForStorage(
     normalizeEdgeType({
       ...existing,
       ...update,
@@ -51,15 +51,19 @@ function normalizeSavedVirtualEdge(edge: Edge): Edge {
     ...edge,
     displayOnly: true,
     isDerived: undefined,
-    manualRoute: edge.manualRoute ?? false,
     type: 'virtual',
+    manualRoute: undefined,
+    bendPoints: undefined,
+    points: undefined,
     ...(sourceHandle ? { sourceHandle } : {}),
     ...(targetHandle ? { targetHandle } : {}),
     routing: {
       mode: routing?.mode ?? 'auto',
       handleAuto: routing?.handleAuto === true,
       ...(routing?.handleAuto !== true ? { handlesLocked: true } : {}),
-      ...(routing?.points?.length ? { points: routing.points.map((p) => ({ ...p })) } : {}),
+      ...(routing?.mode === 'manual' && routing?.points?.length
+        ? { points: routing.points.map((p) => ({ ...p })) }
+        : {}),
     },
     data: edge.data
       ? (() => {

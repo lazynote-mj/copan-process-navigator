@@ -1,5 +1,5 @@
 import type { Edge, Lane, Node, Process, ProcessZone } from '../../types/process'
-import { DEFAULT_NODE_TYPE } from '../../types/nodeTypes'
+import { DEFAULT_NODE_TYPE, getDefaultSystemForNodeType } from '../../types/nodeTypes'
 import { DEFAULT_EDGE_TYPE } from '../../types/edgeTypes'
 import { resolveNodeLocalOrder } from '../layout/localOrder'
 
@@ -30,7 +30,7 @@ export function createDefaultNode(process: Process, laneId?: string): Node {
     phaseOrder: defaultPhase?.order ?? 1,
     localOrder: getNextLocalOrder(process, lane),
     owner: '',
-    system: '',
+    system: getDefaultSystemForNodeType(DEFAULT_NODE_TYPE),
     description: '',
     inputs: [],
     outputs: [],

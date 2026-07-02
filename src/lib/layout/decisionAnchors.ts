@@ -8,6 +8,10 @@ import type { PlacedNode } from './laneLayout'
 
 export type AnchorPoint = { x: number; y: number }
 
+function finiteOr(value: number | undefined, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
 export function isDecisionNodeType(nodeType?: string): boolean {
   return nodeType === 'decision'
 }
@@ -47,13 +51,15 @@ export function getDecisionNodeCenter(node: PlacedNode): AnchorPoint {
 
 /** polygon 꼭지점 — wrapper (x,y) 기준, layout box 대비 스케일 */
 export function getDecisionDiamondVertex(node: PlacedNode, handle: EdgeHandleId): AnchorPoint {
-  const spec = resolveDecisionLayoutForSize(node.width, node.height)
+  const width = finiteOr(node.width, DECISION_NODE_LAYOUT.width)
+  const height = finiteOr(node.height, DECISION_NODE_LAYOUT.height)
+  const spec = resolveDecisionLayoutForSize(width, height)
   const local = spec.vertices[handle]
-  const scaleX = node.width / spec.layoutWidth
-  const scaleY = node.height / spec.layoutHeight
+  const scaleX = spec.layoutWidth > 0 ? width / spec.layoutWidth : 1
+  const scaleY = spec.layoutHeight > 0 ? height / spec.layoutHeight : 1
   return {
-    x: node.x + local.x * scaleX,
-    y: node.y + local.y * scaleY,
+    x: finiteOr(node.x, 0) + finiteOr(local.x * scaleX, 0),
+    y: finiteOr(node.y, 0) + finiteOr(local.y * scaleY, 0),
   }
 }
 
@@ -63,9 +69,16 @@ export function getDecisionHandleOffset(
   boxH: number,
   handle: EdgeHandleId,
 ): { left: number; top: number } {
-  const node = { id: '', laneId: '', x: 0, y: 0, width: boxW, height: boxH }
+  const node = {
+    id: '',
+    laneId: '',
+    x: 0,
+    y: 0,
+    width: finiteOr(boxW, DECISION_NODE_LAYOUT.width),
+    height: finiteOr(boxH, DECISION_NODE_LAYOUT.height),
+  }
   const vertex = getDecisionDiamondVertex(node, handle)
-  return { left: vertex.x, top: vertex.y }
+  return { left: finiteOr(vertex.x, 0), top: finiteOr(vertex.y, 0) }
 }
 
 function nodeCenter(node: PlacedNode): AnchorPoint {

@@ -1,0 +1,15 @@
+Gap No	Douzone SCM No	Douzone Process	Douzone Page	Current Navigator Mapping	Recommended Classification	Priority	Reason	Decision Needed
+G-001	D-SCM-002	메뉴 등록 PROCESS	47	없음	Reference Only 후보	Low	SCM 업무 Flow라기보다 메뉴/권한/공통 설정 성격	Navigator Process Asset에 포함할지 ERP 교육으로 둘지 결정
+G-002	D-SCM-004	매장 등록 PROCESS	49	없음	Add or Reference Review	Medium	매장/POS 운영의 선행 기준정보	매장 기준정보를 별도 Process Group으로 둘지 결정
+G-003	D-SCM-005	저장위치 등록 PROCESS	50	없음	Add or Reference Review	High	입고/출고/재고이동 전체의 기준정보	창고/저장위치 기준정보 Process 추가 여부 결정
+G-004	D-SCM-008	구매 반품 PROCESS	54	없음	Add Required 후보	High	현재 21개에는 구매반품이 별도로 없음	신규 구매반품 Process Group 추가 여부 결정
+G-005	D-SCM-009	원/부자재 구매 입고 PROCESS	55	없음	Business Scope Review	Medium	Copan SCM 적용 여부 불명확	원/부자재/제조성 구매를 구축 대상에 포함할지 결정
+G-006	D-SCM-010	원/부자재 구매 반품 PROCESS	56	없음	Business Scope Review	Medium	원/부자재 구매반품 적용 여부 불명확	원/부자재 구매입고와 함께 결정
+G-007	D-SCM-011	수입 관리 PROCESS	59	없음	Add or Reference Review	Medium	해외 구매/수입 흐름은 06 수출판매와 다름	수입관리 업무가 Copan SCM 범위인지 확인
+G-008	D-SCM-024	기타 입고 PROCESS	72	없음	Add Required 후보	High	기타 출고는 있으나 기타 입고가 없음	재고실사/기타입고 Process 추가 여부 결정
+G-009	D-SCM-025	재고이동 PROCESS	73	13에 부분 포함	Add or Split Review	High	현재 13은 매장 간 이동 중심	일반 창고이동과 매장 간 이동 분리 여부 결정
+G-010	D-SCM-029	지사 구매 입고 PROCESS	78	없음	Business Scope Review	Medium	일본/미국지사 구매입고 흐름 미반영	해외지사 운영을 SCM Navigator 범위에 포함할지 결정
+G-011	D-SCM-030	지사 구매 반품 PROCESS	79	없음	Business Scope Review	Medium	일본/미국지사 구매반품 흐름 미반영	지사 구매입고 포함 시 함께 결정
+G-012	D-SCM-031	지사 판매 PROCESS	80	없음	Business Scope Review	Medium	지사 판매는 06 수출판매와 다른 흐름	해외지사 판매 운영 여부 확인
+G-013	D-SCM-032	지사 판매 반품 PROCESS	81	없음	Business Scope Review	Medium	지사 판매반품 흐름 미반영	지사 판매 포함 시 함께 결정
+G-014	D-SCM-033	지사 기타 출고 PROCESS	82	없음	Business Scope Review	Medium	지사 기타출고 흐름 미반영	해외지사 재고 운영 범위 결정

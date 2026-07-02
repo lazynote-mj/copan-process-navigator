@@ -1,0 +1,159 @@
+{
+  "id": "storage-location-master",
+  "name": "저장위치 등록",
+  "source": "Douzone SCM TO-BE",
+  "version": "v1.0",
+  "description": "D-SCM-005 저장위치 등록 PROCESS 기준. 저장위치/보세창고/납품처별 저장위치 기준정보를 Copan 운영 기준으로 정리한 프로세스 초안.",
+  "overviewNodeId": "purchase-request",
+  "status": "draft",
+  "lastModified": "2026-06-30",
+  "owner": "혁신팀",
+  "lifecycleGroup": "master-data",
+  "phases": [],
+  "lanes": [],
+  "nodes": [
+    {
+      "id": "storage-location-master-step-01",
+      "name": "저장위치 등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "procure-to-pay::p4m",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 저장위치등록. 해외 B2B 수출 시 관리하는 보세창고/저장위치를 ERP 기준정보로 등록한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "저장위치 등록",
+      "erpMenu": "저장위치등록",
+      "processingType": "Manual"
+    },
+    {
+      "id": "storage-location-master-step-02",
+      "name": "재고기간마감 등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "procure-to-pay::p4m",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 재고기간마감등록. 저장위치 운영 시 재고 기간 기준을 등록/확인한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 2,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "재고기간마감 등록",
+      "erpMenu": "재고기간마감등록",
+      "processingType": "Manual"
+    },
+    {
+      "id": "storage-location-master-step-03",
+      "name": "납품처별 저장위치 등록",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "procure-to-pay::p4m",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 납품처별저장위치등록. 납품처별 출고/입고 기준 저장위치를 연결한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "납품처별 저장위치 등록",
+      "erpMenu": "납품처별저장위치등록",
+      "processingType": "Manual"
+    },
+    {
+      "id": "storage-location-master-step-04",
+      "name": "저장위치 정보",
+      "type": "database",
+      "laneId": "business",
+      "phaseId": "inventory::movement-info",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "더존 원문: 저장위치 정보 DATABASE. 저장위치 기준정보가 이후 입고/출고/재고이동의 기준 데이터로 사용된다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 4,
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "businessActivity": "저장위치 정보",
+      "erpMenu": "",
+      "processingType": "Auto"
+    }
+  ],
+  "edges": [
+    {
+      "id": "storage-location-master-e01",
+      "source": "storage-location-master-step-01",
+      "target": "storage-location-master-step-02",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "storage-location-master-e02",
+      "source": "storage-location-master-step-02",
+      "target": "storage-location-master-step-03",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "storage-location-master-e03",
+      "source": "storage-location-master-step-03",
+      "target": "storage-location-master-step-04",
+      "condition": "",
+      "label": "API",
+      "type": "api",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    }
+  ],
+  "zones": []
+}

@@ -186,6 +186,38 @@ export function getNodeTypeLabel(type: NodeType | string): string {
   return meta?.label ?? type
 }
 
+export function getDefaultSystemForNodeType(type: NodeType | string): string {
+  switch (type) {
+    case 'erp':
+    case 'system':
+    case 'exception':
+      return 'ERP'
+    case 'wms-oms':
+      return '이지어드민/WMS'
+    case 'pos':
+      return '이지체인/POS'
+    case 'manual':
+      return '수작업'
+    case 'approval':
+      return '그룹웨어'
+    case 'decision':
+      return 'ERP'
+    case 'database':
+      return 'DATABASE'
+    case 'interface':
+    case 'api':
+      return 'API'
+    case 'interface-rule':
+      return '연결점'
+    case 'linked-process':
+      return '연결 프로세스'
+    case 'external':
+      return '외부 시스템'
+    default:
+      return ''
+  }
+}
+
 /** Detail view 노드 색상 — type + system 기반 */
 export function resolveNodeVisualClass(type: NodeType, system?: string): string {
   const sys = (system ?? '').toLowerCase()

@@ -10,7 +10,6 @@ import businessToProjectEdges from './processes/business-to-project/edges.json'
 
 import businessToPurchaseRequest from './processes/business-to-purchase-request.json'
 import purchaseToApInvoice from './processes/purchase-to-ap-invoice.json'
-import consignmentPurchaseReceipt from './processes/consignment-purchase-receipt.json'
 import b2bDomesticOrderToSales from './processes/b2b-domestic-order-to-sales.json'
 import b2bDomesticReturn from './processes/b2b-domestic-return.json'
 import b2bExportOrderToSales from './processes/b2b-export-order-to-sales.json'
@@ -29,6 +28,10 @@ import serviceBusinessToExpense from './processes/service-business-to-expense.js
 import servicePurchaseToAp from './processes/service-purchase-to-ap.json'
 import serviceOrderToSales from './processes/service-order-to-sales.json'
 import serviceProjectSettlement from './processes/service-project-settlement.json'
+import purchaseReturn from './processes/purchase-return.json'
+import otherReceipt from './processes/other-receipt.json'
+import stockMovement from './processes/stock-movement.json'
+import storageLocationMaster from './processes/storage-location-master.json'
 
 import type { Edge, Node } from '../types/process'
 
@@ -43,7 +46,6 @@ const registry = registryJson as ProcessRegistryFile
 const scmDetailFiles: DetailProcessFile[] = [
   businessToPurchaseRequest,
   purchaseToApInvoice,
-  consignmentPurchaseReceipt,
   b2bDomesticOrderToSales,
   b2bDomesticReturn,
   b2bExportOrderToSales,
@@ -62,6 +64,10 @@ const scmDetailFiles: DetailProcessFile[] = [
   servicePurchaseToAp,
   serviceOrderToSales,
   serviceProjectSettlement,
+  purchaseReturn,
+  otherReceipt,
+  stockMovement,
+  storageLocationMaster,
 ] as DetailProcessFile[]
 
 const scmDetailProcesses = scmDetailFiles.map(loadDetailProcessFile)

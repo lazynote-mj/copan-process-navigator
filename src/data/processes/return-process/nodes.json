@@ -140,7 +140,7 @@
     "type": "interface-rule",
     "laneId": "finance",
     "phaseId": "p10",
-    "system": "이지어드민 ↔ ERP",
+    "system": "",
     "owner": "재무팀",
     "description": "이지어드민과 ERP 연동 시 위탁 재고 여부를 시스템이 판단합니다.",
     "inputs": [],

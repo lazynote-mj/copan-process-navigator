@@ -23,19 +23,28 @@ type EdgePathData = {
   pathPoints?: { x: number; y: number }[]
 }
 
+function isFiniteRoutingPoint(point: EdgeRoutingPoint): boolean {
+  return Number.isFinite(point.x) && Number.isFinite(point.y)
+}
+
+function cloneFinitePoints(points: EdgeRoutingPoint[] | undefined): EdgeRoutingPoint[] {
+  return points?.filter(isFiniteRoutingPoint).map((point) => ({ ...point })) ?? []
+}
+
 /** routing.points / bendPoints / points / data.bendPoints 중 저장된 bend 중간점 */
 export function resolveSavedBendPoints(edge: Edge): { x: number; y: number }[] {
-  const fromRouting = edge.routing?.points
-  if (fromRouting?.length) return fromRouting.map((point) => ({ ...point }))
+  const fromRouting = cloneFinitePoints(edge.routing?.points)
+  if (fromRouting.length) return fromRouting
 
-  const fromBend = edge.bendPoints
-  if (fromBend?.length) return fromBend.map((point) => ({ ...point }))
+  const fromBend = cloneFinitePoints(edge.bendPoints)
+  if (fromBend.length) return fromBend
 
-  const fromPoints = edge.points
-  if (fromPoints?.length) return fromPoints.map((point) => ({ ...point }))
+  const fromPoints = cloneFinitePoints(edge.points)
+  if (fromPoints.length) return fromPoints
 
   const data = edge.data as EdgePathData | undefined
-  if (data?.bendPoints?.length) return data.bendPoints.map((point) => ({ ...point }))
+  const fromData = cloneFinitePoints(data?.bendPoints)
+  if (fromData.length) return fromData
 
   return []
 }
@@ -46,8 +55,9 @@ export function hasSavedEdgePath(edge: Edge): boolean {
 
 /** manualRoute, routing.mode=manual, 또는 저장된 bend가 있으면 auto router 스킵 */
 export function isManualRouteEdge(edge: Edge): boolean {
+  if (edge.routing?.handleAuto === true) return false
   if (edge.manualRoute === true) return true
-  if (edge.routing?.mode === 'manual') return true
+  if (edge.routing?.mode === 'manual') return hasSavedEdgePath(edge)
   return hasSavedEdgePath(edge)
 }
 
@@ -55,6 +65,10 @@ function preserveEdgeRouting(edge: Edge): EdgeRoutingConfig {
   const routing = edge.routing
   const savedPoints = resolveSavedBendPoints(edge)
   const useManual = isManualRouteEdge(edge)
+
+  if (routing?.mode === 'manual' && routing.handleAuto === true) {
+    return { mode: 'auto', handleAuto: true }
+  }
 
   if (useManual) {
     return {
@@ -71,20 +85,34 @@ function preserveEdgeRouting(edge: Edge): EdgeRoutingConfig {
     mode: 'auto',
     ...(routing?.handlesLocked ? { handlesLocked: true } : {}),
     ...(routing?.handleAuto === true ? { handleAuto: true } : {}),
-    ...(savedPoints.length ? { points: savedPoints.map((point) => ({ ...point })) } : {}),
   }
+}
+
+export function normalizeEdgeRoutingPersistence(edge: Edge): Edge {
+  const sourceHandle = resolveEdgeSourceHandle(edge)
+  const targetHandle = resolveEdgeTargetHandle(edge)
+  const routing = preserveEdgeRouting(edge)
+  const next: Edge = {
+    ...edge,
+    manualRoute: undefined,
+    bendPoints: undefined,
+    points: undefined,
+    ...(sourceHandle ? { sourceHandle } : {}),
+    ...(targetHandle ? { targetHandle } : {}),
+    routing,
+  }
+  if (routing.mode === 'auto') {
+    next.routing = {
+      ...routing,
+      points: undefined,
+    }
+  }
+  return next
 }
 
 /** JSON 로드 시 routing.* handle을 root로 이전 (routing mode/points는 유지) */
 export function migrateEdgeHandles(edge: Edge): Edge {
-  const sourceHandle = resolveEdgeSourceHandle(edge)
-  const targetHandle = resolveEdgeTargetHandle(edge)
-  return {
-    ...edge,
-    ...(sourceHandle ? { sourceHandle } : {}),
-    ...(targetHandle ? { targetHandle } : {}),
-    routing: preserveEdgeRouting(edge),
-  }
+  return normalizeEdgeRoutingPersistence(edge)
 }
 
 /** Property Panel 저장 시 handle 기본값 — handleAuto면 router 선택값 유지 */
@@ -176,12 +204,12 @@ export function patchEdgeHandles(
 export function setEdgeManualRouting(edge: Edge, bendPoints: EdgeRoutingPoint[]): Edge {
   const sourceHandle = resolveEdgeSourceHandle(edge) ?? 'bottom'
   const targetHandle = resolveEdgeTargetHandle(edge) ?? 'top'
-  const points = bendPoints.map((point) => ({ ...point }))
+  const points = cloneFinitePoints(bendPoints)
   return lockEdgeHandles({
     ...edge,
-    manualRoute: true,
-    bendPoints: points,
-    points,
+    manualRoute: undefined,
+    bendPoints: undefined,
+    points: undefined,
     routing: updateManualRoutingPoints(edge.routing, points, sourceHandle, targetHandle),
   })
 }

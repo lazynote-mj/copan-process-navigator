@@ -59,10 +59,10 @@
     {
       "id": "b2b-domestic-order-to-sales-step-04",
       "name": "위탁 여부",
-      "type": "decision",
+      "type": "interface-rule",
       "laneId": "business",
       "phaseId": "p4",
-      "system": "ERP",
+      "system": "",
       "owner": "사업부",
       "description": "위탁 여부",
       "inputs": [],
@@ -248,9 +248,9 @@
       "id": "b2b-domestic-order-to-sales-e04",
       "source": "b2b-domestic-order-to-sales-step-04",
       "target": "b2b-domestic-order-to-sales-step-05",
-      "condition": "Y",
+      "condition": "",
       "label": "Y",
-      "type": "condition",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
@@ -356,9 +356,9 @@
       "id": "b2b-domestic-order-to-sales-branch-01",
       "source": "b2b-domestic-order-to-sales-step-04",
       "target": "b2b-domestic-order-to-sales-step-06",
-      "condition": "N",
+      "condition": "",
       "label": "N",
-      "type": "condition",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true

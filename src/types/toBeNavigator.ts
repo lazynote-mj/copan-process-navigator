@@ -1,10 +1,13 @@
 import type { Process } from './process'
+import type { ProcessLifecycleGroupId } from '../config/appConfig'
 
 /** Overview — 전체 맵에서 노드/연결선 강조용 (상세 프로세스와 1:1 아님) */
 export type OverviewProcessGroup = {
   id: string
   name: string
   description: string
+  /** Overview menu placement — Lifecycle Tree 기준 */
+  lifecycleGroupId?: ProcessLifecycleGroupId
   overviewNodeIds: string[]
   overviewEdgeIds: string[]
   /** 심화(상세)로 연결할 DetailProcessGroup id — 없으면 Overview 강조만 */

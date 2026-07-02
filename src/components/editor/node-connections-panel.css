@@ -28,13 +28,18 @@
 
 .node-connections-panel__edge-id {
   font-size: 11px;
-  color: #475569;
-  background: none;
-  border: none;
-  padding: 0;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  padding: 3px 8px;
   cursor: pointer;
-  text-decoration: underline;
   text-align: left;
+}
+
+.node-connections-panel__edge-id:hover {
+  background: #dbeafe;
 }
 
 .edge-connection-fields__handles {
@@ -42,6 +47,18 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 8px;
+}
+
+.edge-connection-fields__label {
+  min-height: 58px;
+}
+
+.edge-connection-fields__preset {
+  margin-top: 6px;
+}
+
+.edge-connection-fields__advanced {
+  margin-top: 6px;
 }
 
 .node-connections-panel__warnings {

@@ -1,25 +1,46 @@
 {
   "id": "service-order-to-sales",
-  "name": "주문등록 ~ 매출전표 : (서비스)",
+  "name": "주문 등록 ~ 매출 전표 생성 : 서비스",
   "source": "SCM TO-BE",
   "version": "v1.0",
-  "description": "PDF 도형 기준 서비스 주문등록~매출마감 프로세스",
+  "description": "서비스 주문등록, 서비스 제공 확인, 매출마감, 전표생성(미결)까지의 Copan 운영 프로세스",
   "overviewNodeId": "order-register",
-  "status": "draft",
-  "lastModified": "2026-06-22",
+  "status": "review",
+  "lastModified": "2026-06-28",
   "owner": "ERP PMO",
   "phases": [],
   "lanes": [],
+  "zones": [
+    {
+      "id": "zone-mqq9wfld-kffb2",
+      "name": "자동프로세스",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "service-order-to-sales-step-02",
+        "service-order-to-sales-step-03",
+        "service-order-to-sales-step-04"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    }
+  ],
   "nodes": [
     {
       "id": "service-order-to-sales-step-01",
-      "name": "주문일괄등록",
+      "name": "서비스 주문등록",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p1",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "주문일괄등록",
+      "description": "서비스 매출 대상 주문을 ERP에 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -28,13 +49,13 @@
     },
     {
       "id": "service-order-to-sales-step-02",
-      "name": "주문확정",
+      "name": "서비스 주문확정",
       "type": "erp",
       "laneId": "business",
       "phaseId": "p2",
-      "system": "ERP",
+      "system": "OmniEsol ERP",
       "owner": "사업부",
-      "description": "주문확정",
+      "description": "서비스 주문 내용을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -43,63 +64,118 @@
     },
     {
       "id": "service-order-to-sales-step-03",
-      "name": "출고요청",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "name": "서비스 제공 확인",
+      "type": "manual",
+      "laneId": "business",
       "phaseId": "p3",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "출고요청",
+      "system": "수작업",
+      "owner": "사업부",
+      "description": "서비스 제공 완료 여부와 과금 기준을 확인한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-order-to-sales-step-04",
-      "name": "출고확정",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "name": "서비스 매출대상 확정",
+      "type": "erp",
+      "laneId": "business",
       "phaseId": "p4",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "출고확정",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "서비스 제공 확인 결과를 기준으로 매출 대상을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-order-to-sales-step-05",
-      "name": "일괄매출마감등록",
+      "name": "매출마감대상 집계",
       "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p5",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "일괄매출마감등록",
+      "laneId": "business",
+      "phaseId": "order-to-cash::p7",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "서비스 매출마감 대상을 집계한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-order-to-sales-step-06",
       "name": "매출마감확정",
       "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p6",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매출마감확정",
+      "laneId": "business",
+      "phaseId": "order-to-cash::p7",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "서비스 매출마감을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "service-order-to-sales-step-07",
+      "name": "전표생성(미결)",
+      "type": "system",
+      "laneId": "business",
+      "phaseId": "finance::pending-voucher",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "매출마감확정 후 ERP가 서비스 매출전표를 미결 상태로 자동 생성한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 7,
+      "localOrder": 7,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
     }
   ],
   "edges": [
@@ -113,7 +189,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-order-to-sales-e02",
@@ -124,8 +202,10 @@
       "type": "normal",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-order-to-sales-e03",
@@ -137,7 +217,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-order-to-sales-e04",
@@ -149,7 +231,9 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-order-to-sales-e05",
@@ -158,6 +242,22 @@
       "condition": "",
       "label": "",
       "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "service-order-to-sales-e06",
+      "source": "service-order-to-sales-step-06",
+      "target": "service-order-to-sales-step-07",
+      "type": "normal",
+      "label": "",
+      "condition": "Auto",
+      "sourceHandle": "right",
+      "targetHandle": "left",
       "routing": {
         "mode": "auto",
         "handleAuto": true

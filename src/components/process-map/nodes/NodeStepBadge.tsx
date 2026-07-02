@@ -1,19 +1,20 @@
 type NodeStepBadgeProps = {
-  step: number
+  step: number | string
   className?: string
 }
 
-/** PDF 스타일 — 노드 좌측 상단 원형 단계 번호 (phaseOrder) */
+/** 노드 좌측 상단 원형 실행 순서 번호 */
 export function NodeStepBadge({ step, className = '' }: NodeStepBadgeProps) {
-  if (!Number.isFinite(step) || step <= 0) return null
+  const label = String(step).trim()
+  if (!label) return null
 
   return (
     <span
       className={`process-node__step-badge${className ? ` ${className}` : ''}`}
-      aria-label={`단계 ${step}`}
-      title={`단계 ${step}`}
+      aria-label={`단계 ${label}`}
+      title={`단계 ${label}`}
     >
-      {step}
+      {label}
     </span>
   )
 }

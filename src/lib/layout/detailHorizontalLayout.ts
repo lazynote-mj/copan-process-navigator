@@ -38,6 +38,7 @@ const DEFAULT_TRACK_COUNT = 3
 export const DETAIL_HORIZONTAL_MAX_TRACK_COUNT = 5
 export const DETAIL_HORIZONTAL_ORDER_COLUMN_WIDTH = 220
 const ORDER_COLUMN_MIN_GAP = 180
+const DETAIL_HORIZONTAL_MIN_CANVAS_WIDTH = 1800
 
 function clampDetailLayoutColumn(value: number | undefined): number | undefined {
   if (value == null || !Number.isFinite(value)) return undefined
@@ -286,8 +287,10 @@ export function getDetailHorizontalLayout(
   const laneNodesById = new Map(lanes.map((lane) => [lane.id, validNodes.filter((node) => node.laneId === lane.id)]))
   const laneOrderIndexes = buildLaneOrderIndexes(laneNodesById, layoutProcess)
   const orderColumnCount = maxLaneColumnCount(laneNodesById, laneOrderIndexes)
-  const baseCanvasWidth =
-    CONTENT_LEFT + Math.max(0, orderColumnCount - 1) * DETAIL_HORIZONTAL_ORDER_COLUMN_WIDTH + ORDER_COLUMN_MIN_GAP + CONTENT_RIGHT_PADDING
+  const baseCanvasWidth = Math.max(
+    DETAIL_HORIZONTAL_MIN_CANVAS_WIDTH,
+    CONTENT_LEFT + Math.max(0, orderColumnCount - 1) * DETAIL_HORIZONTAL_ORDER_COLUMN_WIDTH + ORDER_COLUMN_MIN_GAP + CONTENT_RIGHT_PADDING,
+  )
 
   let laneBands = buildLaneBands(lanes, laneNodesById, usedLaneIds, baseCanvasWidth, layoutProcess, metrics)
   let placed = placeNodes(validNodes, layoutProcess, laneBands, laneOrderIndexes, metrics)

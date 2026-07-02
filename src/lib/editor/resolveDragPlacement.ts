@@ -6,6 +6,9 @@ import { resolveNodeZone } from '../layout/overviewProcessZones'
 import {
   DETAIL_CELL_MAX_ROWS,
   OVERVIEW_CELL_MAX_ROWS,
+  clampCellSlot,
+  cellSlotToRowCol,
+  normalizeLegacyCellSlot,
   rowColToCellSlot,
 } from '../layout/overviewCellPlacement'
 import {
@@ -15,6 +18,21 @@ import {
 } from '../layout/detailHorizontalLayout'
 
 type DropRect = { x: number; y: number; width: number; height: number }
+
+export type NodePlacementPatch = {
+  nodeId: string
+  patch: Partial<Node>
+}
+
+export type DropPlacementPreview = {
+  laneId: string
+  laneName: string
+  zoneId?: ProcessZoneId
+  zoneLabel?: string
+  cellSlot?: number
+  rect: DropRect
+  label: string
+}
 
 function findLaneAtPoint(
   laneBands: LaneBand[],
@@ -144,9 +162,87 @@ function resolveCellSlotFromDrop(
   const contentWidth = Math.max(1, contentRight - contentLeft)
   const col = centerX >= contentLeft + contentWidth / 2 ? 1 : 0
   const rowStep = Math.max(metrics.rowMinHeightDecision, metrics.nodeHeight) + metrics.nodeGapY
-  const rawRow = Math.round((centerY - topY) / rowStep)
+  const rawRow = Math.floor((centerY - topY) / rowStep)
   const row = Math.min(Math.max(rawRow, 0), maxRows - 1)
   return rowColToCellSlot(row, col, maxRows)
+}
+
+function resolveCellSlotPreviewRect(
+  lane: LaneBand,
+  cellSlot: number,
+  topY: number,
+  metrics = DETAIL_GRID_METRICS,
+  maxRows = DETAIL_CELL_MAX_ROWS,
+): DropRect {
+  const { row, col } = cellSlotToRowCol(cellSlot, maxRows)
+  const contentWidth = Math.max(1, lane.contentRight - lane.contentLeft)
+  const columnWidth = contentWidth / 2
+  const rowStep = Math.max(metrics.rowMinHeightDecision, metrics.nodeHeight) + metrics.nodeGapY
+  const inset = 4
+
+  return {
+    x: lane.contentLeft + columnWidth * col + inset,
+    y: topY + rowStep * row + inset,
+    width: Math.max(1, columnWidth - inset * 2),
+    height: Math.max(1, rowStep - inset * 2),
+  }
+}
+
+export function resolveDropPlacementPreview(
+  drop: DropRect,
+  ctx: {
+    laneBands: LaneBand[]
+    zoneBands?: ZoneLayoutBand[]
+    isOverview: boolean
+  },
+): DropPlacementPreview | null {
+  if (!ctx.isOverview) return null
+
+  const centerX = drop.x + drop.width / 2
+  const centerY = drop.y + drop.height / 2
+  const lane =
+    findLaneAtPoint(ctx.laneBands, centerX, centerY) ??
+    findLaneAtX(ctx.laneBands, centerX)
+  if (!lane) return null
+
+  const zone =
+    ctx.zoneBands && ctx.zoneBands.length > 0
+      ? findZoneAtY(ctx.zoneBands, centerY) ??
+        ctx.zoneBands.reduce((best, z) => {
+          const dist = Math.abs(centerY - (z.y + z.height / 2))
+          const bestDist = Math.abs(centerY - (best.y + best.height / 2))
+          return dist < bestDist ? z : best
+        })
+      : undefined
+
+  const topY = zone
+    ? zone.y + OVERVIEW_GRID_METRICS.cellPaddingY
+    : lane.contentTop
+  const cellSlot = resolveCellSlotFromDrop(
+    lane,
+    centerX,
+    centerY,
+    topY,
+    OVERVIEW_GRID_METRICS,
+    OVERVIEW_CELL_MAX_ROWS,
+  )
+  const { row, col } = cellSlotToRowCol(cellSlot, OVERVIEW_CELL_MAX_ROWS)
+
+  return {
+    laneId: lane.laneId,
+    laneName: lane.laneName,
+    zoneId: zone?.zoneId,
+    zoneLabel: zone?.label,
+    cellSlot,
+    rect: resolveCellSlotPreviewRect(
+      lane,
+      cellSlot,
+      topY,
+      OVERVIEW_GRID_METRICS,
+      OVERVIEW_CELL_MAX_ROWS,
+    ),
+    label: `${lane.laneName}${zone ? ` · ${zone.label}` : ''} · ${col === 0 ? '좌' : '우'} ${row + 1}행`,
+  }
 }
 
 function resolveDetailLayoutFromDrop(
@@ -326,6 +422,166 @@ export function resolveNodePlacementAfterDrag(
   }
 
   return patch
+}
+
+function sameOverviewCell(a: Node, b: Node): boolean {
+  return a.laneId === b.laneId && resolveNodeZone(a).zoneId === resolveNodeZone(b).zoneId
+}
+
+function orderedSlotsAfter(slot: number, maxRows: number): number[] {
+  const { row, col } = cellSlotToRowCol(slot, maxRows)
+  const slots: number[] = []
+  for (let r = row + 1; r < maxRows; r += 1) {
+    slots.push(rowColToCellSlot(r, col, maxRows))
+  }
+  for (let r = 0; r < maxRows; r += 1) {
+    const other = rowColToCellSlot(r, col === 0 ? 1 : 0, maxRows)
+    if (other > slot || r > row) slots.push(other)
+  }
+  for (let r = 0; r <= row; r += 1) {
+    slots.push(rowColToCellSlot(r, col === 0 ? 1 : 0, maxRows))
+  }
+  return [...new Set(slots)].filter((candidate) => candidate !== slot)
+}
+
+function resolveOverviewDisplacementPatches(
+  process: Process,
+  nodeId: string,
+  basePatch: Partial<Node>,
+): NodePlacementPatch[] {
+  const dragged = process.nodes.find((node) => node.id === nodeId)
+  if (!dragged || basePatch.cellSlot == null) return [{ nodeId, patch: basePatch }]
+
+  const droppedNode: Node = { ...dragged, ...basePatch }
+  if (!droppedNode.processZone) return [{ nodeId, patch: basePatch }]
+
+  const maxRows = OVERVIEW_CELL_MAX_ROWS
+  const desiredSlot = clampCellSlot(normalizeLegacyCellSlot(basePatch.cellSlot, maxRows), maxRows)
+  const cellNodes = process.nodes.filter((node) => {
+    if (node.id === nodeId) return false
+    if (node.cellSlot == null) return false
+    return sameOverviewCell({ ...node, processZone: resolveNodeZone(node).zoneId }, droppedNode)
+  })
+  const slotToNode = new Map<number, Node>()
+  for (const node of cellNodes) {
+    const slot = clampCellSlot(normalizeLegacyCellSlot(node.cellSlot!, maxRows), maxRows)
+    if (!slotToNode.has(slot)) slotToNode.set(slot, node)
+  }
+  if (!slotToNode.has(desiredSlot)) {
+    return [{ nodeId, patch: { ...basePatch, cellSlot: desiredSlot } }]
+  }
+
+  const emptySlots = new Set<number>()
+  for (let slot = 1; slot <= maxRows * 2; slot += 1) {
+    if (slot !== desiredSlot && !slotToNode.has(slot)) emptySlots.add(slot)
+  }
+  if (emptySlots.size === 0) {
+    return [{ nodeId, patch: { ...basePatch, cellSlot: desiredSlot } }]
+  }
+
+  const patches: NodePlacementPatch[] = [
+    { nodeId, patch: { ...basePatch, cellSlot: desiredSlot } },
+  ]
+  let currentSlot = desiredSlot
+  let moving = slotToNode.get(currentSlot)
+  const visited = new Set<string>()
+
+  while (moving && !visited.has(moving.id)) {
+    visited.add(moving.id)
+    const nextSlot = orderedSlotsAfter(currentSlot, maxRows).find(
+      (slot) => emptySlots.has(slot) || slotToNode.has(slot),
+    )
+    if (nextSlot == null) break
+    const nextOccupant = slotToNode.get(nextSlot)
+    patches.push({
+      nodeId: moving.id,
+      patch: {
+        cellSlot: nextSlot,
+        offsetX: 0,
+        offsetY: 0,
+      },
+    })
+    slotToNode.delete(currentSlot)
+    slotToNode.set(nextSlot, moving)
+    if (emptySlots.has(nextSlot)) break
+    currentSlot = nextSlot
+    moving = nextOccupant
+  }
+
+  return patches
+}
+
+function resolveDetailHorizontalDisplacementPatches(
+  process: Process,
+  nodeId: string,
+  basePatch: Partial<Node>,
+): NodePlacementPatch[] {
+  const dragged = process.nodes.find((node) => node.id === nodeId)
+  const targetLayout = basePatch.detailLayout
+  const laneId = basePatch.laneId ?? dragged?.laneId
+  if (!dragged || !targetLayout || !laneId) return [{ nodeId, patch: basePatch }]
+  if (targetLayout.column == null || targetLayout.row == null) return [{ nodeId, patch: basePatch }]
+
+  const sameLane = process.nodes.filter((node) => node.id !== nodeId && node.laneId === laneId)
+  const occupied = new Map<string, Node>()
+  for (const node of sameLane) {
+    if (!node.detailLayout?.column || !node.detailLayout?.row) continue
+    occupied.set(`${node.detailLayout.column}:${node.detailLayout.row}`, node)
+  }
+
+  const key = `${targetLayout.column}:${targetLayout.row}`
+  if (!occupied.has(key)) return [{ nodeId, patch: basePatch }]
+
+  const patches: NodePlacementPatch[] = [{ nodeId, patch: basePatch }]
+  let column = targetLayout.column
+  const row = targetLayout.row
+  let moving = occupied.get(key)
+  const visited = new Set<string>()
+
+  while (moving && !visited.has(moving.id)) {
+    visited.add(moving.id)
+    column += 1
+    const nextKey = `${column}:${row}`
+    const nextOccupant = occupied.get(nextKey)
+    patches.push({
+      nodeId: moving.id,
+      patch: {
+        detailLayout: { ...(moving.detailLayout ?? {}), column, row },
+        localOrder: column,
+        cellOrder: Math.max(0, column - 1),
+        zoneOrder: Math.max(0, column - 1),
+        offsetX: 0,
+        offsetY: 0,
+      },
+    })
+    if (!nextOccupant) break
+    moving = nextOccupant
+  }
+
+  return patches
+}
+
+export function resolveNodePlacementPatchesAfterDrag(
+  process: Process,
+  nodeId: string,
+  drop: DropRect,
+  ctx: {
+    laneBands: LaneBand[]
+    zoneBands?: ZoneLayoutBand[]
+    placed: PlacedNode[]
+    isOverview: boolean
+    detailHorizontal?: boolean
+  },
+): NodePlacementPatch[] {
+  const patch = resolveNodePlacementAfterDrag(process, nodeId, drop, ctx)
+  if (Object.keys(patch).length === 0) return []
+  if (ctx.isOverview && patch.cellSlot != null) {
+    return resolveOverviewDisplacementPatches(process, nodeId, patch)
+  }
+  if (ctx.detailHorizontal && patch.detailLayout) {
+    return resolveDetailHorizontalDisplacementPatches(process, nodeId, patch)
+  }
+  return [{ nodeId, patch }]
 }
 
 export { OVERVIEW_GRID_METRICS }

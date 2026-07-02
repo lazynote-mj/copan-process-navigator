@@ -58,6 +58,22 @@ export function buildOverviewEdgesFromSequence(): Edge[] {
   return [...e2eMainFlow.links, ...subLinks].map(toEdge)
 }
 
+export function filterEdgesWithValidEndpoints(
+  nodeIds: Set<string>,
+  edges: Edge[],
+): { edges: Edge[]; removed: Edge[] } {
+  const valid: Edge[] = []
+  const removed: Edge[] = []
+  for (const edge of edges) {
+    if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
+      valid.push(edge)
+    } else {
+      removed.push(edge)
+    }
+  }
+  return { edges: valid, removed }
+}
+
 export function buildOverviewProcessGroups(): OverviewProcessGroup[] {
   return structuredClone(overviewProcessGroupsJson as OverviewProcessGroup[])
 }

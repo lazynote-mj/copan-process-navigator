@@ -2,6 +2,8 @@ import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { ProcessNodeData } from '../../../lib/layout/elkLayout'
 import './merge-node.css'
+import './process-node.css'
+import { NodeReviewBadge } from './NodeReviewBadge'
 
 const HANDLES = [
   { id: 'top', position: Position.Top },
@@ -13,6 +15,7 @@ const HANDLES = [
 function MergeNodeCard({ data, selected }: NodeProps & { data: ProcessNodeData }) {
   return (
     <div className={`merge-node${selected ? ' merge-node--selected' : ''}`}>
+      <NodeReviewBadge reviewMode={data.reviewMode} status={data.reviewStatus} />
       <div className="merge-node__circle" aria-hidden />
       <span className="merge-node__label" title={data.name}>
         {data.name}

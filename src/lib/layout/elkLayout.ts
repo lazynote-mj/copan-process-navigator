@@ -1,5 +1,5 @@
 import type { Edge as FlowEdge, Node as FlowNode } from '@xyflow/react'
-import type { NodeType, Process } from '../../types/process'
+import type { NodeReviewStatus, NodeType, Process } from '../../types/process'
 import type { EdgeType } from '../../types/edgeTypes'
 import type { EdgeHandleId } from '../../types/process'
 import type { EdgeValidationStatus } from './edgeRouteValidation'
@@ -64,8 +64,8 @@ export type ProcessNodeData = {
   phaseLabel: string
   phaseOrder: number
   localOrder: number
-  /** PDF ERP 단계 번호 — Detail 뱃지 (미지정 시 뱃지 숨김) */
-  stepBadge?: number
+  /** Detail 자동 실행 순서 뱃지 (view-only, 미지정 시 숨김) */
+  stepBadge?: number | string
   compact?: boolean
   system?: string
   decisionSubtitle?: string
@@ -81,6 +81,9 @@ export type ProcessNodeData = {
   layoutHeight?: number
   /** 프로세스 상세 — phaseOrder 원형 뱃지 (Overview는 false) */
   showStepBadge?: boolean
+  /** Builder Review Mode badge */
+  reviewMode?: boolean
+  reviewStatus?: NodeReviewStatus
 }
 
 export type LayoutOptions = {

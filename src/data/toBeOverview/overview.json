@@ -253,8 +253,7 @@
       "description": "신규 사업기회를 발굴하고 등록합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "manual"
+      "controls": []
     },
     {
       "id": "business-review",
@@ -271,8 +270,7 @@
       "description": "사업 참여 여부 및 실행 가능성을 검토합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "contract-approval",
@@ -289,8 +287,7 @@
       "description": "사업 계약 체결을 위한 품의를 상신합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "contract-register",
@@ -309,8 +306,7 @@
       "outputs": [
         "계약코드 생성"
       ],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "project-register",
@@ -329,8 +325,7 @@
       "outputs": [
         "프로젝트코드 생성"
       ],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "project-approval",
@@ -347,13 +342,12 @@
       "description": "프로젝트 실행을 위한 최종 품의를 상신합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "purchase-request",
       "name": "구매요청",
-      "type": "erp",
+      "type": "linked-process",
       "laneId": "business",
       "phaseId": "procure-to-pay::p1",
       "phaseOrder": 7,
@@ -366,8 +360,7 @@
       "description": "프로젝트 또는 운영 단위 구매 요청을 등록합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "linked-process"
+      "controls": []
     },
     {
       "id": "product-check",
@@ -385,8 +378,7 @@
       "description": "품목 Master 존재 여부를 확인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "vendor-check",
@@ -404,8 +396,7 @@
       "description": "거래처 Master 존재 여부를 확인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "product-register-request",
@@ -423,8 +414,7 @@
       "description": "신규 품목 등록을 요청합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "product-register-approval",
@@ -442,8 +432,7 @@
       "description": "신규 품목 등록을 승인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "vendor-register",
@@ -461,8 +450,7 @@
       "description": "신규 거래처 등록을 요청합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "vendor-register-approval",
@@ -480,8 +468,7 @@
       "description": "신규 거래처 등록을 승인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "po-approval",
@@ -498,8 +485,7 @@
       "description": "발주 품의를 상신하고 승인받습니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "purchase-order",
@@ -517,8 +503,7 @@
       "description": "승인된 발주 정보를 등록합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "inbound-info",
@@ -536,13 +521,12 @@
       "description": "발주 정보를 WMS로 전달합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "api"
+      "controls": []
     },
     {
       "id": "inbound-check",
       "name": "입고확인",
-      "type": "erp",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "procure-to-pay::p7",
       "phaseOrder": 13,
@@ -554,13 +538,12 @@
       "description": "입고 예정 물량을 확인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "wms-oms"
+      "controls": []
     },
     {
       "id": "inbound-confirm",
       "name": "입고확정",
-      "type": "system",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "procure-to-pay::p8",
       "phaseOrder": 14,
@@ -572,8 +555,7 @@
       "description": "입고 확정 결과를 ERP로 전송합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "wms-oms"
+      "controls": []
     },
     {
       "id": "ap-close",
@@ -590,8 +572,7 @@
       "description": "매입 마감을 확정합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "ap-voucher-pending",
@@ -608,8 +589,7 @@
       "description": "매입 전표 생성(미결) 상태를 등록합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "fi-posting",
@@ -626,8 +606,7 @@
       "description": "매입 전표를 회계에 반영합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "online-order",
@@ -644,8 +623,7 @@
       "description": "온라인 몰에서 주문이 발생합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "pos"
+      "controls": []
     },
     {
       "id": "order-sync",
@@ -662,8 +640,7 @@
       "description": "주문 정보를 OMS/ERP로 연동합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "api"
+      "controls": []
     },
     {
       "id": "shipment-request",
@@ -681,13 +658,12 @@
       "description": "출고 지시를 WMS로 전달합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "api"
+      "controls": []
     },
     {
       "id": "shipment-check",
       "name": "출고확인",
-      "type": "erp",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "order-to-cash::p4",
       "phaseOrder": 21,
@@ -699,13 +675,12 @@
       "description": "출고 대상 및 수량을 확인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "wms-oms"
+      "controls": []
     },
     {
       "id": "shipment-confirm",
       "name": "출고확정",
-      "type": "system",
+      "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "order-to-cash::p5",
       "phaseOrder": 22,
@@ -717,8 +692,7 @@
       "description": "출고 확정 결과를 ERP로 전송합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "wms-oms"
+      "controls": []
     },
     {
       "id": "sales-close",
@@ -735,8 +709,7 @@
       "description": "매출 마감을 확정합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "sales-posting",
@@ -753,13 +726,12 @@
       "description": "매출 전표를 회계에 반영합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "order-register",
       "name": "주문등록",
-      "type": "erp",
+      "type": "linked-process",
       "laneId": "business",
       "phaseId": "overview::order-register",
       "phaseOrder": 26,
@@ -772,8 +744,7 @@
       "description": "연동된 주문 정보를 ERP에 등록합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "linked-process"
+      "controls": []
     },
     {
       "id": "sales-inquiry",
@@ -790,8 +761,7 @@
       "description": "매출 마감 대상을 조회합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "prepayment-process",
@@ -809,8 +779,7 @@
       "description": "PG사 선수금 및 예약판매 선수금 반제를 처리합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "interface-rule-consignment-inbound",
@@ -823,13 +792,12 @@
       "processZone": "inbound-inventory",
       "cellOrder": 0,
       "cellSlot": 2,
-      "system": "이지어드민 ↔ ERP",
+      "system": "",
       "owner": "시스템",
       "description": "입고/재고 연동 시 위탁 여부를 시스템이 판단합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "connection-point"
+      "controls": []
     },
     {
       "id": "interface-rule-consignment-return",
@@ -842,17 +810,16 @@
       "processZone": "sales-shipment",
       "cellOrder": 0,
       "cellSlot": 2,
-      "system": "이지어드민 ↔ ERP",
+      "system": "",
       "owner": "시스템",
       "description": "반품/입고 연동 시 위탁 여부를 시스템이 판단합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "connection-point"
+      "controls": []
     },
     {
       "id": "consignment-stock-status",
-      "name": "위탁재고현황",
+      "name": "위탁재고 현황",
       "type": "erp",
       "laneId": "partnership",
       "phaseId": "overview::consignment",
@@ -866,8 +833,7 @@
       "description": "위탁 재고 현황을 조회합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "consignment-sales-register",
@@ -885,8 +851,7 @@
       "description": "1차 위탁매출을 집계·등록합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "consignment-sales-close",
@@ -904,8 +869,7 @@
       "description": "위탁매출 마감을 확정합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "settlement-anomaly-check",
@@ -923,8 +887,7 @@
       "description": "정산 이상 여부를 확인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "exception-handling",
@@ -942,8 +905,7 @@
       "description": "마감·정산 예외 사항을 처리합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "royalty-sales-aggregate",
@@ -961,8 +923,7 @@
       "description": "로열티 매출을 집계합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "royalty-sales-close",
@@ -980,8 +941,7 @@
       "description": "로열티 매출 마감을 확정합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "mg-deduct-check",
@@ -999,8 +959,7 @@
       "description": "로열티 MG 차감 대상 여부를 확인합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "decision"
+      "controls": []
     },
     {
       "id": "mg-offset-process",
@@ -1018,13 +977,12 @@
       "description": "MG 상계를 처리합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "settlement-posting",
       "name": "정산전표처리",
-      "type": "system",
+      "type": "linked-process",
       "laneId": "business",
       "phaseId": "overview::royalty-mg",
       "phaseOrder": 32,
@@ -1037,8 +995,7 @@
       "description": "정산 전표를 처리합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "linked-process"
+      "controls": []
     },
     {
       "id": "settlement-fi-posting",
@@ -1056,8 +1013,7 @@
       "description": "정산 회계전표를 장부에 반영합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "regular-fund-execution",
@@ -1075,8 +1031,7 @@
       "description": "자금기준일 수립기준에 따라 정기 자금을 집행합니다.",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "erp"
+      "controls": []
     },
     {
       "id": "store-sales",
@@ -1093,8 +1048,7 @@
       "description": "매장에서 POS/이지체인 기준 판매 처리",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "manual"
+      "controls": []
     },
     {
       "id": "popup-sales",
@@ -1111,8 +1065,7 @@
       "description": "팝업스토어 현장 판매 처리",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "manual"
+      "controls": []
     },
     {
       "id": "concert-sales",
@@ -1130,12 +1083,11 @@
       "description": "콘서트/행사 현장 판매 처리",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "manual"
+      "controls": []
     },
     {
       "id": "pos-easychain-sync",
-      "name": "POS/이지체인 판매정보 연동",
+      "name": "판매정보 연동",
       "type": "interface",
       "laneId": "retail-easychain",
       "phaseId": "order-to-cash::p2",
@@ -1144,13 +1096,12 @@
       "processZone": "sales-shipment",
       "cellOrder": 5,
       "cellSlot": 6,
-      "system": "이지체인→ERP",
+      "system": "이지체인/POS→ERP",
       "owner": "판매현장",
       "description": "현장 POS 판매정보를 ERP로 연동",
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "api"
+      "controls": []
     },
     {
       "id": "popup-concert-stock-sales-sync",
@@ -1171,13 +1122,12 @@
       ],
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "api"
+      "controls": []
     },
     {
       "id": "return-handling",
       "name": "반품",
-      "type": "interface",
+      "type": "linked-process",
       "laneId": "business",
       "phaseId": "overview::return",
       "phaseOrder": 28,
@@ -1193,13 +1143,12 @@
       ],
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "linked-process"
+      "controls": []
     },
     {
       "id": "stock-transfer-handling",
       "name": "재고이동",
-      "type": "interface",
+      "type": "linked-process",
       "laneId": "business",
       "phaseId": "overview::warehouse-transfer",
       "phaseOrder": 29,
@@ -1215,13 +1164,12 @@
       ],
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "linked-process"
+      "controls": []
     },
     {
       "id": "other-issue-handling",
       "name": "기타출고",
-      "type": "interface",
+      "type": "linked-process",
       "laneId": "business",
       "phaseId": "overview::other-outbound",
       "phaseOrder": 30,
@@ -1237,8 +1185,7 @@
       ],
       "inputs": [],
       "outputs": [],
-      "controls": [],
-      "overviewType": "linked-process"
+      "controls": []
     }
   ],
   "edges": [

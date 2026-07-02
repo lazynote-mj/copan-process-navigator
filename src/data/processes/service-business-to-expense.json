@@ -16,10 +16,10 @@
       "name": "사업기회확보",
       "type": "manual",
       "laneId": "business",
-      "phaseId": "p1",
+      "phaseId": "business-to-project::p1",
       "system": "수작업",
       "owner": "사업부",
-      "description": "사업기회확보",
+      "description": "사업����회확보",
       "inputs": [],
       "outputs": [],
       "controls": [],
@@ -31,22 +31,30 @@
       "name": "사업참여검토",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p2",
-      "system": "ERP",
+      "phaseId": "business-to-project::p2",
+      "system": "그룹웨어",
       "owner": "사업부",
       "description": "사업참여검토",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 2
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-business-to-expense-step-03",
       "name": "계약등록",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p3",
+      "phaseId": "business-to-project::p3",
       "system": "ERP",
       "owner": "사업부",
       "description": "계약등록",
@@ -54,59 +62,68 @@
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-business-to-expense-step-04",
-      "name": "사업계약품의(G/W)",
+      "name": "사업계약품의",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p4",
-      "system": "G/W",
+      "phaseId": "business-to-project::p4",
+      "system": "그룹웨어",
       "owner": "사업부",
       "description": "사업계약품의(G/W)",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
-    },
-    {
-      "id": "service-business-to-expense-step-05",
-      "name": "프로젝트실행품의입력",
-      "type": "erp",
-      "laneId": "business",
-      "phaseId": "p5",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "프로젝트실행품의입력",
-      "inputs": [],
-      "outputs": [],
-      "controls": [],
-      "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 4
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-business-to-expense-step-06",
-      "name": "프로젝트 실행품의(G/W)",
+      "name": "프로젝트 실행품의",
       "type": "decision",
       "laneId": "business",
-      "phaseId": "p6",
-      "system": "G/W",
+      "phaseId": "business-to-project::p6",
+      "system": "그룹웨어",
       "owner": "사업부",
       "description": "프로젝트 실행품의(G/W)",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-business-to-expense-step-07",
-      "name": "프로젝트등록",
+      "name": "프로젝트등록(확정)",
       "type": "erp",
       "laneId": "business",
-      "phaseId": "p7",
+      "phaseId": "business-to-project::p5",
       "system": "ERP",
       "owner": "사업부",
       "description": "프로젝트등록",
@@ -114,43 +131,44 @@
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 7
-    },
-    {
-      "id": "service-business-to-expense-step-08",
-      "name": "WBS코드등록",
-      "type": "erp",
-      "laneId": "business",
-      "phaseId": "p8",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "WBS코드등록",
-      "inputs": [],
-      "outputs": [],
-      "controls": [],
-      "phaseOrder": 8,
-      "localOrder": 8
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-business-to-expense-step-09",
-      "name": "프로젝트 지출결의(G/W)",
+      "name": "프로젝트 지출결의",
       "type": "decision",
       "laneId": "business",
       "phaseId": "p9",
-      "system": "G/W",
+      "system": "그룹웨어",
       "owner": "사업부",
       "description": "프로젝트 지출결의(G/W)",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 9
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 5
+      },
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "service-business-to-expense-step-10",
       "name": "전표생성(미결)",
-      "type": "erp",
-      "laneId": "finance",
+      "type": "system",
+      "laneId": "business",
       "phaseId": "p10",
       "system": "ERP",
       "owner": "재무팀",
@@ -159,7 +177,203 @@
       "outputs": [],
       "controls": [],
       "phaseOrder": 10,
-      "localOrder": 10
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 5
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "node-mqq7rl59-5y9jn",
+      "name": "프로젝트등록(미결)",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p5",
+      "phaseOrder": 1,
+      "localOrder": 3,
+      "owner": "",
+      "system": "",
+      "description": "",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "id": "node-mqq83zuq-exc6t",
+      "name": "품목등록 Process",
+      "type": "linked-process",
+      "laneId": "business",
+      "phaseId": "business-to-project::p1",
+      "phaseOrder": 1,
+      "localOrder": 5,
+      "owner": "",
+      "system": "연결 프로세스",
+      "description": "",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    {
+      "name": "계약서 날인",
+      "type": "manual",
+      "laneId": "business",
+      "phaseId": "business-to-project::p1",
+      "system": "수작업",
+      "owner": "사업부",
+      "description": "승인된 계약서에 날인을 완료한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 1,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 2,
+        "row": 4
+      },
+      "id": "node-mqynudta-o10ci"
+    },
+    {
+      "name": "날인 계약서 첨부(PDF)",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p3",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "날인 완료 계약서를 ERP 계약 정보에 PDF로 첨부한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 5
+      },
+      "id": "node-mqynudta-rm1e8"
+    },
+    {
+      "name": "계약등록(확정)",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "business-to-project::p3",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "날인 계약서 첨부 후 ERP 계약 정보를 확정한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 3,
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "id": "node-mqynudtb-i0tae"
+    },
+    {
+      "name": "구매요청",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "procure-to-pay::p1",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "계약, 프로젝트, WBS, 기준정보가 준비되면 구매요청을 등록하여 구매관리 Capability로 연결한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 11,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "id": "node-mr1a4in1-20ef1"
+    },
+    {
+      "name": "거래처 등록 PROCESS",
+      "type": "linked-process",
+      "laneId": "business",
+      "phaseId": "p11",
+      "system": "연결 프로세스",
+      "owner": "사업부 / 상생협력팀",
+      "description": "구매요청 전 거래처 Master가 필요한 경우 거래처 등록 프로세스로 연결한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 11,
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 5,
+        "row": 2
+      },
+      "id": "node-mr1a4in1-j2cco"
+    },
+    {
+      "name": "구매요청 확정",
+      "type": "erp",
+      "laneId": "business",
+      "phaseId": "procure-to-pay::p1",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "계약, 프로젝트, WBS, 기준정보가 준비되면 구매요청을 등록하여 구매관리 Capability로 연결한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 10,
+      "localOrder": 4,
+      "cellOrder": 6,
+      "zoneOrder": 3,
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 11,
+      "detailLayout": {
+        "column": 4,
+        "row": 2
+      },
+      "id": "node-mr1afyw0-3ulk7"
     }
   ],
   "edges": [
@@ -172,8 +386,10 @@
       "type": "normal",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-business-to-expense-e02",
@@ -185,6 +401,14 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "labelPlacement": {
+        "offset": {
+          "x": 20,
+          "y": -8.759999999999991
+        }
       }
     },
     {
@@ -197,31 +421,23 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-business-to-expense-e04",
       "source": "service-business-to-expense-step-04",
-      "target": "service-business-to-expense-step-05",
+      "target": "node-mqynudtb-i0tae",
       "condition": "Y",
       "label": "Y",
       "type": "condition",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
-    },
-    {
-      "id": "service-business-to-expense-e05",
-      "source": "service-business-to-expense-step-05",
-      "target": "service-business-to-expense-step-06",
-      "condition": "",
-      "label": "",
-      "type": "normal",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-business-to-expense-e06",
@@ -232,32 +448,10 @@
       "type": "condition",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
-      }
-    },
-    {
-      "id": "service-business-to-expense-e07",
-      "source": "service-business-to-expense-step-07",
-      "target": "service-business-to-expense-step-08",
-      "condition": "",
-      "label": "",
-      "type": "normal",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
-    },
-    {
-      "id": "service-business-to-expense-e08",
-      "source": "service-business-to-expense-step-08",
-      "target": "service-business-to-expense-step-09",
-      "condition": "",
-      "label": "",
-      "type": "normal",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+        "handlesLocked": true
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "service-business-to-expense-e09",
@@ -265,11 +459,13 @@
       "target": "service-business-to-expense-step-10",
       "condition": "Y",
       "label": "Y",
-      "type": "condition",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "service-business-to-expense-branch-01",
@@ -280,7 +476,15 @@
       "type": "return",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
+        "handlesLocked": true
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -2.5049999999999955,
+          "y": 27
+        }
       }
     },
     {
@@ -292,31 +496,209 @@
       "type": "return",
       "routing": {
         "mode": "auto",
+        "handlesLocked": true
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -0.5049999999999955,
+          "y": 26
+        }
+      }
+    },
+    {
+      "id": "edge-mqq7g8nh-gor74",
+      "source": "service-business-to-expense-step-07",
+      "target": "node-mr1a4in1-20ef1",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
         "handleAuto": true
       }
     },
     {
-      "id": "service-business-to-expense-branch-03",
+      "id": "edge-mqyo1dtb-eohez",
+      "source": "node-mqynudtb-i0tae",
+      "target": "node-mqynudta-o10ci",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "날인",
+      "condition": "계약서 날인",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqyo1l7x-fglsg",
+      "source": "node-mqynudta-o10ci",
+      "target": "node-mqynudta-rm1e8",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqyo1thm-zv4h8",
+      "source": "node-mqynudta-rm1e8",
+      "target": "node-mqynudtb-i0tae",
+      "sourceHandle": "right",
+      "targetHandle": "bottom",
+      "type": "normal",
+      "label": "첨부완료",
+      "condition": "날인 계약서 첨부 완료",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      }
+    },
+    {
+      "id": "edge-mqyo2j4r-moj3r",
+      "source": "node-mqynudtb-i0tae",
+      "target": "node-mqq7rl59-5y9jn",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "normal",
+      "label": "정상",
+      "condition": "프로젝트 등록 진행",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mr19zoe5-eudqt",
+      "source": "node-mqq7rl59-5y9jn",
+      "target": "service-business-to-expense-step-06",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "정상",
+      "condition": "프로젝트 실행품의",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mr1a0f50-hma50",
+      "source": "node-mqq83zuq-exc6t",
+      "target": "node-mr1a4in1-20ef1",
+      "sourceHandle": "left",
+      "targetHandle": "right",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      }
+    },
+    {
+      "id": "edge-mr1a6gv5-71tj3",
       "source": "service-business-to-expense-step-06",
-      "target": "service-business-to-expense-step-05",
-      "condition": "N",
-      "label": "N",
+      "target": "node-mqq7rl59-5y9jn",
+      "sourceHandle": "left",
+      "targetHandle": "left",
       "type": "return",
+      "label": "N",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      },
+      "labelPlacement": {
+        "offset": {
+          "x": -2.080000000000041,
+          "y": 29
+        }
+      }
+    },
+    {
+      "id": "edge-mr1a8acb-qhon9",
+      "source": "node-mr1a4in1-20ef1",
+      "target": "node-mr1afyw0-3ulk7",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      }
+    },
+    {
+      "id": "edge-mr1a9fdr-fn1z4",
+      "source": "node-mr1a4in1-j2cco",
+      "target": "node-mr1a4in1-20ef1",
+      "type": "normal",
+      "label": "",
+      "condition": "",
       "routing": {
         "mode": "auto",
         "handleAuto": true
       }
     },
     {
-      "id": "service-business-to-expense-branch-04",
-      "source": "service-business-to-expense-step-09",
-      "target": "service-business-to-expense-step-08",
-      "condition": "N",
-      "label": "N",
-      "type": "return",
+      "id": "edge-mr1agzlt-1nf3g",
+      "source": "node-mr1afyw0-3ulk7",
+      "target": "service-business-to-expense-step-09",
+      "type": "normal",
+      "label": "",
+      "condition": "",
       "routing": {
         "mode": "auto",
         "handleAuto": true
+      }
+    }
+  ],
+  "zones": [
+    {
+      "id": "zone-mqq8052m-bvax2",
+      "name": "사업부선택영역",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "service-business-to-expense-step-01",
+        "service-business-to-expense-step-02"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    },
+    {
+      "id": "zone-mr1acvvl-h6c3n",
+      "name": "기준정보 연결",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "node-mr1a4in1-j2cco",
+        "node-mqq83zuq-exc6t"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
       }
     }
   ]

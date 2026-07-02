@@ -10,28 +10,11 @@ import {
   formatOverviewNodeSubtitle,
   resolveOverviewNodeType,
 } from './overviewNodeDisplay'
-import { resolveOverviewVisualClass } from '../types/overviewNodeTypes'
+import { resolveNodeVisualClass } from '../types/nodeTypes'
 import { isConnectorNode, resolveConnectorSubType } from './layout/connectorLayout'
 import type { PlacedNode } from './layout/laneLayout'
 
 type PlacedFlowNode = PlacedNode & { cell3Col?: boolean }
-
-function resolveDetailStepBadge(source: Node, process: Process): number | undefined {
-  if (source.type === 'manual' || source.type === 'linked-process') return undefined
-  if (source.stepBadge === 0) return undefined
-  if (Number.isFinite(source.stepBadge) && (source.stepBadge ?? 0) > 0) {
-    return source.stepBadge
-  }
-
-  const ordered = [...process.nodes].sort(
-    (a, b) =>
-      resolveNodePhaseOrder(a, process) - resolveNodePhaseOrder(b, process) ||
-      resolveNodeLocalOrder(a, process) - resolveNodeLocalOrder(b, process) ||
-      a.id.localeCompare(b.id),
-  )
-  const index = ordered.findIndex((node) => node.id === source.id)
-  return index >= 0 ? index + 1 : undefined
-}
 
 export function buildProcessFlowNode(
   source: Node,
@@ -39,6 +22,8 @@ export function buildProcessFlowNode(
   placed: PlacedFlowNode,
   compact = false,
   scope: 'overview' | 'detail' = compact ? 'overview' : 'detail',
+  autoStepBadge?: number | string,
+  showAutoNumber = true,
 ): FlowNode<ProcessNodeData> {
   const lane = getLaneById(process, source.laneId)
   const isDecision = source.type === 'decision'
@@ -46,12 +31,12 @@ export function buildProcessFlowNode(
   const isConnector = isConnectorNode(source)
   const isDatabase = source.type === 'database'
   const isOverview = scope === 'overview'
-  const stepBadge = isOverview ? source.stepBadge : resolveDetailStepBadge(source, process)
+  const stepBadge = isOverview ? undefined : autoStepBadge
   const overviewType = isOverview
     ? resolveOverviewNodeType(source)
     : source.overviewType
-  const overviewVisualClass = overviewType
-    ? resolveOverviewVisualClass(overviewType, source.system)
+  const overviewVisualClass = isOverview
+    ? resolveNodeVisualClass(source.type, source.system)
     : undefined
   const displayName = isOverview ? formatOverviewNodePrimaryLabel(source) : undefined
   const overviewSubtitle = isOverview ? formatOverviewNodeSubtitle(source, process) : undefined
@@ -91,9 +76,11 @@ export function buildProcessFlowNode(
       compact: isDecision || isInterfaceRule ? compact : isConnector ? true : placed.cell3Col ? true : compact,
       cell3Col: placed.cell3Col === true,
       overviewVisualClass,
-      showStepBadge: !isOverview,
+      showStepBadge: !isOverview && showAutoNumber && stepBadge != null && String(stepBadge).trim() !== '',
       layoutWidth: placed.width,
       layoutHeight: placed.height,
+      reviewMode: false,
+      reviewStatus: source.review?.status ?? 'not-reviewed',
     },
     style: { width: placed.width, height: placed.height },
     zIndex: isInterfaceRule ? 11 : isConnector ? 12 : 10,

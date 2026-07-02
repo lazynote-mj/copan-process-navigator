@@ -4,6 +4,7 @@ import type { ProcessNodeData } from '../../../lib/layout/elkLayout'
 import './process-node.css'
 import './database-node.css'
 import { NodeStepBadge } from './NodeStepBadge'
+import { NodeReviewBadge } from './NodeReviewBadge'
 
 const SIDE_HANDLES = [
   { id: 'left', position: Position.Left },
@@ -12,12 +13,16 @@ const SIDE_HANDLES = [
   { id: 'bottom', position: Position.Bottom },
 ] as const
 
+function finiteOr(value: number | undefined, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
 function DatabaseNodeCard({ data, selected, width, height }: NodeProps & { data: ProcessNodeData }) {
-  const boxW = typeof width === 'number' ? width : 170
-  const boxH = typeof height === 'number' ? height : 56
+  const boxW = finiteOr(width, 170)
+  const boxH = finiteOr(height, 56)
   const title = data.displayName ?? data.name
-  const badgeStep = data.stepBadge ?? 0
-  const showStepBadge = data.showStepBadge !== false && badgeStep > 0
+  const badgeStep = data.stepBadge
+  const showStepBadge = data.showStepBadge !== false && badgeStep != null && String(badgeStep).trim() !== ''
   const compact = data.compact === true
   const cell3Col = data.cell3Col === true
 
@@ -27,6 +32,7 @@ function DatabaseNodeCard({ data, selected, width, height }: NodeProps & { data:
       style={{ width: boxW, height: boxH }}
     >
       {showStepBadge ? <NodeStepBadge step={badgeStep} className={compact ? 'process-node__step-badge--compact' : ''} /> : null}
+      <NodeReviewBadge reviewMode={data.reviewMode} status={data.reviewStatus} />
       <svg
         className="database-node__shape"
         viewBox={`0 0 ${boxW} ${boxH}`}

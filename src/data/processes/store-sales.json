@@ -1,195 +1,365 @@
 {
   "id": "store-sales",
-  "name": "매장판매 ~ 출고 ~ 매출전표",
-  "source": "SCM TO-BE",
+  "type": "detail",
+  "name": "매장 판매 ~ 출고 ~ 매출전표 : 제/상품",
+  "description": "POS/EasyChain 매장판매, ERP 주문/출고, 재고(-), 매출마감, 전표생성 및 재무 승인까지의 Copan 운영 프로세스",
   "version": "v1.0",
-  "description": "PDF 도형 기준 매장 판매~출고~매출전표 프로세스",
-  "overviewNodeId": "store-sales",
-  "status": "draft",
-  "lastModified": "2026-06-22",
+  "status": "review",
+  "lastModified": "2026-06-29",
   "owner": "ERP PMO",
-  "phases": [],
-  "lanes": [],
   "nodes": [
     {
       "id": "store-sales-step-01",
-      "name": "매장 판매",
-      "type": "manual",
+      "name": "매장판매",
+      "type": "pos",
       "laneId": "retail-easychain",
       "phaseId": "p1",
-      "system": "POS",
+      "system": "EasyChain/POS",
       "owner": "판매현장",
-      "description": "매장 판매",
+      "description": "매장에서 POS/이지체인으로 판매를 처리한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 1,
-      "localOrder": 1
+      "localOrder": 1,
+      "offsetX": 0,
+      "offsetY": 0
     },
     {
       "id": "store-sales-step-02",
       "name": "매장 매출마감등록",
-      "type": "pos",
+      "type": "erp",
       "laneId": "retail-easychain",
-      "phaseId": "p2",
-      "system": "이지체인/POS",
+      "phaseId": "order-to-cash::p7",
+      "system": "OmniEsol ERP",
       "owner": "판매현장",
-      "description": "매장 매출마감등록",
+      "description": "매장 판매분 매출마감 등록을 수행한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 2,
-      "localOrder": 2
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 2
     },
     {
       "id": "store-sales-step-03",
-      "name": "주문등록(POS 연동)",
-      "type": "pos",
+      "name": "주문등록",
+      "type": "erp",
       "laneId": "retail-easychain",
       "phaseId": "p3",
-      "system": "POS",
+      "system": "OmniEsol ERP",
       "owner": "판매현장",
-      "description": "주문등록(POS 연동)",
+      "description": "매장 판매 주문을 ERP 주문으로 등록한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 3,
-      "localOrder": 3
+      "localOrder": 1,
+      "cellOrder": 0,
+      "zoneOrder": 0,
+      "detailLayout": {
+        "column": 1,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 2
     },
     {
       "id": "store-sales-step-04",
       "name": "주문확정",
       "type": "erp",
-      "laneId": "business",
+      "laneId": "retail-easychain",
       "phaseId": "p4",
-      "system": "ERP",
-      "owner": "사업부",
-      "description": "주문확정",
+      "system": "OmniEsol ERP",
+      "owner": "판매현장",
+      "description": "매장 판매 주문을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 4,
-      "localOrder": 4
+      "localOrder": 2,
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 3
     },
     {
       "id": "store-sales-step-05",
-      "name": "이지어드민연동현황",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "name": "출고요청",
+      "type": "erp",
+      "laneId": "retail-easychain",
       "phaseId": "p5",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "이지어드민연동현황",
+      "system": "OmniEsol ERP",
+      "owner": "판매현장",
+      "description": "매장 판매분 출고를 요청한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 5,
-      "localOrder": 5
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 4
     },
     {
       "id": "store-sales-step-06",
-      "name": "출고요청",
-      "type": "wms-oms",
-      "laneId": "warehouse-easyadmin",
+      "name": "출고확정",
+      "type": "erp",
+      "laneId": "retail-easychain",
       "phaseId": "p6",
-      "system": "이지어드민/WMS",
-      "owner": "물류센터",
-      "description": "출고요청",
+      "system": "OmniEsol ERP",
+      "owner": "판매현장",
+      "description": "매장 판매분 출고 확정 결과를 ERP에 반영한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 6,
-      "localOrder": 6
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 4
     },
     {
       "id": "store-sales-step-07",
-      "name": "출고확정",
+      "name": "출고확정 확인",
       "type": "wms-oms",
       "laneId": "warehouse-easyadmin",
       "phaseId": "p7",
-      "system": "이지어드민/WMS",
+      "system": "EasyAdmin WMS",
       "owner": "물류센터",
-      "description": "출고확정",
+      "description": "물류센터가 출고 확정 결과를 확인한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 7,
-      "localOrder": 7
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "offsetX": 0,
+      "offsetY": 0,
+      "detailLayout": {
+        "column": 4,
+        "row": 2
+      },
+      "stepBadge": 5
     },
     {
       "id": "store-sales-step-08",
-      "name": "위탁여부",
-      "type": "decision",
+      "name": "위탁여부 확인",
+      "type": "interface-rule",
       "laneId": "business",
       "phaseId": "p8",
-      "system": "ERP",
+      "system": "System Rule",
       "owner": "사업부",
-      "description": "위탁여부",
+      "description": "매장 판매분의 위탁 여부를 판단한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 8,
-      "localOrder": 8
+      "localOrder": 3,
+      "cellOrder": 2,
+      "zoneOrder": 2,
+      "detailLayout": {
+        "column": 3,
+        "row": 1
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
     },
     {
       "id": "store-sales-step-09",
-      "name": "출고정보",
+      "name": "ERP 재고현황",
       "type": "database",
       "laneId": "business",
       "phaseId": "p9",
-      "system": "DATABASE",
-      "owner": "시스템",
-      "description": "출고정보",
+      "system": "OmniEsol ERP",
+      "owner": "사업부",
+      "description": "매장 판매 후 ERP 재고(-) 반영 결과를 조회한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 9,
-      "localOrder": 9
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 2
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
     },
     {
       "id": "store-sales-step-10",
-      "name": "일괄매출마감등록",
+      "name": "매출마감대상 집계",
       "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p10",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "일괄매출마감등록",
+      "laneId": "retail-easychain",
+      "phaseId": "order-to-cash::p7",
+      "system": "OmniEsol ERP",
+      "owner": "판매현장",
+      "description": "매장 판매 매출마감 대상을 집계한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 10,
-      "localOrder": 10
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 6
     },
     {
       "id": "store-sales-step-11",
       "name": "매출마감확정",
       "type": "erp",
-      "laneId": "finance",
-      "phaseId": "p11",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "매출마감확정",
+      "laneId": "retail-easychain",
+      "phaseId": "order-to-cash::p7",
+      "system": "OmniEsol ERP",
+      "owner": "판매현장",
+      "description": "매장 판매 매출마감을 확정한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 11,
-      "localOrder": 11
+      "localOrder": 4,
+      "cellOrder": 3,
+      "zoneOrder": 3,
+      "detailLayout": {
+        "column": 4,
+        "row": 4
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 7
     },
     {
       "id": "store-sales-step-12",
       "name": "전표생성(미결)",
-      "type": "erp",
-      "laneId": "finance",
+      "type": "system",
+      "laneId": "retail-easychain",
       "phaseId": "p12",
-      "system": "ERP",
-      "owner": "재무팀",
-      "description": "전표생성(미결)",
+      "system": "OmniEsol ERP",
+      "owner": "판매현장",
+      "description": "매장 매출마감확정 후 ERP가 매출전표를 미결 상태로 자동 생성한다. Auto Node Owner Rule에 따라 Owner는 판매현장으로 유지한다.",
       "inputs": [],
       "outputs": [],
       "controls": [],
       "phaseOrder": 12,
-      "localOrder": 12
+      "localOrder": 5,
+      "cellOrder": 4,
+      "zoneOrder": 4,
+      "detailLayout": {
+        "column": 5,
+        "row": 4
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 8
+    },
+    {
+      "id": "node-mqt0pojw-g74j0",
+      "name": "전표생성(미결)(AUTO)",
+      "type": "system",
+      "laneId": "retail-easychain",
+      "phaseId": "business-to-project::p1",
+      "phaseOrder": 1,
+      "localOrder": 2,
+      "owner": "판매현장",
+      "system": "OmniEsol ERP",
+      "description": "매장 매출마감등록 후 ERP가 매출전표를 자동 생성한다. Auto Node Owner Rule에 따라 Owner는 판매현장으로 유지한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "cellOrder": 1,
+      "zoneOrder": 1,
+      "detailLayout": {
+        "column": 2,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 3
+    },
+    {
+      "id": "store-sales-step-13",
+      "name": "전표조회승인",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance-accounting::p2",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "재무관리팀이 매장 판매 미결 전표를 조회하고 승인한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 13,
+      "localOrder": 6,
+      "cellOrder": 5,
+      "zoneOrder": 5,
+      "detailLayout": {
+        "column": 6,
+        "row": 3
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
+    },
+    {
+      "id": "store-sales-step-14",
+      "name": "매출전기처리",
+      "type": "erp",
+      "laneId": "finance",
+      "phaseId": "finance-accounting::p3",
+      "system": "OmniEsol ERP",
+      "owner": "재무관리팀",
+      "description": "승인된 매장 매출전표를 전기 처리한다.",
+      "inputs": [],
+      "outputs": [],
+      "controls": [],
+      "phaseOrder": 14,
+      "localOrder": 6,
+      "cellOrder": 5,
+      "zoneOrder": 5,
+      "detailLayout": {
+        "column": 6,
+        "row": 4
+      },
+      "offsetX": 0,
+      "offsetY": 0,
+      "stepBadge": 0
     }
   ],
   "edges": [
@@ -197,61 +367,69 @@
       "id": "store-sales-e01",
       "source": "store-sales-step-01",
       "target": "store-sales-step-02",
-      "condition": "API",
-      "label": "API",
+      "condition": "매장 매출마감 연동",
+      "label": "매출마감 API",
       "type": "api",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
+        "handlesLocked": true
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -29.75,
+          "y": 215
+        }
       }
     },
     {
       "id": "store-sales-e02",
       "source": "store-sales-step-02",
-      "target": "store-sales-step-03",
+      "target": "node-mqt0pojw-g74j0",
       "condition": "",
       "label": "",
       "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "store-sales-e03",
-      "source": "store-sales-step-03",
-      "target": "store-sales-step-04",
-      "condition": "",
-      "label": "",
-      "type": "normal",
+      "source": "store-sales-step-01",
+      "target": "store-sales-step-03",
+      "condition": "매장 주문등록 연동",
+      "label": "주문 API",
+      "type": "api",
       "routing": {
         "mode": "auto",
-        "handleAuto": true
+        "handlesLocked": true
+      },
+      "sourceHandle": "left",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": -17.75,
+          "y": -289.12
+        }
       }
     },
     {
       "id": "store-sales-e04",
       "source": "store-sales-step-04",
-      "target": "store-sales-step-05",
+      "target": "store-sales-step-08",
       "condition": "",
       "label": "",
       "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
-    },
-    {
-      "id": "store-sales-e05",
-      "source": "store-sales-step-05",
-      "target": "store-sales-step-06",
-      "condition": "API",
-      "label": "API",
-      "type": "api",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
     },
     {
       "id": "store-sales-e06",
@@ -263,43 +441,42 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "store-sales-e07",
       "source": "store-sales-step-07",
-      "target": "store-sales-step-08",
-      "condition": "",
-      "label": "",
-      "type": "normal",
+      "target": "store-sales-step-09",
+      "condition": "Auto",
+      "label": "ERP 재고(-)",
+      "type": "api",
       "routing": {
         "mode": "auto",
         "handleAuto": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "labelPlacement": {
+        "offset": {
+          "x": 118,
+          "y": 46
+        }
       }
     },
     {
       "id": "store-sales-e08",
       "source": "store-sales-step-08",
-      "target": "store-sales-step-09",
-      "condition": "Y",
-      "label": "Y",
-      "type": "condition",
-      "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
-    },
-    {
-      "id": "store-sales-e09",
-      "source": "store-sales-step-09",
-      "target": "store-sales-step-10",
+      "target": "store-sales-step-05",
       "condition": "",
-      "label": "",
+      "label": "Y",
       "type": "normal",
       "routing": {
-        "mode": "auto",
-        "handleAuto": true
-      }
+        "mode": "auto"
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "store-sales-e10",
@@ -311,12 +488,69 @@
       "routing": {
         "mode": "auto",
         "handleAuto": true
-      }
+      },
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     {
       "id": "store-sales-e11",
       "source": "store-sales-step-11",
       "target": "store-sales-step-12",
+      "condition": "Auto",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "store-sales-branch-01",
+      "source": "store-sales-step-08",
+      "target": "store-sales-step-06",
+      "condition": "",
+      "label": "N",
+      "type": "normal",
+      "routing": {
+        "mode": "auto"
+      },
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "edge-mqt0fhrn-ujvd0",
+      "source": "store-sales-step-07",
+      "target": "store-sales-step-10",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "normal",
+      "label": "정상",
+      "condition": "출고확정 후 매출집계",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "edge-mqt0lmmu-azvaw",
+      "source": "store-sales-step-03",
+      "target": "store-sales-step-04",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "normal",
+      "label": "",
+      "condition": "",
+      "routing": {
+        "mode": "auto",
+        "handlesLocked": true
+      }
+    },
+    {
+      "id": "store-sales-e12",
+      "source": "store-sales-step-12",
+      "target": "store-sales-step-13",
       "condition": "",
       "label": "",
       "type": "normal",
@@ -326,16 +560,50 @@
       }
     },
     {
-      "id": "store-sales-branch-01",
-      "source": "store-sales-step-08",
-      "target": "store-sales-step-10",
-      "condition": "N",
-      "label": "N",
-      "type": "condition",
+      "id": "store-sales-e13",
+      "source": "node-mqt0pojw-g74j0",
+      "target": "store-sales-step-13",
+      "condition": "",
+      "label": "",
+      "type": "normal",
+      "routing": {
+        "mode": "auto",
+        "handleAuto": true
+      }
+    },
+    {
+      "id": "store-sales-e14",
+      "source": "store-sales-step-13",
+      "target": "store-sales-step-14",
+      "condition": "",
+      "label": "",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
       }
     }
-  ]
+  ],
+  "zones": [
+    {
+      "id": "zone-mqq76kla-cxkc2",
+      "name": "자동프로세스",
+      "type": "process-zone",
+      "laneIds": [],
+      "phaseIds": [],
+      "nodeIds": [
+        "store-sales-step-06",
+        "store-sales-step-07"
+      ],
+      "style": {
+        "showBackground": true,
+        "showBorder": false,
+        "borderStyle": "dashed",
+        "visible": true,
+        "opacity": 0.12
+      }
+    }
+  ],
+  "overviewNodeId": "store-sales",
+  "source": "SCM TO-BE"
 }

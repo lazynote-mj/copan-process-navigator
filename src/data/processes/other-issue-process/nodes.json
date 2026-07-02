@@ -76,11 +76,11 @@
   },
   {
     "id": "wms-outbound-process",
-    "name": "WMS 출고처리",
+    "name": "출고처리",
     "type": "interface",
     "laneId": "warehouse-easyadmin",
     "phaseId": "p5",
-    "system": "WMS",
+    "system": "이지어드민/WMS",
     "owner": "물류센터",
     "description": "WMS에서 기타 출고를 처리합니다.",
     "inputs": [],

@@ -154,13 +154,44 @@ function rowNodePlacementHeight(
   return gridNodeVisualHeight(node.type, metrics)
 }
 
+function computeStableSlotRowHeight(metrics: OverviewGridMetrics): number {
+  const paddedNormal = metrics.nodeHeight + metrics.rowPaddingY * 2
+  const paddedDecision =
+    metrics.decisionHeight + metrics.rowPaddingY * 2 + DECISION_NODE_LAYOUT.exclusionPadding
+  return Math.max(
+    metrics.rowMinHeightNormal,
+    metrics.rowMinHeightDecision,
+    paddedNormal,
+    paddedDecision,
+  )
+}
+
 function computeRowHeights(
   grid: (Node | null)[][],
   metrics: OverviewGridMetrics,
   manualMode: boolean,
   maxRowIndex: number,
   cellLayout?: CellColumnLayout,
+  stableSlotMode = manualMode,
 ): number[] {
+  if (stableSlotMode) {
+    const stableRowHeight = computeStableSlotRowHeight(metrics)
+    return grid.map((rowNodes, rowIndex) => {
+      if (rowIndex > maxRowIndex) return 0
+
+      let rowHeight = stableRowHeight
+      for (const node of rowNodes) {
+        if (!node) continue
+        rowHeight = Math.max(
+          rowHeight,
+          rowNodePlacementHeight(node, metrics, cellLayout) + metrics.rowPaddingY * 2,
+        )
+      }
+
+      return rowHeight
+    })
+  }
+
   return grid.map((rowNodes, rowIndex) => {
     let maxNodeHeight = 0
     let hasDecision = false
@@ -208,9 +239,24 @@ function computeRowYOffsets(
   metrics: OverviewGridMetrics,
   manualMode: boolean,
   maxRowIndex: number,
+  stableSlotMode = manualMode,
 ): number[] {
   const offsets = new Array<number>(rowHeights.length).fill(0)
   let y = 0
+
+  if (stableSlotMode) {
+    for (let row = 0; row < rowHeights.length; row++) {
+      offsets[row] = y
+      const rowHeight = rowHeights[row] ?? 0
+      if (row <= maxRowIndex && rowHeight > 0) {
+        y += rowHeight
+        if (row < maxRowIndex) {
+          y += metrics.nodeGapY
+        }
+      }
+    }
+    return offsets
+  }
 
   for (let row = 0; row < rowHeights.length; row++) {
     offsets[row] = y
@@ -241,8 +287,20 @@ function computeContentHeightFromRows(
   manualMode: boolean,
   maxRowIndex: number,
   grid?: (Node | null)[][],
+  stableSlotMode = manualMode,
 ): number {
   if (rowHeights.length === 0) return 0
+
+  if (stableSlotMode) {
+    let total = 0
+    for (let row = 0; row <= maxRowIndex; row++) {
+      total += rowHeights[row] ?? 0
+      if (row < maxRowIndex) {
+        total += metrics.nodeGapY
+      }
+    }
+    return total
+  }
 
   if (manualMode) {
     let total = 0
@@ -285,9 +343,24 @@ function computeCellContentHeight(
   const maxRowIndex = manualMode
     ? getMaxRowFromAssignments(assignments.values())
     : getMaxOccupiedRowIndex(grid)
-  const rowHeights = computeRowHeights(grid, metrics, manualMode, maxRowIndex)
+  const stableSlotMode = true
+  const rowHeights = computeRowHeights(
+    grid,
+    metrics,
+    manualMode,
+    maxRowIndex,
+    undefined,
+    stableSlotMode,
+  )
 
-  return computeContentHeightFromRows(rowHeights, metrics, manualMode, maxRowIndex, grid) + metrics.cellPaddingY * 2
+  return computeContentHeightFromRows(
+    rowHeights,
+    metrics,
+    manualMode,
+    maxRowIndex,
+    grid,
+    stableSlotMode,
+  ) + metrics.cellPaddingY * 2
 }
 
 function getMaxOccupiedRowIndex(grid: (Node | null)[][]): number {
@@ -362,6 +435,7 @@ type LaneCellRowPlan = {
   rowHeights: number[]
   maxRowIndex: number
   manualMode: boolean
+  stableSlotMode: boolean
 }
 
 export function buildLaneCellRowPlan(
@@ -385,12 +459,21 @@ export function buildLaneCellRowPlan(
   const maxRowIndex = manualMode
     ? getMaxRowFromAssignments(assignments.values())
     : getMaxOccupiedRowIndex(grid)
+  const stableSlotMode = true
 
   return {
     grid,
-    rowHeights: computeRowHeights(grid, metrics, manualMode, maxRowIndex, cellLayout),
+    rowHeights: computeRowHeights(
+      grid,
+      metrics,
+      manualMode,
+      maxRowIndex,
+      cellLayout,
+      stableSlotMode,
+    ),
     maxRowIndex,
     manualMode,
+    stableSlotMode,
   }
 }
 
@@ -427,6 +510,29 @@ export function computeZoneUnifiedRowLayout(
     return row <= maxRowIndex ? metrics.rowMinHeightNormal : 0
   })
 
+  const stableSlotMode = lanePlans.every((plan) => plan.stableSlotMode)
+  if (stableSlotMode) {
+    const stableRowHeight = Math.max(
+      computeStableSlotRowHeight(metrics),
+      ...rowHeights,
+    )
+    const stableRowHeights = rowHeights.map((height, row) =>
+      row <= maxRowIndex ? Math.max(height, stableRowHeight) : 0,
+    )
+    const stableRowYOffsets = new Array<number>(rowCount).fill(0)
+    let y = 0
+    for (let row = 0; row < rowCount; row++) {
+      stableRowYOffsets[row] = y
+      if (row <= maxRowIndex) {
+        y += stableRowHeights[row] ?? 0
+        if (row < maxRowIndex) {
+          y += metrics.nodeGapY
+        }
+      }
+    }
+    return { rowHeights: stableRowHeights, rowYOffsets: stableRowYOffsets, maxRowIndex }
+  }
+
   const rowYOffsets = new Array<number>(rowCount).fill(0)
   for (let row = 0; row < rowCount; row++) {
     let maxOffset = 0
@@ -437,6 +543,7 @@ export function computeZoneUnifiedRowLayout(
         metrics,
         plan.manualMode,
         plan.maxRowIndex,
+        plan.stableSlotMode,
       )
       maxOffset = Math.max(maxOffset, localOffsets[row] ?? 0)
     }
@@ -480,15 +587,30 @@ export function placeNodesInLaneCell(
     options?.maxRows ?? OVERVIEW_CELL_MAX_ROWS,
   )
   const manualMode = cellHasManualSlots(nodes)
+  const stableSlotMode = true
   const { columnCount, rowCount } = layout
   const grid = buildCellNodeGrid(sorted, assignments, layout)
   const maxRowIndex = manualMode
     ? getMaxRowFromAssignments(assignments.values())
     : getMaxOccupiedRowIndex(grid)
   const cellLayout = resolveCellColumnLayout(cellLeft, cellWidth, columnCount, metrics)
-  const localRowHeights = computeRowHeights(grid, metrics, manualMode, maxRowIndex, cellLayout)
+  const localRowHeights = computeRowHeights(
+    grid,
+    metrics,
+    manualMode,
+    maxRowIndex,
+    cellLayout,
+    stableSlotMode,
+  )
   const rowHeights = unifiedRows?.rowHeights ?? localRowHeights
-  const rowYOffsets = unifiedRows?.rowYOffsets ?? computeRowYOffsets(grid, localRowHeights, metrics, manualMode, maxRowIndex)
+  const rowYOffsets = unifiedRows?.rowYOffsets ?? computeRowYOffsets(
+    grid,
+    localRowHeights,
+    metrics,
+    manualMode,
+    maxRowIndex,
+    stableSlotMode,
+  )
   const yBase = options?.yBaseOverride ?? cellTop + metrics.cellPaddingY
 
   const placed: PlacedCellNode[] = []
@@ -511,7 +633,7 @@ export function placeNodesInLaneCell(
       layoutForNode.columnCenters[layoutCol] ?? layoutForNode.columnCenters[0]
     const rowTop = yBase + (rowYOffsets[row] ?? 0)
     const rowCenterY = rowTop + rowHeight / 2
-    const nodeY = unifiedRows
+    const nodeY = unifiedRows || stableSlotMode
       ? rowCenterY - size.height / 2
       : manualMode
         ? rowTop + (row === maxRowIndex ? metrics.rowPaddingY : 0)

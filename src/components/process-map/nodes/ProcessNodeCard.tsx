@@ -9,6 +9,7 @@ import {
 import type { NodeType } from '../../../types/nodeTypes'
 import './process-node.css'
 import { NodeStepBadge } from './NodeStepBadge'
+import { NodeReviewBadge } from './NodeReviewBadge'
 
 const SIDE_HANDLES = [
   { id: 'left', position: Position.Left },
@@ -22,9 +23,10 @@ function ProcessNodeCard({ data, selected }: NodeProps & { data: ProcessNodeData
   const visualClass =
     data.overviewVisualClass ?? resolveNodeVisualClass(nodeType, data.system)
   const dashed =
-    data.overviewType != null
+    NODE_TYPE_META[nodeType]?.dashedBorder ??
+    (data.overviewType != null
       ? (OVERVIEW_NODE_TYPE_META[data.overviewType]?.dashedBorder ?? false)
-      : (NODE_TYPE_META[nodeType]?.dashedBorder ?? false)
+      : false)
   const compact = data.compact === true
   const cell3Col = data.cell3Col === true
   const title = data.displayName ?? data.name
@@ -34,14 +36,15 @@ function ProcessNodeCard({ data, selected }: NodeProps & { data: ProcessNodeData
     !shouldAppendAutoSuffix(data.type) &&
     data.overviewType !== 'manual'
 
-  const badgeStep = data.stepBadge ?? 0
-  const showStepBadge = data.showStepBadge !== false && badgeStep > 0
+  const badgeStep = data.stepBadge
+  const showStepBadge = data.showStepBadge !== false && badgeStep != null && String(badgeStep).trim() !== ''
 
   return (
     <div
       className={`process-node process-node--${visualClass}${dashed ? ' process-node--dashed' : ''}${cell3Col ? ' process-node--cell-3col' : compact ? ' process-node--compact' : ''} ${selected ? 'process-node--selected' : ''}`}
     >
       {showStepBadge ? <NodeStepBadge step={badgeStep} /> : null}
+      <NodeReviewBadge reviewMode={data.reviewMode} status={data.reviewStatus} />
       {SIDE_HANDLES.map(({ id, position }) => (
         <Handle
           key={`target-${id}`}

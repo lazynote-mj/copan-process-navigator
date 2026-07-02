@@ -13,11 +13,11 @@
   "nodes": [
     {
       "id": "stock-transfer-step-01",
-      "name": "재고이동요청(POS)",
+      "name": "재고이동요청",
       "type": "pos",
       "laneId": "retail-easychain",
       "phaseId": "p1",
-      "system": "POS",
+      "system": "이지체인/POS",
       "owner": "판매현장",
       "description": "재고이동요청(POS)",
       "inputs": [],
@@ -43,11 +43,11 @@
     },
     {
       "id": "stock-transfer-step-03",
-      "name": "재고이동확정(POS)",
+      "name": "재고이동확정",
       "type": "pos",
       "laneId": "retail-easychain",
       "phaseId": "p3",
-      "system": "POS",
+      "system": "이지체인/POS",
       "owner": "판매현장",
       "description": "재고이동확정(POS)",
       "inputs": [],
@@ -59,10 +59,10 @@
     {
       "id": "stock-transfer-step-04",
       "name": "위탁 여부",
-      "type": "decision",
+      "type": "interface-rule",
       "laneId": "business",
       "phaseId": "p4",
-      "system": "ERP",
+      "system": "",
       "owner": "사업부",
       "description": "위탁 여부",
       "inputs": [],
@@ -173,9 +173,9 @@
       "id": "stock-transfer-e04",
       "source": "stock-transfer-step-04",
       "target": "stock-transfer-step-05",
-      "condition": "Y",
+      "condition": "",
       "label": "Y",
-      "type": "condition",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true
@@ -221,9 +221,9 @@
       "id": "stock-transfer-branch-01",
       "source": "stock-transfer-step-04",
       "target": "stock-transfer-step-06",
-      "condition": "N",
+      "condition": "",
       "label": "N",
-      "type": "condition",
+      "type": "normal",
       "routing": {
         "mode": "auto",
         "handleAuto": true

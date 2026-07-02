@@ -12,6 +12,7 @@ import {
   buildDetailProcessGroups,
   buildOverviewEdgesFromSequence,
   buildOverviewProcessGroups,
+  filterEdgesWithValidEndpoints,
   validateOverviewEdgeEndpoints,
 } from './toBeOverview/overviewEdgeRegistry'
 
@@ -47,8 +48,14 @@ function loadOverviewProcess(data: OverviewFile): Process {
 
   const nodes = normalizeProcessNodes(data.nodes, { ...draft, nodes: data.nodes })
   const nodeIds = new Set(nodes.map((n) => n.id))
-  const edges = buildOverviewEdgesFromSequence()
-  validateOverviewEdgeEndpoints(nodeIds, edges)
+  const rawEdges = buildOverviewEdgesFromSequence()
+  validateOverviewEdgeEndpoints(nodeIds, rawEdges)
+  const { edges, removed } = filterEdgesWithValidEndpoints(nodeIds, rawEdges)
+  if (removed.length > 0) {
+    console.warn(
+      `[ProcessNavigator] Removed ${removed.length} overview edge(s) with missing endpoints: ${removed.map((edge) => edge.id).join(', ')}`,
+    )
+  }
 
   return {
     ...draft,

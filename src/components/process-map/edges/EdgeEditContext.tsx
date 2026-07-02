@@ -10,6 +10,7 @@ export type EdgeRoutingUpdate = {
 type EdgeEditContextValue = {
   appMode: AppMode
   selectedEdgeId: string | null
+  onEdgeSelect: (edgeId: string) => void
   onEdgeRoutingChange: (update: EdgeRoutingUpdate) => void
   onEdgeLabelPlacementChange: (edgeId: string, labelPlacement: EdgeLabelPlacement | undefined) => void
 }
@@ -17,6 +18,7 @@ type EdgeEditContextValue = {
 export const EdgeEditContext = createContext<EdgeEditContextValue>({
   appMode: 'view',
   selectedEdgeId: null,
+  onEdgeSelect: () => {},
   onEdgeRoutingChange: () => {},
   onEdgeLabelPlacementChange: () => {},
 })

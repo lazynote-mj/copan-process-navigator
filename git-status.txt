@@ -1,0 +1,127 @@
+ M .gitignore
+ D "Docs/06. TO-BE overview.pdf"
+ D Docs/detail-group1-product-purchase-review.md
+ D Docs/overview-node-inventory.csv
+ D Docs/overview-node-review-checklist.md
+ D "Docs/scm to-be process.pdf"
+ D Docs/scm-swimlane-audit.md
+ D Docs/scm-to-be-process-node-order.md
+ D Docs/zone2-purchase-order-review.md
+ D "Docs/\352\263\204\354\225\275 \353\260\217 \354\240\225\354\202\260.pdf"
+ M public/process-data/state.json
+ M src/App.tsx
+ M src/components/editor/EdgeConnectionFields.tsx
+ M src/components/editor/NodeConnectionsPanel.tsx
+ M src/components/editor/PropertyPanel.tsx
+ M src/components/editor/node-connections-panel.css
+ M src/components/editor/property-panel.css
+ M src/components/layout/AppLayout.tsx
+ M src/components/layout/ProcessGroupMenu.tsx
+ M src/components/layout/Toolbar.tsx
+ M src/components/layout/layout.css
+ M src/components/layout/process-group-menu.css
+ M src/components/process-map/ProcessMapCanvas.tsx
+ M src/components/process-map/edges/EdgeEditContext.tsx
+ M src/components/process-map/edges/ProcessEdgeBase.tsx
+ M src/components/process-map/nodes/ConnectorNodeCard.tsx
+ M src/components/process-map/nodes/DatabaseNodeCard.tsx
+ M src/components/process-map/nodes/DecisionNodeCard.tsx
+ M src/components/process-map/nodes/InterfaceRuleNodeCard.tsx
+ M src/components/process-map/nodes/MergeNodeCard.tsx
+ M src/components/process-map/nodes/NodeStepBadge.tsx
+ M src/components/process-map/nodes/ProcessNodeCard.tsx
+ M src/components/process-map/nodes/process-node.css
+ M src/components/process-map/process-map.css
+ M src/data/activeProcessData.ts
+ M src/data/overviewDetailProcesses.ts
+ M src/data/processDataIO.ts
+ M src/data/processDataMigration.ts
+ M src/data/processDataMutations.ts
+ M src/data/processDataStore.tsx
+ M src/data/processExport.ts
+ M src/data/processRegistry.json
+ M src/data/processRegistry.ts
+ M src/data/processes/b2b-domestic-order-to-sales.json
+ M src/data/processes/b2b-domestic-return.json
+ M src/data/processes/b2b-export-order-to-sales.json
+ M src/data/processes/b2c-order-to-sales.json
+ M src/data/processes/b2c-return.json
+ M src/data/processes/business-to-project/edges.json
+ M src/data/processes/business-to-purchase-request.json
+ D src/data/processes/consignment-purchase-receipt.json
+ M src/data/processes/consignment-settlement.json
+ M src/data/processes/event-sales.json
+ M src/data/processes/other-issue-process/nodes.json
+ M src/data/processes/other-issue.json
+ M src/data/processes/overview/offline-pos-sales.json
+ M src/data/processes/popup-concert-stock-sales-sync.json
+ M src/data/processes/preorder-to-sales.json
+ M src/data/processes/purchase-to-ap-invoice.json
+ M src/data/processes/return-process/nodes.json
+ M src/data/processes/revenue-share-settlement.json
+ M src/data/processes/royalty-mg-settlement.json
+ M src/data/processes/service-business-to-expense.json
+ M src/data/processes/service-order-to-sales.json
+ M src/data/processes/service-project-settlement.json
+ M src/data/processes/service-purchase-to-ap.json
+ M src/data/processes/stock-transfer.json
+ M src/data/processes/store-sales.json
+ M src/data/toBeNavigatorRegistry.ts
+ M src/data/toBeOverview/detail-process-groups.json
+ M src/data/toBeOverview/overview.json
+ M src/data/toBeOverview/overviewEdgeRegistry.ts
+ M src/data/toBeOverview/scm-process-groups.json
+ M src/lib/buildProcessFlowNode.ts
+ M src/lib/editor/edgeHandles.ts
+ M src/lib/editor/edgeUpdate.ts
+ M src/lib/editor/processEditor.ts
+ M src/lib/editor/processGroupMembership.ts
+ M src/lib/editor/resolveDragPlacement.ts
+ M src/lib/editor/selectedElement.ts
+ M src/lib/layout/buildOrthogonalFlowEdge.ts
+ M src/lib/layout/decisionAnchors.ts
+ M src/lib/layout/detailHorizontalLayout.ts
+ M src/lib/layout/elkLayout.ts
+ M src/lib/layout/orthogonalEdgeRouter.ts
+ M src/lib/layout/overviewGridLayout.ts
+ M src/lib/overviewNodeDisplay.ts
+ M src/types/commonMasters.ts
+ M src/types/nodeTypes.ts
+ M src/types/process.ts
+ M src/types/toBeNavigator.ts
+?? Docs/00_Project/
+?? Docs/01_Architecture/
+?? Docs/02_Master/
+?? Docs/03_Guides/
+?? Docs/04_Audit/
+?? Docs/05_Review/
+?? Docs/06_Data/
+?? Docs/07_Archive/
+?? Docs/README.md
+?? firebase.json
+?? git-status.txt
+?? src/bootstrap/
+?? src/clipboard/
+?? src/commands/
+?? src/components/layout/RouterHealthDashboard.tsx
+?? src/components/layout/router-health-dashboard.css
+?? src/components/process-map/nodes/NodeReviewBadge.tsx
+?? src/config/
+?? src/data/copanTemplateManifest.ts
+?? src/data/processLifecycleGroups.ts
+?? src/data/processStorageAdapter.ts
+?? src/data/processes/other-receipt.json
+?? src/data/processes/purchase-return.json
+?? src/data/processes/stock-movement.json
+?? src/data/processes/storage-location-master.json
+?? src/definition/
+?? src/engine/
+?? src/lib/editor/nodeClipboard.ts
+?? src/lib/editor/routerValidation.ts
+?? src/lib/editor/shortcutManager.ts
+?? src/lib/master/
+?? src/lib/nodeNumbering.ts
+?? src/runtime/
+?? src/selection/
+?? src/template/
+?? src/types/templatePackage.ts

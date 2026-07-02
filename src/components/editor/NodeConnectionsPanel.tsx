@@ -57,7 +57,7 @@ function ConnectionRow({
     <div className="node-connections-panel__row">
       <div className="node-connections-panel__row-head">
         <button type="button" className="node-connections-panel__edge-id" onClick={onSelect}>
-          {edge.id}
+          연결선 선택
         </button>
         {!disabled && (
           <button
@@ -85,8 +85,8 @@ export function NodeConnectionsPanel({
   node,
   process,
   disabled = false,
-  incomingTitle = '이전 노드',
-  outgoingTitle = '다음 노드',
+  incomingTitle = '이전 업무',
+  outgoingTitle = '다음 업무',
   onSaveEdge,
   onDeleteEdge,
   onSelectEdge,
@@ -122,12 +122,12 @@ export function NodeConnectionsPanel({
           <h3 className="property-panel__section-title">{incomingTitle}</h3>
           {!disabled && (
             <button type="button" className="property-panel__btn property-panel__btn--sm" onClick={addIncoming}>
-              + 이전 노드 연결 추가
+              + 이전 업무 연결
             </button>
           )}
         </div>
         {incoming.length === 0 ? (
-          <p className="property-panel__hint">연결된 이전 노드가 없습니다.</p>
+          <p className="property-panel__hint">연결된 이전 업무가 없습니다.</p>
         ) : (
           incoming.map((edge) => (
             <ConnectionRow
@@ -150,12 +150,12 @@ export function NodeConnectionsPanel({
           <h3 className="property-panel__section-title">{outgoingTitle}</h3>
           {!disabled && (
             <button type="button" className="property-panel__btn property-panel__btn--sm" onClick={addOutgoing}>
-              + 다음 노드 연결 추가
+              + 다음 업무 연결
             </button>
           )}
         </div>
         {outgoing.length === 0 ? (
-          <p className="property-panel__hint">연결된 다음 노드가 없습니다.</p>
+          <p className="property-panel__hint">연결된 다음 업무가 없습니다.</p>
         ) : (
           outgoing.map((edge) => (
             <ConnectionRow

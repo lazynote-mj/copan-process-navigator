@@ -1,8 +1,7 @@
 import type { Edge, Node, Process } from '../types/process'
 import { migrateEdgeHandles } from '../lib/editor/edgeHandles'
+import { normalizeEdgeForStorage } from '../lib/editor/edgeUpdate'
 import { normalizeNodeType } from '../types/nodeTypes'
-import { inferOverviewNodeType } from '../types/overviewNodeTypes'
-import { resolveNodeDetailProcessIds } from './overviewDetailProcesses'
 import { normalizeEdgeType, resolveEdgeType } from '../types/edgeTypes'
 import { resolveNodePhaseOrder } from '../lib/layout/gridLayout'
 import { computeLocalOrders, normalizeAllLocalOrders } from '../lib/layout/localOrder'
@@ -47,21 +46,7 @@ function normalizeNode(node: Node, process: Process): Node {
     ...withType,
     phaseOrder: resolveNodePhaseOrder(withType, process),
   }
-  const withOverview =
-    process.id === 'to-be-overview' && !withPhase.overviewType
-      ? {
-          ...withPhase,
-          overviewType: inferOverviewNodeType({
-            type: withPhase.type,
-            system: withPhase.system,
-            laneId: withPhase.laneId,
-            detailProcessIds: withPhase.detailProcessIds,
-            id: withPhase.id,
-            hasLinkedDetailProcesses:
-              resolveNodeDetailProcessIds(withPhase).length > 0,
-          }),
-        }
-      : withPhase
+  const withOverview = withPhase
   if (typeof withOverview.localOrder === 'number' && withOverview.localOrder > 0) {
     return withOverview
   }
@@ -95,12 +80,29 @@ export function normalizeProcessEdges(edges: Edge[]): Edge[] {
     deduped.push(edge)
   }
   return deduped.map((edge) =>
-    normalizeCanonicalOverviewEdge(migrateEdgeHandles(normalizeEdgeType(edge))),
+    normalizeEdgeForStorage(normalizeCanonicalOverviewEdge(migrateEdgeHandles(normalizeEdgeType(edge)))),
   )
 }
 
+export function filterEdgesByExistingEndpoints(
+  nodes: Pick<Node, 'id'>[],
+  edges: Edge[],
+): { edges: Edge[]; removed: Edge[] } {
+  const nodeIds = new Set(nodes.map((node) => node.id))
+  const valid: Edge[] = []
+  const removed: Edge[] = []
+  for (const edge of edges) {
+    if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
+      valid.push(edge)
+    } else {
+      removed.push(edge)
+    }
+  }
+  return { edges: valid, removed }
+}
+
 export function serializeEdgeForExport(edge: Edge) {
-  const normalized = migrateEdgeHandles(normalizeEdgeType(edge))
+  const normalized = normalizeEdgeForStorage(migrateEdgeHandles(normalizeEdgeType(edge)))
   return {
     ...normalized,
     type: resolveEdgeType(normalized),
@@ -109,6 +111,12 @@ export function serializeEdgeForExport(edge: Edge) {
 
 export function buildProcessExport(process: Process) {
   const { id, name, description, version, status, lastModified, owner, phases, lanes } = process
+  const { edges: validEdges, removed } = filterEdgesByExistingEndpoints(process.nodes, process.edges)
+  if (removed.length > 0) {
+    console.warn(
+      `[ProcessNavigator] Excluded ${removed.length} invalid edge(s) from export (${process.id}): ${removed.map((edge) => edge.id).join(', ')}`,
+    )
+  }
 
   return {
     meta: {
@@ -195,7 +203,7 @@ export function buildProcessExport(process: Process) {
         ...(offsetY != null && offsetY !== 0 ? { offsetY } : {}),
       }),
     ),
-    edges: process.edges.map((edge) => serializeEdgeForExport(edge)),
+    edges: validEdges.map((edge) => serializeEdgeForExport(edge)),
     ...(process.zones?.length
       ? {
           zones: process.zones.map(({ id, name, type, laneIds, phaseIds, nodeIds, style }) => ({

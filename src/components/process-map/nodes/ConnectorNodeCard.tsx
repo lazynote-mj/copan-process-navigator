@@ -5,6 +5,8 @@ import type { ProcessNodeData } from '../../../lib/layout/elkLayout'
 import { resolveConnectorSubType } from '../../../lib/layout/connectorLayout'
 import type { Node } from '../../../types/process'
 import './connector-node.css'
+import './process-node.css'
+import { NodeReviewBadge } from './NodeReviewBadge'
 
 const HANDLES = [
   { id: 'top', position: Position.Top },
@@ -27,6 +29,7 @@ function ConnectorNodeCard({ data, selected }: NodeProps & { data: ConnectorNode
       className={`connector-node connector-node--${subType}${selected ? ' connector-node--selected' : ''}`}
       title={data.name}
     >
+      <NodeReviewBadge reviewMode={data.reviewMode} status={data.reviewStatus} />
       <div className="connector-node__circle" aria-hidden />
       {selected && (
         <span className="connector-node__label">{data.name}</span>

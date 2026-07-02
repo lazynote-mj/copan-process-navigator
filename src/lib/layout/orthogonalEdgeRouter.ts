@@ -277,6 +277,64 @@ function detailLayoutRightwardColumnFlow(
   return target.x > source.x + source.width - ORTHO_EPS
 }
 
+function detailLayoutAdjacentColumnFlow(
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  const sNode = detailLayoutNode(process, source.id)
+  const tNode = detailLayoutNode(process, target.id)
+  if (sNode?.detailLayout?.column == null || tNode?.detailLayout?.column == null) return false
+  if (sNode?.detailLayout?.row == null || tNode?.detailLayout?.row == null) return false
+  if (sNode.laneId !== tNode.laneId) return false
+  if (sNode.detailLayout.row === tNode.detailLayout.row) return false
+  if (Math.abs(tNode.detailLayout.column - sNode.detailLayout.column) !== 1) return false
+  const sourceLeftOfTarget = source.x + source.width <= target.x + ORTHO_EPS
+  const targetLeftOfSource = target.x + target.width <= source.x + ORTHO_EPS
+  return sourceLeftOfTarget || targetLeftOfSource
+}
+
+function prefersForwardDetailColumnUpwardRoute(
+  edge: Edge,
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  if (resolveEdgeSourceHandle(edge) !== 'top') return false
+  const targetHandle = resolveEdgeTargetHandle(edge)
+  if (targetHandle !== 'left' && targetHandle !== 'right') return false
+  if (nodeCenterY(target) >= nodeCenterY(source) - 4) return false
+  return detailLayoutRightwardColumnFlow(source, target, process)
+}
+
+function nodeProcessOrder(meta: ReturnType<typeof getProcessNodeMeta>): number | undefined {
+  const order = meta?.phaseOrder ?? meta?.localOrder ?? meta?.cellOrder
+  return typeof order === 'number' && Number.isFinite(order) ? order : undefined
+}
+
+function qualifiesForUpwardSequentialMerge(
+  edge: Edge,
+  source: PlacedNode,
+  target: PlacedNode,
+  process?: Process,
+): boolean {
+  if (!process) return false
+  if (edge.manualRoute === true || edge.routing?.mode === 'manual') return false
+  if (edge.routing?.handlesLocked === true && edge.routing?.handleAuto !== true) return false
+  if (resolveEdgeType(edge) === 'condition') return false
+  if (nodeCenterY(target) >= nodeCenterY(source) - SAME_ROW_Y_TOLERANCE) return false
+
+  const sourceMeta = getProcessNodeMeta(source.id, process)
+  const targetMeta = getProcessNodeMeta(target.id, process)
+  const sourceOrder = nodeProcessOrder(sourceMeta)
+  const targetOrder = nodeProcessOrder(targetMeta)
+  if (sourceOrder != null && targetOrder != null && targetOrder < sourceOrder) return false
+
+  const dx = Math.abs(nodeCenterX(target) - nodeCenterX(source))
+  const dy = Math.abs(nodeCenterY(source) - nodeCenterY(target))
+  return dx <= Math.max(520, dy * 1.4)
+}
+
 function clampAnchorRatio(value: number): number {
   return Math.min(1, Math.max(0, value))
 }
@@ -302,6 +360,15 @@ function hasImmediateHorizontalFromSourceExit(points: Point[]): boolean {
   const next = simplified[2]
   if (!exit || !next) return false
   return Math.abs(next.y - exit.y) <= ORTHO_EPS && Math.abs(next.x - exit.x) > ORTHO_EPS
+}
+
+function hasImmediateLeftFromSourceExit(points: Point[]): boolean {
+  const simplified = simplifyOrthogonal(points)
+  if (simplified.length < 3) return false
+  const exit = simplified[1]
+  const next = simplified[2]
+  if (!exit || !next) return false
+  return Math.abs(next.y - exit.y) <= ORTHO_EPS && next.x < exit.x - ORTHO_EPS
 }
 
 function hasDownRightUpDetour(points: Point[]): boolean {
@@ -585,7 +652,7 @@ function tryCollisionFreeReroute(
     { parallelIndex: idx, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
     process,
   )
-  const prioritySelected = selectPriorityHandlePath(priorityCandidates, placed, excludeIds, nodeMargin)
+  const prioritySelected = selectPriorityHandlePath(priorityCandidates, placed, excludeIds, nodeMargin, process)
   if (prioritySelected && countNodeCollisions(prioritySelected, placed, excludeIds, nodeMargin, process) === 0) {
     const finalized = finalizeRoutedPath(
       prioritySelected,
@@ -646,7 +713,7 @@ function tryCollisionFreeReroute(
         { parallelIndex: idx, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
         process,
       )
-      points = selectPriorityHandlePath(altCandidates, placed, excludeIds, nodeMargin)
+      points = selectPriorityHandlePath(altCandidates, placed, excludeIds, nodeMargin, process)
       if (!points || countNodeCollisions(points, placed, excludeIds, nodeMargin, process) > 0) continue
 
       const finalized = finalizeRoutedPath(
@@ -922,6 +989,7 @@ function validateSameLaneBracketReturnRoute(
 ): OrthogonalRouteResult {
   const { edge, source, target, process } = options
   if (!process) return result
+  if (prefersForwardDetailColumnUpwardRoute(edge, source, target, process)) return result
   if (!qualifiesForSameLaneBracketReturn(edge, source, target, process)) return result
 
   const bends = countOrthogonalBends(result.points)
@@ -1097,6 +1165,10 @@ function getProcessNodeMeta(nodeId: string, process: Process) {
     processZone: node.processZone,
     laneId: node.laneId,
     cellOrder: node.cellOrder ?? node.zoneOrder ?? 0,
+    phaseOrder: node.phaseOrder,
+    localOrder: node.localOrder,
+    detailColumn: node.detailLayout?.column,
+    detailRow: node.detailLayout?.row,
   }
 }
 
@@ -1317,8 +1389,9 @@ export function validateNoNodeCollision(
   placed: PlacedNode[],
   excludeIds: Set<string>,
   nodeMargin: number = EDGE_NODE_MARGIN,
+  process?: Process,
 ): boolean {
-  return countNodeCollisions(points, placed, excludeIds, nodeMargin) === 0
+  return countNodeCollisions(points, placed, excludeIds, nodeMargin, process) === 0
 }
 
 function segmentDirection(a: Point, b: Point): 'left' | 'right' | 'up' | 'down' | null {
@@ -1634,10 +1707,24 @@ function finalizeRoutedPath(
     sourceIsDecision: isBranchNodeType(sourceType),
     targetIsDecision: isBranchNodeType(targetType),
   })
-  result = simplifyPath(result)
-  validateNoNodeCollision(result, placed, excludeIds, nodeMargin)
+  const beforeSimplify = result
+  const simplified = simplifyPath(result)
+  const beforeCollisionCount = countNodeCollisions(beforeSimplify, placed, excludeIds, nodeMargin, process)
+  const simplifiedCollisionCount = countNodeCollisions(simplified, placed, excludeIds, nodeMargin, process)
+  result =
+    beforeCollisionCount < simplifiedCollisionCount
+      ? beforeSimplify
+      : simplified
+  validateNoNodeCollision(result, placed, excludeIds, nodeMargin, process)
 
   result = snapPathEndpointsToHandles(result, sourcePt, targetPt)
+  if (
+    countNodeCollisions(result, placed, excludeIds, nodeMargin, process) >
+      countNodeCollisions(beforeSimplify, placed, excludeIds, nodeMargin, process) &&
+    validateNoNodeCollision(beforeSimplify, placed, excludeIds, nodeMargin, process)
+  ) {
+    result = snapPathEndpointsToHandles(beforeSimplify, sourcePt, targetPt)
+  }
 
   if (edge) {
     validateEdgePath(result, {
@@ -3414,8 +3501,13 @@ function appendCrossZoneSideGutterCandidates(
     )
   }
 
-  tryDetour(detourLeft)
-  tryDetour(detourRight)
+  if (source.laneId === target.laneId) {
+    tryDetour(detourRight)
+    tryDetour(detourLeft)
+  } else {
+    tryDetour(detourLeft)
+    tryDetour(detourRight)
+  }
 
   const clearY = findClearHorizontalBandY(sx, gutterX, srcExit.y, tgtEntry.y, placed, excludeIds, nodePadding, process)
   if (clearY == null) return
@@ -3709,21 +3801,22 @@ function buildCrossZoneGapDownPaths(
     if (finalObstacles.length > 0) {
       const detourRight = Math.max(...finalObstacles.map((node) => node.x + node.width)) + nodePadding + 12
       const detourLeft = Math.min(...finalObstacles.map((node) => node.x)) - nodePadding - 12
+      const leftDetour = wrap([
+        { x: sx, y: corridorY },
+        { x: detourLeft, y: corridorY },
+        { x: detourLeft, y: tgtEntry.y },
+        { x: tx, y: tgtEntry.y },
+      ])
+      const rightDetour = wrap([
+        { x: sx, y: corridorY },
+        { x: detourRight, y: corridorY },
+        { x: detourRight, y: tgtEntry.y },
+        { x: tx, y: tgtEntry.y },
+      ])
       candidates.push(
-        wrap([
-          { x: sx, y: corridorY },
-          { x: detourLeft, y: corridorY },
-          { x: detourLeft, y: tgtEntry.y },
-          { x: tx, y: tgtEntry.y },
-        ]),
-      )
-      candidates.push(
-        wrap([
-          { x: sx, y: corridorY },
-          { x: detourRight, y: corridorY },
-          { x: detourRight, y: tgtEntry.y },
-          { x: tx, y: tgtEntry.y },
-        ]),
+        ...(source.laneId === target.laneId
+          ? [rightDetour, leftDetour]
+          : [leftDetour, rightDetour]),
       )
     }
 
@@ -3866,6 +3959,7 @@ function selectDownwardBottomTopPath(
   hasObstacles: boolean,
   process?: Process,
   allowGapBends = false,
+  preferRightDetour = false,
 ): Point[] | null {
   let best: Point[] | null = null
   let bestScore = Number.POSITIVE_INFINITY
@@ -3878,6 +3972,9 @@ function selectDownwardBottomTopPath(
     if (routeHasDirectionReversal(points)) score += ROUTE_TIER_COST.directionReversal
     if (hasDownRightUpDetour(points)) score += ROUTE_TIER_COST.directionReversal
     if (hasImmediateHorizontalFromSourceExit(points)) score += ROUTE_TIER_COST.outerRoute
+    if (preferRightDetour && hasImmediateLeftFromSourceExit(points)) {
+      score += ROUTE_TIER_COST.outerRoute * 2
+    }
 
     if (collisions > 0) continue
 
@@ -4062,8 +4159,8 @@ function buildMinimalHandlePaths(
         midY,
       )
     } else {
-      candidates.push(wrap([{ x: midX, y: srcExit.y }, { x: midX, y: tgtEntry.y }]))
       candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
+      candidates.push(wrap([{ x: midX, y: srcExit.y }, { x: midX, y: tgtEntry.y }]))
     }
     return finalizeMinimalHandleCandidates(
       candidates,
@@ -4697,6 +4794,11 @@ function routeDownwardBottomTopEdge(
   const targetType = process ? getNodeType(process, target.id) : undefined
   const crossZoneGap =
     process != null && qualifiesForCrossZoneGapVerticalDrop(source, target, process)
+  const preferRightDetour =
+    process != null &&
+    source.laneId === target.laneId &&
+    source.y + source.height < target.y &&
+    crossZoneGap
 
   const candidates = buildDownwardBottomTopPaths(
     source,
@@ -4724,6 +4826,7 @@ function routeDownwardBottomTopEdge(
       obstacles.length > 0,
       process,
       crossZoneGap,
+      preferRightDetour,
     ) ??
     candidates[0] ??
     buildHandlePathFrame(source, target, sourceHandle, targetHandle, parallelIndex, anchors).wrap([])
@@ -4765,6 +4868,90 @@ function isStraightHandlePair(
   if (sourceHandle === 'right' && targetHandle === 'left') return isHorizontallyAligned(source, target)
   if (sourceHandle === 'left' && targetHandle === 'right') return isHorizontallyAligned(source, target)
   return false
+}
+
+function getSameOverviewZoneRouteObstacles(
+  source: PlacedNode,
+  target: PlacedNode,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process: Process,
+): PlacedNode[] {
+  const sourceMeta = getProcessNodeMeta(source.id, process)
+  const targetMeta = getProcessNodeMeta(target.id, process)
+  const zoneId =
+    sourceMeta?.processZone && sourceMeta.processZone === targetMeta?.processZone
+      ? sourceMeta.processZone
+      : undefined
+
+  const minX = Math.min(source.x, target.x) - nodePadding
+  const maxX = Math.max(source.x + source.width, target.x + target.width) + nodePadding
+  const minY = Math.min(source.y, target.y) - nodePadding * 4
+  const maxY = Math.max(source.y + source.height, target.y + target.height) + nodePadding * 4
+
+  return filterRoutingObstacles(placed, excludeIds, process).filter((node) => {
+    const meta = getProcessNodeMeta(node.id, process)
+    if (zoneId && meta?.processZone !== zoneId) return false
+    const nodeType = getNodeType(process, node.id)
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    const pad = nodePadding + extra
+    return (
+      node.x + node.width + pad > minX &&
+      node.x - pad < maxX &&
+      node.y + node.height + pad > minY &&
+      node.y - pad < maxY
+    )
+  })
+}
+
+function prependCrossLaneLeftRightReturnDetours(
+  candidates: Point[][],
+  wrap: (middles: Point[]) => Point[],
+  source: PlacedNode,
+  target: PlacedNode,
+  srcExit: Point,
+  tgtEntry: Point,
+  placed: PlacedNode[],
+  excludeIds: Set<string>,
+  nodePadding: number,
+  process?: Process,
+): void {
+  if (!process) return
+  if (!nodesShareOverviewZoneDifferentLane(source, target, process)) return
+  if (!(source.x > target.x + target.width)) return
+
+  const obstacles = getSameOverviewZoneRouteObstacles(
+    source,
+    target,
+    placed,
+    excludeIds,
+    nodePadding,
+    process,
+  )
+  const routeBounds = [source, target, ...obstacles]
+  const obstacleTop = (node: PlacedNode): number => {
+    const nodeType = getNodeType(process, node.id)
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    return node.y - nodePadding - extra
+  }
+  const obstacleBottom = (node: PlacedNode): number => {
+    const nodeType = getNodeType(process, node.id)
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    return node.y + node.height + nodePadding + extra
+  }
+  const detourTop = Math.min(...routeBounds.map(obstacleTop)) - 32
+  const detourBottom = Math.max(...routeBounds.map(obstacleBottom)) + 32
+  const topPath = wrap([
+    { x: srcExit.x, y: detourTop },
+    { x: tgtEntry.x, y: detourTop },
+  ])
+  const bottomPath = wrap([
+    { x: srcExit.x, y: detourBottom },
+    { x: tgtEntry.x, y: detourBottom },
+  ])
+
+  candidates.unshift(bottomPath, topPath)
 }
 
 /** 1순위 직선 → 2순위 최소 꺾은선 → 3순위 충돌 회피 우회 */
@@ -4837,6 +5024,40 @@ function buildPriorityHandlePaths(
     }
   }
 
+  if (
+    sourceHandle === 'left' &&
+    targetHandle === 'right' &&
+    process &&
+    nodesShareOverviewZoneDifferentLane(source, target, process) &&
+    !isHorizontallyAligned(source, target, SAME_ROW_Y_TOLERANCE)
+  ) {
+    prependCrossLaneLeftRightReturnDetours(
+      candidates,
+      wrap,
+      source,
+      target,
+      srcExit,
+      tgtEntry,
+      placed,
+      excludeIds,
+      nodePadding,
+      process,
+    )
+    for (const gutterX of resolveCrossLaneGutterCandidates(
+      source,
+      target,
+      placed,
+      process,
+      nodePadding,
+    )) {
+      if (gutterX < srcExit.x - ORTHO_EPS && gutterX > tgtEntry.x + ORTHO_EPS) {
+        candidates.unshift(
+          wrap([{ x: gutterX, y: srcExit.y }, { x: gutterX, y: tgtEntry.y }]),
+        )
+      }
+    }
+  }
+
   if (sourceHandle === 'bottom' && targetHandle === 'top') {
     candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
     candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
@@ -4844,8 +5065,13 @@ function buildPriorityHandlePaths(
     candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
     candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
   } else if (sourceHandle === 'right' && targetHandle === 'left') {
-    candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
-    candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
+    if (target.x > source.x + source.width - ORTHO_EPS) {
+      candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
+      candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
+    } else {
+      candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
+      candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
+    }
   } else if (sourceHandle === 'left' && targetHandle === 'right') {
     candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
     candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
@@ -4853,8 +5079,8 @@ function buildPriorityHandlePaths(
     candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
     candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
   } else {
-    candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
     candidates.push(wrap([{ x: srcExit.x, y: tgtEntry.y }]))
+    candidates.push(wrap([{ x: tgtEntry.x, y: srcExit.y }]))
   }
 
   const midX = (srcExit.x + tgtEntry.x) / 2
@@ -4896,9 +5122,10 @@ function selectPriorityHandlePath(
   placed: PlacedNode[],
   excludeIds: Set<string>,
   nodePadding: number,
+  process?: Process,
 ): Point[] | null {
   for (const points of candidates) {
-    const collisions = countNodeCollisions(points, placed, excludeIds, nodePadding)
+    const collisions = countNodeCollisions(points, placed, excludeIds, nodePadding, process)
     if (collisions === 0) {
       return points
     }
@@ -4945,7 +5172,7 @@ function routePriorityHandleEdge(
   )
 
   const selected =
-    selectPriorityHandlePath(candidates, placed, excludeIds, nodePadding) ??
+    selectPriorityHandlePath(candidates, placed, excludeIds, nodePadding, process) ??
     candidates[0] ??
     buildHandlePathFrame(source, target, sourceHandle, targetHandle, parallelIndex, anchors).wrap([])
 
@@ -4973,6 +5200,114 @@ function routePriorityHandleEdge(
     targetHandle,
     ...routeLabelFields(label),
   }
+}
+
+function routeCrossLaneLeftRightReturnEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult | null {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    process,
+    parallelIndex = 0,
+    minContentX = 0,
+    existingSegments = [],
+  } = options
+  if (!process) return null
+  if (!nodesShareOverviewZoneDifferentLane(source, target, process)) return null
+  if (!(source.x > target.x + target.width)) return null
+  if (isHorizontallyAligned(source, target, SAME_ROW_Y_TOLERANCE)) return null
+
+  const sourceHandle: EdgeHandleId = 'left'
+  const targetHandle: EdgeHandleId = 'right'
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  const start = getHandlePoint(source, sourceHandle, 0.5, sourceType)
+  const end = getHandlePoint(target, targetHandle, 0.5, targetType)
+  const targetEntry = entryPoint(end, targetHandle, HANDLE_STUB + Math.abs(parallelIndex) * 4)
+  const excludeIds = new Set([source.id, target.id])
+  const nodePadding = PRIORITY_ROUTE_NODE_PADDING
+  const obstacles = getSameOverviewZoneRouteObstacles(
+    source,
+    target,
+    placed,
+    excludeIds,
+    nodePadding,
+    process,
+  )
+  const routeBounds = [source, target, ...obstacles]
+  const obstacleTop = (node: PlacedNode): number => {
+    const nodeType = getNodeType(process, node.id)
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    return node.y - nodePadding - extra
+  }
+  const obstacleBottom = (node: PlacedNode): number => {
+    const nodeType = getNodeType(process, node.id)
+    const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+    return node.y + node.height + nodePadding + extra
+  }
+  const detours = [
+    Math.max(...routeBounds.map(obstacleBottom)) + 48,
+    Math.min(...routeBounds.map(obstacleTop)) - 48,
+  ]
+  const targetApproachX = (detourY: number): number => {
+    let approachX = targetEntry.x
+    const minY = Math.min(detourY, end.y)
+    const maxY = Math.max(detourY, end.y)
+    for (const node of filterRoutingObstacles(placed, excludeIds, process)) {
+      const nodeType = getNodeType(process, node.id)
+      const extra = isBranchNodeType(nodeType) ? DECISION_NODE_LAYOUT.exclusionPadding : 0
+      const pad = nodePadding + extra
+      const yOverlaps = node.y + node.height + pad >= minY && node.y - pad <= maxY
+      const xTouches = approachX >= node.x - pad && approachX <= node.x + node.width + pad
+      if (!yOverlaps || !xTouches) continue
+      approachX = Math.max(approachX, node.x + node.width + pad + 14)
+    }
+    return Math.min(approachX, source.x - nodePadding)
+  }
+
+  for (const stub of [2, 0, 6]) {
+    const sourceExit = exitPoint(start, sourceHandle, stub)
+    for (const detourY of detours) {
+      const approachX = targetApproachX(detourY)
+      const candidate = validateOrthogonalPath([
+        start,
+        sourceExit,
+        { x: sourceExit.x, y: detourY },
+        { x: approachX, y: detourY },
+        { x: approachX, y: end.y },
+        end,
+      ])
+      const finalized = finalizeRoutedPath(
+        candidate,
+        source,
+        target,
+        sourceHandle,
+        targetHandle,
+        { parallelIndex, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
+        placed,
+        excludeIds,
+        nodePadding,
+        edge,
+        process,
+      )
+      if (countNodeCollisions(finalized, placed, excludeIds, nodePadding, process) > 0) {
+        continue
+      }
+      const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+      return {
+        path: pointsToPath(finalized, minContentX),
+        points: finalized,
+        bendPoints: extractBendPoints(finalized),
+        sourceHandle,
+        targetHandle,
+        ...routeLabelFields(label),
+        exactEndpoints: true,
+      }
+    }
+  }
+
+  return null
 }
 
 function buildCandidatePaths(
@@ -5070,7 +5405,10 @@ function buildCandidatePaths(
   }
 
   // Case 2: L-shape (single bend)
-  if (sourceHoriz) {
+  if (sourceHandle === 'right' && targetHandle === 'left' && target.x > source.x + source.width - ORTHO_EPS) {
+    candidates.push(wrap([lanePoint(tgtEntry.x, srcExit.y)]))
+    candidates.push(wrap([lanePoint(srcExit.x, tgtEntry.y)]))
+  } else if (sourceHoriz) {
     candidates.push(wrap([lanePoint(srcExit.x, tgtEntry.y)]))
     candidates.push(wrap([lanePoint(tgtEntry.x, srcExit.y)]))
   } else {
@@ -5507,6 +5845,15 @@ function routeLockedHandleEdge(options: OrthogonalRouteOptions): OrthogonalRoute
     }
   }
 
+  const lockedCompactRoute = routeDetailLayoutCompactEdge(options, true)
+  if (
+    lockedCompactRoute &&
+    lockedCompactRoute.sourceHandle === sh &&
+    lockedCompactRoute.targetHandle === th
+  ) {
+    return lockedCompactRoute
+  }
+
   const sourceType = getNodeType(process, options.source.id)
   const targetType = getNodeType(process, options.target.id)
   const branchLocked = isBranchNodeType(sourceType) || isBranchNodeType(targetType)
@@ -5535,6 +5882,16 @@ function routeLockedHandleEdge(options: OrthogonalRouteOptions): OrthogonalRoute
       routePriorityHandleEdge(options, sh, th),
       'same-row-horizontal-locked',
     )
+  }
+  if (sh === 'left' && th === 'right') {
+    const crossLaneReturn = routeCrossLaneLeftRightReturnEdge(options)
+    if (crossLaneReturn) {
+      return finishOrthogonalRoute(
+        options,
+        crossLaneReturn,
+        'cross-lane-left-right-return-locked',
+      )
+    }
   }
 
   if (
@@ -5607,10 +5964,13 @@ function routeLockedHandleEdge(options: OrthogonalRouteOptions): OrthogonalRoute
   )
 }
 
-function routeDetailLayoutCompactEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult | null {
+function routeDetailLayoutCompactEdge(
+  options: OrthogonalRouteOptions,
+  allowSpecifiedHandles = false,
+): OrthogonalRouteResult | null {
   const { edge, source, target, placed, process, minContentX = 0, existingSegments = [] } = options
   if (!process) return null
-  if (hasUserSpecifiedHandles(edge) || isManualRouteEdge(edge)) return null
+  if ((!allowSpecifiedHandles && hasUserSpecifiedHandles(edge)) || isManualRouteEdge(edge)) return null
 
   if (sameDetailLayoutColumn(source, target, process)) {
     const sourceHandle: EdgeHandleId = nodeCenterY(target) >= nodeCenterY(source) ? 'bottom' : 'top'
@@ -5696,6 +6056,55 @@ function routeDetailLayoutCompactEdge(options: OrthogonalRouteOptions): Orthogon
     )
   }
 
+  if (detailLayoutAdjacentColumnFlow(source, target, process)) {
+    const sourceBeforeTarget = nodeCenterX(source) <= nodeCenterX(target)
+    const sourceHandle: EdgeHandleId = sourceBeforeTarget ? 'right' : 'left'
+    const targetHandle: EdgeHandleId = sourceBeforeTarget ? 'left' : 'right'
+    const sourceType = getNodeType(process, source.id)
+    const targetType = getNodeType(process, target.id)
+    const start = getHandlePoint(source, sourceHandle, 0.5, sourceType)
+    const end = getHandlePoint(target, targetHandle, 0.5, targetType)
+    const gapX = sourceBeforeTarget
+      ? (source.x + source.width + target.x) / 2
+      : (target.x + target.width + source.x) / 2
+    const raw = validateOrthogonalPath([
+      start,
+      { x: gapX, y: start.y },
+      { x: gapX, y: end.y },
+      end,
+    ])
+    const excludeIds = new Set([source.id, target.id])
+    const finalized = finalizeRoutedPath(
+      raw,
+      source,
+      target,
+      sourceHandle,
+      targetHandle,
+      { sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
+      placed,
+      excludeIds,
+      PRIORITY_ROUTE_NODE_PADDING,
+      edge,
+      process,
+    )
+    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+    return finishOrthogonalRoute(
+      options,
+      {
+        path: pointsToPath(finalized, minContentX),
+        points: finalized,
+        bendPoints: extractBendPoints(finalized),
+        sourceHandle,
+        targetHandle,
+        ...routeLabelFields(label),
+        exactEndpoints: isBranchNodeType(sourceType) || isBranchNodeType(targetType),
+      },
+      sourceBeforeTarget
+        ? 'detail-layout-adjacent-column-right'
+        : 'detail-layout-adjacent-column-left',
+    )
+  }
+
   if (detailLayoutRightwardColumnFlow(source, target, process)) {
     return finishOrthogonalRoute(
       options,
@@ -5705,6 +6114,187 @@ function routeDetailLayoutCompactEdge(options: OrthogonalRouteOptions): Orthogon
   }
 
   return null
+}
+
+function routeUpwardSequentialMergeEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult | null {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    process,
+    parallelIndex = 0,
+    minContentX = 0,
+    existingSegments = [],
+  } = options
+  if (!qualifiesForUpwardSequentialMerge(edge, source, target, process)) return null
+
+  const sourceBeforeTarget = nodeCenterX(source) <= nodeCenterX(target)
+  const sourceHandle: EdgeHandleId = sourceBeforeTarget ? 'right' : 'left'
+  const targetHandle: EdgeHandleId = sourceBeforeTarget ? 'left' : 'right'
+  const sourceType = getNodeType(process, source.id)
+  const targetType = getNodeType(process, target.id)
+  const start = getHandlePoint(source, sourceHandle, 0.5, sourceType)
+  const end = getHandlePoint(target, targetHandle, 0.5, targetType)
+  const stub = HANDLE_STUB + Math.abs(parallelIndex) * 4
+  const srcExit = exitPoint(start, sourceHandle, stub)
+  const tgtEntry = entryPoint(end, targetHandle, stub)
+  const excludeIds = new Set([source.id, target.id])
+  const nodePadding = PRIORITY_ROUTE_NODE_PADDING
+  const laneX = sourceBeforeTarget
+    ? Math.min(tgtEntry.x, Math.max(srcExit.x, end.x - APPROACH_MIN_LEG))
+    : Math.max(tgtEntry.x, Math.min(srcExit.x, end.x + APPROACH_MIN_LEG))
+  const innerX = sourceBeforeTarget
+    ? Math.min(tgtEntry.x, Math.max(srcExit.x, target.x - nodePadding))
+    : Math.max(tgtEntry.x, Math.min(srcExit.x, target.x + target.width + nodePadding))
+  const outsideX = sourceBeforeTarget
+    ? Math.min(source.x, target.x) - nodePadding - 16
+    : Math.max(source.x + source.width, target.x + target.width) + nodePadding + 16
+
+  const candidates = [
+    validateOrthogonalPath([start, srcExit, { x: laneX, y: srcExit.y }, { x: laneX, y: tgtEntry.y }, tgtEntry, end]),
+    validateOrthogonalPath([start, srcExit, { x: innerX, y: srcExit.y }, { x: innerX, y: tgtEntry.y }, tgtEntry, end]),
+    validateOrthogonalPath([start, srcExit, { x: outsideX, y: srcExit.y }, { x: outsideX, y: tgtEntry.y }, tgtEntry, end]),
+  ]
+
+  let best: Point[] | null = null
+  let bestScore = Number.POSITIVE_INFINITY
+  for (const candidate of candidates) {
+    const finalized = finalizeRoutedPath(
+      candidate,
+      source,
+      target,
+      sourceHandle,
+      targetHandle,
+      { parallelIndex, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
+      placed,
+      excludeIds,
+      nodePadding,
+      edge,
+      process,
+    )
+    const collisions = countNodeCollisions(finalized, placed, excludeIds, nodePadding, process)
+    if (collisions > 0) continue
+    const bends = countOrthogonalBends(finalized)
+    if (bends > MAX_ORTHOGONAL_BENDS + 1) continue
+    let score = pathCost(
+      finalized,
+      source,
+      target,
+      placed,
+      excludeIds,
+      existingSegments,
+      false,
+      nodePadding,
+      {},
+      process,
+    )
+    if (isExternalRoute(finalized, source, target)) score += ROUTE_TIER_COST.outerRoute * 4
+    if ((sourceBeforeTarget && hasImmediateLeftFromSourceExit(finalized)) ||
+      (!sourceBeforeTarget && hasImmediateHorizontalFromSourceExit(finalized))) {
+      score += ROUTE_TIER_COST.outerRoute
+    }
+    score += bends * ROUTE_TIER_COST.oneBend
+    if (score < bestScore) {
+      bestScore = score
+      best = finalized
+    }
+  }
+
+  if (!best) return null
+  const label = resolveRouteEdgeLabel(options, best, existingSegments)
+  return finishOrthogonalRoute(
+    options,
+    {
+      path: pointsToPath(best, minContentX),
+      points: best,
+      bendPoints: extractBendPoints(best),
+      sourceHandle,
+      targetHandle,
+      ...routeLabelFields(label),
+      exactEndpoints: true,
+    },
+    'upward-sequential-merge',
+  )
+}
+
+function routeManualEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult | null {
+  const {
+    edge,
+    source,
+    target,
+    placed,
+    parallelIndex = 0,
+    branchContext,
+    minContentX = 0,
+    existingSegments = [],
+    process,
+    overviewMode = false,
+  } = options
+  if (!isManualRouteEdge(edge)) return null
+
+  const pathAnchors = resolvePathAnchors(parallelIndex, branchContext)
+  const excludeIds = new Set([source.id, target.id])
+  const routing: EdgeRoutingConfig | undefined = edge.routing
+  const savedBendPoints = resolveSavedBendPoints(edge)
+  const nodeMargin = overviewMode ? overviewEdgeNodeMargin(edge) : EDGE_NODE_MARGIN
+  const defaultPair = recommendHandlePairs(edge, source, target, branchContext)[0]
+  const sourceHandle = resolveEdgeSourceHandle(edge) ?? defaultPair[0]
+  const targetHandle = resolveEdgeTargetHandle(edge) ?? defaultPair[1]
+  const manualAnchors = hasUserSpecifiedHandles(edge)
+    ? { ...pathAnchors, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 }
+    : pathAnchors
+  const manualPoints = routing?.points?.length ? routing.points : savedBendPoints
+  const points = buildManualPath(
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    manualPoints,
+    parallelIndex,
+    manualAnchors,
+  )
+  const finalized = finalizeRoutedPath(
+    points,
+    source,
+    target,
+    sourceHandle,
+    targetHandle,
+    manualAnchors,
+    placed,
+    excludeIds,
+    hasUserSpecifiedHandles(edge) ? PRIORITY_ROUTE_NODE_PADDING : nodeMargin,
+    edge,
+    process,
+  )
+  const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
+  const manualResult: OrthogonalRouteResult = {
+    path: pointsToPath(finalized, minContentX),
+    points: finalized,
+    bendPoints: manualPoints,
+    sourceHandle,
+    targetHandle,
+    ...routeLabelFields(label),
+  }
+  const manualCollisions = getCollidedNodes(
+    finalized,
+    placed,
+    excludeIds,
+    hasUserSpecifiedHandles(edge) ? PRIORITY_ROUTE_NODE_PADDING : nodeMargin,
+    process,
+  )
+  if (manualCollisions.length > 0) {
+    console.warn(
+      `[EdgeRouter] Manual route collides with nodes (${edge.id}): ${manualCollisions.map((n) => n.name).join(', ')}${hasUserSpecifiedHandles(edge) ? '' : ' — attempting auto reroute'}`,
+    )
+    if (!hasUserSpecifiedHandles(edge)) {
+      const rerouted = tryCollisionFreeReroute(options, manualResult)
+      if (rerouted) {
+        return finishOrthogonalRoute(options, rerouted, 'manual-rerouted-collision')
+      }
+    }
+  }
+  return finishOrthogonalRoute(options, manualResult, 'manual')
 }
 
 export function routeOrthogonalEdge(options: OrthogonalRouteOptions): OrthogonalRouteResult {
@@ -5724,14 +6314,21 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
 
   const pathAnchors = resolvePathAnchors(parallelIndex, branchContext)
   const excludeIds = new Set([source.id, target.id])
-  const routing: EdgeRoutingConfig | undefined = edge.routing
-  const savedBendPoints = resolveSavedBendPoints(edge)
-  const useManualPath = isManualRouteEdge(edge)
   const nodeMargin = overviewMode ? overviewEdgeNodeMargin(edge) : EDGE_NODE_MARGIN
   const edgeGap = overviewMode ? OVERVIEW_VERTICAL_METRICS.edgeEdgeGap : EDGE_EDGE_MARGIN
 
   const resolvedSourceHandle = resolveEdgeSourceHandle(edge)
   const resolvedTargetHandle = resolveEdgeTargetHandle(edge)
+
+  const manualRoute = routeManualEdge(options)
+  if (manualRoute) return manualRoute
+
+  const lockedRoute = routeLockedHandleEdge(options)
+  if (lockedRoute) return lockedRoute
+
+  const upwardSequentialMergeRoute = routeUpwardSequentialMergeEdge(options)
+  if (upwardSequentialMergeRoute) return upwardSequentialMergeRoute
+
   if (
     process &&
     resolvedSourceHandle &&
@@ -5797,69 +6394,8 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     )
   }
 
-  if (useManualPath) {
-    const defaultPair = recommendHandlePairs(edge, source, target, branchContext)[0]
-    const sourceHandle = resolveEdgeSourceHandle(edge) ?? defaultPair[0]
-    const targetHandle = resolveEdgeTargetHandle(edge) ?? defaultPair[1]
-    const manualAnchors = hasUserSpecifiedHandles(edge)
-      ? { ...pathAnchors, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 }
-      : pathAnchors
-    const manualPoints = routing?.points?.length ? routing.points : savedBendPoints
-    const points = buildManualPath(
-      source,
-      target,
-      sourceHandle,
-      targetHandle,
-      manualPoints,
-      parallelIndex,
-      manualAnchors,
-    )
-    const finalized = finalizeRoutedPath(
-      points,
-      source,
-      target,
-      sourceHandle,
-      targetHandle,
-      manualAnchors,
-      placed,
-      excludeIds,
-      hasUserSpecifiedHandles(edge) ? PRIORITY_ROUTE_NODE_PADDING : nodeMargin,
-      edge,
-      process,
-    )
-    const label = resolveRouteEdgeLabel(options, finalized, existingSegments)
-    const manualResult: OrthogonalRouteResult = {
-      path: pointsToPath(finalized, minContentX),
-      points: finalized,
-      bendPoints: manualPoints,
-      sourceHandle,
-      targetHandle,
-      ...routeLabelFields(label),
-    }
-    const manualCollisions = getCollidedNodes(
-      finalized,
-      placed,
-      excludeIds,
-      hasUserSpecifiedHandles(edge) ? PRIORITY_ROUTE_NODE_PADDING : nodeMargin,
-      process,
-    )
-    if (manualCollisions.length > 0) {
-      console.warn(
-        `[EdgeRouter] Manual route collides with nodes (${edge.id}): ${manualCollisions.map((n) => n.name).join(', ')} — attempting auto reroute`,
-      )
-      const rerouted = tryCollisionFreeReroute(options, manualResult)
-      if (rerouted) {
-        return finishOrthogonalRoute(options, rerouted, 'manual-rerouted-collision')
-      }
-    }
-    return finishOrthogonalRoute(options, manualResult, 'manual')
-  }
-
   const detailCompactRoute = routeDetailLayoutCompactEdge(options)
   if (detailCompactRoute) return detailCompactRoute
-
-  const lockedRoute = routeLockedHandleEdge(options)
-  if (lockedRoute) return lockedRoute
 
   const excludeIdsEarly = new Set([source.id, target.id])
 
@@ -5888,7 +6424,10 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     )
   }
 
-  if (qualifiesForSameLaneBracketReturn(edge, source, target, process)) {
+  if (
+    qualifiesForSameLaneBracketReturn(edge, source, target, process) &&
+    !prefersForwardDetailColumnUpwardRoute(edge, source, target, process)
+  ) {
     return finishOrthogonalRoute(options, routeSameLaneBracketReturnEdge(options), 'same-lane-bracket-return')
   }
 
