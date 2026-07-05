@@ -9,20 +9,8 @@ import { DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 
 /**
  * 판단(decision) 노드 라우팅 헬퍼.
- * 레이아웃 스펙 상수는 순환 참조 없는 decisionNodeSpec.ts에 있으며,
- * 기존 import 호환을 위해 여기서 재노출한다.
+ * 레이아웃 스펙 상수는 순환 참조 없는 decisionNodeSpec.ts에서 직접 import한다.
  */
-export {
-  DECISION_NODE_LAYOUT,
-  DETAIL_DECISION_NODE_LAYOUT,
-  scaleDecisionLayoutSpec,
-  resolveDecisionLayout,
-  isOverviewDecisionSize,
-  resolveDecisionLayoutForSize,
-  isLongDecisionTitle,
-  getDecisionNodeSize,
-} from './decisionNodeSpec'
-export type { DecisionLayoutSpec } from './decisionNodeSpec'
 
 function nodeCenter(node: PlacedNode): { x: number; y: number } {
   return getDecisionNodeCenter(node)
