@@ -1,4 +1,5 @@
 import type { ClipboardPayload } from '../clipboard'
+import type { NavigatorPermission } from '../config/roleConfig'
 import type { ProcessDataStoreValue } from '../data/processDataStore'
 import type { SelectedElement } from '../lib/editor/selectionTypes'
 import type { AppMode } from '../lib/editor/selectionTypes'
@@ -51,6 +52,8 @@ export type Command = {
   id: CommandId
   label: string
   shortcutLabel?: string
+  /** 실행에 필요한 permission — dispatcher가 현재 Role 기준으로 검사한다 */
+  permission?: NavigatorPermission
   canExecute: (context: CommandContext, payload?: CommandPayload) => boolean
   execute: (context: CommandContext, payload?: CommandPayload) => boolean
 }

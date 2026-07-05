@@ -60,6 +60,7 @@ export const copyNodesCommand: Command = {
   id: 'copyNodes',
   label: 'Copy Nodes',
   shortcutLabel: getShortcut('copy'),
+  permission: 'edit-node-edge',
   canExecute: (context, payload) => context.appMode === 'edit' && resolveClipboardNodeIds(context, payload).length > 0,
   execute: (context, payload) => {
     const nodeIds = resolveClipboardNodeIds(context, payload)
@@ -74,6 +75,7 @@ export const pasteNodesCommand: Command = {
   id: 'pasteNodes',
   label: 'Paste Nodes',
   shortcutLabel: getShortcut('paste'),
+  permission: 'edit-node-edge',
   canExecute: (context) => context.appMode === 'edit' && context.clipboard.get() != null,
   execute: (context) => {
     const clipboard = context.clipboard.get()
@@ -86,6 +88,7 @@ export const duplicateNodesCommand: Command = {
   id: 'duplicateNodes',
   label: 'Duplicate Nodes',
   shortcutLabel: getShortcut('duplicate'),
+  permission: 'edit-node-edge',
   canExecute: (context, payload) => copyNodesCommand.canExecute(context, payload),
   execute: (context, payload) => {
     const nodeIds = resolveClipboardNodeIds(context, payload)
@@ -100,6 +103,7 @@ export const deleteSelectionCommand: Command = {
   id: 'deleteSelection',
   label: 'Delete Selection',
   shortcutLabel: getShortcut('delete'),
+  permission: 'edit-node-edge',
   canExecute: (context) => {
     const { nodeIds, edgeIds } = selectedNodeAndEdgeIds(context)
     if (nodeIds.length > 0 || edgeIds.length > 0) return true
@@ -141,6 +145,7 @@ export const undoCommand: Command = {
   id: 'undo',
   label: 'Undo',
   shortcutLabel: getShortcut('undo'),
+  permission: 'edit-node-edge',
   canExecute: () => true,
   execute: (context) => {
     const applied = context.store.undo()
@@ -156,6 +161,7 @@ export const redoCommand: Command = {
   id: 'redo',
   label: 'Redo',
   shortcutLabel: getShortcut('redo'),
+  permission: 'edit-node-edge',
   canExecute: () => true,
   execute: (context) => {
     const applied = context.store.redo()
