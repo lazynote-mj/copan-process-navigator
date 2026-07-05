@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import type { Edge, Lane, Node, Process, ProcessZone, ProcessZoneId } from '../../types/process'
 import {
   EDITABLE_DETAIL_NODE_TYPES,
@@ -1630,7 +1630,11 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
         ].join(':')
       : ''
 
-  useEffect(() => {
+  // Re-init draft only when selection identity changes — not on every process sync.
+  // (render 중 상태 조정 패턴 — effect 재실행 대신 즉시 반영)
+  const [prevSelectionKey, setPrevSelectionKey] = useState(selectionKey)
+  if (prevSelectionKey !== selectionKey) {
+    setPrevSelectionKey(selectionKey)
     setError(null)
     if (selectedElement.type === 'node' || selectedElement.type === 'new-node') {
       setDraftNode(cloneNodeData(selectedElement.data as Node))
@@ -1650,17 +1654,16 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     if (selectedElement.type === 'detail-process-group' || selectedElement.type === 'new-detail-process-group') {
       setDraftDetailProcessGroup(cloneDetailProcessGroup(selectedElement.data as DetailProcessGroup))
     }
-    // Re-init draft only when selection identity changes — not on every process sync.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectionKey])
+  }
 
-  useEffect(() => {
+  // Re-sync group membership changes from canvas clicks without resetting text edits.
+  const [prevMembershipKey, setPrevMembershipKey] = useState(processGroupMembershipKey)
+  if (prevMembershipKey !== processGroupMembershipKey) {
+    setPrevMembershipKey(processGroupMembershipKey)
     if (selectedElement.type === 'process-group' || selectedElement.type === 'new-process-group') {
       setDraftProcessGroup(cloneProcessGroup(selectedElement.data as OverviewProcessGroup))
     }
-    // Re-sync group membership changes from canvas clicks without resetting text edits.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processGroupMembershipKey])
+  }
 
   const commitNode = useCallback(
     (node: Node) => {

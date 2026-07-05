@@ -571,8 +571,9 @@ export function AppLayout() {
     [applySelectionSnapshot],
   )
 
-  const commandContext = useMemo<CommandContext>(
-    () => ({
+  // dispatch 시점에 context를 생성한다 — selectionManager ref를 render 중에 읽지 않기 위함
+  const getCommandContext = useCallback(
+    (): CommandContext => ({
       appMode,
       viewMode,
       activeProcess,
@@ -610,8 +611,8 @@ export function AppLayout() {
   )
 
   const commandDispatcher = useMemo(
-    () => createCommandDispatcher(editorCommandRegistry, () => commandContext),
-    [commandContext],
+    () => createCommandDispatcher(editorCommandRegistry, getCommandContext),
+    [getCommandContext],
   )
 
   const handleCopyNodes = useCallback(

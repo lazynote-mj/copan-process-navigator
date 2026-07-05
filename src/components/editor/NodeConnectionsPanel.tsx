@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { Edge, Node, Process } from '../../types/process'
 import {
   createDefaultIncomingEdge,
@@ -43,9 +43,12 @@ function ConnectionRow({
 }) {
   const [draft, setDraft] = useState(edge)
 
-  useEffect(() => {
+  // edge prop이 바뀌면 draft를 재설정 (render 중 상태 조정 패턴)
+  const [prevEdge, setPrevEdge] = useState(edge)
+  if (prevEdge !== edge) {
+    setPrevEdge(edge)
     setDraft(edge)
-  }, [edge])
+  }
 
   const commit = (next: Edge) => {
     const normalized = withEdgeHandleDefaults(next)

@@ -687,6 +687,9 @@ export function ProcessMapCanvas({
     if (!isOverview) {
       setDetailEdgeRefreshKey((key) => key + 1)
     }
+    // reviewMode는 의도적으로 제외 — review 토글은 전체 레이아웃 재계산 없이
+    // 아래 view-state sync effect가 노드 스타일만 갱신한다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     structureKey,
     edgeRoutingKey,
@@ -908,7 +911,6 @@ export function ProcessMapCanvas({
     [
       isEditMode,
       isEditingOverviewProcessGroup,
-      selectedNodeId,
       selectedEdgeId,
       process,
       onSelectElement,

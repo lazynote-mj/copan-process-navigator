@@ -22,7 +22,10 @@ export function OverviewScrollBridge({
 }: OverviewScrollBridgeProps) {
   const { setViewport } = useReactFlow()
   const scaleRef = useRef(scale)
-  scaleRef.current = scale
+
+  useEffect(() => {
+    scaleRef.current = scale
+  }, [scale])
 
   useEffect(() => {
     const scrollEl = scrollRef.current

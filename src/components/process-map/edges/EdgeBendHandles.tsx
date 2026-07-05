@@ -36,11 +36,16 @@ export function EdgeBendHandles({
   const bendPoints = useMemo(() => extractBendPoints(pathPoints), [pathPoints])
   const [draftBends, setDraftBends] = useState<Point[]>(bendPoints)
   const draftRef = useRef(draftBends)
-  draftRef.current = draftBends
-
   useEffect(() => {
+    draftRef.current = draftBends
+  }, [draftBends])
+
+  // 경로가 바뀌면 draft를 재계산된 bend로 재설정 (render 중 상태 조정 패턴)
+  const [prevBendPoints, setPrevBendPoints] = useState(bendPoints)
+  if (prevBendPoints !== bendPoints) {
+    setPrevBendPoints(bendPoints)
     setDraftBends(bendPoints)
-  }, [bendPoints])
+  }
 
   const commitBends = useCallback(
     (nextBends: Point[]) => {

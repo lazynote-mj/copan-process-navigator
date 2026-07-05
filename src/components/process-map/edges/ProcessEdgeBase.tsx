@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BaseEdge, EdgeLabelRenderer, useReactFlow, type EdgeProps } from '@xyflow/react'
 import type { EdgeType } from '../../../types/edgeTypes'
 import { buildEdgeMarkerColor, buildEdgeStrokeStyle, edgeTypeShowsArrow } from '../../../types/edgeTypes'
@@ -82,7 +82,9 @@ export function ProcessEdgeBase({
   const [draggingLabel, setDraggingLabel] = useState(false)
   const [draftLabelPoint, setDraftLabelPoint] = useState<{ x: number; y: number } | null>(null)
   const draftLabelPointRef = useRef(draftLabelPoint)
-  draftLabelPointRef.current = draftLabelPoint
+  useEffect(() => {
+    draftLabelPointRef.current = draftLabelPoint
+  }, [draftLabelPoint])
   const dragStartPointRef = useRef<{ x: number; y: number } | null>(null)
   const { appMode, onEdgeSelect, onEdgeLabelPlacementChange } = useEdgeEditContext()
   const { screenToFlowPosition } = useReactFlow()
