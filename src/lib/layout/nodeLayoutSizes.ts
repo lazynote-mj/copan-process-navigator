@@ -1,6 +1,7 @@
 import type { NodeType } from '../../types/nodeTypes'
-import { DECISION_NODE_LAYOUT, getDecisionNodeSize } from './decisionNodeLayout'
+import { DECISION_NODE_LAYOUT, getDecisionNodeSize } from './decisionNodeSpec'
 import { getInterfaceRuleNodeSize, isInterfaceRuleNode } from './interfaceRuleLayout'
+import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
 
 /** 인접 노드 간 세로 간격 — decision / interface-rule 아래 일반 node는 60px 이상 */
 export function verticalStackGap(
@@ -19,8 +20,6 @@ export function verticalStackGap(
   }
   return defaultGap
 }
-
-import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
 
 /** Layout bounding box — 노드 마스터 (Overview·Detail 공통) */
 export const NODE_LAYOUT = {

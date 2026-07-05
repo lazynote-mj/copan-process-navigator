@@ -1,6 +1,6 @@
 import type { NodeType } from '../../types/nodeTypes'
 import type { GridLayoutMetrics } from './gridLayoutMetrics'
-import { DETAIL_DECISION_NODE_LAYOUT } from './decisionNodeLayout'
+import { DETAIL_DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 import { DETAIL_GRID_METRICS as DETAIL_OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
 import { getInterfaceRuleNodeSize, isInterfaceRuleNode } from './interfaceRuleLayout'
 

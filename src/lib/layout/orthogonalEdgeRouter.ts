@@ -1,8 +1,8 @@
 import type { Edge, EdgeHandleId, EdgeRoutingConfig, Process } from '../../types/process'
 import { resolveEdgeType } from '../../types/edgeTypes'
 import { resolveEdgeSourceHandle, resolveEdgeTargetHandle, hasUserSpecifiedHandles, resolveLockedEdgeHandles, isManualRouteEdge, resolveSavedBendPoints } from '../editor/edgeHandles'
+import { DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 import {
-  DECISION_NODE_LAYOUT,
   inferDecisionOutgoingPair,
   isDecisionSameColumn,
 } from './decisionNodeLayout'

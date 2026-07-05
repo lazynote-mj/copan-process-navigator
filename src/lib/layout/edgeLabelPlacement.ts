@@ -3,7 +3,7 @@ import type { EdgeType } from '../../types/edgeTypes'
 import type { PlacedNode } from './laneLayout'
 import type { Segment } from './orthogonalEdgeRouter'
 import { isBranchNodeType, getDecisionDiamondVertex } from './decisionAnchors'
-import { DECISION_NODE_LAYOUT } from './decisionNodeLayout'
+import { DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 
 export type Point = { x: number; y: number }
 export type LabelSegmentOrientation = 'horizontal' | 'vertical'

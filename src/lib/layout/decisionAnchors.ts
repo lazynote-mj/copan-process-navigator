@@ -3,7 +3,7 @@ import type { Edge, EdgeHandleId } from '../../types/process'
 import {
   DECISION_NODE_LAYOUT,
   resolveDecisionLayoutForSize,
-} from './decisionNodeLayout'
+} from './decisionNodeSpec'
 import type { PlacedNode } from './laneLayout'
 
 export type AnchorPoint = { x: number; y: number }

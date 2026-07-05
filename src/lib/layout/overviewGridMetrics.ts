@@ -8,7 +8,7 @@ import {
   OVERVIEW_SWIMLANE_GRID,
 } from './swimlaneGridLayout'
 import { OVERVIEW_VERTICAL_METRICS } from './overviewVerticalMetrics'
-import { DETAIL_DECISION_NODE_LAYOUT } from './decisionNodeLayout'
+import { DETAIL_DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 
 /** Cell 내부 열 간 최소 간격 — lane 폭은 변경하지 않음 */
 export const CELL_COLUMN_GAP_MIN = 40

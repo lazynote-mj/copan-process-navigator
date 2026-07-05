@@ -29,7 +29,7 @@ import {
   resolveLaneCellWidth,
   resolvePhaseMinHeight,
 } from './laneLayoutResolver'
-import { DECISION_NODE_LAYOUT } from './decisionNodeLayout'
+import { DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 import { PROCESS_ZONES, resolveNodeZone, zoneOrderIndex } from './overviewProcessZones'
 import { isInterfaceRuleNode } from './interfaceRuleLayout'
 import { isConnectorNodeType, placeConnectorNodes } from './connectorLayout'
