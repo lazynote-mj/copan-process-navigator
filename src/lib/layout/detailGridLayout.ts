@@ -36,7 +36,7 @@ const DETAIL_MAX_CELL_COLUMNS = 2
 
 import { placeNodesInLaneCell, buildLaneCellRowPlan, computeZoneCellUnifiedRowLayout, computeUnifiedContentHeight } from './overviewGridLayout'
 import { DETAIL_DOCUMENT } from './detailLayoutMetrics'
-import { DECISION_NODE_LAYOUT } from './decisionNodeLayout'
+import { DECISION_NODE_LAYOUT } from './decisionNodeSpec'
 import {
   getDetailOverviewLanes,
   getUsedLaneIds,

@@ -8,7 +8,7 @@ import type { OverviewGridMetrics } from './overviewGridMetrics'
 import type { ZoneLayoutBand } from './overviewGridLayout'
 import { laneOrderToStartX, metricsToSwimlaneGrid } from './swimlaneGridLayout'
 import { isBranchNodeType as isBranchNodeTypeFromAnchors } from './decisionAnchors'
-import { getDecisionNodeSize } from './decisionNodeLayout'
+import { getDecisionNodeSize } from './decisionNodeSpec'
 
 /** Rule 노드 — 판단노드와 동일 마스터 (Overview·Detail 공통) */
 export const INTERFACE_RULE_LAYOUT = {
