@@ -1,5 +1,6 @@
 import { toBeNavigator } from './data/toBeNavigatorRegistry'
-import { createInitialProcessData, ProcessDataProvider } from './data/processDataStore'
+import { ProcessDataProvider } from './data/processDataStore'
+import { createInitialProcessData } from './data/processDataMigration'
 import { AppLayout } from './components/layout/AppLayout'
 import { createApplicationBootstrap } from './bootstrap'
 

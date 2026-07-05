@@ -688,7 +688,6 @@ function tryCollisionFreeReroute(
     for (const [sh, th] of pairCandidates) {
       if (sh === current.sourceHandle && th === current.targetHandle) continue
 
-      let points: Point[] | null = null
       if (involvesDecision) {
         const decisionRoute = routeDecisionAwareEdge(
           { ...options, suppressCollisionReroute: true },
@@ -713,7 +712,7 @@ function tryCollisionFreeReroute(
         { parallelIndex: idx, sourceAnchorRatio: 0.5, targetAnchorRatio: 0.5 },
         process,
       )
-      points = selectPriorityHandlePath(altCandidates, placed, excludeIds, nodeMargin, process)
+      const points = selectPriorityHandlePath(altCandidates, placed, excludeIds, nodeMargin, process)
       if (!points || countNodeCollisions(points, placed, excludeIds, nodeMargin, process) > 0) continue
 
       const finalized = finalizeRoutedPath(
@@ -1579,7 +1578,7 @@ function applyArrowMarkerEndpoints(
   }
 
   const interior = points.length > 2 ? points.slice(1, -1) : []
-  let route = ensureTargetApproach(interior, newEnd, targetHandle)
+  const route = ensureTargetApproach(interior, newEnd, targetHandle)
   let result = simplifyPath([newStart, ...route, newEnd])
 
   const lastDir = getLastSegmentDirection(result)
@@ -2047,7 +2046,7 @@ function segmentLength(a: Point, b: Point): number {
 
 function removeShortColinearPoints(points: Point[]): Point[] {
   if (points.length <= 2) return points
-  let result = [...points]
+  const result = [...points]
   let changed = true
   while (changed && result.length > 2) {
     changed = false
@@ -2071,7 +2070,7 @@ function removeShortColinearPoints(points: Point[]): Point[] {
 
 /** 직교 path 단순화 — 동일 방향 병합, 180° 되돌림·중복·짧은 segment 제거 */
 export function simplifyPath(points: Point[]): Point[] {
-  let result = simplifyOrthogonal(points)
+  const result = simplifyOrthogonal(points)
   if (result.length <= 2) return result
 
   const cleaned: Point[] = [result[0]!]

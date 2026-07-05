@@ -6,7 +6,7 @@ import { sortNodesForSelect } from '../../lib/editor/sortNodesForSelect'
 import { HandleSelect } from './HandleSelect'
 import type { EdgeHandleId } from '../../types/process'
 
-export const EDGE_LABEL_PRESETS = [
+const EDGE_LABEL_PRESETS = [
   'Y',
   'N',
   '승인',
@@ -19,7 +19,7 @@ export const EDGE_LABEL_PRESETS = [
   '전표생성(미결)',
 ]
 
-export const EDGE_FORM_TYPES: { value: EdgeType; label: string }[] = [
+const EDGE_FORM_TYPES: { value: EdgeType; label: string }[] = [
   { value: 'normal', label: '일반 흐름' },
   { value: 'condition', label: '승인/판단 흐름' },
   { value: 'api', label: '시스템 연동' },

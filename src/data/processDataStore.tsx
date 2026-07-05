@@ -18,7 +18,6 @@ import {
   type ProcessScope,
 } from '../types/processData'
 import { mergeMissingDetailProcesses, syncDetailProcessesFromRegistry } from './activeProcessData'
-import { createInitialProcessData } from './processDataMigration'
 import {
   connectEdge,
   cloneDetailProcess,
@@ -418,6 +417,7 @@ export function ProcessDataProvider({
   return <ProcessDataContext.Provider value={value}>{children}</ProcessDataContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- provider와 hook을 한 파일에 두는 표준 context 패턴
 export function useProcessDataStore(): ProcessDataStoreValue {
   const context = useContext(ProcessDataContext)
   if (!context) {
@@ -425,5 +425,3 @@ export function useProcessDataStore(): ProcessDataStoreValue {
   }
   return context
 }
-
-export { createInitialProcessData }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { Process } from '../../types/process'
 import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
-import type { OverviewHighlightMode } from '../../lib/editor/viewModeTypes'
 import {
   PROCESS_LIFECYCLE_GROUPS,
   getLifecycleGroupForDetailProcess,
@@ -367,12 +366,4 @@ export function ProcessGroupMenu(props: ProcessGroupMenuProps) {
   return props.variant === 'detail'
     ? <DetailProcessGroupMenu {...props} />
     : <OverviewProcessGroupMenu {...props} />
-}
-
-export function resolveHighlightMode(
-  selectedGroupId: string | null,
-  relatedOnly: boolean,
-): OverviewHighlightMode {
-  if (!selectedGroupId) return 'all'
-  return relatedOnly ? 'filter' : 'dim'
 }

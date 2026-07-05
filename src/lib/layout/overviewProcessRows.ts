@@ -204,7 +204,6 @@ function computeRowsForZone(
     const prev = rows[rows.length - 1]
     if (prev) {
       rowMeta.y = prev.y + prev.height + rowGapBetween(prev, rowMeta, nodes, edges, metrics)
-      currentY = rowMeta.y
     }
 
     rows.push(rowMeta)

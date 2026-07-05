@@ -584,7 +584,7 @@ export function buildCrossLanePath(
     ),
   )
 
-  let routeY1 = findClearY(sy + laneOffset, sx, routeX, obstacles, excludeIds)
+  const routeY1 = findClearY(sy + laneOffset, sx, routeX, obstacles, excludeIds)
   let routeY2 = findClearY(ty + laneOffset, routeX, tx - stub, obstacles, excludeIds)
 
   let points: Point[]

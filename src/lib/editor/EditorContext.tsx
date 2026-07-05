@@ -25,6 +25,7 @@ export function EditorContextProvider({
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- provider와 hook을 한 파일에 두는 표준 context 패턴
 export function useEditorContext(): EditorContextValue {
   return useContext(EditorContext)
 }

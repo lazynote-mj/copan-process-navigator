@@ -321,7 +321,7 @@ export function resolveNodePlacementAfterDrag(
 
   if (!laneId) return {}
 
-  let patch: Partial<Node> = {}
+  let patch: Partial<Node>
 
   if (ctx.isOverview && ctx.zoneBands && ctx.zoneBands.length > 0) {
     const zone =

@@ -63,7 +63,7 @@ import {
   type SelectionSnapshot,
 } from '../../selection'
 import type { AppMode, SelectedElement } from '../../lib/editor/selectionTypes'
-import type { OverviewHighlight, ViewMode } from '../../lib/editor/viewModeTypes'
+import type { OverviewHighlight, OverviewHighlightMode, ViewMode } from '../../lib/editor/viewModeTypes'
 import type { Edge, Lane, Node, Process, ProcessZone } from '../../types/process'
 import type { ProcessScope } from '../../types/processData'
 import { getOverviewProcess, resolveDetailProcessGroups, resolveOverviewProcessGroups } from '../../types/processData'
@@ -75,7 +75,7 @@ import { resolveNodeDetailProcessIds } from '../../data/overviewDetailProcesses'
 import { resolveOverviewNodeType } from '../../lib/overviewNodeDisplay'
 import { DataStatusBar } from './DataStatusBar'
 import { Drawer } from './Drawer'
-import { ProcessGroupMenu, resolveHighlightMode } from './ProcessGroupMenu'
+import { ProcessGroupMenu } from './ProcessGroupMenu'
 import { RouterHealthDashboard } from './RouterHealthDashboard'
 import { Toolbar } from './Toolbar'
 import { ProcessMapCanvas } from '../process-map/ProcessMapCanvas'
@@ -173,6 +173,14 @@ function buildOpenRouterCheckToast(processName: string, issues: RouterValidation
     summary: `${processName} · 오류 ${errors.length}건 · 경고 ${warnings.length}건`,
     issues,
   }
+}
+
+function resolveHighlightMode(
+  selectedGroupId: string | null,
+  relatedOnly: boolean,
+): OverviewHighlightMode {
+  if (!selectedGroupId) return 'all'
+  return relatedOnly ? 'filter' : 'dim'
 }
 
 export function AppLayout() {
