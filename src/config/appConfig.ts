@@ -1,4 +1,10 @@
 import type { TemplatePackageManifest } from '../types/templatePackage'
+import {
+  NAVIGATOR_ROLES,
+  roleHasPermission,
+  type NavigatorPermission,
+  type NavigatorRole,
+} from './roleConfig'
 
 export type ProcessLifecycleGroupId =
   | 'business-start'
@@ -18,12 +24,36 @@ export type ProcessLifecycleGroup = {
 export const TEMPLATE_ID = 'copan-erp-template'
 export const VIEWER_ONLY_BUILD = import.meta.env.VITE_VIEWER_ONLY === 'true'
 
+/**
+ * 배포 시점 Role 결정 (RoleBasedAccessControl.md).
+ * Google 로그인 도입 전까지는 빌드 환경변수로 Role을 정한다.
+ * - VITE_VIEWER_ONLY=true → viewer (Viewer-only 배포)
+ * - VITE_NAVIGATOR_ROLE=viewer|process-builder|platform-owner → 해당 Role
+ * - 미지정 → platform-owner (로컬 개발 기본값)
+ */
+function resolveDeploymentRole(): NavigatorRole {
+  if (VIEWER_ONLY_BUILD) return 'viewer'
+  const configured = import.meta.env.VITE_NAVIGATOR_ROLE as string | undefined
+  if (configured && (NAVIGATOR_ROLES as readonly string[]).includes(configured)) {
+    return configured as NavigatorRole
+  }
+  return 'platform-owner'
+}
+
+export const NAVIGATOR_DEPLOYMENT_ROLE: NavigatorRole = resolveDeploymentRole()
+
+/** 현재 배포 Role 기준 permission 확인 — UI/Command 게이팅 진입점 */
+export function can(permission: NavigatorPermission): boolean {
+  return roleHasPermission(NAVIGATOR_DEPLOYMENT_ROLE, permission)
+}
+
 export const APP_CONFIG = {
   appName: 'Copan ERP Process Navigator',
   processRootLabel: 'SCM Process',
   templateId: TEMPLATE_ID,
   deployment: {
-    viewerOnly: VIEWER_ONLY_BUILD,
+    role: NAVIGATOR_DEPLOYMENT_ROLE,
+    viewerOnly: !roleHasPermission(NAVIGATOR_DEPLOYMENT_ROLE, 'save-process'),
   },
   templateManifest: {
     kind: 'process-template-package',

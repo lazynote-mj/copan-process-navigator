@@ -20,6 +20,7 @@ type ToolbarProps = {
   isLeftOpen: boolean
   isRightOpen: boolean
   viewerOnly?: boolean
+  canReview?: boolean
   detailHeader?: DetailHeaderInfo | null
   onToggleLeft: () => void
   onToggleRight: () => void
@@ -52,6 +53,7 @@ export function Toolbar({
   isLeftOpen,
   isRightOpen,
   viewerOnly = false,
+  canReview = !viewerOnly,
   detailHeader,
   onToggleLeft,
   onToggleRight,
@@ -149,7 +151,7 @@ export function Toolbar({
             </button>
           ) : null}
         </div>
-        {!viewerOnly ? (
+        {canReview ? (
           <button
             type="button"
             className={`toolbar__mode-btn toolbar__mode-btn--small toolbar__review-toggle ${reviewMode ? 'toolbar__mode-btn--active' : ''}`}

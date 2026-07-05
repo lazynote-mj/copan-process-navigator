@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { validateRouterData } from '../../lib/editor/routerValidation'
 import type { ProcessData } from '../../types/processData'
+import { can } from '../../config/appConfig'
 import './router-health-dashboard.css'
 
 type RouterHealthDashboardProps = {
@@ -9,6 +10,7 @@ type RouterHealthDashboardProps = {
 
 function isRouterHealthEnabled(): boolean {
   if (!import.meta.env.DEV) return false
+  if (!can('manage-router')) return false
   if (typeof window === 'undefined') return false
   const params = new URLSearchParams(window.location.search)
   return params.get('routerHealth') === '1' || window.localStorage.getItem('routerHealth') === '1'

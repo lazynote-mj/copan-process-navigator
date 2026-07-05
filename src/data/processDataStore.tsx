@@ -17,6 +17,7 @@ import {
   type ProcessData,
   type ProcessScope,
 } from '../types/processData'
+import { can } from '../config/appConfig'
 import { mergeMissingDetailProcesses, syncDetailProcessesFromRegistry } from './activeProcessData'
 import {
   connectEdge,
@@ -299,6 +300,9 @@ export function ProcessDataProvider({
     data?: ProcessData
     routerReport?: RouterValidationReport
   }> => {
+    if (!can('save-process')) {
+      return { ok: false, error: '현재 Role에는 저장 권한이 없습니다.' }
+    }
     const current = processDataRef.current ?? processData
     if (!current) return { ok: false, error: '데이터가 없습니다.' }
     setSaveStatus('saving')

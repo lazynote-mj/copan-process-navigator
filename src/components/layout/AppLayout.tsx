@@ -5,7 +5,7 @@ import { getActiveProcessData, resolveDetailProcessesForMenu } from '../../data/
 import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
 import { getLifecycleGroupForDetailProcess } from '../../data/processLifecycleGroups'
-import { APP_CONFIG } from '../../config/appConfig'
+import { APP_CONFIG, can } from '../../config/appConfig'
 import { canDeleteLane } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
 import {
@@ -187,6 +187,7 @@ export function AppLayout() {
   const store = useProcessDataStore()
   const { processData, summary, saveStatus, persistAll } = store
   const viewerOnly = APP_CONFIG.deployment.viewerOnly
+  const canReview = can('review')
   const propertyPanelRef = useRef<HTMLElement>(null)
   usePanelNativeEventShield(propertyPanelRef)
 
@@ -1240,12 +1241,13 @@ export function AppLayout() {
         isLeftOpen={isLeftOpen}
         isRightOpen={isRightOpen}
         viewerOnly={viewerOnly}
+        canReview={canReview}
         detailHeader={detailHeader}
         onToggleLeft={() => setIsLeftOpen((prev) => !prev)}
         onToggleRight={() => setIsRightOpen((prev) => !prev)}
         onViewModeChange={handleViewModeChange}
         onAppModeChange={handleAppModeChange}
-        onReviewModeChange={setReviewMode}
+        onReviewModeChange={(enabled) => setReviewMode(enabled && canReview)}
         onShowNodeNumbersChange={setShowNodeNumbers}
         onBackToOverview={handleBackToOverview}
         onAddNode={() => handleStartNew('new-node', selectedLaneId)}
