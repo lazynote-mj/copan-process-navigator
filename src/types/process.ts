@@ -39,7 +39,7 @@ export type ProcessStatus = (typeof PROCESS_STATUSES)[number]
 
 export const NODE_REVIEW_STATUSES = ['not-reviewed', 'ok', 'review-required'] as const
 export type NodeReviewStatus = (typeof NODE_REVIEW_STATUSES)[number]
-export const NODE_REVIEWERS = ['김민정', '김은영', '박정웅'] as const
+export const NODE_REVIEWERS = ['Platform Owner', 'Process Builder'] as const
 export type NodeReviewer = (typeof NODE_REVIEWERS)[number]
 
 export type NodeReview = {

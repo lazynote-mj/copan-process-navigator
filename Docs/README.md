@@ -41,9 +41,8 @@ Navigator의 권한은 사용자 이름이 아니라 Role 기준으로 적용한
 
 기본 Role은 다음과 같다.
 
-- Platform Admin
+- Platform Owner
 - Process Builder
-- Process Reviewer
 - Viewer
 
 Google Workspace 로그인은 사용자를 식별하는 수단이며, 실제 기능 권한은 Email에 매핑된 Role로 결정한다.
