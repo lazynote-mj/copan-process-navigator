@@ -8,11 +8,13 @@ const API_PATH = '/api/process-data'
 
 function readRequestBody(req: import('node:http').IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
-    let data = ''
-    req.on('data', (chunk) => {
-      data += chunk
+    // chunk를 개별 toString하면 multi-byte 문자가 chunk 경계에서 깨진다.
+    // Buffer로 모아 한 번에 디코딩한다.
+    const chunks: Buffer[] = []
+    req.on('data', (chunk: Buffer) => {
+      chunks.push(chunk)
     })
-    req.on('end', () => resolve(data))
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
     req.on('error', reject)
   })
 }
