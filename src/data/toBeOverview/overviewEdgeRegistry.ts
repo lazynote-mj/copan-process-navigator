@@ -12,6 +12,8 @@ type FlowLink = {
   condition?: string
   label?: string
   type?: Edge['type']
+  sourceHandle?: Edge['sourceHandle']
+  targetHandle?: Edge['targetHandle']
 }
 
 type E2eMainFlowFile = {
@@ -43,6 +45,8 @@ function toEdge(link: FlowLink): Edge {
     condition: link.condition ?? '',
     label: link.label ?? '',
     type: link.type ?? 'normal',
+    ...(link.sourceHandle ? { sourceHandle: link.sourceHandle } : {}),
+    ...(link.targetHandle ? { targetHandle: link.targetHandle } : {}),
   }
 }
 

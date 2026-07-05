@@ -6415,43 +6415,35 @@ exports[`layout engine snapshots > 'overview' 1`] = `
       "target": "vendor-register-approval",
     },
     {
-      "bends": 5,
+      "bends": 3,
       "broken": false,
-      "handles": "top→right",
+      "handles": "right→top",
       "id": "main:e2e:09d",
       "points": [
         [
-          1806,
-          759,
+          1876,
+          781,
         ],
         [
-          1806,
-          747,
+          1892,
+          781,
         ],
         [
-          460,
-          747,
+          1892,
+          563,
         ],
         [
-          460,
-          779,
+          546,
+          563,
         ],
         [
-          632,
-          779,
-        ],
-        [
-          632,
-          597,
-        ],
-        [
-          616,
-          597,
+          546,
+          575,
         ],
       ],
       "routing": "orthogonal",
       "source": "vendor-register-approval",
-      "status": "error",
+      "status": "ok",
       "target": "po-approval",
     },
     {
@@ -6477,21 +6469,29 @@ exports[`layout engine snapshots > 'overview' 1`] = `
     {
       "bends": 0,
       "broken": false,
-      "handles": "bottom→top",
+      "handles": "right→right",
       "id": "main:e2e:12",
       "points": [
         [
-          726,
-          619,
+          796,
+          597,
         ],
         [
-          726,
-          905,
+          858,
+          597,
+        ],
+        [
+          858,
+          927,
+        ],
+        [
+          796,
+          927,
         ],
       ],
       "routing": "orthogonal",
       "source": "purchase-order",
-      "status": "error",
+      "status": "ok",
       "target": "inbound-info",
     },
     {
@@ -6555,29 +6555,21 @@ exports[`layout engine snapshots > 'overview' 1`] = `
       "target": "fi-posting",
     },
     {
-      "bends": 4,
+      "bends": 0,
       "broken": false,
-      "handles": "left→right",
+      "handles": "right→right",
       "id": "main:e2e:21b",
       "points": [
         [
-          1646,
+          1786,
           1111,
         ],
         [
-          1528,
+          1818,
           1111,
         ],
         [
-          1528,
-          1143,
-        ],
-        [
-          1712,
-          1143,
-        ],
-        [
-          1712,
+          1818,
           2469,
         ],
         [
@@ -6587,7 +6579,7 @@ exports[`layout engine snapshots > 'overview' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "fi-posting",
-      "status": "error",
+      "status": "ok",
       "target": "regular-fund-execution",
     },
     {
@@ -7686,21 +7678,29 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "bends": 0,
       "broken": false,
-      "handles": "bottom→top",
+      "handles": "right→right",
       "id": "edge-mqu7uqng-6zvra",
       "points": [
         [
-          1621,
-          849,
+          1706,
+          826,
         ],
         [
-          1621,
-          939,
+          1974,
+          826,
+        ],
+        [
+          1974,
+          962,
+        ],
+        [
+          1706,
+          962,
         ],
       ],
       "routing": "orthogonal",
       "source": "node-mqu7tqrc-h4amm",
-      "status": "error",
+      "status": "ok",
       "target": "popup-concert-stock-sales-sync-step-23",
     },
     {
