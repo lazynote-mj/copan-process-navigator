@@ -171,3 +171,25 @@ export function canDeleteLane(process: Process, laneId: string): ValidationResul
   }
   return { ok: true }
 }
+
+/**
+ * 레인은 전역 마스터라 삭제 전 "모든" 프로세스의 노드 참조를 검사해야 한다.
+ * 현재 프로세스만 검사하면 다른 프로세스의 노드가 고아가 되어 렌더에서 사라진다.
+ */
+export function canDeleteLaneAcrossProcesses(
+  processes: Array<{ id: string; name: string; nodes: Node[] }>,
+  laneId: string,
+): ValidationResult {
+  const usedBy = processes.filter((process) =>
+    process.nodes.some((node) => node.laneId === laneId),
+  )
+  if (usedBy.length > 0) {
+    const names = usedBy.map((process) => process.name).slice(0, 3).join(', ')
+    const suffix = usedBy.length > 3 ? ` 외 ${usedBy.length - 3}개` : ''
+    return {
+      ok: false,
+      message: `다음 프로세스에 이 스윔레인의 노드가 있어 삭제할 수 없습니다: ${names}${suffix}`,
+    }
+  }
+  return { ok: true }
+}
