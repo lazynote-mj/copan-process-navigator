@@ -837,6 +837,13 @@ export function AppLayout() {
     setIsRightOpen(true)
   }
 
+  const handleSaveProcessLaneIds = useCallback(
+    (processId: string, laneIds: string[] | undefined) => {
+      store.saveProcessLaneIds(processId, laneIds)
+    },
+    [store],
+  )
+
   const handleSaveDetailProcessGroup = (group: DetailProcessGroup) => {
     store.saveDetailProcessGroup(group)
     for (const overviewGroup of overviewProcessGroups) {
@@ -1370,6 +1377,8 @@ export function AppLayout() {
                   onSaveZone={handleSaveZone}
                   onSaveProcessGroup={handleSaveProcessGroup}
                   onSaveDetailProcessGroup={handleSaveDetailProcessGroup}
+                  masterLanes={processData.commonMasters.lanes}
+                  onSaveProcessLaneIds={handleSaveProcessLaneIds}
                   onProcessGroupDraftChange={handleProcessGroupDraftChange}
                   savedProcessGroup={savedSelectedOverviewGroup}
                   savedDetailProcessGroup={savedSelectedDetailGroup}

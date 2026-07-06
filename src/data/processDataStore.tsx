@@ -36,6 +36,7 @@ import {
   saveZone,
   saveDetailProcessGroup,
   saveProcessGroup,
+  saveProcessLaneIds,
   updateEdge,
   updateActiveNodes,
   updateNode,
@@ -69,6 +70,7 @@ export type ProcessDataStoreValue = {
   saveZone: (scope: ProcessScope, zone: ProcessZone, isNew: boolean) => Process | undefined
   saveProcessGroup: (group: OverviewProcessGroup) => void
   saveDetailProcessGroup: (group: DetailProcessGroup) => void
+  saveProcessLaneIds: (scope: ProcessScope, laneIds: string[] | undefined) => void
   cloneDetailProcess: (sourceProcessId: string, name: string) => CloneDetailProcessResult | null
   deleteNode: (scope: ProcessScope, nodeId: string) => void
   deleteEdge: (scope: ProcessScope, edgeId: string) => void
@@ -386,6 +388,8 @@ export function ProcessDataProvider({
       },
       saveProcessGroup: (group) => mutate((current) => saveProcessGroup(current, group)),
       saveDetailProcessGroup: (group) => mutate((current) => saveDetailProcessGroup(current, group)),
+      saveProcessLaneIds: (scope, laneIds) =>
+        mutate((current) => saveProcessLaneIds(current, scope, laneIds, detailFallback)),
       cloneDetailProcess: (sourceProcessId, name) => {
         let result: CloneDetailProcessResult | null = null
         const next = mutateAndGet((current) => {
