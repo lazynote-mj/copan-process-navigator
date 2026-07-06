@@ -178,6 +178,11 @@
   pointer-events: none !important;
 }
 
+/* 레인 헤더 클릭 레이어 — pane(z:1)·renderer(z:4) 위. 노드 없는 헤더 컬럼에만 hit 영역 */
+.process-map-canvas .swimlane-overlay--lane-hit {
+  z-index: 5 !important;
+}
+
 .process-map-canvas .process-zone-overlay {
   z-index: 1 !important;
   pointer-events: none !important;
