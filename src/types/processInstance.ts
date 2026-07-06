@@ -15,6 +15,8 @@ export type ProcessInstance = {
   nodes: Node[]
   edges: Edge[]
   zones?: ProcessZone[]
+  /** 표시할 Lane Master 서브셋 — 비우면 전체 레인 표시 */
+  laneIds?: string[]
   /** Detail — 연결된 Overview 대표 노드 id */
   overviewNodeId?: string
   source?: string

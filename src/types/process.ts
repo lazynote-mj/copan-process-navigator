@@ -256,6 +256,8 @@ export type Process = {
   owner: string
   phases: Phase[]
   lanes: Lane[]
+  /** 이 프로세스가 표시하는 Lane Master 서브셋 — 비우면 전체 레인 표시 */
+  laneIds?: string[]
   nodes: Node[]
   edges: Edge[]
   /** Process Zone (Group Area) — 노드 묶음 시각적 강조 */

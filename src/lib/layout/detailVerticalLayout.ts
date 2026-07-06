@@ -41,11 +41,21 @@ function toSizedNode(
   }
 }
 
-/** Detail View — Overview와 동일한 5개 Swimlane, order 순서 고정 */
+/**
+ * Detail View Swimlane — registry는 order 기준으로만 쓰고,
+ * 표시 멤버십은 process.lanes(프로세스별 laneIds 필터 반영)를 따른다.
+ * registry에 없는 마스터 신규 레인도 포함한다.
+ */
 export function getDetailOverviewLanes(process: Process): Lane[] {
   const overviewLanes = getOverviewLanes()
   const byId = new Map(process.lanes.map((l) => [l.id, l]))
-  return overviewLanes.map((lane) => byId.get(lane.id) ?? lane)
+  const fromRegistry = overviewLanes
+    .filter((lane) => byId.has(lane.id))
+    .map((lane) => byId.get(lane.id) ?? lane)
+  const registryIds = new Set(overviewLanes.map((lane) => lane.id))
+  const extras = process.lanes.filter((lane) => !registryIds.has(lane.id))
+  const lanes = [...fromRegistry, ...extras].sort((a, b) => a.order - b.order)
+  return lanes.length > 0 ? lanes : overviewLanes
 }
 
 /** 단일 lane Detail — PDF처럼 사업부 1개 lane만 사용 */

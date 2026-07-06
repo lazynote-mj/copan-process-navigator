@@ -3545,7 +3545,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
 exports[`layout engine snapshots > 'business-to-purchase-request' 1`] = `
 {
   "canvasBounds": {
-    "height": 924,
+    "height": 428,
     "width": 2536,
   },
   "edges": [
@@ -4000,10 +4000,6 @@ exports[`layout engine snapshots > 'business-to-purchase-request' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
-    "finance",
   ],
   "nodes": [
     {
@@ -11105,7 +11101,7 @@ exports[`layout engine snapshots > 'royalty-mg-settlement' 1`] = `
 exports[`layout engine snapshots > 'service-business-to-expense' 1`] = `
 {
   "canvasBounds": {
-    "height": 924,
+    "height": 428,
     "width": 2316,
   },
   "edges": [
@@ -11552,10 +11548,6 @@ exports[`layout engine snapshots > 'service-business-to-expense' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
-    "finance",
   ],
   "nodes": [
     {
@@ -11694,7 +11686,7 @@ exports[`layout engine snapshots > 'service-business-to-expense' 1`] = `
 exports[`layout engine snapshots > 'service-order-to-sales' 1`] = `
 {
   "canvasBounds": {
-    "height": 788,
+    "height": 292,
     "width": 1880,
   },
   "edges": [
@@ -11829,10 +11821,6 @@ exports[`layout engine snapshots > 'service-order-to-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
-    "finance",
   ],
   "nodes": [
     {
@@ -13263,7 +13251,7 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
 exports[`layout engine snapshots > 'storage-location-master' 1`] = `
 {
   "canvasBounds": {
-    "height": 788,
+    "height": 292,
     "width": 1880,
   },
   "edges": [
@@ -13330,10 +13318,6 @@ exports[`layout engine snapshots > 'storage-location-master' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
-    "finance",
   ],
   "nodes": [
     {

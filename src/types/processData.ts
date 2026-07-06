@@ -130,6 +130,17 @@ export function cloneProcessData(data: ProcessData): ProcessData {
   return structuredClone(data)
 }
 
+/** instance.laneIds 서브셋 필터 — 무효 id만 남으면 전체 레인으로 안전 fallback */
+function resolveLanesForInstance(
+  instance: ProcessInstance,
+  masters: CommonMasters,
+): CommonMasters['lanes'] {
+  if (!instance.laneIds?.length) return masters.lanes
+  const selected = new Set(instance.laneIds)
+  const lanes = masters.lanes.filter((lane) => selected.has(lane.id))
+  return lanes.length > 0 ? lanes : masters.lanes
+}
+
 /** commonMasters + instance → 렌더/레이아웃용 Process */
 export function resolveProcessWithMasters(
   instance: ProcessInstance,
@@ -143,7 +154,8 @@ export function resolveProcessWithMasters(
     status: instance.status ?? 'draft',
     lastModified: instance.lastModified ?? '',
     owner: instance.owner ?? '',
-    lanes: masters.lanes,
+    lanes: resolveLanesForInstance(instance, masters),
+    laneIds: instance.laneIds,
     phases: masters.phases,
     nodes: instance.nodes,
     edges: instance.edges,
@@ -233,6 +245,7 @@ export function processToInstance(
     nodes: structuredClone(process.nodes),
     edges: structuredClone(process.edges),
     zones: process.zones ? structuredClone(process.zones) : undefined,
+    laneIds: process.laneIds ? [...process.laneIds] : undefined,
     overviewNodeId: process.overviewNodeId,
     source: process.source,
   }

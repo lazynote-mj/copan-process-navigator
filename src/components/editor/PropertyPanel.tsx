@@ -241,6 +241,9 @@ type PropertyPanelProps = {
   onSaveZone: (zone: ProcessZone, isNew: boolean) => void
   onSaveProcessGroup?: (group: OverviewProcessGroup) => void
   onSaveDetailProcessGroup?: (group: DetailProcessGroup) => void
+  /** Lane Master 전체 목록 — 프로세스별 표시 레인 선택 UI용 */
+  masterLanes?: Lane[]
+  onSaveProcessLaneIds?: (processId: string, laneIds: string[] | undefined) => void
   onProcessGroupDraftChange?: (group: OverviewProcessGroup) => void
   savedProcessGroup?: OverviewProcessGroup
   savedDetailProcessGroup?: DetailProcessGroup
@@ -1109,17 +1112,34 @@ function DetailProcessGroupForm({
   group,
   detailProcesses,
   overviewProcessGroups,
+  masterLanes,
+  processLaneIds,
   disabled,
   onChange,
+  onProcessLaneIdsChange,
   onOpenDetailProcess,
 }: {
   group: DetailProcessGroup
   detailProcesses: Process[]
   overviewProcessGroups: OverviewProcessGroup[]
+  masterLanes: Lane[]
+  /** null = 전체 레인 표시 */
+  processLaneIds: string[] | null
   disabled: boolean
   onChange: (group: DetailProcessGroup) => void
+  onProcessLaneIdsChange: (laneIds: string[] | null) => void
   onOpenDetailProcess?: (processId: string) => void
 }) {
+  const linkedProcess = detailProcesses.find((entry) => entry.id === group.detailProcessId)
+  const usedLaneIds = new Set((linkedProcess?.nodes ?? []).map((node) => node.laneId))
+  const selectedLaneIds = processLaneIds ?? masterLanes.map((lane) => lane.id)
+  const toggleLane = (laneId: string, checked: boolean) => {
+    const next = new Set(selectedLaneIds)
+    if (checked) next.add(laneId)
+    else next.delete(laneId)
+    const ordered = masterLanes.map((lane) => lane.id).filter((id) => next.has(id))
+    onProcessLaneIdsChange(ordered.length === masterLanes.length ? null : ordered)
+  }
   return (
     <div className="property-panel__section">
       <h3 className="property-panel__section-title">프로세스 상세 그룹</h3>
@@ -1168,6 +1188,34 @@ function DetailProcessGroupForm({
           프로세스 상세 메뉴에서 이 프로세스가 속할 Lifecycle 카테고리입니다. 복제된 프로세스는 원본 카테고리를 이어받습니다.
         </p>
       </div>
+      {masterLanes.length > 0 ? (
+        <div className="property-panel__field">
+          <label className="property-panel__label">표시 레인</label>
+          <div className="property-panel__checkbox-list">
+            {masterLanes.map((lane) => {
+              const used = usedLaneIds.has(lane.id)
+              return (
+                <label key={lane.id} className="property-panel__checkbox-item">
+                  <input
+                    type="checkbox"
+                    checked={selectedLaneIds.includes(lane.id)}
+                    disabled={disabled || used}
+                    onChange={(e) => toggleLane(lane.id, e.target.checked)}
+                  />
+                  <span>
+                    {lane.name}
+                    {used ? ' (노드 배치됨)' : ''}
+                  </span>
+                </label>
+              )
+            })}
+          </div>
+          <p className="property-panel__hint">
+            이 프로세스 상세에 표시할 스윔레인입니다. 노드가 배치된 레인은 해제할 수 없고, 전체
+            선택 시 새 레인이 추가되면 자동으로 함께 표시됩니다.
+          </p>
+        </div>
+      ) : null}
       <div className="property-panel__field">
         <label className="property-panel__label">그룹 ID</label>
         <input className="property-panel__input" value={group.id} disabled readOnly />
@@ -1583,6 +1631,8 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     onSaveZone,
     onSaveProcessGroup,
     onSaveDetailProcessGroup,
+    masterLanes,
+    onSaveProcessLaneIds,
     onProcessGroupDraftChange,
     savedProcessGroup,
     savedDetailProcessGroup,
@@ -1692,6 +1742,23 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     }
   }
 
+  // 프로세스별 표시 레인 draft — 선택 그룹/연결 프로세스가 바뀌면 재초기화 (null = 전체 표시)
+  const laneDraftKey = `${selectionKey}:${draftDetailProcessGroup?.detailProcessId ?? ''}`
+  const [draftProcessLaneIds, setDraftProcessLaneIds] = useState<string[] | null>(() => {
+    const linkedProcess = detailProcesses?.find(
+      (entry) => entry.id === draftDetailProcessGroup?.detailProcessId,
+    )
+    return linkedProcess?.laneIds ? [...linkedProcess.laneIds] : null
+  })
+  const [prevLaneDraftKey, setPrevLaneDraftKey] = useState(laneDraftKey)
+  if (prevLaneDraftKey !== laneDraftKey) {
+    setPrevLaneDraftKey(laneDraftKey)
+    const linkedProcess = detailProcesses?.find(
+      (entry) => entry.id === draftDetailProcessGroup?.detailProcessId,
+    )
+    setDraftProcessLaneIds(linkedProcess?.laneIds ? [...linkedProcess.laneIds] : null)
+  }
+
   const commitNode = useCallback(
     (node: Node) => {
       const normalized = normalizeNodeLocalOrder(node, process)
@@ -1779,9 +1846,12 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       }
       setError(null)
       onSaveDetailProcessGroup?.({ ...group, name })
+      if (onSaveProcessLaneIds && group.detailProcessId) {
+        onSaveProcessLaneIds(group.detailProcessId, draftProcessLaneIds ?? undefined)
+      }
       return true
     },
-    [onSaveDetailProcessGroup],
+    [onSaveDetailProcessGroup, onSaveProcessLaneIds, draftProcessLaneIds],
   )
 
   const handleProcessGroupChange = useCallback(
@@ -2057,8 +2127,11 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           group={draftDetailProcessGroup}
           detailProcesses={detailProcesses ?? []}
           overviewProcessGroups={props.overviewProcessGroups ?? []}
+          masterLanes={masterLanes ?? []}
+          processLaneIds={draftProcessLaneIds}
           disabled={!isEditMode && !isNewGroup}
           onChange={setDraftDetailProcessGroup}
+          onProcessLaneIdsChange={setDraftProcessLaneIds}
           onOpenDetailProcess={onOpenDetailProcess}
         />
       </div>

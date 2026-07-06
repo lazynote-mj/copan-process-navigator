@@ -368,6 +368,41 @@ export function saveEdge(
   )
 }
 
+/**
+ * 프로세스별 표시 레인 저장.
+ * 노드가 배치된 레인은 숨길 수 없어 자동 포함하고,
+ * 전체 레인 선택이면 필드를 제거해 "마스터 전체 자동 표시"로 되돌린다.
+ */
+export function saveProcessLaneIds(
+  data: ProcessData,
+  scope: ProcessScope,
+  laneIds: string[] | undefined,
+  fallback?: DetailProcessFallback,
+): ProcessData {
+  return updateProcessInstance(
+    data,
+    scope,
+    (instance) => {
+      if (!laneIds) {
+        const { laneIds: _removed, ...rest } = instance
+        return rest as ProcessInstance
+      }
+      const masterLaneIds = data.commonMasters.lanes.map((lane) => lane.id)
+      const selected = new Set(laneIds)
+      for (const node of instance.nodes) {
+        if (node.laneId) selected.add(node.laneId)
+      }
+      const ordered = masterLaneIds.filter((id) => selected.has(id))
+      if (ordered.length === masterLaneIds.length) {
+        const { laneIds: _removed, ...rest } = instance
+        return rest as ProcessInstance
+      }
+      return { ...instance, laneIds: ordered }
+    },
+    fallback,
+  )
+}
+
 /** 스윔레인은 commonMasters — Overview·Detail 공통 */
 export function saveLane(
   data: ProcessData,
