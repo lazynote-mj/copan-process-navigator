@@ -20,6 +20,8 @@ export type DetailProcessGroup = {
   name: string
   description: string
   detailProcessId: string
+  /** 프로세스 상세 menu placement — 비우면 appConfig 기본 분류 기준 */
+  lifecycleGroupId?: ProcessLifecycleGroupId
   /** Overview에서 대응하는 강조 그룹 — 없으면 상세 전용 */
   linkedOverviewGroupId?: string
 }
