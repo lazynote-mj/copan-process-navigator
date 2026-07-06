@@ -4,7 +4,7 @@ import { useProcessDataStore } from '../../data/processDataStore'
 import { getActiveProcessData, resolveDetailProcessesForMenu } from '../../data/activeProcessData'
 import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
-import { getLifecycleGroupForDetailProcess } from '../../data/processLifecycleGroups'
+import { getLifecycleGroupForDetailProcess, resolveLifecycleGroupForDetailGroup } from '../../data/processLifecycleGroups'
 import { APP_CONFIG, can } from '../../config/appConfig'
 import { canDeleteLane } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
@@ -396,7 +396,9 @@ export function AppLayout() {
   const detailHeader = useMemo(() => {
     if (viewMode === 'overview') return null
     const detailGroup = detailProcessGroups.find((group) => group.detailProcessId === activeProcess.id)
-    const lifecycleGroup = getLifecycleGroupForDetailProcess(activeProcess.id)
+    const lifecycleGroup = detailGroup
+      ? resolveLifecycleGroupForDetailGroup(detailGroup)
+      : getLifecycleGroupForDetailProcess(activeProcess.id)
     return {
       breadcrumbs: [APP_CONFIG.processRootLabel, lifecycleGroup.label],
       processLabel: '',

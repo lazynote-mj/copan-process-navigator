@@ -4,6 +4,7 @@ import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeN
 import {
   PROCESS_LIFECYCLE_GROUPS,
   getLifecycleGroupForDetailProcess,
+  resolveLifecycleGroupForDetailGroup,
 } from '../../data/processLifecycleGroups'
 import './process-group-menu.css'
 
@@ -47,7 +48,7 @@ function buildDetailLifecycleSections(groups: DetailProcessGroup[]) {
   return PROCESS_LIFECYCLE_GROUPS.map((lifecycleGroup) => ({
     lifecycleGroup,
     groups: groups.filter(
-      (group) => getLifecycleGroupForDetailProcess(group.detailProcessId).id === lifecycleGroup.id,
+      (group) => resolveLifecycleGroupForDetailGroup(group).id === lifecycleGroup.id,
     ),
   }))
 }

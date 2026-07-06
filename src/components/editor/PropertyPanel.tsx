@@ -1142,6 +1142,33 @@ function DetailProcessGroupForm({
         />
       </div>
       <div className="property-panel__field">
+        <label className="property-panel__label">Lifecycle Group</label>
+        <select
+          className="property-panel__select"
+          value={group.lifecycleGroupId ?? ''}
+          disabled={disabled}
+          onChange={(e) => {
+            const value = e.target.value
+            if (!value) {
+              const { lifecycleGroupId: _removed, ...rest } = group
+              onChange(rest)
+              return
+            }
+            onChange({ ...group, lifecycleGroupId: value as DetailProcessGroup['lifecycleGroupId'] })
+          }}
+        >
+          <option value="">기본 분류 기준 자동 배치</option>
+          {PROCESS_LIFECYCLE_GROUPS.map((lifecycleGroup) => (
+            <option key={lifecycleGroup.id} value={lifecycleGroup.id}>
+              {lifecycleGroup.label}
+            </option>
+          ))}
+        </select>
+        <p className="property-panel__hint">
+          프로세스 상세 메뉴에서 이 프로세스가 속할 Lifecycle 카테고리입니다. 복제된 프로세스는 원본 카테고리를 이어받습니다.
+        </p>
+      </div>
+      <div className="property-panel__field">
         <label className="property-panel__label">그룹 ID</label>
         <input className="property-panel__input" value={group.id} disabled readOnly />
       </div>

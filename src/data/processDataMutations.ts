@@ -13,6 +13,7 @@ import {
 } from '../lib/editor/processEditor'
 import { normalizeEdgeForStorage } from '../lib/editor/edgeUpdate'
 import { isDerivedDisplayEdge } from '../lib/nodeVisibility'
+import { resolveLifecycleGroupForDetailGroup } from './processLifecycleGroups'
 import {
   cloneProcessData,
   findProcessIndex,
@@ -473,11 +474,20 @@ export function cloneDetailProcess(
     data.commonMasters,
   )
 
+  // 복제본은 원본의 분류를 데이터 필드로 명시 승계한다 —
+  // 새 processId는 appConfig 기본 분류 맵에 없어 fallback으로 빠지기 때문.
+  const sourceGroup = (data.detailProcessGroups ?? []).find(
+    (entry) => entry.detailProcessId === sourceProcessId,
+  )
   const clonedGroup: DetailProcessGroup = {
     id: groupId,
     name,
     description: source.description ?? '',
     detailProcessId: processId,
+    lifecycleGroupId: resolveLifecycleGroupForDetailGroup({
+      detailProcessId: sourceProcessId,
+      lifecycleGroupId: sourceGroup?.lifecycleGroupId,
+    }).id,
   }
 
   return {
