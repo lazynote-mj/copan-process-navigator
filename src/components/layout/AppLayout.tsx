@@ -6,7 +6,7 @@ import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGrou
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
 import { getLifecycleGroupForDetailProcess, resolveLifecycleGroupForDetailGroup } from '../../data/processLifecycleGroups'
 import { APP_CONFIG, can } from '../../config/appConfig'
-import { canDeleteLane } from '../../lib/editor/processEditor'
+import { canDeleteLane, canDeleteLaneAcrossProcesses } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
 import {
   buildNewEdgeSelection,
@@ -972,10 +972,16 @@ export function AppLayout() {
 
   const handleDeleteLane = useCallback(
     (laneId: string) => {
+      // 레인은 전역 마스터 — 열려 있지 않은 프로세스의 노드 참조까지 검사한다
+      const guard = canDeleteLaneAcrossProcesses(processData.processes, laneId)
+      if (!guard.ok) {
+        window.alert(guard.message)
+        return
+      }
       store.deleteLane(activeScope, laneId)
       setSelectedElement(null)
     },
-    [store, activeScope],
+    [store, activeScope, processData.processes],
   )
 
   const handleDeleteZone = useCallback(

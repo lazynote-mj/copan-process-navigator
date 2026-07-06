@@ -606,11 +606,24 @@ export function deleteLane(
   _scope: ProcessScope,
   laneId: string,
 ): ProcessData {
+  // 최종 방어 — 어느 프로세스든 이 레인을 참조하는 노드가 있으면 삭제하지 않는다
+  const referenced = data.processes.some((process) =>
+    process.nodes.some((node) => node.laneId === laneId),
+  )
+  if (referenced) return data
+
   const overview = getProcessByScope(data, 'overview')
   if (!overview) return data
 
+  // 프로세스별 표시 레인(laneIds)에 남은 참조도 함께 정리
+  const processes = data.processes.map((process) =>
+    process.laneIds?.includes(laneId)
+      ? { ...process, laneIds: process.laneIds.filter((id) => id !== laneId) }
+      : process,
+  )
+
   const nextOverview = deleteLaneFromProcess(overview, laneId)
-  return updateCommonMasters(data, (masters) => ({
+  return updateCommonMasters({ ...data, processes }, (masters) => ({
     ...masters,
     lanes: nextOverview.lanes,
   }))
