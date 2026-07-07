@@ -417,18 +417,42 @@ export function saveProcessLaneDisplay(
 }
 
 /** 스윔레인은 commonMasters — Overview·Detail 공통 */
+/**
+ * 프로세스가 현재 화면에 표시하는 레인 id — 단일 레인 collapse를 반영한다.
+ * 신규 레인 추가 시 기존 프로세스를 이 값으로 고정하면 표시가 그대로 유지된다.
+ */
+function currentDisplayedLaneIds(instance: ProcessInstance, masters: CommonMasters): string[] {
+  const usedLaneIds = [...new Set(instance.nodes.map((node) => node.laneId).filter(Boolean))]
+  // 명시 설정이 없고 노드가 한 레인에만 있으면 collapse 상태 → 그 레인만 표시 중
+  if (!instance.laneIds?.length && usedLaneIds.length === 1) {
+    return usedLaneIds
+  }
+  return resolveProcessWithMasters(instance, masters).lanes.map((lane) => lane.id)
+}
+
 export function saveLane(
   data: ProcessData,
   _scope: ProcessScope,
   lane: Lane,
   isNew: boolean,
 ): ProcessData {
-  return updateCommonMasters(data, (masters) => {
+  const withLane = updateCommonMasters(data, (masters) => {
     const lanes = isNew
       ? sortLanesByOrder([...masters.lanes, lane])
       : sortLanesByOrder(masters.lanes.map((existing) => (existing.id === lane.id ? lane : existing)))
     return { ...masters, lanes }
   })
+  if (!isNew) return withLane
+
+  // 신규 레인은 기존 프로세스에 자동 노출하지 않는다 — laneIds 미지정(전체 표시)
+  // detail 프로세스를 현재 표시 레인으로 고정해 새 레인을 제외한다.
+  // Overview는 마스터 맵이므로 새 레인을 그대로 반영한다.
+  const oldMasters = data.commonMasters
+  const processes = withLane.processes.map((instance) => {
+    if (instance.type !== 'detail' || instance.laneIds?.length) return instance
+    return { ...instance, laneIds: currentDisplayedLaneIds(instance, oldMasters) }
+  })
+  return { ...withLane, processes }
 }
 
 export function saveZone(
