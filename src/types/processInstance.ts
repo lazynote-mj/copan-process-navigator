@@ -17,6 +17,8 @@ export type ProcessInstance = {
   zones?: ProcessZone[]
   /** 표시할 Lane Master 서브셋 — 비우면 전체 레인 표시 */
   laneIds?: string[]
+  /** 노드가 없는 레인을 자동 숨김 (laneIds 서브셋 위에 추가 적용) */
+  autoHideEmptyLanes?: boolean
   /** Detail — 연결된 Overview 대표 노드 id */
   overviewNodeId?: string
   source?: string

@@ -135,10 +135,19 @@ function resolveLanesForInstance(
   instance: ProcessInstance,
   masters: CommonMasters,
 ): CommonMasters['lanes'] {
-  if (!instance.laneIds?.length) return masters.lanes
-  const selected = new Set(instance.laneIds)
-  const lanes = masters.lanes.filter((lane) => selected.has(lane.id))
-  return lanes.length > 0 ? lanes : masters.lanes
+  let lanes = masters.lanes
+  if (instance.laneIds?.length) {
+    const selected = new Set(instance.laneIds)
+    const filtered = masters.lanes.filter((lane) => selected.has(lane.id))
+    if (filtered.length > 0) lanes = filtered
+  }
+  if (instance.autoHideEmptyLanes) {
+    const usedLaneIds = new Set(instance.nodes.map((node) => node.laneId))
+    const withNodes = lanes.filter((lane) => usedLaneIds.has(lane.id))
+    // 노드가 하나도 없는 프로세스는 전부 숨기지 않고 현재 집합을 유지한다
+    if (withNodes.length > 0) lanes = withNodes
+  }
+  return lanes
 }
 
 /** commonMasters + instance → 렌더/레이아웃용 Process */
@@ -156,6 +165,7 @@ export function resolveProcessWithMasters(
     owner: instance.owner ?? '',
     lanes: resolveLanesForInstance(instance, masters),
     laneIds: instance.laneIds,
+    autoHideEmptyLanes: instance.autoHideEmptyLanes,
     phases: masters.phases,
     nodes: instance.nodes,
     edges: instance.edges,
@@ -246,6 +256,7 @@ export function processToInstance(
     edges: structuredClone(process.edges),
     zones: process.zones ? structuredClone(process.zones) : undefined,
     laneIds: process.laneIds ? [...process.laneIds] : undefined,
+    autoHideEmptyLanes: process.autoHideEmptyLanes,
     overviewNodeId: process.overviewNodeId,
     source: process.source,
   }

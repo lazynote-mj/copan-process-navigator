@@ -243,7 +243,10 @@ type PropertyPanelProps = {
   onSaveDetailProcessGroup?: (group: DetailProcessGroup) => void
   /** Lane Master 전체 목록 — 프로세스별 표시 레인 선택 UI용 */
   masterLanes?: Lane[]
-  onSaveProcessLaneIds?: (processId: string, laneIds: string[] | undefined) => void
+  onSaveProcessLaneDisplay?: (
+    processId: string,
+    settings: { laneIds?: string[]; autoHideEmptyLanes?: boolean },
+  ) => void
   onProcessGroupDraftChange?: (group: OverviewProcessGroup) => void
   savedProcessGroup?: OverviewProcessGroup
   savedDetailProcessGroup?: DetailProcessGroup
@@ -1114,9 +1117,11 @@ function DetailProcessGroupForm({
   overviewProcessGroups,
   masterLanes,
   processLaneIds,
+  autoHideEmptyLanes,
   disabled,
   onChange,
   onProcessLaneIdsChange,
+  onAutoHideEmptyLanesChange,
   onOpenDetailProcess,
 }: {
   group: DetailProcessGroup
@@ -1125,9 +1130,11 @@ function DetailProcessGroupForm({
   masterLanes: Lane[]
   /** null = 전체 레인 표시 */
   processLaneIds: string[] | null
+  autoHideEmptyLanes: boolean
   disabled: boolean
   onChange: (group: DetailProcessGroup) => void
   onProcessLaneIdsChange: (laneIds: string[] | null) => void
+  onAutoHideEmptyLanesChange: (enabled: boolean) => void
   onOpenDetailProcess?: (processId: string) => void
 }) {
   const linkedProcess = detailProcesses.find((entry) => entry.id === group.detailProcessId)
@@ -1191,28 +1198,40 @@ function DetailProcessGroupForm({
       {masterLanes.length > 0 ? (
         <div className="property-panel__field">
           <label className="property-panel__label">표시 레인</label>
+          <label className="property-panel__checkbox-item">
+            <input
+              type="checkbox"
+              checked={autoHideEmptyLanes}
+              disabled={disabled}
+              onChange={(e) => onAutoHideEmptyLanesChange(e.target.checked)}
+            />
+            <span>노드 없는 레인 자동 숨김</span>
+          </label>
           <div className="property-panel__checkbox-list">
             {masterLanes.map((lane) => {
               const used = usedLaneIds.has(lane.id)
+              const checked = selectedLaneIds.includes(lane.id)
+              const autoHidden = autoHideEmptyLanes && !used
               return (
                 <label key={lane.id} className="property-panel__checkbox-item">
                   <input
                     type="checkbox"
-                    checked={selectedLaneIds.includes(lane.id)}
-                    disabled={disabled || used}
+                    checked={checked}
+                    disabled={disabled || used || autoHideEmptyLanes}
                     onChange={(e) => toggleLane(lane.id, e.target.checked)}
                   />
                   <span>
                     {lane.name}
-                    {used ? ' (노드 배치됨)' : ''}
+                    {used ? ' (노드 배치됨)' : autoHidden && checked ? ' (자동 숨김)' : ''}
                   </span>
                 </label>
               )
             })}
           </div>
           <p className="property-panel__hint">
-            이 프로세스 상세에 표시할 스윔레인입니다. 노드가 배치된 레인은 해제할 수 없고, 전체
-            선택 시 새 레인이 추가되면 자동으로 함께 표시됩니다.
+            {autoHideEmptyLanes
+              ? '노드가 있는 레인만 표시됩니다. 노드를 추가/삭제하면 레인이 자동으로 나타나고 사라집니다.'
+              : '이 프로세스 상세에 표시할 스윔레인입니다. 노드가 배치된 레인은 해제할 수 없고, 전체 선택 시 새 레인이 추가되면 자동으로 함께 표시됩니다.'}
           </p>
         </div>
       ) : null}
@@ -1632,7 +1651,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     onSaveProcessGroup,
     onSaveDetailProcessGroup,
     masterLanes,
-    onSaveProcessLaneIds,
+    onSaveProcessLaneDisplay,
     onProcessGroupDraftChange,
     savedProcessGroup,
     savedDetailProcessGroup,
@@ -1742,21 +1761,22 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
     }
   }
 
-  // 프로세스별 표시 레인 draft — 선택 그룹/연결 프로세스가 바뀌면 재초기화 (null = 전체 표시)
+  // 프로세스별 레인 표시 설정 draft — 선택 그룹/연결 프로세스가 바뀌면 재초기화 (null = 전체 표시)
   const laneDraftKey = `${selectionKey}:${draftDetailProcessGroup?.detailProcessId ?? ''}`
-  const [draftProcessLaneIds, setDraftProcessLaneIds] = useState<string[] | null>(() => {
-    const linkedProcess = detailProcesses?.find(
-      (entry) => entry.id === draftDetailProcessGroup?.detailProcessId,
-    )
-    return linkedProcess?.laneIds ? [...linkedProcess.laneIds] : null
-  })
+  const linkedDetailProcess = detailProcesses?.find(
+    (entry) => entry.id === draftDetailProcessGroup?.detailProcessId,
+  )
+  const [draftProcessLaneIds, setDraftProcessLaneIds] = useState<string[] | null>(() =>
+    linkedDetailProcess?.laneIds ? [...linkedDetailProcess.laneIds] : null,
+  )
+  const [draftAutoHideEmptyLanes, setDraftAutoHideEmptyLanes] = useState<boolean>(
+    () => linkedDetailProcess?.autoHideEmptyLanes ?? false,
+  )
   const [prevLaneDraftKey, setPrevLaneDraftKey] = useState(laneDraftKey)
   if (prevLaneDraftKey !== laneDraftKey) {
     setPrevLaneDraftKey(laneDraftKey)
-    const linkedProcess = detailProcesses?.find(
-      (entry) => entry.id === draftDetailProcessGroup?.detailProcessId,
-    )
-    setDraftProcessLaneIds(linkedProcess?.laneIds ? [...linkedProcess.laneIds] : null)
+    setDraftProcessLaneIds(linkedDetailProcess?.laneIds ? [...linkedDetailProcess.laneIds] : null)
+    setDraftAutoHideEmptyLanes(linkedDetailProcess?.autoHideEmptyLanes ?? false)
   }
 
   const commitNode = useCallback(
@@ -1846,12 +1866,15 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       }
       setError(null)
       onSaveDetailProcessGroup?.({ ...group, name })
-      if (onSaveProcessLaneIds && group.detailProcessId) {
-        onSaveProcessLaneIds(group.detailProcessId, draftProcessLaneIds ?? undefined)
+      if (onSaveProcessLaneDisplay && group.detailProcessId) {
+        onSaveProcessLaneDisplay(group.detailProcessId, {
+          laneIds: draftProcessLaneIds ?? undefined,
+          autoHideEmptyLanes: draftAutoHideEmptyLanes,
+        })
       }
       return true
     },
-    [onSaveDetailProcessGroup, onSaveProcessLaneIds, draftProcessLaneIds],
+    [onSaveDetailProcessGroup, onSaveProcessLaneDisplay, draftProcessLaneIds, draftAutoHideEmptyLanes],
   )
 
   const handleProcessGroupChange = useCallback(
@@ -2129,9 +2152,11 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           overviewProcessGroups={props.overviewProcessGroups ?? []}
           masterLanes={masterLanes ?? []}
           processLaneIds={draftProcessLaneIds}
+          autoHideEmptyLanes={draftAutoHideEmptyLanes}
           disabled={!isEditMode && !isNewGroup}
           onChange={setDraftDetailProcessGroup}
           onProcessLaneIdsChange={setDraftProcessLaneIds}
+          onAutoHideEmptyLanesChange={setDraftAutoHideEmptyLanes}
           onOpenDetailProcess={onOpenDetailProcess}
         />
       </div>

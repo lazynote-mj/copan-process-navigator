@@ -258,6 +258,8 @@ export type Process = {
   lanes: Lane[]
   /** 이 프로세스가 표시하는 Lane Master 서브셋 — 비우면 전체 레인 표시 */
   laneIds?: string[]
+  /** 노드가 없는 레인을 자동 숨김 (laneIds 서브셋 위에 추가 적용) */
+  autoHideEmptyLanes?: boolean
   nodes: Node[]
   edges: Edge[]
   /** Process Zone (Group Area) — 노드 묶음 시각적 강조 */

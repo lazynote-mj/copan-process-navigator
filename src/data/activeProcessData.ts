@@ -70,13 +70,16 @@ function normalizeProcessInstanceWithMasters(
     ...(options?.preserveZonesFrom?.edges.filter((edge) => !baseEdgeIds.has(edge.id)) ?? []),
   ])
 
+  // laneIds/autoHideEmptyLanes는 registry에 없는 사용자별 표시 설정이므로,
+  // registry 동기화로 instance를 재구성할 때 zones처럼 현재 값을 보존한다.
+  const preserved = options?.preserveZonesFrom
   return {
     ...instance,
     nodes: [...nodes, ...normalizedExtraNodes],
     edges,
-    zones: options?.preserveZonesFrom
-      ? structuredClone(options.preserveZonesFrom.zones ?? [])
-      : instance.zones,
+    zones: preserved ? structuredClone(preserved.zones ?? []) : instance.zones,
+    laneIds: preserved ? preserved.laneIds : instance.laneIds,
+    autoHideEmptyLanes: preserved ? preserved.autoHideEmptyLanes : instance.autoHideEmptyLanes,
   }
 }
 
