@@ -64,13 +64,18 @@ export function isDetailSingleLaneProcess(nodes: Node[]): boolean {
 }
 
 /**
- * Detail 레이아웃 lane — 단일 lane 프로세스는 5열 폭을 하나의 lane으로 사용 (PDF 사업부 단일 스윔레인)
+ * Detail 레이아웃 lane — 단일 lane 프로세스는 5열 폭을 하나의 lane으로 사용 (PDF 사업부 단일 스윔레인).
+ * 단, 프로세스별 laneIds로 노드 없는 레인을 명시 표시하도록 설정한 경우 collapse하지 않고
+ * 설정한 레인을 모두 보여준다.
  */
 export function resolveDetailLayoutLanes(process: Process, nodes: Node[]): Lane[] {
-  if (!isDetailSingleLaneProcess(nodes)) {
+  const usedLaneIds = getUsedLaneIds(nodes)
+  const hasExplicitEmptyLane =
+    process.laneIds != null && process.lanes.some((lane) => !usedLaneIds.has(lane.id))
+  if (!isDetailSingleLaneProcess(nodes) || hasExplicitEmptyLane) {
     return getDetailOverviewLanes(process)
   }
-  const usedLaneId = [...getUsedLaneIds(nodes)][0]
+  const usedLaneId = [...usedLaneIds][0]
   const lane = getDetailOverviewLanes(process).find((entry) => entry.id === usedLaneId)
   if (!lane) return getDetailOverviewLanes(process)
   return [
