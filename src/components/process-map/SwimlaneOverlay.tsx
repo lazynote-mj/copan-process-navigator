@@ -260,6 +260,10 @@ function VerticalSwimlaneOverlay({
                     }
                     stroke={isSelected && !isInactive ? '#2563eb' : '#cbd5e1'}
                     strokeWidth={isSelected && !isInactive ? 2 : 1}
+                    style={{
+                      cursor: editMode && !isInactive ? 'pointer' : undefined,
+                      pointerEvents: editMode && !isInactive ? 'auto' : 'none',
+                    }}
                     onClick={(event) => {
                       if (!editMode || isInactive) return
                       event.stopPropagation()
@@ -338,6 +342,7 @@ function HorizontalSwimlaneOverlay({
   const LANE_HEADER_WIDTH = 160
 
   return (
+    <>
     <svg
       className="swimlane-overlay"
       style={{
@@ -380,6 +385,10 @@ function HorizontalSwimlaneOverlay({
                 fill={isSelected ? 'rgba(37,99,235,0.12)' : 'transparent'}
                 stroke={isSelected ? '#2563eb' : 'transparent'}
                 strokeWidth={isSelected ? 2 : 0}
+                style={{
+                  cursor: editMode ? 'pointer' : undefined,
+                  pointerEvents: editMode ? 'auto' : 'none',
+                }}
                 onClick={(event) => {
                   if (!editMode) return
                   event.stopPropagation()
@@ -416,5 +425,38 @@ function HorizontalSwimlaneOverlay({
         />
       </g>
     </svg>
+    {editMode ? (
+      // React Flow pane이 배경 오버레이 위에 있어 클릭을 가로채므로,
+      // 노드가 없는 헤더 컬럼(x < LANE_HEADER_WIDTH)에만 pane 위 클릭 레이어를 얹는다.
+      <svg
+        className="swimlane-overlay swimlane-overlay--lane-hit"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          overflow: 'visible',
+          zIndex: 5,
+        }}
+      >
+        <g transform={`translate(${viewport.x},${viewport.y}) scale(${viewport.zoom})`}>
+          {laneBands.map((band) => (
+            <rect
+              key={band.laneId}
+              x={0}
+              y={band.y}
+              width={LANE_HEADER_WIDTH}
+              height={band.height}
+              fill="transparent"
+              style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+              onClick={(event) => {
+                event.stopPropagation()
+                onLaneSelect?.(band.laneId)
+              }}
+            />
+          ))}
+        </g>
+      </svg>
+    ) : null}
+    </>
   )
 }
