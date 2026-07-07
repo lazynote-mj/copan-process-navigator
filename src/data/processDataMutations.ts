@@ -368,36 +368,49 @@ export function saveEdge(
   )
 }
 
+export type ProcessLaneDisplaySettings = {
+  /** 표시 레인 서브셋 — undefined면 마스터 전체 표시 */
+  laneIds?: string[]
+  /** 노드 없는 레인 자동 숨김 */
+  autoHideEmptyLanes?: boolean
+}
+
 /**
- * 프로세스별 표시 레인 저장.
+ * 프로세스별 레인 표시 설정 저장 (표시 레인 서브셋 + 빈 레인 자동 숨김).
  * 노드가 배치된 레인은 숨길 수 없어 자동 포함하고,
- * 전체 레인 선택이면 필드를 제거해 "마스터 전체 자동 표시"로 되돌린다.
+ * 전체 레인 선택이면 laneIds 필드를 제거해 "마스터 전체 자동 표시"로 되돌린다.
+ * 각 설정은 기본값(전체 표시 / 숨김 안 함)일 때 필드를 제거해 데이터를 깔끔하게 유지한다.
  */
-export function saveProcessLaneIds(
+export function saveProcessLaneDisplay(
   data: ProcessData,
   scope: ProcessScope,
-  laneIds: string[] | undefined,
+  settings: ProcessLaneDisplaySettings,
   fallback?: DetailProcessFallback,
 ): ProcessData {
   return updateProcessInstance(
     data,
     scope,
     (instance) => {
-      if (!laneIds) {
-        const { laneIds: _removed, ...rest } = instance
-        return rest as ProcessInstance
+      const { laneIds: _laneIds, autoHideEmptyLanes: _auto, ...base } = instance
+      const next: ProcessInstance = { ...base }
+
+      if (settings.laneIds) {
+        const masterLaneIds = data.commonMasters.lanes.map((lane) => lane.id)
+        const selected = new Set(settings.laneIds)
+        for (const node of instance.nodes) {
+          if (node.laneId) selected.add(node.laneId)
+        }
+        const ordered = masterLaneIds.filter((id) => selected.has(id))
+        if (ordered.length < masterLaneIds.length) {
+          next.laneIds = ordered
+        }
       }
-      const masterLaneIds = data.commonMasters.lanes.map((lane) => lane.id)
-      const selected = new Set(laneIds)
-      for (const node of instance.nodes) {
-        if (node.laneId) selected.add(node.laneId)
+
+      if (settings.autoHideEmptyLanes) {
+        next.autoHideEmptyLanes = true
       }
-      const ordered = masterLaneIds.filter((id) => selected.has(id))
-      if (ordered.length === masterLaneIds.length) {
-        const { laneIds: _removed, ...rest } = instance
-        return rest as ProcessInstance
-      }
-      return { ...instance, laneIds: ordered }
+
+      return next
     },
     fallback,
   )

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { toBeNavigator } from '../toBeNavigatorRegistry'
 import { createInitialProcessData } from '../processDataMigration'
-import { deleteLane, saveLane, saveProcessLaneIds } from '../processDataMutations'
+import { deleteLane, saveLane, saveProcessLaneDisplay } from '../processDataMutations'
 import { canDeleteLaneAcrossProcesses } from '../../lib/editor/processEditor'
 import type { Lane } from '../../types/process'
 
@@ -40,7 +40,7 @@ describe('스윔레인 삭제 — 전역 참조 가드', () => {
     // 한 프로세스의 표시 레인에 새 레인만 지정 — 노드 레인은 자동 포함되고
     // 미사용 레인(예: 판매현장)이 빠져 서브셋으로 저장된다
     const target = 'purchase-to-ap-invoice'
-    data = saveProcessLaneIds(data, target, [NEW_LANE.id])
+    data = saveProcessLaneDisplay(data, target, { laneIds: [NEW_LANE.id] })
     const before = data.processes.find((entry) => entry.id === target)!
     expect(before.laneIds).toContain(NEW_LANE.id)
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useProcessDataStore } from '../../data/processDataStore'
+import type { ProcessLaneDisplaySettings } from '../../data/processDataMutations'
 import { getActiveProcessData, resolveDetailProcessesForMenu } from '../../data/activeProcessData'
 import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
@@ -837,9 +838,9 @@ export function AppLayout() {
     setIsRightOpen(true)
   }
 
-  const handleSaveProcessLaneIds = useCallback(
-    (processId: string, laneIds: string[] | undefined) => {
-      store.saveProcessLaneIds(processId, laneIds)
+  const handleSaveProcessLaneDisplay = useCallback(
+    (processId: string, settings: ProcessLaneDisplaySettings) => {
+      store.saveProcessLaneDisplay(processId, settings)
     },
     [store],
   )
@@ -1384,7 +1385,7 @@ export function AppLayout() {
                   onSaveProcessGroup={handleSaveProcessGroup}
                   onSaveDetailProcessGroup={handleSaveDetailProcessGroup}
                   masterLanes={processData.commonMasters.lanes}
-                  onSaveProcessLaneIds={handleSaveProcessLaneIds}
+                  onSaveProcessLaneDisplay={handleSaveProcessLaneDisplay}
                   onProcessGroupDraftChange={handleProcessGroupDraftChange}
                   savedProcessGroup={savedSelectedOverviewGroup}
                   savedDetailProcessGroup={savedSelectedDetailGroup}
