@@ -6,6 +6,7 @@ import type {
   OverviewProcessGroup,
   ProcessGroup,
 } from '../types/toBeNavigator'
+import type { Workflow } from '../types/workflow'
 import {
   extractCommonMastersFromOverview,
   processToInstance,
@@ -34,6 +35,8 @@ export type ProcessDataFilePayloadV2 = {
   processes: ProcessInstance[]
   overviewProcessGroups?: OverviewProcessGroup[]
   detailProcessGroups?: DetailProcessGroup[]
+  /** Workflow Grouping Metadata — commonMasters 밖 최상위 별도 배열 (optional, additive) */
+  workflows?: Workflow[]
   /** @deprecated */
   processGroups?: ProcessGroup[]
 }
@@ -127,6 +130,8 @@ export function buildProcessDataFromPayload(
     dirty: false,
     baselineNodeCount: summary.nodeCount,
     baselineEdgeCount: summary.edgeCount,
+    // Workflow Grouping Metadata 보존 — 없으면 미정의(기존 payload 하위호환)
+    ...(v2.workflows ? { workflows: structuredClone(v2.workflows) } : {}),
   }
   if (v2.overviewProcessGroups?.length || v2.detailProcessGroups?.length) {
     return ensureProcessGroupFields({
@@ -174,5 +179,7 @@ export function processDataToFilePayload(data: ProcessData): ProcessDataFilePayl
     processes: normalized.processes.map((p) => normalizeProcessInstanceEdges(structuredClone(p))),
     overviewProcessGroups: structuredClone(normalized.overviewProcessGroups ?? []),
     detailProcessGroups: structuredClone(normalized.detailProcessGroups ?? []),
+    // Workflow Grouping Metadata — 있을 때만 직렬화 (기존 파일 하위호환)
+    ...(normalized.workflows ? { workflows: structuredClone(normalized.workflows) } : {}),
   }
 }
