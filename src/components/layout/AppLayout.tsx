@@ -1464,6 +1464,7 @@ export function AppLayout() {
           <ProcessGroupMenu
             variant="detail"
             groups={detailProcessGroups}
+            workflows={processData.workflows}
             selectedGroupId={
               detailProcessGroups.find((group) => group.detailProcessId === detailProcessId)?.id ?? null
             }
