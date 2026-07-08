@@ -1,7 +1,7 @@
 {
   "kind": "copan-process-navigator-state",
   "version": 2,
-  "exportedAt": "2026-07-02T11:12:15.706Z",
+  "exportedAt": "2026-07-07T07:15:59.384Z",
   "commonMasters": {
     "lanes": [
       {
@@ -19,23 +19,30 @@
         "description": "거래처, 발주품의, 계약/발주등록, 입고정보전달"
       },
       {
+        "id": "lane-mr8i71rk-rr7ki",
+        "name": "경영혁신팀 / 그룹웨어",
+        "order": 3,
+        "ownerDepartment": "",
+        "description": ""
+      },
+      {
         "id": "warehouse-easyadmin",
         "name": "물류센터 / 이지어드민",
-        "order": 3,
+        "order": 4,
         "ownerDepartment": "",
         "description": "입고확인, 입고등록, 출고확인, 출고등록, 재고관리"
       },
       {
         "id": "retail-easychain",
         "name": "판매현장 / 이지체인",
-        "order": 4,
+        "order": 5,
         "ownerDepartment": "",
         "description": "매장, 팝업, 콘서트현장 판매 및 현장 재고/판매 처리"
       },
       {
         "id": "finance",
         "name": "재무팀 / ERP",
-        "order": 5,
+        "order": 6,
         "ownerDepartment": "",
         "description": "매입마감, 매출마감, 전표생성, 정산, 자금집행"
       }
@@ -2945,6 +2952,13 @@
             "stroke": "#0284c7"
           }
         }
+      ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
       ]
     },
     {
@@ -3519,6 +3533,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "order-register",
       "source": "SCM TO-BE"
     },
@@ -4085,7 +4106,14 @@
         }
       ],
       "overviewNodeId": "return-handling",
-      "source": "SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
       "id": "b2b-export-order-to-sales",
@@ -4913,6 +4941,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "order-register",
       "source": "SCM TO-BE"
     },
@@ -5591,6 +5626,13 @@
             "labelPosition": "top"
           }
         }
+      ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
       ],
       "overviewNodeId": "order-register",
       "source": "SCM TO-BE"
@@ -6401,6 +6443,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "order-register",
       "source": "SCM TO-BE"
     },
@@ -6722,6 +6771,13 @@
             "opacity": 0.12
           }
         }
+      ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
       ],
       "overviewNodeId": "stock-transfer-handling",
       "source": "SCM TO-BE"
@@ -7184,6 +7240,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "other-issue-handling",
       "source": "SCM TO-BE"
     },
@@ -7453,6 +7516,13 @@
         }
       ],
       "zones": [],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "settlement-posting",
       "source": "SCM TO-BE"
     },
@@ -7853,6 +7923,13 @@
         }
       ],
       "zones": [],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "settlement-posting",
       "source": "SCM TO-BE"
     },
@@ -9202,6 +9279,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "popup-concert-stock-sales-sync",
       "source": "SCM TO-BE"
     },
@@ -9842,7 +9926,14 @@
         }
       ],
       "overviewNodeId": "purchase-request",
-      "source": "SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
       "id": "purchase-to-ap-invoice",
@@ -10609,6 +10700,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "purchase-request",
       "source": "SCM TO-BE"
     },
@@ -11304,6 +11402,13 @@
             "opacity": 0.12
           }
         }
+      ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
       ],
       "overviewNodeId": "return-handling",
       "source": "SCM TO-BE"
@@ -12569,7 +12674,14 @@
         }
       ],
       "overviewNodeId": "concert-sales",
-      "source": "SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
       "id": "store-sales",
@@ -13146,7 +13258,14 @@
         }
       ],
       "overviewNodeId": "store-sales",
-      "source": "SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
       "id": "revenue-share-settlement",
@@ -13557,6 +13676,13 @@
         }
       ],
       "zones": [],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "settlement-posting",
       "source": "SCM TO-BE"
     },
@@ -14266,7 +14392,14 @@
         }
       ],
       "overviewNodeId": "opportunity",
-      "source": "SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
       "id": "service-purchase-to-ap",
@@ -14758,6 +14891,13 @@
           }
         }
       ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "purchase-request",
       "source": "SCM TO-BE"
     },
@@ -15025,7 +15165,14 @@
         }
       ],
       "overviewNodeId": "order-register",
-      "source": "SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
       "id": "service-project-settlement",
@@ -15418,6 +15565,13 @@
         }
       ],
       "zones": [],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
       "overviewNodeId": "settlement-posting",
       "source": "SCM TO-BE"
     },
@@ -16092,7 +16246,15 @@
             "opacity": 0.12
           }
         }
-      ]
+      ],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
+      "type": "detail"
     },
     {
       "id": "other-receipt",
@@ -16456,7 +16618,15 @@
           }
         }
       ],
-      "zones": []
+      "zones": [],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
+      "type": "detail"
     },
     {
       "id": "stock-movement",
@@ -16826,7 +16996,15 @@
           }
         }
       ],
-      "zones": []
+      "zones": [],
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ],
+      "type": "detail"
     },
     {
       "id": "storage-location-master",
@@ -16992,673 +17170,104 @@
           "targetHandle": "top"
         }
       ],
-      "zones": []
+      "zones": [],
+      "type": "detail",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     },
     {
-      "id": "purchase-return",
+      "id": "구매-요청-매입-전표-생성-f-b",
       "type": "detail",
-      "name": "구매반품",
-      "description": "D-SCM-008 구매 반품 PROCESS 기준. 구매요청/발주/반품의뢰/구매송장/재고차감/전표승인을 Copan 업무 Owner 기준으로 정리한 프로세스 초안.",
+      "name": "구매 요청 ~ 매입 전표 생성 : F&B",
+      "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "version": "v1.0",
       "status": "draft",
-      "lastModified": "2026-06-30",
+      "lastModified": "2026-07-06T00:06:22.699Z",
       "owner": "혁신팀",
       "nodes": [
         {
-          "id": "purchase-return-step-01",
-          "name": "구매반품 요청",
-          "type": "erp",
+          "id": "구매-요청-매입-전표-생성-f-b-step-01",
+          "name": "구매진행",
+          "type": "manual",
           "laneId": "business",
           "phaseId": "procure-to-pay::p1",
-          "system": "OmniEsol ERP",
+          "system": "수작업",
           "owner": "사업부",
-          "description": "더존 원문: 구매요청입력. 반품 대상 구매/입고 건을 기준으로 사업부가 구매반품 필요를 등록한다.",
+          "description": "서비스 제공 또는 외주/용역 구매를 위해 사업부가 구매요청을 등록한다.",
           "inputs": [],
           "outputs": [],
           "controls": [],
           "phaseOrder": 1,
           "localOrder": 1,
-          "cellOrder": 0,
-          "zoneOrder": 0,
-          "detailLayout": {
-            "column": 1,
-            "row": 1
-          },
           "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매반품 요청",
-          "erpMenu": "구매요청입력",
-          "processingType": "Manual"
+          "offsetY": 0
         },
         {
-          "id": "purchase-return-step-02",
-          "name": "구매반품 요청 처리",
-          "type": "erp",
+          "id": "구매-요청-매입-전표-생성-f-b-step-10",
+          "name": "지출결의",
+          "type": "system",
           "laneId": "business",
-          "phaseId": "procure-to-pay::p1",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 구매요청처리. 구매반품 요청 내용과 반품 사유를 확정한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 2,
-          "localOrder": 2,
-          "cellOrder": 1,
-          "zoneOrder": 1,
-          "detailLayout": {
-            "column": 2,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매반품 요청 처리",
-          "erpMenu": "구매요청처리",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-03",
-          "name": "구매발주 등록",
-          "type": "erp",
-          "laneId": "partnership",
-          "phaseId": "procure-to-pay::p5",
+          "phaseId": "p10",
           "system": "OmniEsol ERP",
           "owner": "상생협력팀",
-          "description": "더존 원문: 구매발주입력. 원 구매발주와 반품 대상 공급사 기준을 확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 3,
-          "localOrder": 3,
-          "cellOrder": 2,
-          "zoneOrder": 2,
-          "detailLayout": {
-            "column": 3,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매발주 등록",
-          "erpMenu": "구매발주입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-04",
-          "name": "구매발주 처리",
-          "type": "erp",
-          "laneId": "partnership",
-          "phaseId": "procure-to-pay::p5",
-          "system": "OmniEsol ERP",
-          "owner": "상생협력팀",
-          "description": "더존 원문: 구매발주처리. 반품 기준 발주/공급사 정보를 처리한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 4,
-          "localOrder": 4,
-          "cellOrder": 3,
-          "zoneOrder": 3,
-          "detailLayout": {
-            "column": 4,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매발주 처리",
-          "erpMenu": "구매발주처리",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-05",
-          "name": "구매반품 의뢰 등록",
-          "type": "erp",
-          "laneId": "partnership",
-          "phaseId": "procure-to-pay::p10",
-          "system": "OmniEsol ERP",
-          "owner": "상생협력팀",
-          "description": "더존 원문: 구매반품의뢰입력. 공급사 반품 요청을 ERP에 등록한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 5,
-          "localOrder": 5,
-          "cellOrder": 4,
-          "zoneOrder": 4,
-          "detailLayout": {
-            "column": 5,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매반품 의뢰 등록",
-          "erpMenu": "구매반품의뢰입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-06",
-          "name": "구매반품 등록",
-          "type": "erp",
-          "laneId": "partnership",
-          "phaseId": "procure-to-pay::p10",
-          "system": "OmniEsol ERP",
-          "owner": "상생협력팀",
-          "description": "더존 원문: 구매반품입력. 구매반품 전표 생성을 위한 반품 정보를 입력한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 6,
-          "localOrder": 6,
-          "cellOrder": 5,
-          "zoneOrder": 5,
-          "detailLayout": {
-            "column": 6,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매반품 등록",
-          "erpMenu": "구매반품입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-07",
-          "name": "이지어드민 연동현황",
-          "type": "wms-oms",
-          "laneId": "warehouse-easyadmin",
-          "phaseId": "inventory::movement-info",
-          "system": "EasyAdmin WMS",
-          "owner": "물류센터",
-          "description": "더존 원문: 이지어드민연동현황. 반품 출고 요청/처리 연동 상태를 확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 7,
-          "localOrder": 7,
-          "cellOrder": 5,
-          "zoneOrder": 5,
-          "detailLayout": {
-            "column": 6,
-            "row": 2
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "이지어드민 연동현황",
-          "erpMenu": "",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-08",
-          "name": "구매송장 입력",
-          "type": "erp",
-          "laneId": "partnership",
-          "phaseId": "procure-to-pay::p10",
-          "system": "OmniEsol ERP",
-          "owner": "상생협력팀",
-          "description": "더존 원문: 구매송장입력. 반품에 따른 매입 차감/송장 정보를 입력한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 8,
-          "localOrder": 8,
-          "cellOrder": 6,
-          "zoneOrder": 6,
-          "detailLayout": {
-            "column": 7,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매송장 입력",
-          "erpMenu": "구매송장입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-09",
-          "name": "구매송장 처리",
-          "type": "erp",
-          "laneId": "partnership",
-          "phaseId": "procure-to-pay::p10",
-          "system": "OmniEsol ERP",
-          "owner": "상생협력팀",
-          "description": "더존 원문: 구매송장처리. 구매반품 송장 처리를 확정한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 9,
-          "localOrder": 9,
-          "cellOrder": 7,
-          "zoneOrder": 7,
-          "detailLayout": {
-            "column": 8,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "구매송장 처리",
-          "erpMenu": "구매송장처리",
-          "processingType": "Manual"
-        },
-        {
-          "id": "purchase-return-step-10",
-          "name": "전표조회승인",
-          "type": "erp",
-          "laneId": "finance",
-          "phaseId": "procure-to-pay::p11",
-          "system": "OmniEsol ERP",
-          "owner": "재무관리팀",
-          "description": "더존 원문: 전표조회승인. 구매반품/매입 차감에 따른 미결 전표를 재무관리팀이 확인/승인한다.",
+          "description": "매입마감확정 후 ERP가 매입전표를 미결 상태로 자동 생성한다. Auto Node Owner Rule에 따라 Owner는 상생협력팀으로 유지한다.",
           "inputs": [],
           "outputs": [],
           "controls": [],
           "phaseOrder": 10,
-          "localOrder": 10,
-          "cellOrder": 8,
-          "zoneOrder": 8,
+          "localOrder": 2,
+          "cellOrder": 1,
+          "zoneOrder": 1,
           "detailLayout": {
-            "column": 9,
+            "column": 2,
             "row": 1
           },
           "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "전표조회승인",
-          "erpMenu": "전표조회승인",
-          "processingType": "Manual"
+          "offsetY": 0
         },
         {
-          "id": "purchase-return-step-11",
-          "name": "위탁 여부",
-          "type": "interface-rule",
-          "laneId": "business",
-          "phaseId": "overview::return",
-          "system": "System Rule",
-          "owner": "사업부",
-          "description": "더존 원문: 위탁 여부. 구매반품 재고가 자사재고인지 위탁재고인지 판단한다.",
+          "id": "구매-요청-매입-전표-생성-f-b-step-11",
+          "name": "전표조회승인",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p2",
+          "system": "OmniEsol ERP",
+          "owner": "재무관리팀",
+          "description": "재무관리팀이 미결 서비스 매입전표를 조회하고 승인한다.",
           "inputs": [],
           "outputs": [],
           "controls": [],
           "phaseOrder": 11,
-          "localOrder": 11,
+          "localOrder": 5,
           "cellOrder": 4,
           "zoneOrder": 4,
           "detailLayout": {
             "column": 5,
-            "row": 2
+            "row": 1
           },
           "offsetX": 0,
           "offsetY": 0,
-          "businessActivity": "위탁 여부",
-          "erpMenu": "",
-          "processingType": "API"
+          "stepBadge": 0
         },
         {
-          "id": "purchase-return-step-12",
-          "name": "ERP 재고",
-          "type": "database",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p9",
+          "id": "구매-요청-매입-전표-생성-f-b-step-12",
+          "name": "정기자금집행",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p3",
           "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: ERP 재고 DATABASE / 재고(-). 구매반품 확정 후 ERP 재고가 차감된다.",
+          "owner": "재무관리팀",
+          "description": "승인된 서비스 매입전표를 전기 처리한다. 회계 상세 업무는 Reference Only로 관리한다.",
           "inputs": [],
           "outputs": [],
           "controls": [],
           "phaseOrder": 12,
-          "localOrder": 12,
-          "cellOrder": 6,
-          "zoneOrder": 6,
-          "detailLayout": {
-            "column": 7,
-            "row": 2
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "ERP 재고",
-          "erpMenu": "",
-          "processingType": "Auto"
-        },
-        {
-          "id": "purchase-return-step-13",
-          "name": "출고 정보",
-          "type": "database",
-          "laneId": "warehouse-easyadmin",
-          "phaseId": "inventory::movement-info",
-          "system": "EasyAdmin WMS",
-          "owner": "물류센터",
-          "description": "더존 원문: 출고 정보 DATABASE. 구매반품 출고 요청/처리 결과를 저장한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 13,
-          "localOrder": 13,
-          "cellOrder": 6,
-          "zoneOrder": 6,
-          "detailLayout": {
-            "column": 7,
-            "row": 3
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "출고 정보",
-          "erpMenu": "",
-          "processingType": "Auto"
-        }
-      ],
-      "edges": [
-        {
-          "id": "purchase-return-e01",
-          "source": "purchase-return-step-01",
-          "target": "purchase-return-step-02",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e02",
-          "source": "purchase-return-step-02",
-          "target": "purchase-return-step-03",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e03",
-          "source": "purchase-return-step-03",
-          "target": "purchase-return-step-04",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e04",
-          "source": "purchase-return-step-04",
-          "target": "purchase-return-step-05",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e05",
-          "source": "purchase-return-step-05",
-          "target": "purchase-return-step-06",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e06",
-          "source": "purchase-return-step-06",
-          "target": "purchase-return-step-11",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e07",
-          "source": "purchase-return-step-11",
-          "target": "purchase-return-step-12",
-          "condition": "",
-          "label": "Y",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e08",
-          "source": "purchase-return-step-11",
-          "target": "purchase-return-step-13",
-          "condition": "",
-          "label": "N",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e09",
-          "source": "purchase-return-step-06",
-          "target": "purchase-return-step-07",
-          "condition": "",
-          "label": "API",
-          "type": "api",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e10",
-          "source": "purchase-return-step-07",
-          "target": "purchase-return-step-13",
-          "condition": "",
-          "label": "출고 요청/처리",
-          "type": "api",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e11",
-          "source": "purchase-return-step-06",
-          "target": "purchase-return-step-08",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e12",
-          "source": "purchase-return-step-08",
-          "target": "purchase-return-step-09",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "purchase-return-e13",
-          "source": "purchase-return-step-09",
-          "target": "purchase-return-step-10",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        }
-      ],
-      "zones": [],
-      "overviewNodeId": "purchase-request",
-      "source": "Douzone SCM TO-BE"
-    },
-    {
-      "id": "other-receipt",
-      "type": "detail",
-      "name": "기타입고",
-      "description": "D-SCM-024 기타 입고 PROCESS 기준. 재고실사 등 기타 사유의 입고 요청, EasyAdmin WMS 연동, ERP 재고(+) 반영을 Copan 용어로 정리한 프로세스 초안.",
-      "version": "v1.0",
-      "status": "draft",
-      "lastModified": "2026-06-30",
-      "owner": "혁신팀",
-      "nodes": [
-        {
-          "id": "other-receipt-step-01",
-          "name": "입고요청 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p6",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 입고요청입력. 재고실사 등 기타 사유로 입고가 필요한 경우 사업부가 입고 요청을 등록한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 1,
-          "localOrder": 1,
-          "cellOrder": 0,
-          "zoneOrder": 0,
-          "detailLayout": {
-            "column": 1,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "입고요청 등록",
-          "erpMenu": "입고요청입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "other-receipt-step-02",
-          "name": "재고요청 처리",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p6",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 재고요청처리. 기타입고 요청 사유와 재고 반영 기준을 확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 2,
-          "localOrder": 2,
-          "cellOrder": 1,
-          "zoneOrder": 1,
-          "detailLayout": {
-            "column": 2,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "재고요청 처리",
-          "erpMenu": "재고요청처리",
-          "processingType": "Manual"
-        },
-        {
-          "id": "other-receipt-step-03",
-          "name": "이지어드민 연동현황",
-          "type": "wms-oms",
-          "laneId": "warehouse-easyadmin",
-          "phaseId": "inventory::movement-info",
-          "system": "EasyAdmin WMS",
-          "owner": "물류센터",
-          "description": "더존 원문: 이지어드민연동현황. 기타입고 요청/처리 연동 상태를 확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 3,
-          "localOrder": 3,
-          "cellOrder": 2,
-          "zoneOrder": 2,
-          "detailLayout": {
-            "column": 3,
-            "row": 2
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "이지어드민 연동현황",
-          "erpMenu": "",
-          "processingType": "Manual"
-        },
-        {
-          "id": "other-receipt-step-04",
-          "name": "기타입고 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p8",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문 도형은 기타출고입력으로 추출되나, D-SCM-024 기타 입고 PROCESS 의미에 맞춰 Copan에서는 기타입고 등록으로 관리한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 4,
-          "localOrder": 4,
-          "cellOrder": 2,
-          "zoneOrder": 2,
-          "detailLayout": {
-            "column": 3,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "기타입고 등록",
-          "erpMenu": "기타입고입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "other-receipt-step-05",
-          "name": "위탁 여부",
-          "type": "interface-rule",
-          "laneId": "business",
-          "phaseId": "overview::return",
-          "system": "System Rule",
-          "owner": "사업부",
-          "description": "더존 원문: 위탁 여부. 기타입고 대상이 자사재고인지 위탁재고인지 판단한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 5,
           "localOrder": 5,
-          "cellOrder": 3,
-          "zoneOrder": 3,
-          "detailLayout": {
-            "column": 4,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "위탁 여부",
-          "erpMenu": "",
-          "processingType": "API"
-        },
-        {
-          "id": "other-receipt-step-06",
-          "name": "입고정보",
-          "type": "database",
-          "laneId": "warehouse-easyadmin",
-          "phaseId": "inventory::movement-info",
-          "system": "EasyAdmin WMS",
-          "owner": "물류센터",
-          "description": "더존 원문: 입고요청 API / 입고처리 API. EasyAdmin WMS 입고 요청/처리 정보를 저장한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 6,
-          "localOrder": 6,
           "cellOrder": 4,
           "zoneOrder": 4,
           "detailLayout": {
@@ -17667,602 +17276,398 @@
           },
           "offsetX": 0,
           "offsetY": 0,
-          "businessActivity": "입고정보",
-          "erpMenu": "",
-          "processingType": "Auto"
-        },
-        {
-          "id": "other-receipt-step-07",
-          "name": "ERP 재고(+)",
-          "type": "database",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p9",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: ERP 재고(+). 기타입고 확정 결과가 ERP 재고 증가로 반영된다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 7,
-          "localOrder": 7,
-          "cellOrder": 5,
-          "zoneOrder": 5,
-          "detailLayout": {
-            "column": 6,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "ERP 재고(+)",
-          "erpMenu": "",
-          "processingType": "Auto"
+          "stepBadge": 0
         }
       ],
       "edges": [
         {
-          "id": "other-receipt-e01",
-          "source": "other-receipt-step-01",
-          "target": "other-receipt-step-02",
+          "id": "구매-요청-매입-전표-생성-f-b-e10",
+          "source": "구매-요청-매입-전표-생성-f-b-step-10",
+          "target": "구매-요청-매입-전표-생성-f-b-step-11",
           "condition": "",
           "label": "",
           "type": "normal",
           "routing": {
             "mode": "auto",
             "handleAuto": true
-          }
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
         },
         {
-          "id": "other-receipt-e02",
-          "source": "other-receipt-step-02",
-          "target": "other-receipt-step-04",
+          "id": "구매-요청-매입-전표-생성-f-b-e11",
+          "source": "구매-요청-매입-전표-생성-f-b-step-11",
+          "target": "구매-요청-매입-전표-생성-f-b-step-12",
           "condition": "",
           "label": "",
           "type": "normal",
           "routing": {
             "mode": "auto",
             "handleAuto": true
-          }
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
         },
         {
-          "id": "other-receipt-e03",
-          "source": "other-receipt-step-04",
-          "target": "other-receipt-step-05",
-          "condition": "",
+          "id": "edge-mr8gsd8z-1boof",
+          "source": "구매-요청-매입-전표-생성-f-b-step-01",
+          "target": "구매-요청-매입-전표-생성-f-b-step-10",
+          "sourceHandle": "right",
+          "targetHandle": "left",
+          "type": "normal",
           "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "other-receipt-e04",
-          "source": "other-receipt-step-05",
-          "target": "other-receipt-step-06",
           "condition": "",
-          "label": "N",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "other-receipt-e05",
-          "source": "other-receipt-step-05",
-          "target": "other-receipt-step-07",
-          "condition": "",
-          "label": "Y",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "other-receipt-e06",
-          "source": "other-receipt-step-02",
-          "target": "other-receipt-step-03",
-          "condition": "",
-          "label": "API",
-          "type": "api",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "other-receipt-e07",
-          "source": "other-receipt-step-03",
-          "target": "other-receipt-step-06",
-          "condition": "",
-          "label": "입고요청/처리",
-          "type": "api",
           "routing": {
             "mode": "auto",
             "handleAuto": true
           }
         }
       ],
-      "overviewNodeId": "inventory-control",
-      "source": "Douzone SCM TO-BE"
-    },
-    {
-      "id": "stock-movement",
-      "type": "detail",
-      "name": "일반 재고이동",
-      "description": "D-SCM-025 재고이동 PROCESS 기준. 매장 간 이동과 구분되는 일반 창고/저장위치 간 재고이동 프로세스 초안.",
-      "version": "v1.0",
-      "status": "draft",
-      "lastModified": "2026-06-30",
-      "owner": "혁신팀",
-      "nodes": [
+      "zones": [
         {
-          "id": "stock-movement-step-01",
-          "name": "출고요청 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "order-to-cash::p3",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 출고요청입력. 일반 재고이동을 위해 출고 창고 기준 이동 요청을 등록한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 1,
-          "localOrder": 1,
-          "cellOrder": 0,
-          "zoneOrder": 0,
-          "detailLayout": {
-            "column": 1,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "출고요청 등록",
-          "erpMenu": "출고요청입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "stock-movement-step-02",
-          "name": "재고요청 처리",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "inventory::movement-info",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 재고요청처리. 출고창고/입고창고 및 이동 수량을 확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 2,
-          "localOrder": 2,
-          "cellOrder": 1,
-          "zoneOrder": 1,
-          "detailLayout": {
-            "column": 2,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "재고요청 처리",
-          "erpMenu": "재고요청처리",
-          "processingType": "Manual"
-        },
-        {
-          "id": "stock-movement-step-03",
-          "name": "이지어드민 연동현황",
-          "type": "wms-oms",
-          "laneId": "warehouse-easyadmin",
-          "phaseId": "inventory::movement-info",
-          "system": "EasyAdmin WMS",
-          "owner": "물류센터",
-          "description": "더존 원문: 이지어드민연동현황. 입/출고요청 및 입/출고처리 연동 상태를 확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 3,
-          "localOrder": 3,
-          "cellOrder": 2,
-          "zoneOrder": 2,
-          "detailLayout": {
-            "column": 3,
-            "row": 2
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "이지어드민 연동현황",
-          "erpMenu": "",
-          "processingType": "Manual"
-        },
-        {
-          "id": "stock-movement-step-04",
-          "name": "재고이동 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "inventory::movement-info",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문 도형은 기타출고입력으로 추출되나, D-SCM-025 재고이동 PROCESS 의미에 맞춰 Copan에서는 재고이동 등록으로 관리한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 4,
-          "localOrder": 4,
-          "cellOrder": 2,
-          "zoneOrder": 2,
-          "detailLayout": {
-            "column": 3,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "재고이동 등록",
-          "erpMenu": "재고이동입력",
-          "processingType": "Manual"
-        },
-        {
-          "id": "stock-movement-step-05",
-          "name": "위탁 여부",
-          "type": "interface-rule",
-          "laneId": "business",
-          "phaseId": "overview::return",
-          "system": "System Rule",
-          "owner": "사업부",
-          "description": "더존 원문: 위탁 여부. 이동 대상 재고가 자사재고인지 위탁재고인지 판단한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 5,
-          "localOrder": 5,
-          "cellOrder": 3,
-          "zoneOrder": 3,
-          "detailLayout": {
-            "column": 4,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "위탁 여부",
-          "erpMenu": "",
-          "processingType": "API"
-        },
-        {
-          "id": "stock-movement-step-06",
-          "name": "입/출고정보",
-          "type": "database",
-          "laneId": "warehouse-easyadmin",
-          "phaseId": "inventory::movement-info",
-          "system": "EasyAdmin WMS",
-          "owner": "물류센터",
-          "description": "더존 원문: 입/출고요청 API / 입/출고처리 API. 재고이동 입출고 요청/처리 정보를 저장한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 6,
-          "localOrder": 6,
-          "cellOrder": 4,
-          "zoneOrder": 4,
-          "detailLayout": {
-            "column": 5,
-            "row": 2
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "입/출고정보",
-          "erpMenu": "",
-          "processingType": "Auto"
-        },
-        {
-          "id": "stock-movement-step-07",
-          "name": "출고창고 재고(-)",
-          "type": "database",
-          "laneId": "business",
-          "phaseId": "order-to-cash::p6",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 출고창고 재고(-). 재고이동 확정 시 출고 창고 재고가 차감된다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 7,
-          "localOrder": 7,
-          "cellOrder": 5,
-          "zoneOrder": 5,
-          "detailLayout": {
-            "column": 6,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "출고창고 재고(-)",
-          "erpMenu": "",
-          "processingType": "Auto"
-        },
-        {
-          "id": "stock-movement-step-08",
-          "name": "입고창고 재고(+)",
-          "type": "database",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p9",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 입고창고 재고(+). 재고이동 확정 시 입고 창고 재고가 증가한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 8,
-          "localOrder": 8,
-          "cellOrder": 6,
-          "zoneOrder": 6,
-          "detailLayout": {
-            "column": 7,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "입고창고 재고(+)",
-          "erpMenu": "",
-          "processingType": "Auto"
-        }
-      ],
-      "edges": [
-        {
-          "id": "stock-movement-e01",
-          "source": "stock-movement-step-01",
-          "target": "stock-movement-step-02",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e02",
-          "source": "stock-movement-step-02",
-          "target": "stock-movement-step-04",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e03",
-          "source": "stock-movement-step-04",
-          "target": "stock-movement-step-05",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e04",
-          "source": "stock-movement-step-05",
-          "target": "stock-movement-step-06",
-          "condition": "",
-          "label": "N",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e05",
-          "source": "stock-movement-step-05",
-          "target": "stock-movement-step-07",
-          "condition": "",
-          "label": "Y",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e06",
-          "source": "stock-movement-step-07",
-          "target": "stock-movement-step-08",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e07",
-          "source": "stock-movement-step-02",
-          "target": "stock-movement-step-03",
-          "condition": "",
-          "label": "API",
-          "type": "api",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "stock-movement-e08",
-          "source": "stock-movement-step-03",
-          "target": "stock-movement-step-06",
-          "condition": "",
-          "label": "입/출고요청/처리",
-          "type": "api",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        }
-      ],
-      "zones": [],
-      "overviewNodeId": "stock-transfer-handling",
-      "source": "Douzone SCM TO-BE"
-    },
-    {
-      "id": "storage-location-master",
-      "type": "detail",
-      "name": "저장위치 등록",
-      "description": "D-SCM-005 저장위치 등록 PROCESS 기준. 저장위치/보세창고/납품처별 저장위치 기준정보를 Copan 운영 기준으로 정리한 프로세스 초안.",
-      "version": "v1.0",
-      "status": "draft",
-      "lastModified": "2026-06-30",
-      "owner": "혁신팀",
-      "nodes": [
-        {
-          "id": "storage-location-master-step-01",
-          "name": "저장위치 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p4m",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 저장위치등록. 해외 B2B 수출 시 관리하는 보세창고/저장위치를 ERP 기준정보로 등록한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 1,
-          "localOrder": 1,
-          "cellOrder": 0,
-          "zoneOrder": 0,
-          "detailLayout": {
-            "column": 1,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "저장위치 등록",
-          "erpMenu": "저장위치등록",
-          "processingType": "Manual"
-        },
-        {
-          "id": "storage-location-master-step-02",
-          "name": "재고기간마감 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p4m",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 재고기간마감등록. 저장위치 운영 시 재고 기간 기준을 등록/확인한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 2,
-          "localOrder": 2,
-          "cellOrder": 1,
-          "zoneOrder": 1,
-          "detailLayout": {
-            "column": 2,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "재고기간마감 등록",
-          "erpMenu": "재고기간마감등록",
-          "processingType": "Manual"
-        },
-        {
-          "id": "storage-location-master-step-03",
-          "name": "납품처별 저장위치 등록",
-          "type": "erp",
-          "laneId": "business",
-          "phaseId": "procure-to-pay::p4m",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 납품처별저장위치등록. 납품처별 출고/입고 기준 저장위치를 연결한다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 3,
-          "localOrder": 3,
-          "cellOrder": 2,
-          "zoneOrder": 2,
-          "detailLayout": {
-            "column": 3,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "납품처별 저장위치 등록",
-          "erpMenu": "납품처별저장위치등록",
-          "processingType": "Manual"
-        },
-        {
-          "id": "storage-location-master-step-04",
-          "name": "저장위치 정보",
-          "type": "database",
-          "laneId": "business",
-          "phaseId": "inventory::movement-info",
-          "system": "OmniEsol ERP",
-          "owner": "사업부",
-          "description": "더존 원문: 저장위치 정보 DATABASE. 저장위치 기준정보가 이후 입고/출고/재고이동의 기준 데이터로 사용된다.",
-          "inputs": [],
-          "outputs": [],
-          "controls": [],
-          "phaseOrder": 4,
-          "localOrder": 4,
-          "cellOrder": 3,
-          "zoneOrder": 3,
-          "detailLayout": {
-            "column": 4,
-            "row": 1
-          },
-          "offsetX": 0,
-          "offsetY": 0,
-          "businessActivity": "저장위치 정보",
-          "erpMenu": "",
-          "processingType": "Auto"
-        }
-      ],
-      "edges": [
-        {
-          "id": "storage-location-master-e01",
-          "source": "storage-location-master-step-01",
-          "target": "storage-location-master-step-02",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "storage-location-master-e02",
-          "source": "storage-location-master-step-02",
-          "target": "storage-location-master-step-03",
-          "condition": "",
-          "label": "",
-          "type": "normal",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
-          }
-        },
-        {
-          "id": "storage-location-master-e03",
-          "source": "storage-location-master-step-03",
-          "target": "storage-location-master-step-04",
-          "condition": "",
-          "label": "API",
-          "type": "api",
-          "routing": {
-            "mode": "auto",
-            "handleAuto": true
+          "id": "구매-요청-매입-전표-생성-f-b-zone-01",
+          "name": "자동프로세스",
+          "type": "process-zone",
+          "laneIds": [],
+          "phaseIds": [],
+          "nodeIds": [],
+          "style": {
+            "showBackground": true,
+            "showBorder": false,
+            "borderStyle": "dashed",
+            "visible": true,
+            "opacity": 0.12,
+            "labelPosition": "left"
           }
         }
       ],
       "overviewNodeId": "purchase-request",
-      "source": "Douzone SCM TO-BE"
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "partnership",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
+    },
+    {
+      "id": "구매-요청-매입-전표-생성-it-s-w",
+      "type": "detail",
+      "name": "구매 요청 ~ 매입 전표 생성 : IT, S/W",
+      "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
+      "version": "v1.0",
+      "status": "draft",
+      "lastModified": "2026-07-06T00:51:50.909Z",
+      "owner": "혁신팀",
+      "nodes": [
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-01",
+          "name": "구매요청",
+          "type": "approval",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p1",
+          "system": "그룹웨어",
+          "owner": "사업부",
+          "description": "서비스 제공 또는 외주/용역 구매를 위해 사업부가 구매요청을 등록한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 1,
+          "localOrder": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "cellOrder": 0,
+          "zoneOrder": 0,
+          "detailLayout": {
+            "column": 1,
+            "row": 2
+          }
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-02",
+          "name": "구매요청확인",
+          "type": "manual",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "procure-to-pay::p1",
+          "system": "수작업",
+          "owner": "사업부",
+          "description": "사업부가 서비스 구매요청을 확정한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 2,
+          "localOrder": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "cellOrder": 0,
+          "zoneOrder": 0,
+          "detailLayout": {
+            "column": 1,
+            "row": 1
+          }
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "name": "구매발주 품의",
+          "type": "decision",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "procure-to-pay::p4",
+          "system": "Groupware",
+          "owner": "사업부",
+          "description": "서비스 발주 조건에 대해 사업부가 품의를 진행한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 3,
+          "localOrder": 1,
+          "cellOrder": 0,
+          "zoneOrder": 0,
+          "detailLayout": {
+            "column": 1,
+            "row": 2
+          },
+          "offsetX": 0,
+          "offsetY": 0
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-04",
+          "name": "지출결의",
+          "type": "erp",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "procure-to-pay::p5",
+          "system": "ERP",
+          "owner": "상생협력팀",
+          "description": "상생협력팀이 서비스 구매 발주를 등록한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 4,
+          "localOrder": 4,
+          "cellOrder": 3,
+          "zoneOrder": 3,
+          "detailLayout": {
+            "column": 4,
+            "row": 1
+          },
+          "offsetX": 0,
+          "offsetY": 0
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-10",
+          "name": "전표생성(미결)",
+          "type": "system",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "p10",
+          "system": "OmniEsol ERP",
+          "owner": "상생협력팀",
+          "description": "매입마감확정 후 ERP가 매입전표를 미결 상태로 자동 생성한다. Auto Node Owner Rule에 따라 Owner는 상생협력팀으로 유지한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 10,
+          "localOrder": 4,
+          "cellOrder": 3,
+          "zoneOrder": 3,
+          "detailLayout": {
+            "column": 4,
+            "row": 2
+          },
+          "offsetX": 0,
+          "offsetY": 0
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-11",
+          "name": "전표조회승인",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p2",
+          "system": "OmniEsol ERP",
+          "owner": "재무관리팀",
+          "description": "재무관리팀이 미결 서비스 매입전표를 조회하고 승인한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 11,
+          "localOrder": 4,
+          "cellOrder": 3,
+          "zoneOrder": 3,
+          "detailLayout": {
+            "column": 4,
+            "row": 1
+          },
+          "offsetX": 0,
+          "offsetY": 0,
+          "stepBadge": 0
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-12",
+          "name": "정기자금집행",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p3",
+          "system": "OmniEsol ERP",
+          "owner": "재무관리팀",
+          "description": "승인된 서비스 매입전표를 전기 처리한다. 회계 상세 업무는 Reference Only로 관리한다.",
+          "inputs": [],
+          "outputs": [],
+          "controls": [],
+          "phaseOrder": 12,
+          "localOrder": 4,
+          "cellOrder": 3,
+          "zoneOrder": 3,
+          "detailLayout": {
+            "column": 4,
+            "row": 2
+          },
+          "offsetX": 0,
+          "offsetY": 0,
+          "stepBadge": 0
+        }
+      ],
+      "edges": [
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e01",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-01",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-02",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e02",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-02",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e03",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-04",
+          "condition": "Y",
+          "label": "Y",
+          "type": "condition",
+          "routing": {
+            "mode": "auto",
+            "handlesLocked": true
+          },
+          "sourceHandle": "right",
+          "targetHandle": "left"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-branch-01",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-02",
+          "condition": "N",
+          "label": "N",
+          "type": "return",
+          "routing": {
+            "mode": "manual",
+            "handlesLocked": true,
+            "points": [
+              {
+                "x": 741,
+                "y": 48
+              },
+              {
+                "x": 521,
+                "y": 48
+              }
+            ]
+          },
+          "sourceHandle": "left",
+          "targetHandle": "left",
+          "labelPlacement": {
+            "offset": {
+              "x": -7.079999999999984,
+              "y": 29
+            }
+          }
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e10",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-10",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-11",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e11",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-11",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-12",
+          "condition": "",
+          "label": "",
+          "type": "normal",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          },
+          "sourceHandle": "bottom",
+          "targetHandle": "top"
+        },
+        {
+          "id": "edge-mrab952j-5ho5k",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-04",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-10",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "type": "normal",
+          "label": "",
+          "condition": "",
+          "routing": {
+            "mode": "auto",
+            "handleAuto": true
+          }
+        }
+      ],
+      "zones": [
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-zone-01",
+          "name": "자동프로세스",
+          "type": "process-zone",
+          "laneIds": [],
+          "phaseIds": [],
+          "nodeIds": [],
+          "style": {
+            "showBackground": true,
+            "showBorder": false,
+            "borderStyle": "dashed",
+            "visible": true,
+            "opacity": 0.12,
+            "labelPosition": "left"
+          }
+        }
+      ],
+      "overviewNodeId": "purchase-request",
+      "source": "SCM TO-BE",
+      "laneIds": [
+        "business",
+        "lane-mr8i71rk-rr7ki",
+        "warehouse-easyadmin",
+        "retail-easychain",
+        "finance"
+      ]
     }
   ],
   "overviewProcessGroups": [
@@ -18739,6 +18144,20 @@
       "name": "일반 재고이동",
       "description": "Candidate: Douzone 재고이동 PROCESS 기준 신규 작성 대상",
       "detailProcessId": "stock-movement"
+    },
+    {
+      "id": "구매-요청-매입-전표-생성-f-b-group",
+      "name": "구매 요청 ~ 매입 전표 생성 : 연구개발비/F&B/물류센터소모품",
+      "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
+      "detailProcessId": "구매-요청-매입-전표-생성-f-b",
+      "lifecycleGroupId": "purchase-inbound"
+    },
+    {
+      "id": "구매-요청-매입-전표-생성-it-s-w-group",
+      "name": "구매 요청 ~ 매입 전표 생성 : IT, S/W",
+      "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
+      "detailProcessId": "구매-요청-매입-전표-생성-it-s-w",
+      "lifecycleGroupId": "purchase-inbound"
     }
   ]
 }
