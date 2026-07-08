@@ -4,7 +4,7 @@
 |---|---|
 |Title|Process Definition|
 |Purpose|업무 흐름만 담는 중립 모델의 기준을 정의한다.|
-|Status|Draft|
+|Status|Approved|
 |Owner|Project Team|
 |Last Updated|2026-07-08|
 |Related Docs|`../01_Architecture/DataModel.md`, `../01_Architecture/Generator.md`, `../05_Review/Codex/Workflow-Phase1-Specification.md`, `../05_Review/Codex/Workflow-Phase2-Open-Issues-Decision.md`|

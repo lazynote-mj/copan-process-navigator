@@ -4,7 +4,7 @@
 |---|---|
 |Title|Data Model|
 |Purpose|Platform Data, Workspace, Template Package, Process Definition, ViewModel의 관계를 정의한다.|
-|Status|Draft|
+|Status|Approved|
 |Owner|Project Team|
 |Last Updated|2026-07-08|
 |Related Docs|`Architecture.md`, `Layer.md`, `TemplatePackage.md`, `../02_Master/ProcessDefinition.md`, `../05_Review/Codex/Workflow-Phase1-Specification.md`, `../05_Review/Codex/Workflow-Phase2-Open-Issues-Decision.md`|
