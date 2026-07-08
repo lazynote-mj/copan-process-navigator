@@ -115,11 +115,88 @@
   text-align: center;
 }
 
+/* Workflow (Category → Workflow → Variant 3계층) — Visual Hierarchy v2 */
+/* Workflow = 업무 흐름 "카드": 헤더 + Variant를 하나의 카드로 묶고 뚜렷한 좌측 액센트 바 */
+.process-group-menu__workflow {
+  margin-top: 9px;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #7c8ca3;
+  border-radius: 0 8px 8px 0;
+  background: #f7f9fc;
+  overflow: hidden;
+}
+
+.process-group-menu__workflow-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.process-group-menu__workflow-header:hover {
+  background: rgba(124, 140, 163, 0.1);
+}
+
+/* 펼침 상태 — 헤더와 Variant 사이 구분선 */
+.process-group-menu__workflow-header[aria-expanded="true"] {
+  border-bottom: 1px solid #e4e9f1;
+}
+
+.process-group-menu__workflow-caret {
+  flex: 0 0 auto;
+  width: 12px;
+  color: #475569;
+  font-size: 11px;
+}
+
+.process-group-menu__workflow-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Count = 보조 정보: 작고 연하게, 우측 정렬 */
+.process-group-menu__workflow-count {
+  flex: 0 0 auto;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #7b8794;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .process-group-menu__section .process-group-menu__list {
   position: relative;
   margin-left: 8px;
   padding-left: 11px;
   border-bottom: 0;
+}
+
+/* Variant 목록 — 카드 내부, 약한 리스트 */
+.process-group-menu__section .process-group-menu__list--variants {
+  margin: 4px 0 4px 16px;
+  padding-left: 11px;
+}
+
+/* Flatten Workflow 목록 — 카드 자체가 항목이므로 margin/padding 리셋 */
+.process-group-menu__section .process-group-menu__list--flattened {
+  margin: 0;
+  padding-left: 0;
 }
 
 .process-group-menu__section .process-group-menu__list::before {
@@ -130,6 +207,42 @@
   left: 0;
   width: 1px;
   background: #dbe4ef;
+}
+
+/* Variant 가이드라인 */
+.process-group-menu__section .process-group-menu__list--variants::before {
+  width: 2px;
+  background: #d3dbe6;
+}
+
+/* Flatten 목록은 가이드라인 제거 (Workflow 카드 계층이므로) */
+.process-group-menu__section .process-group-menu__list--flattened::before {
+  display: none;
+}
+
+/* Flatten 항목 = Workflow 카드 스타일 유지 (caret/count/순번만 제거) */
+.process-group-menu__section .process-group-menu__list--flattened .process-group-menu__item {
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #7c8ca3;
+  border-radius: 0 8px 8px 0;
+  background: #f7f9fc;
+  overflow: hidden;
+  transition: background 0.12s;
+}
+
+.process-group-menu__section .process-group-menu__list--flattened .process-group-menu__item:hover {
+  background: rgba(124, 140, 163, 0.1);
+}
+
+.process-group-menu__section .process-group-menu__list--flattened .process-group-menu__select--compact {
+  padding: 10px 36px 10px 11px;
+}
+
+.process-group-menu__section .process-group-menu__list--flattened .process-group-menu__title {
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
 .process-group-menu__section .process-group-menu__list > li + li {
@@ -187,6 +300,33 @@
   overflow: hidden;
   font-size: 12px;
   font-weight: 600;
+}
+
+/* Variant 항목 — Workflow(13px/800)보다 작고 가볍게 하위 계층 강조 */
+.process-group-menu__list--variants .process-group-menu__select--compact .process-group-menu__title {
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.process-group-menu__list--variants .process-group-menu__select--compact {
+  min-height: 28px;
+}
+
+/* Variant number badge — 작고 보조적으로 */
+.process-group-menu__list--variants .process-group-menu__select--compact .process-group-menu__index {
+  min-width: 18px;
+  height: 16px;
+  margin-right: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+/* Active Variant — 선택은 명확하되 Workflow 카드보다 상위처럼 보이지 않게 좌측 액센트 중심 */
+.process-group-menu__section .process-group-menu__list--variants .process-group-menu__item--active {
+  box-shadow: inset 3px 0 0 var(--accent);
+  background: var(--accent-bg);
 }
 
 .process-group-menu__title-text {
