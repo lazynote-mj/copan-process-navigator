@@ -6,6 +6,7 @@ import type { Edge, Process, ProcessZone } from './process'
 import type { Node } from './process'
 import type { ProcessInstance } from './processInstance'
 import { OVERVIEW_SCOPE } from './processInstance'
+import type { Workflow } from './workflow'
 import type {
   DetailProcessGroup,
   OverviewProcessGroup,
@@ -27,6 +28,8 @@ export type ProcessData = {
   processes: ProcessInstance[]
   overviewProcessGroups?: OverviewProcessGroup[]
   detailProcessGroups?: DetailProcessGroup[]
+  /** Workflow Grouping Metadata — commonMasters(Master) 아님. 비우면 기존 동작 */
+  workflows?: Workflow[]
   /** @deprecated overviewProcessGroups */
   processGroups?: ProcessGroup[]
   updatedAt: string

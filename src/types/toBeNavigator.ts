@@ -24,6 +24,14 @@ export type DetailProcessGroup = {
   lifecycleGroupId?: ProcessLifecycleGroupId
   /** Overview에서 대응하는 강조 그룹 — 없으면 상세 전용 */
   linkedOverviewGroupId?: string
+  /** 소속 Workflow — Workflow Grouping Metadata (DataModel.md) */
+  workflowId?: string
+  /** 실행 유형 표시 라벨 (예: 'B2B 국내') — Phase 2 우선 관리 키 */
+  variantLabel?: string
+  /** 정규 Variant 엔티티 도입 시 사용 (Phase 2 이후 재평가) */
+  variantId?: string
+  /** Workflow 내 Variant 표시 순서 */
+  variantOrder?: number
 }
 
 /** @deprecated OverviewProcessGroup | DetailProcessGroup 사용 */
