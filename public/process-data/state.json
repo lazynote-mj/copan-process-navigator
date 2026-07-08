@@ -4118,7 +4118,7 @@
     {
       "id": "b2b-export-order-to-sales",
       "type": "detail",
-      "name": "주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외",
+      "name": "주문 등록 ~ 수출 출고 ~ 매출전표 : B2B 해외",
       "description": "해외 B2B 자사/위탁재고 주문등록, 수출 이동지시, 송장/B/L/통관, 해외 가상창고 재고이동, 매출마감, 전표생성까지의 Copan 운영 프로세스",
       "version": "v1.0",
       "status": "review",
@@ -4954,7 +4954,7 @@
     {
       "id": "b2c-order-to-sales",
       "type": "detail",
-      "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2C",
+      "name": "주문 등록 ~ 출고 ~ 매출전표 : B2C",
       "description": "B2C 온라인몰 주문접수, EasyAdmin OMS 주문수집, EasyAdmin WMS 출고, OmniEsol ERP 주문/매출마감, 전표생성 및 재무 승인까지의 Copan 운영 프로세스",
       "version": "v1.0",
       "status": "review",
@@ -9938,7 +9938,7 @@
     {
       "id": "purchase-to-ap-invoice",
       "type": "detail",
-      "name": "구매 요청 ~ 입고 ~ 매입 전표 : 제/상품",
+      "name": "구매 요청 ~ 입고 ~ 매입전표 : 제/상품",
       "description": "계약/프로젝트 기반 구매요청 이후 구매발주, EasyAdmin WMS 입고, ERP 재고(+), 매입마감, 전표생성 및 재무 승인까지 이어지는 제/상품 구매/매입 프로세스",
       "version": "v1.0",
       "status": "review",
@@ -14404,7 +14404,7 @@
     {
       "id": "service-purchase-to-ap",
       "type": "detail",
-      "name": "구매 요청 ~ 매입 전표 생성 : 서비스",
+      "name": "구매 요청 ~ 매입전표 생성 : 서비스",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "version": "v1.0",
       "status": "review",
@@ -14904,7 +14904,7 @@
     {
       "id": "service-order-to-sales",
       "type": "detail",
-      "name": "주문 등록 ~ 매출 전표 생성 : 서비스",
+      "name": "주문 등록 ~ 매출전표 생성 : 서비스",
       "description": "서비스 주문등록, 서비스 제공 확인, 매출마감, 전표생성(미결)까지의 Copan 운영 프로세스",
       "version": "v1.0",
       "status": "review",
@@ -17183,7 +17183,7 @@
     {
       "id": "구매-요청-매입-전표-생성-f-b",
       "type": "detail",
-      "name": "구매 요청 ~ 매입 전표 생성 : F&B",
+      "name": "구매 요청 ~ 매입전표 생성 : F&B",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "version": "v1.0",
       "status": "draft",
@@ -17354,7 +17354,7 @@
     {
       "id": "구매-요청-매입-전표-생성-it-s-w",
       "type": "detail",
-      "name": "구매 요청 ~ 매입 전표 생성 : IT, S/W",
+      "name": "구매 요청 ~ 매입전표 생성 : IT, S/W",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "version": "v1.0",
       "status": "draft",
@@ -18006,7 +18006,7 @@
     },
     {
       "id": "pg-purchase-to-ap-invoice",
-      "name": "구매 요청 ~ 입고 ~ 매입 전표 : 제/상품",
+      "name": "구매 요청 ~ 입고 ~ 매입전표 : 제/상품",
       "description": "구매요청·발주·입고·재고인식·매입마감·매입전표·회계반영 (제/상품)",
       "detailProcessId": "purchase-to-ap-invoice",
       "workflowId": "wf-purchase-to-ap",
@@ -18015,7 +18015,7 @@
     },
     {
       "id": "pg-b2b-domestic-order-to-sales",
-      "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2B 국내",
+      "name": "주문 등록 ~ 출고 ~ 매출전표 : B2B 국내",
       "description": "B2B 국내 주문등록·출고·매출마감·매출전표",
       "detailProcessId": "b2b-domestic-order-to-sales",
       "workflowId": "wf-order-to-sales",
@@ -18024,7 +18024,7 @@
     },
     {
       "id": "pg-b2b-domestic-return",
-      "name": "주문 반품 ~ 입고 ~ 반품 전표 : B2B 국내",
+      "name": "주문 반품 ~ 입고 ~ 반품전표 : B2B 국내",
       "description": "B2B 국내 주문반품·입고·반품전표",
       "detailProcessId": "b2b-domestic-return",
       "linkedOverviewGroupId": "ov-returns",
@@ -18034,7 +18034,7 @@
     },
     {
       "id": "pg-b2b-export-order-to-sales",
-      "name": "주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외",
+      "name": "주문 등록 ~ 수출 출고 ~ 매출전표 : B2B 해외",
       "description": "해외 B2B 자사/위탁재고 주문등록·수출출고·통관/B/L·매출마감·전표생성",
       "detailProcessId": "b2b-export-order-to-sales",
       "workflowId": "wf-order-to-sales",
@@ -18043,7 +18043,7 @@
     },
     {
       "id": "pg-b2c-order-to-sales",
-      "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2C",
+      "name": "주문 등록 ~ 출고 ~ 매출전표 : B2C",
       "description": "B2C 온라인몰 주문수집·EasyAdmin 출고·ERP 매출마감·전표생성",
       "detailProcessId": "b2c-order-to-sales",
       "workflowId": "wf-order-to-sales",
@@ -18147,7 +18147,7 @@
     },
     {
       "id": "pg-service-business-to-expense",
-      "name": "사업기회 ~ 비용 전표 생성 : 서비스",
+      "name": "사업기회 ~ 비용전표 생성 : 서비스",
       "description": "플랫폼·콘텐츠·공연 등 서비스 사업기회부터 비용전표까지",
       "detailProcessId": "service-business-to-expense",
       "workflowId": "wf-business-to-expense",
@@ -18156,7 +18156,7 @@
     },
     {
       "id": "pg-service-purchase-to-ap",
-      "name": "구매 요청 ~ 매입 전표 생성 : 서비스",
+      "name": "구매 요청 ~ 매입전표 생성 : 서비스",
       "description": "서비스 구매요청·매입마감·매입전표",
       "detailProcessId": "service-purchase-to-ap",
       "workflowId": "wf-purchase-request-to-ap",
@@ -18165,7 +18165,7 @@
     },
     {
       "id": "pg-service-order-to-sales",
-      "name": "주문 등록 ~ 매출 전표 생성 : 서비스",
+      "name": "주문 등록 ~ 매출전표 생성 : 서비스",
       "description": "서비스 주문등록·서비스 제공 확인·매출마감·전표생성(미결)",
       "detailProcessId": "service-order-to-sales",
       "workflowId": "wf-service-order-to-sales",
@@ -18219,7 +18219,7 @@
     },
     {
       "id": "구매-요청-매입-전표-생성-f-b-group",
-      "name": "구매 요청 ~ 매입 전표 생성 : 연구개발비/F&B/물류센터소모품",
+      "name": "구매 요청 ~ 매입전표 생성 : 연구개발비/F&B/물류센터소모품",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "detailProcessId": "구매-요청-매입-전표-생성-f-b",
       "lifecycleGroupId": "purchase-inbound",
@@ -18229,7 +18229,7 @@
     },
     {
       "id": "구매-요청-매입-전표-생성-it-s-w-group",
-      "name": "구매 요청 ~ 매입 전표 생성 : IT, S/W",
+      "name": "구매 요청 ~ 매입전표 생성 : IT, S/W",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "detailProcessId": "구매-요청-매입-전표-생성-it-s-w",
       "lifecycleGroupId": "purchase-inbound",
