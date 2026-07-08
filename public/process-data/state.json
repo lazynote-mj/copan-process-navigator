@@ -17999,165 +17999,433 @@
       "id": "pg-business-to-purchase-request",
       "name": "사업 기회 확보 ~ 구매 요청 : 제/상품",
       "description": "사업기회 확보·계약·프로젝트 품의·기준정보·구매요청까지 (응원봉, MD 등 제/상품)",
-      "detailProcessId": "business-to-purchase-request"
+      "detailProcessId": "business-to-purchase-request",
+      "workflowId": "wf-business-to-purchase",
+      "variantLabel": "제/상품",
+      "variantOrder": 1
     },
     {
       "id": "pg-purchase-to-ap-invoice",
       "name": "구매 요청 ~ 입고 ~ 매입 전표 : 제/상품",
       "description": "구매요청·발주·입고·재고인식·매입마감·매입전표·회계반영 (제/상품)",
-      "detailProcessId": "purchase-to-ap-invoice"
+      "detailProcessId": "purchase-to-ap-invoice",
+      "workflowId": "wf-purchase-to-ap",
+      "variantLabel": "제/상품",
+      "variantOrder": 1
     },
     {
       "id": "pg-b2b-domestic-order-to-sales",
       "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2B 국내",
       "description": "B2B 국내 주문등록·출고·매출마감·매출전표",
-      "detailProcessId": "b2b-domestic-order-to-sales"
+      "detailProcessId": "b2b-domestic-order-to-sales",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "B2B 국내",
+      "variantOrder": 1
     },
     {
       "id": "pg-b2b-domestic-return",
       "name": "주문 반품 ~ 입고 ~ 반품 전표 : B2B 국내",
       "description": "B2B 국내 주문반품·입고·반품전표",
       "detailProcessId": "b2b-domestic-return",
-      "linkedOverviewGroupId": "ov-returns"
+      "linkedOverviewGroupId": "ov-returns",
+      "workflowId": "wf-order-return",
+      "variantLabel": "B2B 국내",
+      "variantOrder": 1
     },
     {
       "id": "pg-b2b-export-order-to-sales",
       "name": "주문 등록 ~ 수출 출고 ~ 매출 전표 : B2B 해외",
       "description": "해외 B2B 자사/위탁재고 주문등록·수출출고·통관/B/L·매출마감·전표생성",
-      "detailProcessId": "b2b-export-order-to-sales"
+      "detailProcessId": "b2b-export-order-to-sales",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "B2B 해외",
+      "variantOrder": 2
     },
     {
       "id": "pg-b2c-order-to-sales",
       "name": "주문 등록 ~ 출고 ~ 매출 전표 : B2C",
       "description": "B2C 온라인몰 주문수집·EasyAdmin 출고·ERP 매출마감·전표생성",
-      "detailProcessId": "b2c-order-to-sales"
+      "detailProcessId": "b2c-order-to-sales",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "B2C",
+      "variantOrder": 3
     },
     {
       "id": "pg-preorder-to-sales",
       "name": "예약 판매 ~ 출고 ~ 매출전표 : B2C",
       "description": "B2C 예약판매·출고·매출전표",
-      "detailProcessId": "preorder-to-sales"
+      "detailProcessId": "preorder-to-sales",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "예약판매",
+      "variantOrder": 7
     },
     {
       "id": "pg-b2c-return",
       "name": "주문 반품 ~ 입고 ~ 반품전표 : B2C",
       "description": "B2C 주문반품·입고·반품전표",
-      "detailProcessId": "b2c-return"
+      "detailProcessId": "b2c-return",
+      "workflowId": "wf-order-return",
+      "variantLabel": "B2C",
+      "variantOrder": 2
     },
     {
       "id": "pg-popup-concert-stock-sales-sync",
       "name": "공연장/팝업 판매 ~ 출고 ~ 매출전표 : 제/상품",
       "description": "공연장·팝업 현장 판매·재고이동·잔여재고 복귀·매출마감",
       "detailProcessId": "popup-concert-stock-sales-sync",
-      "linkedOverviewGroupId": "ov-popup-concert"
+      "linkedOverviewGroupId": "ov-popup-concert",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "공연장/팝업",
+      "variantOrder": 5
     },
     {
       "id": "pg-event-sales",
       "name": "이벤트 : 제/상품",
       "description": "이벤트 주문·당첨자 여부·현장수령/택배발송 분리·출고·매출마감",
-      "detailProcessId": "event-sales"
+      "detailProcessId": "event-sales",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "이벤트",
+      "variantOrder": 6
     },
     {
       "id": "pg-store-sales",
       "name": "매장 판매 ~ 출고 ~ 매출전표 : 제/상품",
       "description": "매장 POS 판매·출고·재고차감·매출마감",
-      "detailProcessId": "store-sales"
+      "detailProcessId": "store-sales",
+      "workflowId": "wf-order-to-sales",
+      "variantLabel": "매장",
+      "variantOrder": 4
     },
     {
       "id": "pg-stock-transfer",
       "name": "매장 간 재고이동 : 제/상품",
       "description": "매장·창고 간 재고이동",
       "detailProcessId": "stock-transfer",
-      "linkedOverviewGroupId": "ov-warehouse-transfer"
+      "linkedOverviewGroupId": "ov-warehouse-transfer",
+      "workflowId": "wf-stock-movement",
+      "variantLabel": "창고간",
+      "variantOrder": 2
     },
     {
       "id": "pg-other-issue",
       "name": "기타 출고 : 제/상품",
       "description": "기타출고·무상증정",
       "detailProcessId": "other-issue",
-      "linkedOverviewGroupId": "ov-other-outbound"
+      "linkedOverviewGroupId": "ov-other-outbound",
+      "workflowId": "wf-other-issue",
+      "variantLabel": "단일",
+      "variantOrder": 1
     },
     {
       "id": "pg-royalty-mg-settlement",
       "name": "기획사 로열티 정산 : 제/상품",
       "description": "로열티 매출 집계·MG 상계·정산전표",
       "detailProcessId": "royalty-mg-settlement",
-      "linkedOverviewGroupId": "ov-royalty-mg"
+      "linkedOverviewGroupId": "ov-royalty-mg",
+      "workflowId": "wf-royalty-settlement",
+      "variantLabel": "기획사",
+      "variantOrder": 1
     },
     {
       "id": "pg-consignment-settlement",
       "name": "위탁 매출 정산",
       "description": "위탁 재고·매출 마감 및 이상 검증·정산전표",
       "detailProcessId": "consignment-settlement",
-      "linkedOverviewGroupId": "ov-consignment-settlement"
+      "linkedOverviewGroupId": "ov-consignment-settlement",
+      "workflowId": "wf-consignment-settlement",
+      "variantLabel": "위탁",
+      "variantOrder": 1
     },
     {
       "id": "pg-revenue-share-settlement",
       "name": "수익배분 매출 정산",
       "description": "수익배분 매출 집계·정산·전표",
-      "detailProcessId": "revenue-share-settlement"
+      "detailProcessId": "revenue-share-settlement",
+      "workflowId": "wf-revenue-share-settlement",
+      "variantLabel": "수익배분",
+      "variantOrder": 1
     },
     {
       "id": "pg-service-business-to-expense",
       "name": "사업기회 ~ 비용 전표 생성 : 서비스",
       "description": "플랫폼·콘텐츠·공연 등 서비스 사업기회부터 비용전표까지",
-      "detailProcessId": "service-business-to-expense"
+      "detailProcessId": "service-business-to-expense",
+      "workflowId": "wf-business-to-expense",
+      "variantLabel": "서비스",
+      "variantOrder": 1
     },
     {
       "id": "pg-service-purchase-to-ap",
       "name": "구매 요청 ~ 매입 전표 생성 : 서비스",
       "description": "서비스 구매요청·매입마감·매입전표",
-      "detailProcessId": "service-purchase-to-ap"
+      "detailProcessId": "service-purchase-to-ap",
+      "workflowId": "wf-purchase-request-to-ap",
+      "variantLabel": "서비스",
+      "variantOrder": 1
     },
     {
       "id": "pg-service-order-to-sales",
       "name": "주문 등록 ~ 매출 전표 생성 : 서비스",
       "description": "서비스 주문등록·서비스 제공 확인·매출마감·전표생성(미결)",
-      "detailProcessId": "service-order-to-sales"
+      "detailProcessId": "service-order-to-sales",
+      "workflowId": "wf-service-order-to-sales",
+      "variantLabel": "서비스",
+      "variantOrder": 1
     },
     {
       "id": "pg-service-project-settlement",
       "name": "프로젝트 정산 : 서비스",
       "description": "서비스 프로젝트 정산·전표·회계반영",
-      "detailProcessId": "service-project-settlement"
+      "detailProcessId": "service-project-settlement",
+      "workflowId": "wf-project-settlement",
+      "variantLabel": "서비스",
+      "variantOrder": 1
     },
     {
       "id": "pg-storage-location-master",
       "name": "저장위치 등록",
       "description": "Candidate: Douzone 저장위치 등록 PROCESS 기준 신규 작성 대상",
-      "detailProcessId": "storage-location-master"
+      "detailProcessId": "storage-location-master",
+      "workflowId": "wf-storage-location",
+      "variantLabel": "단일",
+      "variantOrder": 1
     },
     {
       "id": "pg-purchase-return",
       "name": "구매반품",
       "description": "Candidate: Douzone 구매 반품 PROCESS 기준 신규 작성 대상",
-      "detailProcessId": "purchase-return"
+      "detailProcessId": "purchase-return",
+      "workflowId": "wf-purchase-return",
+      "variantLabel": "단일",
+      "variantOrder": 1
     },
     {
       "id": "pg-other-receipt",
       "name": "기타입고",
       "description": "Candidate: Douzone 기타 입고 PROCESS 기준 신규 작성 대상",
-      "detailProcessId": "other-receipt"
+      "detailProcessId": "other-receipt",
+      "workflowId": "wf-other-receipt",
+      "variantLabel": "단일",
+      "variantOrder": 1
     },
     {
       "id": "pg-stock-movement",
       "name": "일반 재고이동",
       "description": "Candidate: Douzone 재고이동 PROCESS 기준 신규 작성 대상",
-      "detailProcessId": "stock-movement"
+      "detailProcessId": "stock-movement",
+      "workflowId": "wf-stock-movement",
+      "variantLabel": "일반",
+      "variantOrder": 1
     },
     {
       "id": "구매-요청-매입-전표-생성-f-b-group",
       "name": "구매 요청 ~ 매입 전표 생성 : 연구개발비/F&B/물류센터소모품",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "detailProcessId": "구매-요청-매입-전표-생성-f-b",
-      "lifecycleGroupId": "purchase-inbound"
+      "lifecycleGroupId": "purchase-inbound",
+      "workflowId": "wf-purchase-request-to-ap",
+      "variantLabel": "F&B",
+      "variantOrder": 2
     },
     {
       "id": "구매-요청-매입-전표-생성-it-s-w-group",
       "name": "구매 요청 ~ 매입 전표 생성 : IT, S/W",
       "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
       "detailProcessId": "구매-요청-매입-전표-생성-it-s-w",
-      "lifecycleGroupId": "purchase-inbound"
+      "lifecycleGroupId": "purchase-inbound",
+      "workflowId": "wf-purchase-request-to-ap",
+      "variantLabel": "IT·S/W",
+      "variantOrder": 3
+    }
+  ],
+  "workflows": [
+    {
+      "workflowId": "wf-business-to-purchase",
+      "workflowName": "사업기회 → 계약 → 구매요청",
+      "category": "business-start",
+      "status": "active",
+      "steps": [
+        "사업기회",
+        "계약",
+        "구매요청"
+      ],
+      "order": 1
+    },
+    {
+      "workflowId": "wf-business-to-expense",
+      "workflowName": "사업기회 → 비용전표",
+      "category": "business-start",
+      "status": "active",
+      "steps": [
+        "사업기회",
+        "비용전표"
+      ],
+      "order": 2
+    },
+    {
+      "workflowId": "wf-business-to-project",
+      "workflowName": "사업시작 → 구매 → 매입전표",
+      "category": "business-start",
+      "status": "draft",
+      "steps": [
+        "사업기회",
+        "계약",
+        "프로젝트",
+        "구매요청",
+        "입고",
+        "매입전표"
+      ],
+      "order": 3,
+      "description": "end-to-end 광의 흐름 — 별도 Workflow 후보(O5)"
+    },
+    {
+      "workflowId": "wf-purchase-to-ap",
+      "workflowName": "구매요청 → 입고 → 매입전표",
+      "category": "purchase-inbound",
+      "status": "active",
+      "steps": [
+        "구매요청",
+        "입고",
+        "매입전표"
+      ],
+      "order": 1
+    },
+    {
+      "workflowId": "wf-purchase-request-to-ap",
+      "workflowName": "구매요청 → 매입전표",
+      "category": "purchase-inbound",
+      "status": "active",
+      "steps": [
+        "구매요청",
+        "매입전표"
+      ],
+      "order": 2
+    },
+    {
+      "workflowId": "wf-order-to-sales",
+      "workflowName": "주문 → 출고 → 매출전표",
+      "category": "sales",
+      "status": "active",
+      "steps": [
+        "주문",
+        "출고",
+        "매출전표"
+      ],
+      "order": 1
+    },
+    {
+      "workflowId": "wf-service-order-to-sales",
+      "workflowName": "주문 → 매출전표(서비스)",
+      "category": "sales",
+      "status": "active",
+      "steps": [
+        "주문",
+        "매출전표"
+      ],
+      "order": 2,
+      "description": "출고 단계 없는 서비스형 — 별도 Workflow(O1)"
+    },
+    {
+      "workflowId": "wf-order-return",
+      "workflowName": "주문반품 → 입고 → 반품전표",
+      "category": "returns",
+      "status": "active",
+      "steps": [
+        "주문반품",
+        "입고",
+        "반품전표"
+      ],
+      "order": 1
+    },
+    {
+      "workflowId": "wf-purchase-return",
+      "workflowName": "구매반품",
+      "category": "returns",
+      "status": "active",
+      "steps": [
+        "구매반품"
+      ],
+      "order": 2
+    },
+    {
+      "workflowId": "wf-stock-movement",
+      "workflowName": "재고이동",
+      "category": "inventory",
+      "status": "active",
+      "steps": [
+        "재고이동"
+      ],
+      "order": 1
+    },
+    {
+      "workflowId": "wf-other-receipt",
+      "workflowName": "기타입고",
+      "category": "inventory",
+      "status": "active",
+      "steps": [
+        "기타입고"
+      ],
+      "order": 2
+    },
+    {
+      "workflowId": "wf-other-issue",
+      "workflowName": "기타출고",
+      "category": "inventory",
+      "status": "active",
+      "steps": [
+        "기타출고"
+      ],
+      "order": 3
+    },
+    {
+      "workflowId": "wf-royalty-settlement",
+      "workflowName": "로열티 정산",
+      "category": "settlement",
+      "status": "active",
+      "steps": [
+        "로열티 정산"
+      ],
+      "order": 1
+    },
+    {
+      "workflowId": "wf-consignment-settlement",
+      "workflowName": "위탁 매출 정산",
+      "category": "settlement",
+      "status": "active",
+      "steps": [
+        "위탁 매출 정산"
+      ],
+      "order": 2
+    },
+    {
+      "workflowId": "wf-revenue-share-settlement",
+      "workflowName": "수익배분 매출 정산",
+      "category": "settlement",
+      "status": "active",
+      "steps": [
+        "수익배분 매출 정산"
+      ],
+      "order": 3
+    },
+    {
+      "workflowId": "wf-project-settlement",
+      "workflowName": "프로젝트 정산",
+      "category": "settlement",
+      "status": "active",
+      "steps": [
+        "프로젝트 정산"
+      ],
+      "order": 4
+    },
+    {
+      "workflowId": "wf-storage-location",
+      "workflowName": "저장위치 등록",
+      "category": "master-data",
+      "status": "active",
+      "steps": [
+        "저장위치 등록"
+      ],
+      "order": 1
     }
   ]
 }
