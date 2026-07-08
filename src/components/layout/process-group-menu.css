@@ -84,20 +84,34 @@
   gap: 6px;
 }
 
+/* Category = Folder (Accordion 헤더, 클릭 개폐) */
 .process-group-menu__section-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 9px;
-  border: 1px solid #d8e1ee;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
   border-radius: 6px;
-  background: #f1f5f9;
+  background: #eef2f7;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.process-group-menu__section-header:hover {
+  background: #e4eaf2;
+}
+
+.process-group-menu__section-caret {
+  flex: 0 0 auto;
+  color: #64748b;
 }
 
 .process-group-menu__section-header h3 {
   margin: 0;
-  color: #334155;
+  flex: 1 1 auto;
+  color: #1e293b;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -105,58 +119,51 @@
 
 .process-group-menu__section-header span {
   flex: 0 0 auto;
-  min-width: 22px;
+  min-width: 20px;
   padding: 1px 7px;
   border-radius: 999px;
   background: #fff;
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 700;
+  color: #7b8794;
+  font-size: 10px;
+  font-weight: 600;
   text-align: center;
 }
 
-/* Workflow (Category → Workflow → Variant 3계층) — Visual Hierarchy v2 */
-/* Workflow = 업무 흐름 "카드": 헤더 + Variant를 하나의 카드로 묶고 뚜렷한 좌측 액센트 바 */
+/* Workflow = Explorer Section / Flow (v3) — 박스 카드보다 가벼운 '업무 흐름 섹션' */
 .process-group-menu__workflow {
-  margin-top: 9px;
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #7c8ca3;
-  border-radius: 0 8px 8px 0;
-  background: #f7f9fc;
-  overflow: hidden;
+  margin-top: 2px;
 }
 
 .process-group-menu__workflow-header {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   width: 100%;
-  padding: 10px 11px;
+  padding: 8px 10px;
   border: 0;
-  border-radius: 0;
+  border-radius: 6px;
   background: transparent;
   color: #1e293b;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12.5px;
+  font-weight: 700;
   cursor: pointer;
   text-align: left;
   transition: background 0.12s;
 }
 
 .process-group-menu__workflow-header:hover {
-  background: rgba(124, 140, 163, 0.1);
-}
-
-/* 펼침 상태 — 헤더와 Variant 사이 구분선 */
-.process-group-menu__workflow-header[aria-expanded="true"] {
-  border-bottom: 1px solid #e4e9f1;
+  background: #eef2f7;
 }
 
 .process-group-menu__workflow-caret {
   flex: 0 0 auto;
-  width: 12px;
-  color: #475569;
-  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Workflow 대표 아이콘 — 흐름 빠른 구분 */
+.process-group-menu__workflow-icon {
+  flex: 0 0 auto;
+  color: #5b6b82;
 }
 
 .process-group-menu__workflow-name {
@@ -165,16 +172,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   letter-spacing: 0.01em;
+  /* 화살표(→) Flow 느낌 강화 */
+  word-spacing: 0.06em;
 }
 
 /* Count = 보조 정보: 작고 연하게, 우측 정렬 */
 .process-group-menu__workflow-count {
   flex: 0 0 auto;
-  padding: 1px 7px;
+  padding: 0 6px;
   border-radius: 999px;
-  background: #eef2f7;
-  color: #7b8794;
-  font-size: 10px;
+  color: #9aa5b3;
+  font-size: 9.5px;
   font-weight: 600;
   text-align: center;
   white-space: nowrap;
@@ -187,15 +195,15 @@
   border-bottom: 0;
 }
 
-/* Variant 목록 — 카드 내부, 약한 리스트 */
+/* Variant = Scenario 리스트 — Workflow 아이콘 자리에 맞춰 들여쓰기, 세로 guide line */
 .process-group-menu__section .process-group-menu__list--variants {
-  margin: 4px 0 4px 16px;
-  padding-left: 11px;
+  margin: 1px 0 3px 21px;
+  padding-left: 12px;
 }
 
-/* Flatten Workflow 목록 — 카드 자체가 항목이므로 margin/padding 리셋 */
+/* Flatten Workflow 목록 — Flow 헤더 스타일이므로 들여쓰기 없음 */
 .process-group-menu__section .process-group-menu__list--flattened {
-  margin: 0;
+  margin: 2px 0 0;
   padding-left: 0;
 }
 
@@ -209,39 +217,38 @@
   background: #dbe4ef;
 }
 
-/* Variant 가이드라인 */
+/* Variant guide line */
 .process-group-menu__section .process-group-menu__list--variants::before {
-  width: 2px;
-  background: #d3dbe6;
+  width: 1.5px;
+  background: #d8e0ea;
 }
 
-/* Flatten 목록은 가이드라인 제거 (Workflow 카드 계층이므로) */
+/* Flatten 목록은 guide line 제거 (Flow 계층이므로) */
 .process-group-menu__section .process-group-menu__list--flattened::before {
   display: none;
 }
 
-/* Flatten 항목 = Workflow 카드 스타일 유지 (caret/count/순번만 제거) */
+/* Flatten 항목 = Workflow(Flow) 헤더 스타일 (caret/count/순번만 제거, 아이콘 유지) */
 .process-group-menu__section .process-group-menu__list--flattened .process-group-menu__item {
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #7c8ca3;
-  border-radius: 0 8px 8px 0;
-  background: #f7f9fc;
-  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   transition: background 0.12s;
 }
 
 .process-group-menu__section .process-group-menu__list--flattened .process-group-menu__item:hover {
-  background: rgba(124, 140, 163, 0.1);
+  background: #eef2f7;
 }
 
 .process-group-menu__section .process-group-menu__list--flattened .process-group-menu__select--compact {
-  padding: 10px 36px 10px 11px;
+  padding: 8px 36px 8px 10px;
 }
 
 .process-group-menu__section .process-group-menu__list--flattened .process-group-menu__title {
+  gap: 8px;
   color: #1e293b;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12.5px;
+  font-weight: 700;
   letter-spacing: 0.01em;
 }
 
@@ -323,10 +330,21 @@
   font-weight: 600;
 }
 
-/* Active Variant — 선택은 명확하되 Workflow 카드보다 상위처럼 보이지 않게 좌측 액센트 중심 */
+/* Active (v3) — Workflow보다 눈에 덜 띄게: 좌측 2px 액센트 + 옅은 배경, bold 없음 */
+.process-group-menu__section .process-group-menu__item--active {
+  border-color: transparent;
+  box-shadow: inset 2px 0 0 var(--accent);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.process-group-menu__section .process-group-menu__item--active .process-group-menu__title {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .process-group-menu__section .process-group-menu__list--variants .process-group-menu__item--active {
-  box-shadow: inset 3px 0 0 var(--accent);
-  background: var(--accent-bg);
+  box-shadow: inset 2px 0 0 var(--accent);
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .process-group-menu__title-text {

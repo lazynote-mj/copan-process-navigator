@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { Process } from '../../types/process'
 import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
 import type { Workflow } from '../../types/workflow'
@@ -10,6 +11,7 @@ import {
   buildDetailWorkflowSections,
   type WorkflowVariantNode,
 } from '../../lib/sidebar/workflowSections'
+import { getWorkflowIcon } from '../../lib/sidebar/workflowIcon'
 import './process-group-menu.css'
 
 type OverviewMenuProps = {
@@ -82,13 +84,24 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
   const [cloneName, setCloneName] = useState('')
   const [actionMenuGroupId, setActionMenuGroupId] = useState<string | null>(null)
   const [collapsedWorkflowIds, setCollapsedWorkflowIds] = useState<Set<string>>(new Set())
+  // Category Accordion — 기본은 선택 카테고리만 펼침(나머지 접힘), 사용자가 추가로 펼침 가능 (다중 허용, 로컬 state only)
+  const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(new Set())
 
+  // Builder 모드는 편집/추가 콜백 존재로 판별 (별도 prop 없이)
+  const builderMode = Boolean(onAddGroup || onEditGroup || onCloneGroup)
   const sections = buildDetailWorkflowSections(groups, workflows)
 
-  // active Variant가 속한 Workflow는 접혀 있어도 자동 펼침
-  const selectedWorkflowId = selectedGroupId
-    ? groups.find((g) => g.id === selectedGroupId)?.workflowId
+  // active Variant가 속한 Workflow/Category는 접혀 있어도 자동 펼침
+  const selectedGroup = selectedGroupId ? groups.find((g) => g.id === selectedGroupId) : undefined
+  const selectedWorkflowId = selectedGroup?.workflowId
+  const selectedCategoryId = selectedGroupId
+    ? sections.find(
+        (s) =>
+          s.workflows.some((n) => n.groups.some((g) => g.id === selectedGroupId)) ||
+          s.ungrouped.some((g) => g.id === selectedGroupId),
+      )?.lifecycleGroup.id
     : undefined
+
   const isWorkflowExpanded = (workflowId: string) =>
     workflowId === selectedWorkflowId || !collapsedWorkflowIds.has(workflowId)
   const toggleWorkflow = (workflowId: string) =>
@@ -99,12 +112,25 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
       return next
     })
 
+  // 선택 카테고리는 자동 펼침, 그 외는 사용자가 펼친 것만 펼침 (기본 접힘)
+  const isCategoryExpanded = (categoryId: string) =>
+    categoryId === selectedCategoryId || expandedCategoryIds.has(categoryId)
+  const toggleCategory = (categoryId: string) =>
+    setExpandedCategoryIds((current) => {
+      const next = new Set(current)
+      if (next.has(categoryId)) next.delete(categoryId)
+      else next.add(categoryId)
+      return next
+    })
+
   const renderGroupItem = (
     group: DetailProcessGroup,
     badge: string,
     label: string,
-    options?: { flattened?: boolean },
-  ) => (
+    options?: { flattened?: boolean; Icon?: typeof ChevronDown },
+  ) => {
+    const Icon = options?.Icon
+    return (
     <li key={group.id}>
       <div
         className={`process-group-menu__item ${
@@ -120,6 +146,7 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
           }}
         >
           <span className="process-group-menu__title">
+            {Icon ? <Icon size={14} className="process-group-menu__workflow-icon" aria-hidden /> : null}
             {badge ? <span className="process-group-menu__index">{badge}</span> : null}
             <span className="process-group-menu__title-text">{label}</span>
           </span>
@@ -211,23 +238,25 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
         ) : null}
       </div>
     </li>
-  )
+    )
+  }
 
   const renderWorkflowNode = (node: WorkflowVariantNode) => {
-    // 단일 Variant Workflow는 과계층화 방지 — 헤더 없이 단일 행
+    const Icon = getWorkflowIcon(node.workflow)
+    // 단일 Variant Workflow는 과계층화 방지 — 헤더 없이 단일 행 (Flow 아이콘·스타일 유지)
     if (node.flattened) {
       const only = node.groups[0]
       if (!only) return null
-      // Flatten Workflow — Workflow 헤더 스타일 유지, caret/count/순번만 제거
       const label = node.workflow?.workflowName ?? only.name
       return (
         <ul key={node.workflow?.workflowId ?? only.id} className="process-group-menu__list process-group-menu__list--flattened">
-          {renderGroupItem(only, '', label, { flattened: true })}
+          {renderGroupItem(only, '', label, { flattened: true, Icon })}
         </ul>
       )
     }
     const workflow = node.workflow!
     const expanded = isWorkflowExpanded(workflow.workflowId)
+    const Caret = expanded ? ChevronDown : ChevronRight
     return (
       <div key={workflow.workflowId} className="process-group-menu__workflow">
         <button
@@ -236,7 +265,8 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
           aria-expanded={expanded}
           onClick={() => toggleWorkflow(workflow.workflowId)}
         >
-          <span className="process-group-menu__workflow-caret">{expanded ? '▾' : '▸'}</span>
+          <Caret size={13} className="process-group-menu__workflow-caret" aria-hidden />
+          <Icon size={14} className="process-group-menu__workflow-icon" aria-hidden />
           <span className="process-group-menu__workflow-name">{workflow.workflowName}</span>
           <span
             className="process-group-menu__workflow-count"
@@ -247,12 +277,9 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
         </button>
         {expanded ? (
           <ul className="process-group-menu__list process-group-menu__list--variants">
-            {node.groups.map((group, index) =>
-              renderGroupItem(
-                group,
-                String(group.variantOrder ?? index + 1).padStart(2, '0'),
-                group.variantLabel ?? group.name,
-              ),
+            {node.groups.map((group) =>
+              // Variant = Scenario: 번호 제거, 라벨 중심
+              renderGroupItem(group, '', group.variantLabel ?? group.name),
             )}
           </ul>
         ) : null}
@@ -261,7 +288,7 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
   }
 
   return (
-    <nav className="process-group-menu">
+    <nav className="process-group-menu process-group-menu--explorer">
       {cloneNotice ? <p className="process-group-menu__notice">{cloneNotice}</p> : null}
       {onAddGroup ? (
         <div className="process-group-menu__actions">
@@ -271,28 +298,41 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
         </div>
       ) : null}
       <div className="process-group-menu__sections">
-        {sections.map(({ lifecycleGroup, workflows: workflowNodes, ungrouped, totalGroups }) => (
-          <section key={lifecycleGroup.id} className="process-group-menu__section">
-            <header className="process-group-menu__section-header">
-              <h3>{lifecycleGroup.label}</h3>
-              <span>{totalGroups}</span>
-            </header>
-            {totalGroups === 0 ? (
-              <p className="process-group-menu__empty">추가 후보 검토 영역</p>
-            ) : (
-              <>
-                {workflowNodes.map(renderWorkflowNode)}
-                {ungrouped.length > 0 ? (
-                  <ul className="process-group-menu__list">
-                    {ungrouped.map((group, index) =>
-                      renderGroupItem(group, String(index + 1).padStart(2, '0'), group.name),
-                    )}
-                  </ul>
+        {sections
+          // 빈 카테고리: Viewer 숨김, Builder 표시
+          .filter(({ totalGroups }) => builderMode || totalGroups > 0)
+          .map(({ lifecycleGroup, workflows: workflowNodes, ungrouped, totalGroups }) => {
+            const catExpanded = isCategoryExpanded(lifecycleGroup.id)
+            const CatCaret = catExpanded ? ChevronDown : ChevronRight
+            return (
+              <section key={lifecycleGroup.id} className="process-group-menu__section">
+                <button
+                  type="button"
+                  className="process-group-menu__section-header"
+                  aria-expanded={catExpanded}
+                  onClick={() => toggleCategory(lifecycleGroup.id)}
+                >
+                  <CatCaret size={14} className="process-group-menu__section-caret" aria-hidden />
+                  <h3>{lifecycleGroup.label}</h3>
+                  <span>{totalGroups}</span>
+                </button>
+                {catExpanded ? (
+                  totalGroups === 0 ? (
+                    <p className="process-group-menu__empty">추가 후보 검토 영역</p>
+                  ) : (
+                    <>
+                      {workflowNodes.map(renderWorkflowNode)}
+                      {ungrouped.length > 0 ? (
+                        <ul className="process-group-menu__list">
+                          {ungrouped.map((group) => renderGroupItem(group, '', group.name))}
+                        </ul>
+                      ) : null}
+                    </>
+                  )
                 ) : null}
-              </>
-            )}
-          </section>
-        ))}
+              </section>
+            )
+          })}
       </div>
     </nav>
   )
