@@ -29,7 +29,16 @@ export type ProcessDataFilePayloadV1 = {
 
 export type ProcessDataFilePayloadV2 = {
   kind: 'copan-process-navigator-state'
-  version: 2
+  /**
+   * 직렬화 스키마 버전 (ADR-005 §D3 — migration 판단용). 신규 canonical 필드.
+   * legacy 파일에서는 이 값이 없고 top-level `version:2`가 스키마 버전 역할을 했다 → 로드 시 back-compat.
+   */
+  schemaVersion?: 2
+  /**
+   * schemaVersion 도입 이후: Runtime Entities content 버전.
+   * legacy 파일(schemaVersion 미존재)에서는 스키마 버전(=2)이었으므로 content 버전은 로드 시 초기값으로 해석한다.
+   */
+  version: number
   exportedAt: string
   commonMasters: CommonMasters
   processes: ProcessInstance[]
@@ -43,10 +52,31 @@ export type ProcessDataFilePayloadV2 = {
 
 export type ProcessDataFilePayload = ProcessDataFilePayloadV1 | ProcessDataFilePayloadV2
 
+/** Runtime content 버전 초기값 (ADR-005 §D3, WP1 정책: content.version = 1). */
+export const INITIAL_CONTENT_VERSION = 1
+
+/** 저장 파일의 직렬화 스키마 버전. legacy는 top-level `version`이 이 역할이었다(back-compat). */
+export function resolveSchemaVersion(payload: ProcessDataFilePayload): number {
+  return (payload as ProcessDataFilePayloadV2).schemaVersion ?? payload.version
+}
+
 export function isV2Payload(
   payload: ProcessDataFilePayload,
 ): payload is ProcessDataFilePayloadV2 {
-  return payload.version === 2
+  return resolveSchemaVersion(payload) === 2
+}
+
+/**
+ * Runtime content 버전 해석 (forward-only).
+ * - schemaVersion이 있는 파일에서만 top-level `version`이 content 버전이다.
+ * - legacy 파일(schemaVersion 미존재)·V1은 초기값을 부여한다.
+ */
+export function resolveContentVersion(payload: ProcessDataFilePayload): number {
+  const v2 = payload as ProcessDataFilePayloadV2
+  if (v2.schemaVersion !== undefined && typeof v2.version === 'number') {
+    return v2.version
+  }
+  return INITIAL_CONTENT_VERSION
 }
 
 function normalizeV1Details(details: ProcessDataFilePayloadV1['details']): Process[] {
@@ -90,7 +120,8 @@ export function migrateV1ToV2(payload: ProcessDataFilePayloadV1): ProcessDataFil
   )
   return {
     kind: 'copan-process-navigator-state',
-    version: 2,
+    schemaVersion: 2,
+    version: INITIAL_CONTENT_VERSION,
     exportedAt: payload.exportedAt,
     commonMasters,
     processes: [overviewInstance, ...detailInstances],
@@ -125,6 +156,8 @@ export function buildProcessDataFromPayload(
   const base: ProcessData = {
     commonMasters,
     processes,
+    // content 버전은 원본 payload 기준으로 해석한다(legacy·V1 → 초기값, schemaVersion 파일 → 보존).
+    version: resolveContentVersion(payload),
     updatedAt: v2.exportedAt,
     dataSource,
     dirty: false,
@@ -161,6 +194,7 @@ export function createInitialProcessData(
   return ensureProcessGroupFields({
     commonMasters,
     processes,
+    version: INITIAL_CONTENT_VERSION,
     updatedAt: new Date().toISOString(),
     dataSource: 'project-json',
     dirty: false,
@@ -173,7 +207,9 @@ export function processDataToFilePayload(data: ProcessData): ProcessDataFilePayl
   const normalized = ensureProcessGroupFields(data)
   return {
     kind: 'copan-process-navigator-state',
-    version: 2,
+    schemaVersion: 2,
+    // content 버전은 Runtime에서 관리(WP1: 보존). dirty는 직렬화하지 않는다(ADR-005 §D3).
+    version: normalized.version,
     exportedAt: normalized.updatedAt,
     commonMasters: structuredClone(normalized.commonMasters),
     processes: normalized.processes.map((p) => normalizeProcessInstanceEdges(structuredClone(p))),

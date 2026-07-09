@@ -7,7 +7,11 @@ import {
   summarizeProcessData,
   type ProcessData,
 } from '../types/processData'
-import { buildProcessDataFromPayload, processDataToFilePayload } from './processDataMigration'
+import {
+  buildProcessDataFromPayload,
+  isV2Payload,
+  processDataToFilePayload,
+} from './processDataMigration'
 import type { ProcessDataFilePayload } from './processDataMigration'
 import { normalizeProcessEdges, normalizeProcessNodes } from './processExport'
 import { formatTimestamp } from './workingStateStats'
@@ -143,17 +147,21 @@ export function validateImportPayload(payload: unknown): ProcessDataFilePayload 
     throw new Error('지원하지 않는 JSON 형식입니다.')
   }
 
-  if (parsed.version === 2) {
+  // 직렬화 스키마 버전 판정: 신규 파일은 schemaVersion, legacy 파일은 top-level version (ADR-005 §D3).
+  const schemaVersion =
+    (parsed as { schemaVersion?: number }).schemaVersion ?? parsed.version
+
+  if (schemaVersion === 2) {
     validateV2Payload(parsed as Parameters<typeof validateV2Payload>[0])
     return parsed as ProcessDataFilePayload
   }
 
-  if (parsed.version === 1) {
+  if (schemaVersion === 1) {
     validateV1Overview(parsed as Parameters<typeof validateV1Overview>[0])
     return parsed as ProcessDataFilePayload
   }
 
-  throw new Error('지원하지 않는 JSON 버전입니다. (version 1 또는 2)')
+  throw new Error('지원하지 않는 JSON 스키마 버전입니다. (schemaVersion 2 또는 legacy version 1/2)')
 }
 
 export function parseProcessDataFile(content: string): ProcessDataFilePayload {
@@ -211,7 +219,7 @@ export function validateExportedPayload(payload: ProcessDataFilePayload): Export
   let nodeCount = 0
   let processCount = 0
 
-  if (payload.version === 2) {
+  if (isV2Payload(payload)) {
     for (const process of payload.processes) {
       processCount += 1
       nodeCount += process.nodes.filter((node) => node.type !== 'phase-connector').length
