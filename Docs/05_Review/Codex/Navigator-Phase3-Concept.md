@@ -4,7 +4,7 @@
 |---|---|
 |Title|Navigator 정보 구조 — Graph First + Multiple Views (Journey 도입)|
 |Purpose|Navigator가 "최종적으로 무엇을 표현·탐색하는 도구인가"를 정의한다. 핵심 원칙은 **Graph First**: Process Graph가 기층이고, Category→Workflow→Variant 트리와 Journey는 그 위의 서로 다른 View다. Journey·Relation·Process Graph가 모델 안에서 어떤 관계로 존재하는지 확정한다.|
-|Status|Review (Draft)|
+|Status|**Approved** (ratified by `06_Decisions/ADR-003-Navigator-IA-Ratification.md`, 2026-07-09) — 상태 전이 Draft → Review → Approved 완료|
 |Owner|혁신팀|
 |Last Updated|2026-07-08|
 |Baseline|`v1.0-baseline` + Workflow/Variant 구현 완료 (PR #13~#17 merged)|
