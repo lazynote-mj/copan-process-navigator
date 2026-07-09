@@ -32,8 +32,18 @@ export type ProcessData = {
   workflows?: Workflow[]
   /** @deprecated overviewProcessGroups */
   processGroups?: ProcessGroup[]
+  /**
+   * Runtime Entities content 버전 (ADR-005 §D3 / ADR-006 §D4).
+   * 저장 파일의 top-level `schemaVersion`(직렬화 스키마 버전)과 구분되는 콘텐츠 논리 버전.
+   * WP1은 도입·보존만 담당하며, 증가(version++)는 WP5 applyChangeSet 경계의 몫이다.
+   */
+  version: number
   updatedAt: string
   dataSource: ProcessDataSource
+  /**
+   * 세션 메타데이터. persistence 제외(저장 파일에 직렬화하지 않는다).
+   * hydrate 시 재계산/무시한다(ADR-005 §D3).
+   */
   dirty: boolean
   baselineNodeCount: number
   baselineEdgeCount: number
