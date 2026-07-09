@@ -43,6 +43,7 @@ Proposed → Accepted → (Superseded | Deprecated)
 | [ADR-001](ADR-001-Workflow-Variant.md) | Workflow / Variant 모델 도입 | Accepted | 2026-07-08 | 이름 문자열에 암묵 존재하던 Workflow/Variant를 additive 스키마로 명시화 (Model B) |
 | [ADR-002](ADR-002-Graph-First.md) | Graph First Architecture | Accepted (Ratified by ADR-003) | 2026-07-09 | Process Graph를 기층으로, Category→Workflow→Variant 트리와 Journey를 그 위의 View로 |
 | [ADR-003](ADR-003-Navigator-IA-Ratification.md) | Navigator Architecture Ratification | Accepted | 2026-07-09 | Navigator Information Architecture를 Canonical Architecture로 공식 비준(Phase 4.0 게이트) |
+| [ADR-004](ADR-004-Process-Graph-Schema-First.md) | Process Graph Schema First (Phase 4.1 재정렬) | Accepted | 2026-07-09 | Phase 4.1을 Process Graph Schema 우선으로 재정렬. ADR-003 로드맵 표현 보완 |
 
 ## 작성 규약
 
