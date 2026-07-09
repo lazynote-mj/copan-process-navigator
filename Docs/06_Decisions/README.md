@@ -46,6 +46,7 @@ Proposed → Accepted → (Superseded | Deprecated)
 | [ADR-004](ADR-004-Process-Graph-Schema-First.md) | Process Graph Schema First (Phase 4.1 재정렬) | Accepted | 2026-07-09 | Phase 4.1을 Process Graph Schema 우선으로 재정렬. ADR-003 로드맵 표현 보완 |
 | [ADR-005](ADR-005-Navigator-Runtime-Model.md) | Navigator Runtime Model | Accepted | 2026-07-09 | ProcessData를 1급 Runtime으로 격상. state.json=persistence checkpoint, Graph=미저장 index, Single Writer, version(콘텐츠) 도입 |
 | [ADR-006](ADR-006-Change-Set-Architecture.md) | Change Set Architecture | Accepted | 2026-07-09 | Runtime 변경은 Change Set(명령 집합)으로만. baseVersion·atomic apply·version++1회·validation·conflict·undo/redo·dry-run·AI proposal/user confirm 분리 |
+| [ADR-007](ADR-007-Data-first-Approval-and-Runtime-Governance-Layer.md) | Data-first Approval and Runtime Governance Layer | Proposed | 2026-07-09 | Runtime 위에 거버넌스·승인 계층을 additive로 제안. 승인 대상=구조화 레코드(Data-first), 문서=승인 산출물. draft 타입(Governance/Approval/Document/RuntimeState) + WP2.1~2.5 |
 
 ## 작성 규약
 
