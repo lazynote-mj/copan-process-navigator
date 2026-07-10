@@ -8,6 +8,12 @@ import type { ProcessInstance } from './processInstance'
 import { OVERVIEW_SCOPE } from './processInstance'
 import type { Workflow } from './workflow'
 import type {
+  ApprovalPolicy,
+  ApprovalRoute,
+  DocumentArtifact,
+  GovernanceRule,
+} from './governance'
+import type {
   DetailProcessGroup,
   OverviewProcessGroup,
   ProcessGroup,
@@ -32,6 +38,16 @@ export type ProcessData = {
   workflows?: Workflow[]
   /** @deprecated overviewProcessGroups */
   processGroups?: ProcessGroup[]
+  // ── Governance Layer (ADR-007 · WP2.1) — additive·optional. 비우면 기존 동작. ──
+  // 구조(타입)만 도입한다. 직렬화·검증·resolver·문서 생성은 후속 WP2.2~2.4의 몫이다.
+  /** 거버넌스 규칙 메타데이터 (정책/규칙이며 실행 엔진 아님). */
+  governanceRules?: GovernanceRule[]
+  /** 승인 정책 (경로 도출 규칙). resolver는 WP2.3. */
+  approvalPolicies?: ApprovalPolicy[]
+  /** 승인 경로 — 구조화 레코드를 대상으로 하는 Data-first 승인(문서 아님). */
+  approvalRoutes?: ApprovalRoute[]
+  /** 승인 이후 생성되는 문서 산출물 (post-approval output). */
+  documentArtifacts?: DocumentArtifact[]
   /**
    * Runtime Entities content 버전 (ADR-005 §D3 / ADR-006 §D4).
    * 저장 파일의 top-level `schemaVersion`(직렬화 스키마 버전)과 구분되는 콘텐츠 논리 버전.
