@@ -81,16 +81,18 @@ export function Toolbar({
     (crumb) => Boolean(crumb) && crumb !== APP_CONFIG.processRootLabel,
   )
 
-  // 표시 전용 파싱 — 원본 데이터는 바꾸지 않는다.
-  // title은 "<workflow> : <variant>" 형태이고 workflow는 "A ~ B" 범위 표기를 쓴다.
+  // 표시 전용 파싱 — 원본 데이터(detailHeader.title)는 절대 바꾸지 않는다.
+  // title은 "<workflow> : <variant>" 형태이고 workflow는 "A ~ B" 흐름 표기를 쓴다.
+  // variant는 "공백 : 공백"으로 둘러싸인 콜론만 분리한다. 콜론 앞뒤 공백이 없는 제목
+  // (예: "해외 사업: 일본 시장 진출")은 variant로 오인하지 않고 원문 그대로 표시한다(안전 fallback).
   const rawTitle = detailHeader?.title ?? ''
-  const colonIdx = Math.max(rawTitle.lastIndexOf(':'), rawTitle.lastIndexOf('：'))
+  const variantMatch = rawTitle.match(/^(.*\S)\s+[:：]\s+(\S.*)$/)
   // ② Workflow 이름을 가장 강조. 흐름 구분자 ~ 는 → 로 다듬는다.
-  const workflowTitle = (colonIdx > 0 ? rawTitle.slice(0, colonIdx) : rawTitle)
+  const workflowTitle = (variantMatch ? variantMatch[1] : rawTitle)
     .trim()
     .replace(/\s*~\s*/g, ' → ')
   // ③ Variant(보조 정보)는 title에 내장된 값 또는 processLabel에서 뽑아 가운뎃점으로 정리한다.
-  const variantSource = detailHeader?.processLabel || (colonIdx > 0 ? rawTitle.slice(colonIdx + 1) : '')
+  const variantSource = detailHeader?.processLabel || (variantMatch ? variantMatch[2] : '')
   const variantLabel = variantSource
     ? variantSource
         .split(/[,·]/)
@@ -144,10 +146,12 @@ export function Toolbar({
         ) : (
           <h1 className="toolbar__title">{APP_CONFIG.appName}</h1>
         )}
-        <div className="toolbar__mode-group">
+        {/* ⑤ 현재 화면(view) 선택 — 활성 상태를 aria-pressed로도 전달 */}
+        <div className="toolbar__mode-group" role="group" aria-label="화면 보기">
           <button
             type="button"
             className={`toolbar__mode-btn ${viewMode === 'overview' ? 'toolbar__mode-btn--active' : ''}`}
+            aria-pressed={viewMode === 'overview'}
             onClick={() => onViewModeChange('overview')}
           >
             전체 Overview
@@ -155,6 +159,7 @@ export function Toolbar({
           <button
             type="button"
             className={`toolbar__mode-btn ${viewMode === 'detail' ? 'toolbar__mode-btn--active' : ''}`}
+            aria-pressed={viewMode === 'detail'}
             onClick={() => onViewModeChange('detail')}
           >
             프로세스 상세
@@ -169,6 +174,7 @@ export function Toolbar({
           <button
             type="button"
             className={`toolbar__mode-btn toolbar__mode-btn--small ${appMode === 'view' ? 'toolbar__mode-btn--active' : ''}`}
+            aria-pressed={appMode === 'view'}
             onClick={() => onAppModeChange('view')}
           >
             Viewer
@@ -177,6 +183,7 @@ export function Toolbar({
             <button
               type="button"
               className={`toolbar__mode-btn toolbar__mode-btn--small ${appMode === 'edit' ? 'toolbar__mode-btn--active' : ''}`}
+              aria-pressed={appMode === 'edit'}
               onClick={() => onAppModeChange('edit')}
             >
               Builder
