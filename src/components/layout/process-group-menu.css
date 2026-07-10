@@ -188,6 +188,28 @@
   white-space: nowrap;
 }
 
+/* ADR-008 Navigation Phase 1 — Workflow가 최상위 섹션. Lifecycle은 metadata badge로만 */
+.process-group-menu__section-header .process-group-menu__section-badge {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* "미분류 Workflow" fallback 섹션 — 안전망이므로 시각적으로 약하게 */
+.process-group-menu__section--fallback .process-group-menu__section-header {
+  background: #f1f5f9;
+}
+.process-group-menu__section--fallback .process-group-menu__workflow-name {
+  color: #64748b;
+}
+
 .process-group-menu__section .process-group-menu__list {
   position: relative;
   margin-left: 8px;
