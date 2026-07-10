@@ -11,9 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
-# Phase 2A.1 — dev-local runtime edits (seed state.json stays canonical/committed)
+# Phase 2A.1/2A.2 — dev-local runtime edits + temp/backup (seed state.json stays canonical/committed)
 public/process-data/state.local.json
 public/process-data/*.local.json
+public/process-data/state.local.*
 .env
 .env.*
 !.env.example
