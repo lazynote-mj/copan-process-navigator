@@ -76,6 +76,29 @@ export function Toolbar({
   canDelete,
   onSaveAll,
 }: ToolbarProps) {
+  // ① 사용자에게 의미 없는 내부 루트 분류(SCM Process)는 breadcrumb에서 감춘다. (표시 전용)
+  const visibleBreadcrumbs = (detailHeader?.breadcrumbs ?? []).filter(
+    (crumb) => Boolean(crumb) && crumb !== APP_CONFIG.processRootLabel,
+  )
+
+  // 표시 전용 파싱 — 원본 데이터는 바꾸지 않는다.
+  // title은 "<workflow> : <variant>" 형태이고 workflow는 "A ~ B" 범위 표기를 쓴다.
+  const rawTitle = detailHeader?.title ?? ''
+  const colonIdx = Math.max(rawTitle.lastIndexOf(':'), rawTitle.lastIndexOf('：'))
+  // ② Workflow 이름을 가장 강조. 흐름 구분자 ~ 는 → 로 다듬는다.
+  const workflowTitle = (colonIdx > 0 ? rawTitle.slice(0, colonIdx) : rawTitle)
+    .trim()
+    .replace(/\s*~\s*/g, ' → ')
+  // ③ Variant(보조 정보)는 title에 내장된 값 또는 processLabel에서 뽑아 가운뎃점으로 정리한다.
+  const variantSource = detailHeader?.processLabel || (colonIdx > 0 ? rawTitle.slice(colonIdx + 1) : '')
+  const variantLabel = variantSource
+    ? variantSource
+        .split(/[,·]/)
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .join(' · ')
+    : ''
+
   return (
     <header className="toolbar">
       <div className="toolbar__left">
@@ -91,7 +114,7 @@ export function Toolbar({
         {viewMode === 'detail' && (
           <button type="button" className="toolbar__btn" onClick={onBackToOverview}>
             <ArrowLeft size={16} />
-            <span>Overview</span>
+            <span>전체 Overview</span>
           </button>
         )}
       </div>
@@ -99,19 +122,23 @@ export function Toolbar({
       <div className="toolbar__center">
         {detailHeader ? (
           <div className="toolbar__page-heading">
-            {detailHeader.breadcrumbs?.length ? (
-              <span className="toolbar__breadcrumb">
-                {detailHeader.breadcrumbs.join(' > ')}
-              </span>
-            ) : null}
-            <h1 className="toolbar__page-title">{detailHeader.title}</h1>
-            {detailHeader.processLabel ? (
+            {visibleBreadcrumbs.length ? (
               <>
-                <span className="toolbar__page-divider" aria-hidden>
-                  |
+                <span className="toolbar__breadcrumb">{visibleBreadcrumbs.join(' › ')}</span>
+                <span className="toolbar__page-sep" aria-hidden>
+                  ›
                 </span>
-                <span className="toolbar__page-label">{detailHeader.processLabel}</span>
               </>
+            ) : null}
+            {/* ② 현재 Workflow 이름을 가장 강조한다 */}
+            <h1 className="toolbar__page-title" title={detailHeader.title}>
+              {workflowTitle}
+            </h1>
+            {/* ③ Variant는 보조 정보(badge) */}
+            {variantLabel ? (
+              <span className="toolbar__page-label" title={variantLabel}>
+                {variantLabel}
+              </span>
             ) : null}
           </div>
         ) : (
@@ -133,7 +160,12 @@ export function Toolbar({
             프로세스 상세
           </button>
         </div>
-        <div className="toolbar__mode-group toolbar__mode-group--secondary">
+        {/* ⑥ Viewer/Builder는 권한(Role) 선택임을 명시 */}
+        <div
+          className="toolbar__mode-group toolbar__mode-group--secondary"
+          role="group"
+          aria-label="권한(Role)"
+        >
           <button
             type="button"
             className={`toolbar__mode-btn toolbar__mode-btn--small ${appMode === 'view' ? 'toolbar__mode-btn--active' : ''}`}
