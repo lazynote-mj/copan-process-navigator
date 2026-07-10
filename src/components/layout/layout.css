@@ -202,21 +202,30 @@
 .toolbar__page-heading {
   display: flex;
   flex-direction: row;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   min-width: 0;
   max-width: min(620px, 48vw);
 }
 
+/* 컨텍스트(카테고리) — 보조 정보로 약하게 */
 .toolbar__breadcrumb {
   flex-shrink: 0;
   max-width: 190px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* breadcrumb › workflow 구분자 (표시 전용) */
+.toolbar__page-sep {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .toolbar__page-index {
@@ -233,10 +242,11 @@
   text-align: center;
 }
 
+/* ② Header에서 가장 강조 — 현재 보고 있는 Workflow 이름 */
 .toolbar__page-title {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text-primary);
   letter-spacing: 0;
   white-space: nowrap;
@@ -246,21 +256,18 @@
   min-width: 0;
 }
 
-.toolbar__page-divider {
-  flex-shrink: 0;
-  font-size: 9px;
-  font-weight: 500;
-  color: var(--text-muted);
-  line-height: 1;
-}
-
+/* ③ Variant는 보조 정보 badge — Workflow보다 약하게 */
 .toolbar__page-label {
   flex-shrink: 0;
-  font-size: 9px;
-  font-weight: 500;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 10px;
+  font-weight: 600;
   color: var(--text-muted);
   white-space: nowrap;
-  line-height: 1;
+  line-height: 1.5;
 }
 
 .toolbar__page-meta {
@@ -294,6 +301,7 @@
 
 .toolbar__mode-group {
   display: inline-flex;
+  flex-shrink: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
@@ -307,15 +315,18 @@
   background: var(--surface);
   color: var(--text-secondary);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .toolbar__mode-btn + .toolbar__mode-btn {
   border-left: 1px solid var(--border);
 }
 
+/* ⑤ 현재 선택된 화면/권한을 명확하게 */
 .toolbar__mode-btn--active {
   background: var(--accent-bg);
   color: var(--accent);
+  font-weight: 700;
 }
 
 .toolbar__review-toggle {
@@ -407,11 +418,23 @@
   white-space: nowrap;
 }
 
+/* ⑧ Save Status — 상태 색상에 맞춘 도트로 가독성만 정리 (기능/문구 불변) */
 .toolbar__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 999px;
+}
+
+.toolbar__status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .toolbar__status--modified {
