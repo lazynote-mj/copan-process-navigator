@@ -3,7 +3,9 @@ import path from 'node:path'
 import type { Plugin } from 'vite'
 
 const STATE_DIR = 'public/process-data'
-const STATE_FILE = 'state.json'
+// Phase 2A.1 — dev 런타임 편집은 untracked local 파일에만 write한다.
+// 커밋된 시드(state.json)는 실행 중 앱이 절대 덮어쓰지 않는다(fallback/seed 전용).
+const STATE_FILE = 'state.local.json'
 const API_PATH = '/api/process-data'
 
 function readRequestBody(req: import('node:http').IncomingMessage): Promise<string> {
