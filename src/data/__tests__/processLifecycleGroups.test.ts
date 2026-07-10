@@ -65,4 +65,19 @@ describe('cloneDetailProcess — 카테고리 승계', () => {
     const secondGroup = second.data.detailProcessGroups?.find((entry) => entry.id === second.groupId)
     expect(secondGroup?.lifecycleGroupId).toBe('settlement')
   })
+
+  it('ADR-008 — 복제본은 원본의 workflowId를 승계한다(미분류로 떨어지지 않음)', () => {
+    const first = cloneDetailProcess(baseData(), 'purchase-to-ap-invoice', 'wf 승계 원본')
+    const firstGroup = first.data.detailProcessGroups?.find((entry) => entry.id === first.groupId)
+    // 원본 그룹에 Workflow 소속을 부여한 상태를 모사
+    const withWorkflow = {
+      ...first.data,
+      detailProcessGroups: first.data.detailProcessGroups?.map((entry) =>
+        entry.id === first.groupId ? { ...entry, workflowId: 'wf-purchase-request-to-ap' } : entry,
+      ),
+    }
+    const second = cloneDetailProcess(withWorkflow, firstGroup!.detailProcessId, 'wf 승계 복제')
+    const secondGroup = second.data.detailProcessGroups?.find((entry) => entry.id === second.groupId)
+    expect(secondGroup?.workflowId).toBe('wf-purchase-request-to-ap')
+  })
 })

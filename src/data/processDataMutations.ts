@@ -560,6 +560,9 @@ export function cloneDetailProcess(
       detailProcessId: sourceProcessId,
       lifecycleGroupId: sourceGroup?.lifecycleGroupId,
     }).id,
+    // ADR-008 Navigation Phase 1 — 복제본은 원본의 Workflow 소속을 승계한다(사용자가 바꾸기 전까지).
+    // 승계하지 않으면 복제본이 "미분류 Workflow"로 떨어진다. variantLabel/order는 새 항목이라 비운다.
+    ...(sourceGroup?.workflowId ? { workflowId: sourceGroup.workflowId } : {}),
   }
 
   return {

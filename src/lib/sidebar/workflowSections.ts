@@ -94,3 +94,73 @@ export function buildDetailWorkflowSections(
     }
   })
 }
+
+/**
+ * ADR-008 Workflow-first Navigation — Sidebar 최상위 구조.
+ *
+ * Category(Lifecycle)를 외곽 트리로 쓰지 않고 **Workflow를 1차 섹션**으로 삼는다.
+ * - workflowId가 workflows[]에 해석되는 그룹 → 해당 Workflow 섹션(정렬: workflow.order → workflowName)
+ * - workflowId가 없거나 미해석 → 단일 후행 "미분류 Workflow" fallback 섹션(호환 안전망일 뿐, canonical 아님)
+ * - 각 Workflow 내부 Variant는 variantOrder → name 순
+ *
+ * Lifecycle은 여기서 트리 계층이 아니라 Workflow의 metadata(workflow.category)로만 남는다.
+ */
+export const UNCLASSIFIED_WORKFLOW_KEY = '__unclassified-workflow__'
+export const UNCLASSIFIED_WORKFLOW_LABEL = '미분류 Workflow'
+
+export type WorkflowSection = {
+  /** 섹션 키 (workflowId 또는 fallback sentinel) — 접기/펼치기·React key용 */
+  key: string
+  /** fallback 섹션이면 undefined */
+  workflow?: Workflow
+  fallback: boolean
+  /** 섹션에 속한 Detail Process(Variant)들 (정렬됨) */
+  groups: DetailProcessGroup[]
+}
+
+export function buildWorkflowSections(
+  groups: DetailProcessGroup[],
+  workflows: Workflow[] | undefined,
+): WorkflowSection[] {
+  const workflowById = new Map((workflows ?? []).map((wf) => [wf.workflowId, wf]))
+
+  const byWorkflow = new Map<string, DetailProcessGroup[]>()
+  const fallback: DetailProcessGroup[] = []
+  for (const group of groups) {
+    const wfId = group.workflowId
+    if (wfId && workflowById.has(wfId)) {
+      const list = byWorkflow.get(wfId) ?? []
+      list.push(group)
+      byWorkflow.set(wfId, list)
+    } else {
+      // workflowId 결측 또는 미해석 → 미분류 fallback (렌더 전용 안전망)
+      fallback.push(group)
+    }
+  }
+
+  // 순서 = canonical workflows[] 배열 순서(ADR-008). order 필드는 카테고리별 값이라 쓰지 않는다.
+  // 그룹이 하나도 없는 Workflow는 노이즈 방지를 위해 표시하지 않는다.
+  const sections: WorkflowSection[] = []
+  for (const workflow of workflows ?? []) {
+    const wfGroups = byWorkflow.get(workflow.workflowId)
+    if (wfGroups && wfGroups.length > 0) {
+      sections.push({
+        key: workflow.workflowId,
+        workflow,
+        fallback: false,
+        groups: sortVariants(wfGroups),
+      })
+    }
+  }
+
+  if (fallback.length > 0) {
+    sections.push({
+      key: UNCLASSIFIED_WORKFLOW_KEY,
+      workflow: undefined,
+      fallback: true,
+      groups: sortVariants(fallback),
+    })
+  }
+
+  return sections
+}
