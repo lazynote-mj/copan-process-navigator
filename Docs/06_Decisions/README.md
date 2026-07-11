@@ -36,6 +36,24 @@ Proposed → Accepted → (Superseded | Deprecated)
 - **Superseded**: 후속 ADR로 대체됨(어느 ADR로 대체됐는지 명시).
 - **Deprecated**: 더 이상 유효하지 않음.
 
+## ADR 관계도 · 읽는 순서 (Core Lineage)
+
+Navigator 아키텍처의 **핵심 4결정선**은 아래 순서로 읽는다 — 각 ADR은 앞 ADR 위에 세워진다.
+
+```text
+ADR-005  Navigator Runtime Model        (Runtime 1급 · state.json=checkpoint · content version)
+   │  ↳ 그 Runtime을 "어떻게 변경하나"
+ADR-006  Change Set Architecture         (모든 변이는 Change Set · baseVersion · atomic apply)
+   │  ↳ 그 Runtime 위에 "무엇을 얹나"
+ADR-007  Data-first Approval / Governance (거버넌스·승인 계층 · 승인 대상=레코드 · 문서=산출물)
+   │  ↳ 그 Runtime을 "어떻게 탐색하나"
+ADR-008  Navigation Architecture         (Workflow-first · Lifecycle=View facet)
+```
+
+- **기층(선행 원칙)**: ADR-002 Graph First → ADR-003 Ratification → ADR-004 Schema First.
+- **결론 vs 근거**: ADR은 **결론**만 담는다. 배경 분석은 리뷰 문서에 있다 — 예: ADR-008의 근거 = [Sidebar IA Analysis](../05_Review/Sidebar-IA-Analysis-Workflow-Variant.md).
+- **신규 개발자 권장 읽기 순서**: `002 → 005 → 006 → 007 → 008`.
+
 ## ADR 인덱스
 
 | ADR | 제목 | 상태 | 날짜 | 요약 |
