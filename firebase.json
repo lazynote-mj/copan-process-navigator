@@ -1,10 +1,14 @@
 {
   "hosting": {
     "public": "dist",
+    "predeploy": [
+      "npm run build:preview"
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.local.json"
     ],
     "rewrites": [
       {

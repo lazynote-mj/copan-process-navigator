@@ -17,7 +17,7 @@ import {
   type ProcessData,
   type ProcessScope,
 } from '../types/processData'
-import { can } from '../config/appConfig'
+import { canEdit, canSave, isPreviewMode, PREVIEW_NOTICE } from '../config/deploymentConfig'
 import { mergeMissingDetailProcesses, syncDetailProcessesFromRegistry } from './activeProcessData'
 import {
   connectEdge,
@@ -180,6 +180,10 @@ export function ProcessDataProvider({
   )
 
   const mutate = useCallback((updater: (current: ProcessData) => ProcessData) => {
+    // Preview(읽기 전용)에서는 모든 편집 mutation을 진입점에서 차단한다.
+    // (탐색용 hydration은 로드 시 mergeMissingDetailProcesses로 이미 완료되어
+    //  ensureDetailProcess는 이 시점에 no-op이므로 탐색은 영향받지 않는다.)
+    if (!canEdit) return
     const current = processDataRef.current
     if (!current) return
     const next = updater(current)
@@ -194,6 +198,8 @@ export function ProcessDataProvider({
 
   /** setState functional updater는 동기 실행 — 저장 직후 canonical process를 반환 */
   const mutateAndGet = useCallback((updater: (current: ProcessData) => ProcessData): ProcessData | null => {
+    // Preview(읽기 전용) — 편집 mutation 진입점 차단 (mutate와 동일 정책).
+    if (!canEdit) return null
     const current = processDataRef.current
     if (!current) return null
     const next = updater(current)
@@ -303,8 +309,13 @@ export function ProcessDataProvider({
     data?: ProcessData
     routerReport?: RouterValidationReport
   }> => {
-    if (!can('save-process')) {
-      return { ok: false, error: '현재 Role에는 저장 권한이 없습니다.' }
+    if (!canSave) {
+      return {
+        ok: false,
+        error: isPreviewMode
+          ? PREVIEW_NOTICE
+          : '현재 Role에는 저장 권한이 없습니다.',
+      }
     }
     const current = processDataRef.current ?? processData
     if (!current) return { ok: false, error: '데이터가 없습니다.' }

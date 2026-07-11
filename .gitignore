@@ -18,6 +18,8 @@ public/process-data/state.local.*
 .env
 .env.*
 !.env.example
+# Preview 빌드 플래그는 비밀이 아니며 배포/CI에서 필요하므로 커밋한다.
+!.env.preview
 .firebase
 firebase-debug.log*
 

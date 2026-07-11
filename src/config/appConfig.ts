@@ -1,10 +1,9 @@
 import type { TemplatePackageManifest } from '../types/templatePackage'
-import {
-  NAVIGATOR_ROLES,
-  roleHasPermission,
-  type NavigatorPermission,
-  type NavigatorRole,
-} from './roleConfig'
+import { isViewerOnlyDeployment, NAVIGATOR_DEPLOYMENT_ROLE } from './deploymentConfig'
+
+// 하위호환 re-export — 배포/권한 판정의 소유권은 Permission 계층(roleConfig)과
+// Deployment 계층(deploymentConfig)에 있다. 기존 `from appConfig` import들은 그대로 둔다.
+export { can, NAVIGATOR_DEPLOYMENT_ROLE, VIEWER_ONLY_BUILD } from './deploymentConfig'
 
 export type ProcessLifecycleGroupId =
   | 'business-start'
@@ -22,30 +21,6 @@ export type ProcessLifecycleGroup = {
 }
 
 export const TEMPLATE_ID = 'copan-erp-template'
-export const VIEWER_ONLY_BUILD = import.meta.env.VITE_VIEWER_ONLY === 'true'
-
-/**
- * 배포 시점 Role 결정 (RoleBasedAccessControl.md).
- * Google 로그인 도입 전까지는 빌드 환경변수로 Role을 정한다.
- * - VITE_VIEWER_ONLY=true → viewer (Viewer-only 배포)
- * - VITE_NAVIGATOR_ROLE=viewer|process-builder|platform-owner → 해당 Role
- * - 미지정 → platform-owner (로컬 개발 기본값)
- */
-function resolveDeploymentRole(): NavigatorRole {
-  if (VIEWER_ONLY_BUILD) return 'viewer'
-  const configured = import.meta.env.VITE_NAVIGATOR_ROLE as string | undefined
-  if (configured && (NAVIGATOR_ROLES as readonly string[]).includes(configured)) {
-    return configured as NavigatorRole
-  }
-  return 'platform-owner'
-}
-
-export const NAVIGATOR_DEPLOYMENT_ROLE: NavigatorRole = resolveDeploymentRole()
-
-/** 현재 배포 Role 기준 permission 확인 — UI/Command 게이팅 진입점 */
-export function can(permission: NavigatorPermission): boolean {
-  return roleHasPermission(NAVIGATOR_DEPLOYMENT_ROLE, permission)
-}
 
 export const APP_CONFIG = {
   appName: 'Copan ERP Process Navigator',
@@ -53,7 +28,7 @@ export const APP_CONFIG = {
   templateId: TEMPLATE_ID,
   deployment: {
     role: NAVIGATOR_DEPLOYMENT_ROLE,
-    viewerOnly: !roleHasPermission(NAVIGATOR_DEPLOYMENT_ROLE, 'save-process'),
+    viewerOnly: isViewerOnlyDeployment,
   },
   templateManifest: {
     kind: 'process-template-package',

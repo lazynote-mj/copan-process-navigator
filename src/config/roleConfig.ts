@@ -1,3 +1,9 @@
+/**
+ * Permission 계층 — "각 Role이 **무엇을 할 수 있는가**"만 정의하는 순수 정책.
+ * 환경/배포/빌드에 대한 지식을 갖지 않는다. "지금 이 배포가 어떤 Role인가"는
+ * Deployment 계층([deploymentConfig.ts])이 결정하고, 둘의 합성이 capability다.
+ */
+
 export const NAVIGATOR_ROLES = [
   'platform-owner',
   'process-builder',
