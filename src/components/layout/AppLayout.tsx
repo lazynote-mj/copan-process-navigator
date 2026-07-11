@@ -7,7 +7,8 @@ import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGrou
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
 import { getLifecycleGroupForDetailProcess, resolveLifecycleGroupForDetailGroup } from '../../data/processLifecycleGroups'
 import { getCategoryDisplayName, getWorkflowDisplayName } from '../../lib/sidebar/navigationDisplay'
-import { APP_CONFIG, can } from '../../config/appConfig'
+import { APP_CONFIG } from '../../config/appConfig'
+import { can, isPreviewMode, PREVIEW_NOTICE } from '../../config/deploymentConfig'
 import { canDeleteLane, canDeleteLaneAcrossProcesses } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
 import {
@@ -1265,7 +1266,12 @@ export function AppLayout() {
   const selectedLaneId = selectedElement?.type === 'lane' ? selectedElement.id : null
 
   return (
-    <div className={`app-shell${reviewMode ? ' app-shell--review' : ''}`}>
+    <div className={`app-shell${reviewMode ? ' app-shell--review' : ''}${isPreviewMode ? ' app-shell--preview' : ''}`}>
+      {isPreviewMode ? (
+        <div className="app-preview-banner" role="status" aria-live="polite">
+          {PREVIEW_NOTICE}
+        </div>
+      ) : null}
       <Toolbar
         viewMode={viewMode}
         appMode={appMode}

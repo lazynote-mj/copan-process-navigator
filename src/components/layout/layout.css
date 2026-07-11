@@ -663,3 +663,24 @@
   line-height: 1.6;
   color: var(--text-secondary);
 }
+
+/* Preview(읽기 전용) 안내 배너 — 최소 UI 변경. Toolbar 위에 슬림하게 고정. */
+.app-preview-banner {
+  flex: 0 0 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fef3c7;
+  color: #92400e;
+  border-bottom: 1px solid #fcd34d;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* 배너(30px)만큼 본문 높이를 줄인다. Preview에서는 review 모드가 불가하므로 조합 불필요. */
+.app-shell--preview .app-body {
+  height: calc(100vh - 44px - 28px - 30px);
+}
