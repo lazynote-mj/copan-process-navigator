@@ -9,6 +9,7 @@ import {
 } from '../../data/processLifecycleGroups'
 import {
   buildCapabilitySections,
+  isMeaninglessSoleVariant,
   UNCLASSIFIED_WORKFLOW_LABEL,
   type CapabilitySection,
   type WorkflowSection,
@@ -54,12 +55,6 @@ function resolveDetailProcess(
   return detailProcesses.find((process) => process.id === detailProcessId)
 }
 
-/** Lifecycle은 ADR-008에서 트리가 아니라 metadata(badge) — 라벨만 조회한다. */
-function lifecycleLabelOf(categoryId: string | undefined): string | undefined {
-  if (!categoryId) return undefined
-  return PROCESS_LIFECYCLE_GROUPS.find((group) => group.id === categoryId)?.label
-}
-
 function buildOverviewLifecycleSections(
   groups: OverviewProcessGroup[],
   detailProcesses: Process[] | undefined,
@@ -92,14 +87,15 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
   const [cloneGroupId, setCloneGroupId] = useState<string | null>(null)
   const [cloneName, setCloneName] = useState('')
   const [actionMenuGroupId, setActionMenuGroupId] = useState<string | null>(null)
-  const [collapsedWorkflowIds, setCollapsedWorkflowIds] = useState<Set<string>>(new Set())
-  const [collapsedCapabilityKeys, setCollapsedCapabilityKeys] = useState<Set<string>>(new Set())
+  // Progressive Disclosure — 기본은 모두 접힘. 사용자가 수동으로 펼친 항목만 이 집합에 담긴다.
+  const [expandedCapabilityKeys, setExpandedCapabilityKeys] = useState<Set<string>>(new Set())
+  const [expandedWorkflowKeys, setExpandedWorkflowKeys] = useState<Set<string>>(new Set())
 
   // Navigation Display Layer — Business Capability → Workflow → Detail Process 3계층.
   // Workflow는 여전히 1차 내비게이션 정체성이고, Capability는 표시 grouping이다 (ADR-008/009).
   const capabilities = buildCapabilitySections(groups, workflows)
 
-  // 선택된 Detail Process가 속한 Capability/Workflow는 접혀 있어도 자동 펼침
+  // 선택된 Detail Process가 속한 Capability/Workflow (자동 전개 대상)
   const selectedCapability = selectedGroupId
     ? capabilities.find((cap) =>
         cap.workflowSections.some((s) => s.groups.some((g) => g.id === selectedGroupId)),
@@ -110,20 +106,32 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
     s.groups.some((g) => g.id === selectedGroupId),
   )?.key
 
-  const isCapabilityExpanded = (key: string) =>
-    key === selectedCapabilityKey || !collapsedCapabilityKeys.has(key)
+  // 현재 선택 경로만 자동 전개한다. 선택이 바뀌면 새 경로를 펼치되, 사용자가 수동으로 펼친 항목은
+  // 그대로 유지한다(집합에서 지우지 않음) — 위치를 잃지 않으면서 첫 화면 정보량을 최소화.
+  const selectedPath = `${selectedCapabilityKey ?? ''}|${selectedSectionKey ?? ''}`
+  const [prevSelectedPath, setPrevSelectedPath] = useState<string>('')
+  if (prevSelectedPath !== selectedPath) {
+    setPrevSelectedPath(selectedPath)
+    if (selectedCapabilityKey) {
+      setExpandedCapabilityKeys((current) => new Set(current).add(selectedCapabilityKey))
+    }
+    if (selectedSectionKey) {
+      setExpandedWorkflowKeys((current) => new Set(current).add(selectedSectionKey))
+    }
+  }
+
+  const isCapabilityExpanded = (key: string) => expandedCapabilityKeys.has(key)
   const toggleCapability = (key: string) =>
-    setCollapsedCapabilityKeys((current) => {
+    setExpandedCapabilityKeys((current) => {
       const next = new Set(current)
       if (next.has(key)) next.delete(key)
       else next.add(key)
       return next
     })
 
-  const isWorkflowExpanded = (sectionKey: string) =>
-    sectionKey === selectedSectionKey || !collapsedWorkflowIds.has(sectionKey)
+  const isWorkflowExpanded = (sectionKey: string) => expandedWorkflowKeys.has(sectionKey)
   const toggleWorkflow = (sectionKey: string) =>
-    setCollapsedWorkflowIds((current) => {
+    setExpandedWorkflowKeys((current) => {
       const next = new Set(current)
       if (next.has(sectionKey)) next.delete(sectionKey)
       else next.add(sectionKey)
@@ -249,13 +257,28 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
   }
 
   const renderWorkflowSection = (section: WorkflowSection) => {
-    const expanded = isWorkflowExpanded(section.key)
-    const Caret = expanded ? ChevronDown : ChevronRight
     const Icon = getWorkflowIcon(section.workflow)
-    // ADR-008 — Workflow는 단일 Variant여도 항상 이름을 노출한다(내비게이션 정체성 유지).
+    // ADR-008 — Workflow는 항상 이름을 노출한다(내비게이션 정체성 유지).
     // 표시 라벨은 짧은 workflowDisplayName을 쓰되 내부 정체성(workflowId)은 그대로다.
     const name = getWorkflowDisplayName(section.workflow) || UNCLASSIFIED_WORKFLOW_LABEL
-    const lifecycleLabel = lifecycleLabelOf(section.workflow?.category)
+
+    // 의미 없는 단일 Variant → Workflow 자체를 선택 가능한 Leaf로 렌더한다.
+    // 클릭 시 그 유일한 Detail Process를 선택(detailProcessId 불변) — 편집/복제 메뉴도 유지된다.
+    if (isMeaninglessSoleVariant(section)) {
+      return (
+        <section
+          key={section.key}
+          className="process-group-menu__section process-group-menu__section--workflow process-group-menu__section--leaf"
+        >
+          <ul className="process-group-menu__list process-group-menu__list--leaf">
+            {renderGroupItem(section.groups[0], '', name, { Icon })}
+          </ul>
+        </section>
+      )
+    }
+
+    const expanded = isWorkflowExpanded(section.key)
+    const Caret = expanded ? ChevronDown : ChevronRight
     return (
       <section
         key={section.key}
@@ -272,11 +295,6 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
           <Caret size={14} className="process-group-menu__section-caret" aria-hidden />
           <Icon size={14} className="process-group-menu__workflow-icon" aria-hidden />
           <h3 className="process-group-menu__workflow-name">{name}</h3>
-          {lifecycleLabel ? (
-            <span className="process-group-menu__section-badge" title={`분류: ${lifecycleLabel}`}>
-              {lifecycleLabel}
-            </span>
-          ) : null}
           <span
             className="process-group-menu__workflow-count"
             title={`실행 유형 ${section.groups.length}개`}

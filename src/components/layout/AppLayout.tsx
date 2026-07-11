@@ -409,10 +409,15 @@ export function AppLayout() {
       (detailGroup
         ? resolveLifecycleGroupForDetailGroup(detailGroup).id
         : getLifecycleGroupForDetailProcess(activeProcess.id).id)
+    const workflowLabel = workflow ? getWorkflowDisplayName(workflow) : (detailGroup?.name ?? activeProcess.name)
+    // Variant 라벨이 placeholder('단일'·빈 문자열·Workflow명과 동일)면 breadcrumb에 노출하지 않는다
+    // — Sidebar의 단일 Variant 억제와 일관되게, 의미 없는 '단일'이 헤더에도 뜨지 않게 한다.
+    const rawVariant = (detailGroup?.variantLabel ?? '').trim()
+    const variantLabel = !rawVariant || rawVariant === '단일' || rawVariant === workflowLabel ? '' : rawVariant
     return {
       capabilityLabel: getCategoryDisplayName(capabilityId),
-      workflowLabel: workflow ? getWorkflowDisplayName(workflow) : (detailGroup?.name ?? activeProcess.name),
-      variantLabel: detailGroup?.variantLabel ?? '',
+      workflowLabel,
+      variantLabel,
       fullTitle: detailGroup?.name ?? activeProcess.name,
     }
   }, [viewMode, activeProcess, detailProcessGroups, processData.workflows])

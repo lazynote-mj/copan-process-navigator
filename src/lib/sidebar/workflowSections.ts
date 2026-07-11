@@ -5,7 +5,7 @@ import {
   PROCESS_LIFECYCLE_GROUPS,
   resolveLifecycleGroupForDetailGroup,
 } from '../../data/processLifecycleGroups'
-import { getCategoryDisplayName } from './navigationDisplay'
+import { getCategoryDisplayName, getWorkflowDisplayName } from './navigationDisplay'
 
 /**
  * Sidebar detail 메뉴 그룹핑 — Category → Workflow → Variant 3계층.
@@ -117,6 +117,22 @@ export type WorkflowSection = {
   fallback: boolean
   /** 섹션에 속한 Detail Process(Variant)들 (정렬됨) */
   groups: DetailProcessGroup[]
+}
+
+/**
+ * 의미 없는 단일 Variant 판정(Sidebar 표시 전용) — Workflow에 Detail Process가 하나뿐이고
+ * 그 Variant 라벨이 placeholder('단일'·빈 문자열·Workflow 표시명/내부명과 동일)일 때만 true.
+ * 이 경우 Workflow 행 자체를 선택 가능한 Leaf로 렌더한다(과잉 계층 제거).
+ * 실제 의미가 있는 단일 Variant(예: 서비스판매 → 서비스)는 유지한다(false).
+ * 데이터(Workflow→Detail 관계)는 바꾸지 않는다 — 렌더 판단일 뿐이다.
+ */
+export function isMeaninglessSoleVariant(section: WorkflowSection): boolean {
+  if (section.fallback || section.groups.length !== 1) return false
+  const label = (section.groups[0].variantLabel ?? '').trim()
+  if (!label || label === '단일') return true
+  if (label === getWorkflowDisplayName(section.workflow)) return true
+  if (section.workflow && label === section.workflow.workflowName) return true
+  return false
 }
 
 export function buildWorkflowSections(

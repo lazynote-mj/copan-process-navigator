@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCapabilitySections,
+  isMeaninglessSoleVariant,
   UNCLASSIFIED_CAPABILITY_KEY,
+  type WorkflowSection,
 } from '../workflowSections'
 import type { DetailProcessGroup } from '../../../types/toBeNavigator'
 import type { Workflow } from '../../../types/workflow'
@@ -78,5 +80,37 @@ describe('buildCapabilitySections — Business Capability → Workflow → Detai
     expect(fallback.workflowSections.some((s) => s.groups.some((g) => g.id === 'g-orphan'))).toBe(true)
     // 정상 데이터에서는 fallback이 없어야 하므로 마지막에 위치
     expect(capabilities[capabilities.length - 1].key).toBe(UNCLASSIFIED_CAPABILITY_KEY)
+  })
+})
+
+describe('isMeaninglessSoleVariant — 단일 Variant 억제 규칙 (v0.9)', () => {
+  const section = (workflow: Workflow | undefined, variantLabels: (string | undefined)[], fallback = false): WorkflowSection => ({
+    key: workflow?.workflowId ?? 'fallback',
+    workflow,
+    fallback,
+    groups: variantLabels.map((variantLabel, i) => grp(`g${i}`, workflow?.workflowId ?? 'x', { variantLabel })),
+  })
+  const storage = wf('wf-storage', '저장위치 등록', 'master-data')
+  const servSales = wf('wf-service-order-to-sales', '주문 → 매출전표(서비스)', 'sales')
+
+  it('단일 placeholder 라벨은 억제한다(true)', () => {
+    expect(isMeaninglessSoleVariant(section(storage, ['단일']))).toBe(true)
+  })
+  it('빈 라벨도 억제한다(true)', () => {
+    expect(isMeaninglessSoleVariant(section(storage, [undefined]))).toBe(true)
+    expect(isMeaninglessSoleVariant(section(storage, ['  ']))).toBe(true)
+  })
+  it('라벨이 Workflow 표시명과 동일하면 억제한다(true)', () => {
+    // getWorkflowDisplayName(wf-service-order-to-sales) = '서비스판매'
+    expect(isMeaninglessSoleVariant(section(servSales, ['서비스판매']))).toBe(true)
+  })
+  it('의미 있는 단일 Variant(서비스판매 → 서비스)는 유지한다(false)', () => {
+    expect(isMeaninglessSoleVariant(section(servSales, ['서비스']))).toBe(false)
+  })
+  it('Variant가 2개 이상이면 억제하지 않는다(false)', () => {
+    expect(isMeaninglessSoleVariant(section(storage, ['단일', '단일']))).toBe(false)
+  })
+  it('fallback 섹션은 억제하지 않는다(예외 감지 유지)', () => {
+    expect(isMeaninglessSoleVariant(section(undefined, ['단일'], true))).toBe(false)
   })
 })

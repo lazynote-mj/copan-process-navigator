@@ -286,6 +286,27 @@
   color: #64748b;
 }
 
+/* 의미 없는 단일 Variant → Workflow가 곧 Leaf.
+   변형 트리 들여쓰기/가이드 없이 워크플로우 행 수준으로 렌더한다. */
+.process-group-menu__list--leaf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.process-group-menu__list--leaf .process-group-menu__select--compact {
+  padding: 6px 8px;
+}
+.process-group-menu__list--leaf .process-group-menu__title {
+  gap: 8px;
+}
+.process-group-menu__list--leaf .process-group-menu__title-text {
+  font-weight: 700;
+  color: #1e293b;
+}
+.process-group-menu__list--leaf .process-group-menu__workflow-icon {
+  color: #5b6b82;
+}
+
 .process-group-menu__section .process-group-menu__list {
   position: relative;
   margin-left: 8px;
