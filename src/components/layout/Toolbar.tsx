@@ -1,14 +1,25 @@
-import { PanelLeft, PanelRight, Plus, Save, GitBranch, Layers, ArrowLeft, BoxSelect, Copy } from 'lucide-react'
+import { Fragment } from 'react'
+import { PanelLeft, PanelRight, Plus, Save, GitBranch, Layers, BoxSelect, Copy } from 'lucide-react'
 import type { AppMode, SaveStatus } from '../../lib/editor/selectionTypes'
 import type { ViewMode } from '../../lib/editor/viewModeTypes'
 import { getShortcut } from '../../lib/editor/shortcutManager'
 import { APP_CONFIG } from '../../config/appConfig'
 import './layout.css'
 
+/**
+ * Navigation Display Layer — Header 브레드크럼 표시 모델.
+ * Sidebar와 동일한 display 라벨(navigationDisplay)을 쓴다. 원본 데이터는 바꾸지 않는다.
+ * 표시 형태: `capabilityLabel › workflowLabel › variantLabel`(variant=현재 위치, 강조).
+ */
 export type DetailHeaderInfo = {
-  processLabel: string
-  title: string
-  breadcrumbs?: string[]
+  /** Business Capability (breadcrumb 1) */
+  capabilityLabel: string
+  /** Workflow 표시 라벨 (breadcrumb 2) */
+  workflowLabel: string
+  /** Variant = 선택된 Detail Process (leaf, 강조) */
+  variantLabel: string
+  /** 툴팁/aria용 원본 전체 이름 */
+  fullTitle: string
 }
 
 type ToolbarProps = {
@@ -28,7 +39,6 @@ type ToolbarProps = {
   onAppModeChange: (mode: AppMode) => void
   onReviewModeChange: (enabled: boolean) => void
   onShowNodeNumbersChange: (enabled: boolean) => void
-  onBackToOverview: () => void
   onAddNode: () => void
   onAddEdge: () => void
   onAddLane: () => void
@@ -61,7 +71,6 @@ export function Toolbar({
   onAppModeChange,
   onReviewModeChange,
   onShowNodeNumbersChange,
-  onBackToOverview,
   onAddNode,
   onAddEdge,
   onAddLane,
@@ -76,29 +85,16 @@ export function Toolbar({
   canDelete,
   onSaveAll,
 }: ToolbarProps) {
-  // ① 사용자에게 의미 없는 내부 루트 분류(SCM Process)는 breadcrumb에서 감춘다. (표시 전용)
-  const visibleBreadcrumbs = (detailHeader?.breadcrumbs ?? []).filter(
-    (crumb) => Boolean(crumb) && crumb !== APP_CONFIG.processRootLabel,
-  )
-
-  // 표시 전용 파싱 — 원본 데이터(detailHeader.title)는 절대 바꾸지 않는다.
-  // title은 "<workflow> : <variant>" 형태이고 workflow는 "A ~ B" 흐름 표기를 쓴다.
-  // variant는 "공백 : 공백"으로 둘러싸인 콜론만 분리한다. 콜론 앞뒤 공백이 없는 제목
-  // (예: "해외 사업: 일본 시장 진출")은 variant로 오인하지 않고 원문 그대로 표시한다(안전 fallback).
-  const rawTitle = detailHeader?.title ?? ''
-  const variantMatch = rawTitle.match(/^(.*\S)\s+[:：]\s+(\S.*)$/)
-  // ② Workflow 이름을 가장 강조. 흐름 구분자 ~ 는 → 로 다듬는다.
-  const workflowTitle = (variantMatch ? variantMatch[1] : rawTitle)
-    .trim()
-    .replace(/\s*~\s*/g, ' → ')
-  // ③ Variant(보조 정보)는 title에 내장된 값 또는 processLabel에서 뽑아 가운뎃점으로 정리한다.
-  const variantSource = detailHeader?.processLabel || (variantMatch ? variantMatch[2] : '')
-  const variantLabel = variantSource
-    ? variantSource
-        .split(/[,·]/)
-        .map((part) => part.trim())
-        .filter(Boolean)
-        .join(' · ')
+  // Navigation Display Layer — breadcrumb: capability › workflow › variant(leaf, 강조).
+  // variant가 없으면 workflow를 leaf로 올린다(중복 방지).
+  const crumbs = detailHeader
+    ? (detailHeader.variantLabel
+        ? [detailHeader.capabilityLabel, detailHeader.workflowLabel]
+        : [detailHeader.capabilityLabel]
+      ).filter(Boolean)
+    : []
+  const leafLabel = detailHeader
+    ? detailHeader.variantLabel || detailHeader.workflowLabel
     : ''
 
   return (
@@ -113,35 +109,24 @@ export function Toolbar({
           <PanelLeft size={18} />
           <span>메뉴</span>
         </button>
-        {viewMode === 'detail' && (
-          <button type="button" className="toolbar__btn" onClick={onBackToOverview}>
-            <ArrowLeft size={16} />
-            <span>전체 Overview</span>
-          </button>
-        )}
       </div>
 
       <div className="toolbar__center">
         {detailHeader ? (
           <div className="toolbar__page-heading">
-            {visibleBreadcrumbs.length ? (
-              <>
-                <span className="toolbar__breadcrumb">{visibleBreadcrumbs.join(' › ')}</span>
+            {/* Business Capability › Workflow › (leaf) — Sidebar와 동일한 표시 모델 */}
+            {crumbs.map((crumb) => (
+              <Fragment key={crumb}>
+                <span className="toolbar__breadcrumb">{crumb}</span>
                 <span className="toolbar__page-sep" aria-hidden>
                   ›
                 </span>
-              </>
-            ) : null}
-            {/* ② 현재 Workflow 이름을 가장 강조한다 */}
-            <h1 className="toolbar__page-title" title={detailHeader.title}>
-              {workflowTitle}
+              </Fragment>
+            ))}
+            {/* leaf = 현재 위치(Detail Process/variant)를 강조 */}
+            <h1 className="toolbar__page-title" title={detailHeader.fullTitle}>
+              {leafLabel}
             </h1>
-            {/* ③ Variant는 보조 정보(badge) */}
-            {variantLabel ? (
-              <span className="toolbar__page-label" title={variantLabel}>
-                {variantLabel}
-              </span>
-            ) : null}
           </div>
         ) : (
           <h1 className="toolbar__title">{APP_CONFIG.appName}</h1>

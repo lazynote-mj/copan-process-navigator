@@ -8,11 +8,13 @@ import {
   getLifecycleGroupForDetailProcess,
 } from '../../data/processLifecycleGroups'
 import {
-  buildWorkflowSections,
+  buildCapabilitySections,
   UNCLASSIFIED_WORKFLOW_LABEL,
+  type CapabilitySection,
   type WorkflowSection,
 } from '../../lib/sidebar/workflowSections'
 import { getWorkflowIcon } from '../../lib/sidebar/workflowIcon'
+import { getWorkflowDisplayName } from '../../lib/sidebar/navigationDisplay'
 import './process-group-menu.css'
 
 type OverviewMenuProps = {
@@ -91,14 +93,32 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
   const [cloneName, setCloneName] = useState('')
   const [actionMenuGroupId, setActionMenuGroupId] = useState<string | null>(null)
   const [collapsedWorkflowIds, setCollapsedWorkflowIds] = useState<Set<string>>(new Set())
+  const [collapsedCapabilityKeys, setCollapsedCapabilityKeys] = useState<Set<string>>(new Set())
 
-  // ADR-008 — Workflow를 최상위 섹션으로 삼는다 (Lifecycle은 badge/metadata).
-  const sections = buildWorkflowSections(groups, workflows)
+  // Navigation Display Layer — Business Capability → Workflow → Detail Process 3계층.
+  // Workflow는 여전히 1차 내비게이션 정체성이고, Capability는 표시 grouping이다 (ADR-008/009).
+  const capabilities = buildCapabilitySections(groups, workflows)
 
-  // 선택된 Detail Process가 속한 Workflow 섹션은 접혀 있어도 자동 펼침
-  const selectedSectionKey = selectedGroupId
-    ? sections.find((section) => section.groups.some((g) => g.id === selectedGroupId))?.key
+  // 선택된 Detail Process가 속한 Capability/Workflow는 접혀 있어도 자동 펼침
+  const selectedCapability = selectedGroupId
+    ? capabilities.find((cap) =>
+        cap.workflowSections.some((s) => s.groups.some((g) => g.id === selectedGroupId)),
+      )
     : undefined
+  const selectedCapabilityKey = selectedCapability?.key
+  const selectedSectionKey = selectedCapability?.workflowSections.find((s) =>
+    s.groups.some((g) => g.id === selectedGroupId),
+  )?.key
+
+  const isCapabilityExpanded = (key: string) =>
+    key === selectedCapabilityKey || !collapsedCapabilityKeys.has(key)
+  const toggleCapability = (key: string) =>
+    setCollapsedCapabilityKeys((current) => {
+      const next = new Set(current)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
 
   const isWorkflowExpanded = (sectionKey: string) =>
     sectionKey === selectedSectionKey || !collapsedWorkflowIds.has(sectionKey)
@@ -233,7 +253,8 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
     const Caret = expanded ? ChevronDown : ChevronRight
     const Icon = getWorkflowIcon(section.workflow)
     // ADR-008 — Workflow는 단일 Variant여도 항상 이름을 노출한다(내비게이션 정체성 유지).
-    const name = section.workflow?.workflowName ?? UNCLASSIFIED_WORKFLOW_LABEL
+    // 표시 라벨은 짧은 workflowDisplayName을 쓰되 내부 정체성(workflowId)은 그대로다.
+    const name = getWorkflowDisplayName(section.workflow) || UNCLASSIFIED_WORKFLOW_LABEL
     const lifecycleLabel = lifecycleLabelOf(section.workflow?.category)
     return (
       <section
@@ -275,6 +296,40 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
     )
   }
 
+  const renderCapabilitySection = (capability: CapabilitySection) => {
+    const expanded = isCapabilityExpanded(capability.key)
+    const Caret = expanded ? ChevronDown : ChevronRight
+    return (
+      <section
+        key={capability.key}
+        className={`process-group-menu__capability ${
+          capability.fallback ? 'process-group-menu__capability--fallback' : ''
+        }`}
+      >
+        <button
+          type="button"
+          className="process-group-menu__capability-header"
+          aria-expanded={expanded}
+          onClick={() => toggleCapability(capability.key)}
+        >
+          <Caret size={14} className="process-group-menu__section-caret" aria-hidden />
+          <h3 className="process-group-menu__capability-name">{capability.displayName}</h3>
+          <span
+            className="process-group-menu__capability-count"
+            title={`실행 프로세스 ${capability.totalGroups}개`}
+          >
+            {capability.totalGroups}
+          </span>
+        </button>
+        {expanded ? (
+          <div className="process-group-menu__capability-body">
+            {capability.workflowSections.map(renderWorkflowSection)}
+          </div>
+        ) : null}
+      </section>
+    )
+  }
+
   return (
     <nav className="process-group-menu process-group-menu--explorer">
       {cloneNotice ? <p className="process-group-menu__notice">{cloneNotice}</p> : null}
@@ -286,10 +341,10 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
         </div>
       ) : null}
       <div className="process-group-menu__sections">
-        {sections.length === 0 ? (
+        {capabilities.length === 0 ? (
           <p className="process-group-menu__empty">표시할 Workflow가 없습니다.</p>
         ) : (
-          sections.map(renderWorkflowSection)
+          capabilities.map(renderCapabilitySection)
         )}
       </div>
     </nav>
