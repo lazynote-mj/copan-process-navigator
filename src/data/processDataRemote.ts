@@ -129,6 +129,16 @@ export async function saveRemoteProcessData(data: ProcessData): Promise<ProcessD
     throw new Error(message || '서버 저장에 실패했습니다. dev 서버(npm run dev)에서 실행 중인지 확인하세요.')
   }
 
+  // 정적 호스팅(Firebase 등)은 `POST /api/process-data`를 SPA fallback(index.html, 200)으로
+  // 되돌린다. 이 "가짜 성공"을 진짜 성공으로 오인하면 이후 재로드가 시드로 되돌아가 편집이
+  // 유실된다. 서버가 발급하는 JSON 확인 응답이 아니면 저장 실패로 처리한다(편집은 그대로 보존).
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('json')) {
+    throw new Error(
+      '이 환경에서는 저장할 수 없습니다. (읽기 전용 호스팅이거나 저장 서버가 없습니다)',
+    )
+  }
+
   // 저장 성공 → 서버가 발급한 새 토큰으로 교체한다.
   const result = (await response.json().catch(() => ({}))) as { revision?: number }
   if (typeof result.revision === 'number') {
