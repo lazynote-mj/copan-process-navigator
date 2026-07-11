@@ -67,7 +67,7 @@ ADR-008  Navigation Architecture         (Workflow-first · Lifecycle=View facet
 | [ADR-007](ADR-007-Data-first-Approval-and-Runtime-Governance-Layer.md) | Data-first Approval and Runtime Governance Layer | Proposed | 2026-07-09 | Runtime 위에 거버넌스·승인 계층을 additive로 제안. 승인 대상=구조화 레코드(Data-first), 문서=승인 산출물. draft 타입(Governance/Approval/Document/RuntimeState) + WP2.1~2.5 |
 | [ADR-008](ADR-008-Navigation-Architecture-Workflow-First.md) | Navigation Architecture (Workflow-first Navigation) | Proposed | 2026-07-10 | Navigator 탐색 기준은 Lifecycle이 아니라 Workflow. Navigation(Workflow→Detail Process)/View(Lifecycle 등)/Execution/Governance/Persistence 계층 분리. Lifecycle을 facet으로 강등. Phase 1~3 |
 | [ADR-009](ADR-009-Workflow-Assignment-Integrity.md) | Builder Integrity — Workflow Assignment | Accepted | 2026-07-10 | Builder 데이터 생성 규칙: 신규 Detail Process 그룹은 Workflow 필수 소속(컨텍스트 자동승계 + 컨텍스트 없으면 Property Panel Workflow picker 강제). "미분류 Workflow" fallback을 예외 데이터 감지기로 고정. Validation→발견에서 Builder→생성 방지로 전환. ADR-008 §5·§6 후속 |
-| [ADR-010](ADR-010-Navigator-Menu-UX-Principles.md) | Navigator 메뉴 트리 UX 설계 원칙 | Proposed | 2026-07-11 | 메뉴 트리의 UI 표현·상호작용 규범(P1–P10): 데이터/표현 분리, Workflow 중심, Single-Variant 숨김, Progressive Disclosure, 조건부 Expand, 클릭 최소화. 데이터 모델 무변경. main `250746b` 준수 감사 포함(G1 Single-Variant 부분적용 등 4개 gap). §6 Single-Variant 정책 비준 대기 |
+| [ADR-010](ADR-010-Navigator-Menu-UX-Principles.md) | Navigator 메뉴 트리 UX 설계 원칙 | Accepted | 2026-07-11 | 메뉴 트리의 UI 표현·상호작용 규범(P1–P10): 데이터/표현 분리, Workflow 중심, Single-Variant 숨김(Option A 비준: 단일 Variant는 라벨 무관 Leaf 평탄화), Progressive Disclosure, 조건부 Expand, 클릭 최소화. 데이터 모델 무변경. G1·G2·G3 구현 해소, G4 성능 백로그 |
 
 ## 작성 규약
 

@@ -5,7 +5,7 @@ import {
   PROCESS_LIFECYCLE_GROUPS,
   resolveLifecycleGroupForDetailGroup,
 } from '../../data/processLifecycleGroups'
-import { getCategoryDisplayName, getWorkflowDisplayName } from './navigationDisplay'
+import { getCategoryDisplayName } from './navigationDisplay'
 
 /**
  * Sidebar detail 메뉴 그룹핑 — Category → Workflow → Variant 3계층.
@@ -120,19 +120,17 @@ export type WorkflowSection = {
 }
 
 /**
- * 의미 없는 단일 Variant 판정(Sidebar 표시 전용) — Workflow에 Detail Process가 하나뿐이고
- * 그 Variant 라벨이 placeholder('단일'·빈 문자열·Workflow 표시명/내부명과 동일)일 때만 true.
- * 이 경우 Workflow 행 자체를 선택 가능한 Leaf로 렌더한다(과잉 계층 제거).
- * 실제 의미가 있는 단일 Variant(예: 서비스판매 → 서비스)는 유지한다(false).
- * 데이터(Workflow→Detail 관계)는 바꾸지 않는다 — 렌더 판단일 뿐이다.
+ * 단일 Variant 판정(Navigation Tree 표시 전용, ADR-010 Option A) —
+ * Workflow에 Detail Process(Variant)가 **하나뿐이면 라벨의 의미와 무관하게** true.
+ * 이 경우 Variant 행을 숨기고 Workflow 행 자체를 선택 가능한 Leaf로 렌더한다
+ * (과잉 계층 제거·클릭 최소화). 선택 타깃은 그 유일한 Detail Process(`detailProcessId` 불변)다.
+ *
+ * Variant 데이터·의미는 Runtime/Builder/검색/상세 헤더 컨텍스트에서 그대로 보존된다 —
+ * 이는 Tree 렌더 판단일 뿐 데이터(Workflow→Detail 관계)를 바꾸지 않는다.
+ * fallback("미분류") 섹션은 예외 감지기이므로 평탄화하지 않는다(false).
  */
-export function isMeaninglessSoleVariant(section: WorkflowSection): boolean {
-  if (section.fallback || section.groups.length !== 1) return false
-  const label = (section.groups[0].variantLabel ?? '').trim()
-  if (!label || label === '단일') return true
-  if (label === getWorkflowDisplayName(section.workflow)) return true
-  if (section.workflow && label === section.workflow.workflowName) return true
-  return false
+export function isSoleVariant(section: WorkflowSection): boolean {
+  return !section.fallback && section.groups.length === 1
 }
 
 export function buildWorkflowSections(
