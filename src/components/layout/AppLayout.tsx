@@ -28,6 +28,7 @@ import {
   cloneDetailProcessGroup,
   cloneZoneData,
   refreshSelectedElement,
+  resolveCreationWorkflowId,
 } from '../../lib/editor/selectedElement'
 import {
   isNodeInProcessGroup,
@@ -899,7 +900,13 @@ export function AppLayout() {
       ...allDetailProcesses.filter((process) => process.id === detailProcessId),
       ...allDetailProcesses.filter((process) => process.id !== detailProcessId),
     ]
-    setSelectedElement(buildNewDetailProcessGroupSelection(detailProcessGroups, currentFirst))
+    // ADR-009 Builder Integrity — 현재 열린 Detail Process가 속한 Workflow를 기본값으로 승계해
+    // 신규 그룹이 "미분류 Workflow" fallback으로 떨어지지 않게 한다.
+    // 컨텍스트가 없으면 undefined → 자동 선택 없이 Property Panel에서 필수 선택.
+    const activeWorkflowId = resolveCreationWorkflowId(detailProcessGroups, detailProcessId)
+    setSelectedElement(
+      buildNewDetailProcessGroupSelection(detailProcessGroups, currentFirst, activeWorkflowId),
+    )
     setIsRightOpen(true)
   }, [detailProcessGroups, allDetailProcesses, detailProcessId, viewerOnly])
 
@@ -1384,6 +1391,7 @@ export function AppLayout() {
                   onSaveZone={handleSaveZone}
                   onSaveProcessGroup={handleSaveProcessGroup}
                   onSaveDetailProcessGroup={handleSaveDetailProcessGroup}
+                  workflows={processData.workflows}
                   masterLanes={processData.commonMasters.lanes}
                   onSaveProcessLaneDisplay={handleSaveProcessLaneDisplay}
                   onProcessGroupDraftChange={handleProcessGroupDraftChange}

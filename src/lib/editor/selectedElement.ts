@@ -166,9 +166,25 @@ export function buildNewProcessGroupSelection(processGroups: OverviewProcessGrou
   return { type: 'new-process-group', id: data.id, data }
 }
 
+/**
+ * ADR-009 Builder Integrity — 신규 Detail Process 그룹 생성 시 상속할 Workflow를 결정한다.
+ * 현재 열린 Detail Process가 속한 그룹의 workflowId를 반환한다.
+ * 컨텍스트가 없거나(매칭 그룹 없음) 그 그룹이 미분류(workflowId 결측)이면 undefined —
+ * 이때는 절대 자동 선택하지 않고 Property Panel에서 필수 선택하게 한다.
+ */
+export function resolveCreationWorkflowId(
+  detailProcessGroups: DetailProcessGroup[],
+  activeDetailProcessId: string | undefined,
+): string | undefined {
+  if (!activeDetailProcessId) return undefined
+  return detailProcessGroups.find((group) => group.detailProcessId === activeDetailProcessId)
+    ?.workflowId
+}
+
 export function buildNewDetailProcessGroupSelection(
   detailProcessGroups: DetailProcessGroup[] = [],
   detailProcesses: Process[] = [],
+  workflowId?: string,
 ): SelectedElement {
   const nextIndex = detailProcessGroups.length + 1
   const process = detailProcesses[0]
@@ -185,6 +201,9 @@ export function buildNewDetailProcessGroupSelection(
     name: process?.name ?? `신규 프로세스 그룹 ${nextIndex}`,
     description: process?.description ?? '',
     detailProcessId: process?.id ?? '',
+    // ADR-009 Builder Integrity — 생성 컨텍스트(현재 열린 Detail Process)의 Workflow를
+    // 미리 채워 "미분류 Workflow" fallback으로 떨어지지 않게 한다. 없으면 Property Panel에서 필수 선택.
+    ...(workflowId ? { workflowId } : {}),
   }
   return { type: 'new-detail-process-group', id: data.id, data }
 }

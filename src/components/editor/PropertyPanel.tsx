@@ -41,6 +41,7 @@ import {
 } from '../../lib/editor/processEditor'
 import type { AppMode, SelectedElement } from '../../lib/editor/selectionTypes'
 import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
+import type { Workflow } from '../../types/workflow'
 import { PROCESS_LIFECYCLE_GROUPS } from '../../data/processLifecycleGroups'
 import { panelEventShieldProps } from '../../lib/ui/panelEventShield'
 import {
@@ -241,6 +242,8 @@ type PropertyPanelProps = {
   onSaveZone: (zone: ProcessZone, isNew: boolean) => void
   onSaveProcessGroup?: (group: OverviewProcessGroup) => void
   onSaveDetailProcessGroup?: (group: DetailProcessGroup) => void
+  /** Workflow 정의 목록 — Detail Process 그룹의 소속 Workflow 선택 UI용 (ADR-008) */
+  workflows?: Workflow[]
   /** Lane Master 전체 목록 — 프로세스별 표시 레인 선택 UI용 */
   masterLanes?: Lane[]
   onSaveProcessLaneDisplay?: (
@@ -1115,6 +1118,7 @@ function DetailProcessGroupForm({
   group,
   detailProcesses,
   overviewProcessGroups,
+  workflows,
   masterLanes,
   processLaneIds,
   autoHideEmptyLanes,
@@ -1127,6 +1131,7 @@ function DetailProcessGroupForm({
   group: DetailProcessGroup
   detailProcesses: Process[]
   overviewProcessGroups: OverviewProcessGroup[]
+  workflows: Workflow[]
   masterLanes: Lane[]
   /** null = 전체 레인 표시 */
   processLaneIds: string[] | null
@@ -1167,6 +1172,35 @@ function DetailProcessGroupForm({
           disabled={disabled}
           onChange={(e) => onChange({ ...group, description: e.target.value })}
         />
+      </div>
+      <div className="property-panel__field">
+        <label className="property-panel__label">소속 Workflow</label>
+        <select
+          className="property-panel__select"
+          value={group.workflowId ?? ''}
+          disabled={disabled}
+          onChange={(e) => {
+            const value = e.target.value
+            if (!value) {
+              const { workflowId: _removed, ...rest } = group
+              onChange(rest)
+              return
+            }
+            onChange({ ...group, workflowId: value })
+          }}
+        >
+          <option value="">선택…</option>
+          {workflows.map((workflow) => (
+            <option key={workflow.workflowId} value={workflow.workflowId}>
+              {workflow.workflowName}
+            </option>
+          ))}
+        </select>
+        <p className="property-panel__hint">
+          {workflows.length === 0
+            ? '정의된 Workflow가 없습니다. Workflow가 없으면 이 프로세스는 "미분류 Workflow"로 표시됩니다.'
+            : 'Navigator 탐색의 1차 기준입니다(ADR-008). 신규 프로세스는 반드시 하나의 Workflow에 소속되어야 하며, 비우면 "미분류 Workflow" 안전망으로 표시됩니다.'}
+        </p>
       </div>
       <div className="property-panel__field">
         <label className="property-panel__label">Lifecycle Group</label>
@@ -1864,6 +1898,14 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
         setError('연결 상세 프로세스를 선택하세요.')
         return false
       }
+      // ADR-008 Workflow Assignment Integrity — 신규 생성은 반드시 Workflow에 소속되어야 한다
+      // (fallback "미분류 Workflow"는 예외 데이터 감지용). 정의된 Workflow가 없으면 예외적으로 허용.
+      const isNewGroup = selectedElement.type === 'new-detail-process-group'
+      const hasWorkflows = (props.workflows?.length ?? 0) > 0
+      if (isNewGroup && hasWorkflows && !group.workflowId) {
+        setError('소속 Workflow를 선택하세요.')
+        return false
+      }
       setError(null)
       onSaveDetailProcessGroup?.({ ...group, name })
       if (onSaveProcessLaneDisplay && group.detailProcessId) {
@@ -1874,7 +1916,14 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
       }
       return true
     },
-    [onSaveDetailProcessGroup, onSaveProcessLaneDisplay, draftProcessLaneIds, draftAutoHideEmptyLanes],
+    [
+      onSaveDetailProcessGroup,
+      onSaveProcessLaneDisplay,
+      draftProcessLaneIds,
+      draftAutoHideEmptyLanes,
+      selectedElement.type,
+      props.workflows,
+    ],
   )
 
   const handleProcessGroupChange = useCallback(
@@ -2150,6 +2199,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
           group={draftDetailProcessGroup}
           detailProcesses={detailProcesses ?? []}
           overviewProcessGroups={props.overviewProcessGroups ?? []}
+          workflows={props.workflows ?? []}
           masterLanes={masterLanes ?? []}
           processLaneIds={draftProcessLaneIds}
           autoHideEmptyLanes={draftAutoHideEmptyLanes}
