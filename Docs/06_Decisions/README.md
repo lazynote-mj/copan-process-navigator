@@ -66,6 +66,7 @@ ADR-008  Navigation Architecture         (Workflow-first · Lifecycle=View facet
 | [ADR-006](ADR-006-Change-Set-Architecture.md) | Change Set Architecture | Accepted | 2026-07-09 | Runtime 변경은 Change Set(명령 집합)으로만. baseVersion·atomic apply·version++1회·validation·conflict·undo/redo·dry-run·AI proposal/user confirm 분리 |
 | [ADR-007](ADR-007-Data-first-Approval-and-Runtime-Governance-Layer.md) | Data-first Approval and Runtime Governance Layer | Proposed | 2026-07-09 | Runtime 위에 거버넌스·승인 계층을 additive로 제안. 승인 대상=구조화 레코드(Data-first), 문서=승인 산출물. draft 타입(Governance/Approval/Document/RuntimeState) + WP2.1~2.5 |
 | [ADR-008](ADR-008-Navigation-Architecture-Workflow-First.md) | Navigation Architecture (Workflow-first Navigation) | Proposed | 2026-07-10 | Navigator 탐색 기준은 Lifecycle이 아니라 Workflow. Navigation(Workflow→Detail Process)/View(Lifecycle 등)/Execution/Governance/Persistence 계층 분리. Lifecycle을 facet으로 강등. Phase 1~3 |
+| [ADR-009](ADR-009-Workflow-Assignment-Integrity.md) | Builder Integrity — Workflow Assignment | Accepted | 2026-07-10 | Builder 데이터 생성 규칙: 신규 Detail Process 그룹은 Workflow 필수 소속(컨텍스트 자동승계 + 컨텍스트 없으면 Property Panel Workflow picker 강제). "미분류 Workflow" fallback을 예외 데이터 감지기로 고정. Validation→발견에서 Builder→생성 방지로 전환. ADR-008 §5·§6 후속 |
 
 ## 작성 규약
 
