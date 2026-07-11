@@ -278,6 +278,18 @@
   background: #eef2f7;
 }
 
+/* G3 (ADR-010 P7) — 하위 Variant가 선택된 Workflow 헤더 Highlight */
+.process-group-menu__section--selected > .process-group-menu__section-header {
+  background: #e0edff;
+  box-shadow: inset 2px 0 0 #2563eb;
+}
+.process-group-menu__section--selected > .process-group-menu__section-header:hover {
+  background: #d3e4ff;
+}
+.process-group-menu__section--selected > .process-group-menu__section-header h3 {
+  color: #1d4ed8;
+}
+
 /* "미분류" fallback Capability — 예외 감지용이므로 약하게 */
 .process-group-menu__capability--fallback .process-group-menu__capability-header {
   background: #f1f5f9;

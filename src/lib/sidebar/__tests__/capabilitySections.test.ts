@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCapabilitySections,
-  isMeaninglessSoleVariant,
+  isSoleVariant,
   UNCLASSIFIED_CAPABILITY_KEY,
   type WorkflowSection,
 } from '../workflowSections'
@@ -83,7 +83,7 @@ describe('buildCapabilitySections — Business Capability → Workflow → Detai
   })
 })
 
-describe('isMeaninglessSoleVariant — 단일 Variant 억제 규칙 (v0.9)', () => {
+describe('isSoleVariant — 단일 Variant 평탄화 규칙 (ADR-010 Option A)', () => {
   const section = (workflow: Workflow | undefined, variantLabels: (string | undefined)[], fallback = false): WorkflowSection => ({
     key: workflow?.workflowId ?? 'fallback',
     workflow,
@@ -93,24 +93,24 @@ describe('isMeaninglessSoleVariant — 단일 Variant 억제 규칙 (v0.9)', () 
   const storage = wf('wf-storage', '저장위치 등록', 'master-data')
   const servSales = wf('wf-service-order-to-sales', '주문 → 매출전표(서비스)', 'sales')
 
-  it('단일 placeholder 라벨은 억제한다(true)', () => {
-    expect(isMeaninglessSoleVariant(section(storage, ['단일']))).toBe(true)
+  it('단일 placeholder 라벨은 평탄화한다(true)', () => {
+    expect(isSoleVariant(section(storage, ['단일']))).toBe(true)
   })
-  it('빈 라벨도 억제한다(true)', () => {
-    expect(isMeaninglessSoleVariant(section(storage, [undefined]))).toBe(true)
-    expect(isMeaninglessSoleVariant(section(storage, ['  ']))).toBe(true)
+  it('빈 라벨도 평탄화한다(true)', () => {
+    expect(isSoleVariant(section(storage, [undefined]))).toBe(true)
+    expect(isSoleVariant(section(storage, ['  ']))).toBe(true)
   })
-  it('라벨이 Workflow 표시명과 동일하면 억제한다(true)', () => {
-    // getWorkflowDisplayName(wf-service-order-to-sales) = '서비스판매'
-    expect(isMeaninglessSoleVariant(section(servSales, ['서비스판매']))).toBe(true)
+  it('라벨이 Workflow 표시명과 동일한 단일 Variant도 평탄화한다(true)', () => {
+    expect(isSoleVariant(section(servSales, ['서비스판매']))).toBe(true)
   })
-  it('의미 있는 단일 Variant(서비스판매 → 서비스)는 유지한다(false)', () => {
-    expect(isMeaninglessSoleVariant(section(servSales, ['서비스']))).toBe(false)
+  it('의미 있는 단일 Variant(서비스판매 → 서비스)도 라벨과 무관하게 평탄화한다(true)', () => {
+    // Option A: Variant가 하나면 라벨 의미와 무관하게 Leaf. 데이터/의미는 상세 컨텍스트에서 보존.
+    expect(isSoleVariant(section(servSales, ['서비스']))).toBe(true)
   })
-  it('Variant가 2개 이상이면 억제하지 않는다(false)', () => {
-    expect(isMeaninglessSoleVariant(section(storage, ['단일', '단일']))).toBe(false)
+  it('Variant가 2개 이상이면 평탄화하지 않는다(false)', () => {
+    expect(isSoleVariant(section(storage, ['단일', '단일']))).toBe(false)
   })
-  it('fallback 섹션은 억제하지 않는다(예외 감지 유지)', () => {
-    expect(isMeaninglessSoleVariant(section(undefined, ['단일'], true))).toBe(false)
+  it('fallback 섹션은 평탄화하지 않는다(예외 감지 유지)', () => {
+    expect(isSoleVariant(section(undefined, ['단일'], true))).toBe(false)
   })
 })

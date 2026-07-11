@@ -9,7 +9,7 @@ import {
 } from '../../data/processLifecycleGroups'
 import {
   buildCapabilitySections,
-  isMeaninglessSoleVariant,
+  isSoleVariant,
   UNCLASSIFIED_WORKFLOW_LABEL,
   type CapabilitySection,
   type WorkflowSection,
@@ -262,9 +262,9 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
     // 표시 라벨은 짧은 workflowDisplayName을 쓰되 내부 정체성(workflowId)은 그대로다.
     const name = getWorkflowDisplayName(section.workflow) || UNCLASSIFIED_WORKFLOW_LABEL
 
-    // 의미 없는 단일 Variant → Workflow 자체를 선택 가능한 Leaf로 렌더한다.
+    // 단일 Variant(ADR-010 Option A) → Workflow 자체를 선택 가능한 Leaf로 평탄화한다.
     // 클릭 시 그 유일한 Detail Process를 선택(detailProcessId 불변) — 편집/복제 메뉴도 유지된다.
-    if (isMeaninglessSoleVariant(section)) {
+    if (isSoleVariant(section)) {
       return (
         <section
           key={section.key}
@@ -279,17 +279,20 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
 
     const expanded = isWorkflowExpanded(section.key)
     const Caret = expanded ? ChevronDown : ChevronRight
+    // G3 (ADR-010 P7) — 하위 Variant가 선택된 Workflow는 헤더도 Highlight해 선택 경로를 드러낸다.
+    const hasSelectedChild = section.groups.some((group) => group.id === selectedGroupId)
     return (
       <section
         key={section.key}
         className={`process-group-menu__section process-group-menu__section--workflow ${
           section.fallback ? 'process-group-menu__section--fallback' : ''
-        }`}
+        } ${hasSelectedChild ? 'process-group-menu__section--selected' : ''}`}
       >
         <button
           type="button"
           className="process-group-menu__section-header"
           aria-expanded={expanded}
+          aria-current={hasSelectedChild ? 'true' : undefined}
           onClick={() => toggleWorkflow(section.key)}
         >
           <Caret size={14} className="process-group-menu__section-caret" aria-hidden />
