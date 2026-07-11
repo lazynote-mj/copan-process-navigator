@@ -6,6 +6,7 @@ import { getActiveProcessData, resolveDetailProcessesForMenu } from '../../data/
 import { getDetailProcessById, getDetailProcessGroupById, getOverviewProcessGroupById, toBeNavigator } from '../../data/toBeNavigatorRegistry'
 import { readUiPreferences, writeUiPreferences } from '../../data/uiPreferences'
 import { getLifecycleGroupForDetailProcess, resolveLifecycleGroupForDetailGroup } from '../../data/processLifecycleGroups'
+import { getCategoryDisplayName, getWorkflowDisplayName } from '../../lib/sidebar/navigationDisplay'
 import { APP_CONFIG, can } from '../../config/appConfig'
 import { canDeleteLane, canDeleteLaneAcrossProcesses } from '../../lib/editor/processEditor'
 import { panelEventShieldProps, usePanelNativeEventShield } from '../../lib/ui/panelEventShield'
@@ -398,15 +399,28 @@ export function AppLayout() {
   const detailHeader = useMemo(() => {
     if (viewMode === 'overview') return null
     const detailGroup = detailProcessGroups.find((group) => group.detailProcessId === activeProcess.id)
-    const lifecycleGroup = detailGroup
-      ? resolveLifecycleGroupForDetailGroup(detailGroup)
-      : getLifecycleGroupForDetailProcess(activeProcess.id)
+    const workflow = detailGroup?.workflowId
+      ? processData.workflows?.find((wf) => wf.workflowId === detailGroup.workflowId)
+      : undefined
+    // Navigation Display Layer — Business Capability › Workflow › Detail Process(variant).
+    // Capability는 workflow.category 우선, 없으면 detail group의 lifecycle로 폴백(표시 전용).
+    const capabilityId =
+      workflow?.category ??
+      (detailGroup
+        ? resolveLifecycleGroupForDetailGroup(detailGroup).id
+        : getLifecycleGroupForDetailProcess(activeProcess.id).id)
+    const workflowLabel = workflow ? getWorkflowDisplayName(workflow) : (detailGroup?.name ?? activeProcess.name)
+    // Variant 라벨이 placeholder('단일'·빈 문자열·Workflow명과 동일)면 breadcrumb에 노출하지 않는다
+    // — Sidebar의 단일 Variant 억제와 일관되게, 의미 없는 '단일'이 헤더에도 뜨지 않게 한다.
+    const rawVariant = (detailGroup?.variantLabel ?? '').trim()
+    const variantLabel = !rawVariant || rawVariant === '단일' || rawVariant === workflowLabel ? '' : rawVariant
     return {
-      breadcrumbs: [APP_CONFIG.processRootLabel, lifecycleGroup.label],
-      processLabel: '',
-      title: detailGroup?.name ?? activeProcess.name,
+      capabilityLabel: getCategoryDisplayName(capabilityId),
+      workflowLabel,
+      variantLabel,
+      fullTitle: detailGroup?.name ?? activeProcess.name,
     }
-  }, [viewMode, activeProcess, detailProcessGroups])
+  }, [viewMode, activeProcess, detailProcessGroups, processData.workflows])
 
   useEffect(() => {
     setSelectedElement(null)
@@ -1229,10 +1243,6 @@ export function AppLayout() {
     }
   }
 
-  const handleBackToOverview = () => {
-    resetToFullOverview()
-  }
-
   const handleSelectEdgeFromPanel = useCallback(
     (edgeId: string) => {
       const el = buildSelectedEdge(activeProcess, edgeId)
@@ -1273,7 +1283,6 @@ export function AppLayout() {
         onAppModeChange={handleAppModeChange}
         onReviewModeChange={(enabled) => setReviewMode(enabled && canReview)}
         onShowNodeNumbersChange={setShowNodeNumbers}
-        onBackToOverview={handleBackToOverview}
         onAddNode={() => handleStartNew('new-node', selectedLaneId)}
         onAddEdge={() => handleStartNew('new-edge')}
         onAddLane={() => handleStartNew('new-lane')}

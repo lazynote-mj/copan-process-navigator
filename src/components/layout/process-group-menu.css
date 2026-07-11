@@ -210,6 +210,103 @@
   color: #64748b;
 }
 
+/* Business Capability = 최상위 Folder (Navigation Display Layer v0.9)
+   Capability → Workflow → Detail Process 3계층. Capability가 folder 강조를 가져가고,
+   그 아래 Workflow 헤더는 2번째 계층으로 톤을 낮춘다. */
+.process-group-menu__capability {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.process-group-menu__capability-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #e8edf4;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.process-group-menu__capability-header:hover {
+  background: #dde5ef;
+}
+
+.process-group-menu__capability-name {
+  margin: 0;
+  flex: 1 1 auto;
+  color: #0f172a;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.process-group-menu__capability-count {
+  flex: 0 0 auto;
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #fff;
+  color: #7b8794;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Capability 내부 = Workflow 섹션들 (2번째 계층: 살짝 들여쓰기 + 가이드 라인) */
+.process-group-menu__capability-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 2px;
+  padding-left: 10px;
+  border-left: 1px solid #e2e8f0;
+  margin-left: 8px;
+}
+
+/* Capability 하위 Workflow 헤더는 folder 강조를 낮춘다(Capability가 이미 folder). */
+.process-group-menu__capability-body .process-group-menu__section-header {
+  background: transparent;
+  padding: 6px 8px;
+}
+.process-group-menu__capability-body .process-group-menu__section-header:hover {
+  background: #eef2f7;
+}
+
+/* "미분류" fallback Capability — 예외 감지용이므로 약하게 */
+.process-group-menu__capability--fallback .process-group-menu__capability-header {
+  background: #f1f5f9;
+}
+.process-group-menu__capability--fallback .process-group-menu__capability-name {
+  color: #64748b;
+}
+
+/* 의미 없는 단일 Variant → Workflow가 곧 Leaf.
+   변형 트리 들여쓰기/가이드 없이 워크플로우 행 수준으로 렌더한다. */
+.process-group-menu__list--leaf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.process-group-menu__list--leaf .process-group-menu__select--compact {
+  padding: 6px 8px;
+}
+.process-group-menu__list--leaf .process-group-menu__title {
+  gap: 8px;
+}
+.process-group-menu__list--leaf .process-group-menu__title-text {
+  font-weight: 700;
+  color: #1e293b;
+}
+.process-group-menu__list--leaf .process-group-menu__workflow-icon {
+  color: #5b6b82;
+}
+
 .process-group-menu__section .process-group-menu__list {
   position: relative;
   margin-left: 8px;

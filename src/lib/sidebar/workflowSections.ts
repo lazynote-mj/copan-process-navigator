@@ -1,10 +1,11 @@
 import type { DetailProcessGroup } from '../../types/toBeNavigator'
 import type { Workflow } from '../../types/workflow'
-import type { ProcessLifecycleGroup } from '../../config/appConfig'
+import type { ProcessLifecycleGroup, ProcessLifecycleGroupId } from '../../config/appConfig'
 import {
   PROCESS_LIFECYCLE_GROUPS,
   resolveLifecycleGroupForDetailGroup,
 } from '../../data/processLifecycleGroups'
+import { getCategoryDisplayName, getWorkflowDisplayName } from './navigationDisplay'
 
 /**
  * Sidebar detail 메뉴 그룹핑 — Category → Workflow → Variant 3계층.
@@ -118,6 +119,22 @@ export type WorkflowSection = {
   groups: DetailProcessGroup[]
 }
 
+/**
+ * 의미 없는 단일 Variant 판정(Sidebar 표시 전용) — Workflow에 Detail Process가 하나뿐이고
+ * 그 Variant 라벨이 placeholder('단일'·빈 문자열·Workflow 표시명/내부명과 동일)일 때만 true.
+ * 이 경우 Workflow 행 자체를 선택 가능한 Leaf로 렌더한다(과잉 계층 제거).
+ * 실제 의미가 있는 단일 Variant(예: 서비스판매 → 서비스)는 유지한다(false).
+ * 데이터(Workflow→Detail 관계)는 바꾸지 않는다 — 렌더 판단일 뿐이다.
+ */
+export function isMeaninglessSoleVariant(section: WorkflowSection): boolean {
+  if (section.fallback || section.groups.length !== 1) return false
+  const label = (section.groups[0].variantLabel ?? '').trim()
+  if (!label || label === '단일') return true
+  if (label === getWorkflowDisplayName(section.workflow)) return true
+  if (section.workflow && label === section.workflow.workflowName) return true
+  return false
+}
+
 export function buildWorkflowSections(
   groups: DetailProcessGroup[],
   workflows: Workflow[] | undefined,
@@ -163,4 +180,83 @@ export function buildWorkflowSections(
   }
 
   return sections
+}
+
+/**
+ * Navigation Display Layer(v0.9) — Business Capability → Workflow → Detail Process 3계층.
+ *
+ * `buildWorkflowSections`(Workflow→Detail 2계층)를 `workflow.category`로 한 번 더 묶는다.
+ * Business Capability는 표시 계층(View grouping)일 뿐 canonical tree가 아니며, Workflow 계층을
+ * 절대 건너뛰지 않는다(ADR-008/009).
+ *
+ * - 정렬: `PROCESS_LIFECYCLE_GROUPS` 순서(=category 표준 순서). capability 내부 Workflow 순서는
+ *   `buildWorkflowSections`(canonical workflows[] 순서)를 그대로 유지한다.
+ * - workflowId 미해석(fallback 섹션) 또는 category 결측 Workflow → 후행 "미분류" capability(예외 감지용).
+ * - 그룹이 없는 capability는 표시하지 않는다.
+ */
+export const UNCLASSIFIED_CAPABILITY_KEY = '__unclassified-capability__'
+export const UNCLASSIFIED_CAPABILITY_LABEL = '미분류'
+
+export type CapabilitySection = {
+  /** capability(category) id 또는 fallback sentinel — 접기/펼치기·React key용 */
+  key: string
+  categoryId?: ProcessLifecycleGroupId
+  /** Business Capability 표시 라벨 */
+  displayName: string
+  fallback: boolean
+  /** 이 capability에 속한 Workflow 섹션들 (정렬됨) */
+  workflowSections: WorkflowSection[]
+  /** 헤더 카운트용 — 소속 Detail Process(Variant) 총합 */
+  totalGroups: number
+}
+
+export function buildCapabilitySections(
+  groups: DetailProcessGroup[],
+  workflows: Workflow[] | undefined,
+): CapabilitySection[] {
+  const workflowSections = buildWorkflowSections(groups, workflows)
+
+  const byCapability = new Map<ProcessLifecycleGroupId, WorkflowSection[]>()
+  const exceptions: WorkflowSection[] = []
+  for (const section of workflowSections) {
+    const capabilityId = section.fallback ? undefined : section.workflow?.category
+    if (!capabilityId) {
+      exceptions.push(section)
+      continue
+    }
+    const list = byCapability.get(capabilityId) ?? []
+    list.push(section)
+    byCapability.set(capabilityId, list)
+  }
+
+  const countGroups = (sections: WorkflowSection[]) =>
+    sections.reduce((total, section) => total + section.groups.length, 0)
+
+  const capabilities: CapabilitySection[] = []
+  for (const lifecycle of PROCESS_LIFECYCLE_GROUPS) {
+    const sections = byCapability.get(lifecycle.id)
+    if (sections && sections.length > 0) {
+      capabilities.push({
+        key: lifecycle.id,
+        categoryId: lifecycle.id,
+        displayName: getCategoryDisplayName(lifecycle.id),
+        fallback: false,
+        workflowSections: sections,
+        totalGroups: countGroups(sections),
+      })
+    }
+  }
+
+  if (exceptions.length > 0) {
+    capabilities.push({
+      key: UNCLASSIFIED_CAPABILITY_KEY,
+      categoryId: undefined,
+      displayName: UNCLASSIFIED_CAPABILITY_LABEL,
+      fallback: true,
+      workflowSections: exceptions,
+      totalGroups: countGroups(exceptions),
+    })
+  }
+
+  return capabilities
 }
