@@ -88,10 +88,26 @@ export type MasterLayer = {
   layoutRuleMaster: LayoutRuleMaster[]
 }
 
+/**
+ * Organization — 실제 업무 담당 조직 (Business Layer 마스터, ADR-012).
+ * Execution Domain(레이아웃)과 분리되어 레이아웃에 영향을 주지 않는다. 조직 변경은 assignment만 바꾼다.
+ */
+export type Organization = {
+  id: string
+  name: string
+  order?: number
+  active?: boolean
+}
+
 /** Overview + 모든 Detail이 공유하는 마스터 설정 */
 export type CommonMasters = {
   lanes: Lane[]
   phases: Phase[]
+  /**
+   * 조직 마스터 (Business Layer canonical, ADR-011/012). additive·optional — 기존 파일 하위호환.
+   * `lanes`(=Execution Domain)와 분리. Role/RACI/KPI도 향후 동일 패턴으로 확장.
+   */
+  organizations?: Organization[]
   nodeTypes?: NodeType[]
   edgeTypes?: EdgeType[]
   masterLayer?: MasterLayer

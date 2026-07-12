@@ -67,11 +67,24 @@ export type Phase = {
   height?: number
 }
 
-/** 스윔레인 = 담당 부서/역할 영역 (Lane) */
+/**
+ * Execution Domain id — 레이아웃(컬럼)을 결정하는 안정적 업무 영역 식별자.
+ * ADR-011/012: Execution Domain은 Business Layer 개념이며, Runtime 노드는 이 값을 **참조**만 한다.
+ * WP2 1차에서는 `Node.laneId`가 이 값을 담는다(전면 rename은 후속 ADR).
+ */
+export type ExecutionDomainId = string
+
+/**
+ * 스윔레인 = 레이아웃 컬럼 영역 (Lane).
+ * WP2 이후 의미 전환: "담당 부서(조직)"이 아니라 **Execution Domain**을 나타낸다.
+ * 조직은 별도 Organization 마스터 + assignment로 분리한다(ADR-012).
+ * @see ExecutionDomain (동일 shape의 의미 alias)
+ */
 export type Lane = {
   id: string
   name: string
   order: number
+  /** @deprecated Execution Domain 전환 후 미사용 — 조직은 Organization 마스터로 이전(WP10 제거) */
   ownerDepartment: string
   description?: string
   /** 담당 시스템 (Master Data) */
@@ -79,6 +92,9 @@ export type Lane = {
   /** Lane column 폭 (px). 미지정 시 layout engine 기본값 */
   width?: number
 }
+
+/** Execution Domain (레이아웃 영역) — 현 구현에서는 Lane과 동일 shape의 의미 alias. */
+export type ExecutionDomain = Lane
 
 /** Overview Cross-Functional 업무 Zone (고정 grid row) — node.processZone */
 export type ProcessZoneId =
@@ -126,7 +142,16 @@ export type Node = {
   type: NodeType
   /** Overview PDF 범례 타입 — Overview 캔버스 전용 (미지정 시 type에서 추론) */
   overviewType?: import('./overviewNodeTypes').OverviewNodeType
+  /**
+   * Execution Domain id (레이아웃 컬럼 결정). 의미 전환: 조직이 아니라 **Execution Domain**을 가리킨다.
+   * @see ExecutionDomainId — 필드명은 하위호환 위해 유지, rename은 후속 ADR.
+   */
   laneId: string
+  /**
+   * 노드별 담당 조직 override (ADR-012 Hybrid). 미지정 시 상위 assignment
+   * (DetailProcessGroup.domainAssignments → 미래 Workflow 기본)에서 상속. 레이아웃에 **무영향**.
+   */
+  organizationId?: string
   phaseId: string
   /** 왼쪽 → 오른쪽 업무 진행 순서 (전역 단계 설명/필터용) */
   phaseOrder?: number
