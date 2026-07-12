@@ -1,0 +1,411 @@
+{
+  "kind": "copan-process-navigator-state",
+  "schemaVersion": 2,
+  "version": 1,
+  "exportedAt": "2026-07-07T07:15:59.384Z",
+  "commonMasters": {
+    "lanes": [
+      {
+        "id": "business",
+        "name": "사업부 / ERP",
+        "order": 1,
+        "ownerDepartment": "",
+        "description": "계약, 프로젝트, 구매요청, 주문/출고요청 등 ERP 기준 업무"
+      },
+      {
+        "id": "partnership",
+        "name": "상생협력팀 / ERP",
+        "order": 2,
+        "ownerDepartment": "",
+        "description": "거래처, 발주품의, 계약/발주등록, 입고정보전달"
+      },
+      {
+        "id": "lane-mr8i71rk-rr7ki",
+        "name": "경영혁신팀 / 그룹웨어",
+        "order": 3,
+        "ownerDepartment": "",
+        "description": ""
+      },
+      {
+        "id": "warehouse-easyadmin",
+        "name": "물류센터 / 이지어드민",
+        "order": 4,
+        "ownerDepartment": "",
+        "description": "입고확인, 입고등록, 출고확인, 출고등록, 재고관리"
+      },
+      {
+        "id": "retail-easychain",
+        "name": "판매현장 / 이지체인",
+        "order": 5,
+        "ownerDepartment": "",
+        "description": "매장, 팝업, 콘서트현장 판매 및 현장 재고/판매 처리"
+      },
+      {
+        "id": "finance",
+        "name": "재무팀 / ERP",
+        "order": 6,
+        "ownerDepartment": "",
+        "description": "매입마감, 매출마감, 전표생성, 정산, 자금집행"
+      }
+    ],
+    "phases": []
+  },
+  "processes": [
+    {
+      "id": "purchase-to-ap-invoice",
+      "type": "detail",
+      "name": "구매 요청 ~ 입고 ~ 매입전표 : 제/상품",
+      "nodes": [
+        {
+          "id": "purchase-to-ap-invoice-step-01",
+          "name": "구매요청",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p1"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-02",
+          "name": "구매요청확정",
+          "type": "erp",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p1"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-03",
+          "name": "발주등록",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p5"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-04",
+          "name": "구매발주 품의",
+          "type": "decision",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p4"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-05",
+          "name": "발주처리",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p5"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-06",
+          "name": "입고요청",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p6"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-07",
+          "name": "입고정보",
+          "type": "database",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p7"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-08",
+          "name": "입고처리",
+          "type": "manual",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p8"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-09",
+          "name": "입고요청 확인",
+          "type": "wms-oms",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p9"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-10",
+          "name": "입고수량 입력",
+          "type": "wms-oms",
+          "laneId": "warehouse-easyadmin",
+          "phaseId": "p10"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-11",
+          "name": "입고확정",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "p11"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-12",
+          "name": "ERP 재고현황",
+          "type": "database",
+          "laneId": "partnership",
+          "phaseId": "p12"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-13",
+          "name": "매입마감조회",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p10"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-14",
+          "name": "매입마감확정",
+          "type": "erp",
+          "laneId": "partnership",
+          "phaseId": "procure-to-pay::p10"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-15",
+          "name": "전표생성(미결)",
+          "type": "system",
+          "laneId": "partnership",
+          "phaseId": "p15"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-16",
+          "name": "위탁여부 확인",
+          "type": "interface-rule",
+          "laneId": "partnership",
+          "phaseId": "p16"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-17",
+          "name": "위탁재고 현황",
+          "type": "database",
+          "laneId": "partnership",
+          "phaseId": "p17"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-18",
+          "name": "전표조회승인",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p2"
+        },
+        {
+          "id": "purchase-to-ap-invoice-step-19",
+          "name": "정기자금집행",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p3"
+        }
+      ],
+      "edges": [
+        {
+          "id": "purchase-to-ap-invoice-e01",
+          "source": "purchase-to-ap-invoice-step-01",
+          "target": "purchase-to-ap-invoice-step-02"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e02",
+          "source": "purchase-to-ap-invoice-step-02",
+          "target": "purchase-to-ap-invoice-step-03"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e03",
+          "source": "purchase-to-ap-invoice-step-03",
+          "target": "purchase-to-ap-invoice-step-05"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e04",
+          "source": "purchase-to-ap-invoice-step-04",
+          "target": "purchase-to-ap-invoice-step-06"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e06",
+          "source": "purchase-to-ap-invoice-step-06",
+          "target": "purchase-to-ap-invoice-step-09"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e07",
+          "source": "purchase-to-ap-invoice-step-07",
+          "target": "purchase-to-ap-invoice-step-16"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e09",
+          "source": "purchase-to-ap-invoice-step-09",
+          "target": "purchase-to-ap-invoice-step-08"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e10",
+          "source": "purchase-to-ap-invoice-step-10",
+          "target": "purchase-to-ap-invoice-step-07"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e11",
+          "source": "purchase-to-ap-invoice-step-11",
+          "target": "purchase-to-ap-invoice-step-12"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e12",
+          "source": "purchase-to-ap-invoice-step-11",
+          "target": "purchase-to-ap-invoice-step-13"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e13",
+          "source": "purchase-to-ap-invoice-step-13",
+          "target": "purchase-to-ap-invoice-step-14"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e14",
+          "source": "purchase-to-ap-invoice-step-14",
+          "target": "purchase-to-ap-invoice-step-15"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e16",
+          "source": "purchase-to-ap-invoice-step-16",
+          "target": "purchase-to-ap-invoice-step-17"
+        },
+        {
+          "id": "purchase-to-ap-invoice-branch-01",
+          "source": "purchase-to-ap-invoice-step-04",
+          "target": "purchase-to-ap-invoice-step-05"
+        },
+        {
+          "id": "edge-mqozov0n-v6182",
+          "source": "purchase-to-ap-invoice-step-08",
+          "target": "purchase-to-ap-invoice-step-10"
+        },
+        {
+          "id": "edge-mqp08rw4-iplmz",
+          "source": "purchase-to-ap-invoice-step-16",
+          "target": "purchase-to-ap-invoice-step-11"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e17",
+          "source": "purchase-to-ap-invoice-step-15",
+          "target": "purchase-to-ap-invoice-step-18"
+        },
+        {
+          "id": "purchase-to-ap-invoice-e18",
+          "source": "purchase-to-ap-invoice-step-18",
+          "target": "purchase-to-ap-invoice-step-19"
+        },
+        {
+          "id": "edge-mr0c2i7v-jngq0",
+          "source": "purchase-to-ap-invoice-step-05",
+          "target": "purchase-to-ap-invoice-step-04"
+        }
+      ]
+    },
+    {
+      "id": "구매-요청-매입-전표-생성-it-s-w",
+      "type": "detail",
+      "name": "구매 요청 ~ 매입전표 생성 : IT, S/W",
+      "nodes": [
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-01",
+          "name": "구매요청",
+          "type": "approval",
+          "laneId": "business",
+          "phaseId": "procure-to-pay::p1"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-02",
+          "name": "구매요청확인",
+          "type": "manual",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "procure-to-pay::p1"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "name": "구매발주 품의",
+          "type": "decision",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "procure-to-pay::p4"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-04",
+          "name": "지출결의",
+          "type": "erp",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "procure-to-pay::p5"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-10",
+          "name": "전표생성(미결)",
+          "type": "system",
+          "laneId": "lane-mr8i71rk-rr7ki",
+          "phaseId": "p10"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-11",
+          "name": "전표조회승인",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p2"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-step-12",
+          "name": "정기자금집행",
+          "type": "erp",
+          "laneId": "finance",
+          "phaseId": "finance-accounting::p3"
+        }
+      ],
+      "edges": [
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e01",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-01",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-02"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e02",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-02",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-03"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e03",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-04"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-branch-01",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-03",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-02"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e10",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-10",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-11"
+        },
+        {
+          "id": "구매-요청-매입-전표-생성-it-s-w-e11",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-11",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-12"
+        },
+        {
+          "id": "edge-mrab952j-5ho5k",
+          "source": "구매-요청-매입-전표-생성-it-s-w-step-04",
+          "target": "구매-요청-매입-전표-생성-it-s-w-step-10"
+        }
+      ]
+    }
+  ],
+  "detailProcessGroups": [
+    {
+      "id": "pg-purchase-to-ap-invoice",
+      "name": "구매 요청 ~ 입고 ~ 매입전표 : 제/상품",
+      "description": "구매요청·발주·입고·재고인식·매입마감·매입전표·회계반영 (제/상품)",
+      "detailProcessId": "purchase-to-ap-invoice",
+      "workflowId": "wf-purchase-to-ap",
+      "variantLabel": "제/상품",
+      "variantOrder": 1
+    },
+    {
+      "id": "구매-요청-매입-전표-생성-it-s-w-group",
+      "name": "구매 요청 ~ 매입전표 생성 : IT, S/W",
+      "description": "서비스 구매요청, 발주품의, 부분권한 입고요청/입고확정, 매입마감, ERP 자동 전표생성 및 재무 승인까지의 서비스 구매/매입 프로세스",
+      "detailProcessId": "구매-요청-매입-전표-생성-it-s-w",
+      "lifecycleGroupId": "purchase-inbound",
+      "workflowId": "wf-purchase-request-to-ap",
+      "variantLabel": "IT·S/W",
+      "variantOrder": 3
+    }
+  ],
+  "_meta": {
+    "source": "state.json subset (de-identified, minimized)",
+    "purpose": "WP3 Golden Fixture — 구매/발주 대표 프로세스",
+    "fields": "id/name/type/laneId/phaseId only; no owner/system/PII"
+  }
+}
