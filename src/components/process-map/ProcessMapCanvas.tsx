@@ -139,6 +139,8 @@ type ProcessMapCanvasProps = {
   renderSyncRevision?: number
   showNodeNumbers?: boolean
   panelInsetRight?: number
+  /** WP4 — Detail lane subtitle에 표시할 도메인별 담당 조직명(Business Policy 조회 결과). 레이아웃 무영향. */
+  laneOrganizations?: Map<string, string>
   onSelectElement: (element: SelectedElement | null) => void
   onSelectedNodeIdsChange?: (nodeIds: string[], options?: SelectionChangeOptions) => { nodeIds: string[]; primaryNodeId: string | null } | void
   onSelectedEdgeIdsChange?: (edgeIds: string[], options?: SelectionChangeOptions) => { edgeIds: string[]; primaryEdgeId: string | null } | void
@@ -441,6 +443,7 @@ export function ProcessMapCanvas({
   renderSyncRevision = 0,
   showNodeNumbers = true,
   panelInsetRight = 0,
+  laneOrganizations,
   onSelectElement,
   onSelectedNodeIdsChange,
   onSelectedEdgeIdsChange,
@@ -509,6 +512,19 @@ export function ProcessMapCanvas({
   const detailScrollRef = useRef<HTMLDivElement>(null)
 
   const isOverview = viewMode === 'overview'
+  // WP4 — presentation-only adapter. Detail에서만 lane subtitle에 담당 조직명을 주입한다.
+  // ⚠ `LaneBand.ownerDepartment` 슬롯을 subtitle 표시 용도로 **재사용**할 뿐이며, 이 값은:
+  //   - layout(컬럼 위치/폭/node 배치)에 사용되지 않음 (레이아웃 키는 laneId=도메인)
+  //   - persistence에 저장되지 않음 (렌더 시점 파생값)
+  //   - canonical organization assignment가 아님 (canonical은 DetailProcessGroup.domainAssignments)
+  // Overview는 도메인만 표시하므로 원본 band(빈 subtitle)를 그대로 쓴다.
+  const displayLaneBands = useMemo(() => {
+    if (isOverview || !laneOrganizations || laneOrganizations.size === 0) return laneBands
+    return laneBands.map((band) => {
+      const org = laneOrganizations.get(band.laneId)
+      return org ? { ...band, ownerDepartment: org } : band
+    })
+  }, [isOverview, laneBands, laneOrganizations])
   const useDetailHorizontal = !isOverview
   const isDetailVertical = !isOverview && !useDetailHorizontal
   const isEditingOverviewProcessGroup =
@@ -1336,7 +1352,7 @@ export function ProcessMapCanvas({
       )}
       {canvasBounds && (
         <SwimlaneOverlay
-          laneBands={laneBands}
+          laneBands={displayLaneBands}
           canvasBounds={canvasBounds}
           layoutOrientation={layoutOrientation}
           zoneBands={isOverview ? zoneBands : []}

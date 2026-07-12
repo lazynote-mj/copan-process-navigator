@@ -14,6 +14,7 @@ import {
   type ProcessDataFilePayload,
 } from '../processDataMigration'
 import { filePayloadToProcessData } from '../processDataIO'
+import { resolveLaneOrganizations } from '../../lib/executionDomainPresentation'
 
 /**
  * WP3 Golden Scenario — 실제 대표 프로세스(구매/발주)로 전체 파이프라인을 검증한다.
@@ -144,9 +145,46 @@ describe('Golden Scenario — WP3 파이프라인 게이트', () => {
     )
   })
 
-  // 후속 UI WP의 todo로 유지
-  it.todo('Overview Render: lane 수 = Execution Domain 수, 조직은 lane으로 렌더되지 않음')
-  it.todo('Detail Render: 도메인 lane 배치 + 담당 조직 보조정보 표시')
+  // WP4 — Presentation 게이트 (todo → 실제 assertion 전환)
+  it('Overview Render: lane = Execution Domain(≤5), 조직은 lane/subtitle로 렌더되지 않음', () => {
+    const data = buildProcessDataFromPayload(fixturePayload, 'server-json')
+    const domainNames = data.commonMasters.lanes.map((l) => l.name)
+    // lane 이름은 도메인명(사업/구매/…)이고 조직명(사업부/상생협력팀 등)이 아니다
+    expect(data.commonMasters.lanes.length).toBeLessThanOrEqual(5)
+    for (const orgName of ['사업부', '상생협력팀', '경영혁신팀', '재무팀']) {
+      expect(domainNames).not.toContain(orgName)
+    }
+    // Overview 프로세스는 group이 없으므로 조직 subtitle 없음(빈 Map)
+    const overviewOrgs = resolveLaneOrganizations(undefined, data.commonMasters.organizations)
+    expect(overviewOrgs.size).toBe(0)
+  })
+
+  it('Detail Render: 도메인 lane 배치 + 담당 조직 보조정보(subtitle) resolve', () => {
+    const data = buildProcessDataFromPayload(fixturePayload, 'server-json')
+    const orgs = data.commonMasters.organizations
+    const g1 = data.detailProcessGroups?.find((g) => g.detailProcessId === 'purchase-to-ap-invoice')
+    const g2 = data.detailProcessGroups?.find((g) => g.detailProcessId === '구매-요청-매입-전표-생성-it-s-w')
+    // 같은 procurement 도메인이 Variant마다 다른 조직으로 보조표시
+    expect(resolveLaneOrganizations(g1, orgs).get('procurement')).toBe('상생협력팀')
+    expect(resolveLaneOrganizations(g2, orgs).get('procurement')).toBe('경영혁신팀')
+    expect(resolveLaneOrganizations(g1, orgs).get('finance')).toBe('재무팀')
+  })
+
+  it('Organization 변경은 lane(도메인) 집합·순서·node laneId에 영향 없음 (레이아웃 불변)', () => {
+    const data = buildProcessDataFromPayload(fixturePayload, 'server-json')
+    const domainKeysBefore = data.commonMasters.lanes.map((l) => l.id)
+    const nodeLanesBefore = data.processes.flatMap((p) => p.nodes.map((n) => n.laneId)).sort()
+    // 조직 배정을 상생협력팀→경영혁신팀으로 바꿔도 (subtitle 값만 변함)
+    const g1 = data.detailProcessGroups!.find((g) => g.detailProcessId === 'purchase-to-ap-invoice')!
+    g1.domainAssignments = g1.domainAssignments!.map((a) =>
+      a.executionDomainId === 'procurement' ? { ...a, organizationId: 'business-innovation' } : a,
+    )
+    // 레이아웃 키(도메인 집합·node laneId)는 불변
+    expect(data.commonMasters.lanes.map((l) => l.id)).toEqual(domainKeysBefore)
+    expect(data.processes.flatMap((p) => p.nodes.map((n) => n.laneId)).sort()).toEqual(nodeLanesBefore)
+    // subtitle(보조정보)만 바뀐다
+    expect(resolveLaneOrganizations(g1, data.commonMasters.organizations).get('procurement')).toBe('경영혁신팀')
+  })
 })
 
 // ── 추가 검증 (사용자 지정) ──────────────────────────────────────────────────────

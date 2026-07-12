@@ -83,6 +83,7 @@ import { ProcessGroupMenu } from './ProcessGroupMenu'
 import { RouterHealthDashboard } from './RouterHealthDashboard'
 import { Toolbar } from './Toolbar'
 import { ProcessMapCanvas } from '../process-map/ProcessMapCanvas'
+import { resolveLaneOrganizations } from '../../lib/executionDomainPresentation'
 import { PropertyPanel } from '../editor/PropertyPanel'
 import { ProcessCanvasContainer, PROPERTY_PANEL_WIDTH } from './ProcessCanvasContainer'
 import '../layout/node-detail.css'
@@ -324,6 +325,18 @@ export function AppLayout() {
   const detailProcessGroups = useMemo(
     () => resolveDetailProcessGroups(processData, toBeNavigator.detailProcessGroups),
     [processData],
+  )
+
+  // WP4 — Detail lane subtitle에 표시할 도메인별 담당 조직명(Business Policy 조회). Overview는 빈 Map.
+  const laneOrganizations = useMemo(
+    () =>
+      viewMode === 'detail'
+        ? resolveLaneOrganizations(
+            detailProcessGroups.find((group) => group.detailProcessId === activeProcess.id),
+            processData.commonMasters.organizations,
+          )
+        : new Map<string, string>(),
+    [viewMode, activeProcess.id, detailProcessGroups, processData.commonMasters.organizations],
   )
 
   const resolveLinkedDetailProcessId = useCallback(
@@ -1439,6 +1452,7 @@ export function AppLayout() {
             renderSyncRevision={renderSyncRevision}
             showNodeNumbers={showNodeNumbers}
             panelInsetRight={isRightOpen ? PROPERTY_PANEL_WIDTH : 0}
+            laneOrganizations={laneOrganizations}
             onSelectElement={handleSelectElement}
             onSelectedNodeIdsChange={handleCanvasNodeSelectionChange}
             onSelectedEdgeIdsChange={handleCanvasEdgeSelectionChange}
