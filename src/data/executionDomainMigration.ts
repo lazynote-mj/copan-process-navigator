@@ -2,6 +2,9 @@ import type { ExecutionDomain, ExecutionDomainId } from '../types/process'
 import type { DomainAssignment } from '../types/toBeNavigator'
 import type { Organization } from '../types/commonMasters'
 
+/** Execution Domain 도입 스키마 버전 (V2→V3). schemaVersion<3 이면 마이그레이션 적용. */
+export const EXECUTION_DOMAIN_SCHEMA_VERSION = 3
+
 /**
  * Execution Domain 마이그레이션 — legacy lane(조직/혼합 스킴) → canonical Execution Domain + 조직 배정.
  *
@@ -232,4 +235,260 @@ export function extractDomainAssignments(
   }
 
   return { assignments, nodeOverrides, warnings }
+}
+
+// ── V2 → V3 payload 변환 (WP3) ─────────────────────────────────────────────────
+
+type LaneMasterLike = { id: string; name?: string; order?: number }
+type NodeLike = {
+  id: string
+  laneId: string
+  organizationId?: string
+  interfaceRuleAnchor?: { fromLaneId: string; toLaneId: string }
+}
+type ZoneLike = { laneIds?: string[] }
+type ProcessLike = { id: string; type?: string; nodes: NodeLike[]; zones?: ZoneLike[] }
+type GroupLike = { id: string; detailProcessId: string; domainAssignments?: DomainAssignment[] }
+type CommonMastersLike = { lanes: LaneMasterLike[]; organizations?: Organization[] }
+
+export type ExecutionDomainMigrationStats = {
+  processes: number
+  nodesRemapped: number
+  assignmentsCreated: number
+  nodeOverrides: number
+  syntheticDomains: number
+}
+
+/** legacy laneId → domain 매핑 시 등장하는 synthetic 도메인/조직을 마스터에 반영하기 위한 누적기. */
+function collectSynthetic(
+  laneNameById: Map<string, string>,
+  syntheticDomains: Map<string, ExecutionDomain>,
+  syntheticOrgs: Map<string, Organization>,
+  result: DomainMappingResult,
+  laneId: string,
+): void {
+  if (!result.synthetic) return
+  if (!syntheticDomains.has(result.executionDomainId)) {
+    syntheticDomains.set(result.executionDomainId, {
+      id: result.executionDomainId,
+      name: laneNameById.get(laneId) ?? laneId,
+      order: 100 + syntheticDomains.size,
+      ownerDepartment: '',
+    })
+  }
+  if (result.organizationId && !syntheticOrgs.has(result.organizationId)) {
+    syntheticOrgs.set(result.organizationId, {
+      id: result.organizationId,
+      name: laneNameById.get(laneId) ?? laneId,
+      order: 100 + syntheticOrgs.size,
+    })
+  }
+}
+
+function remapAnchor(
+  anchor: { fromLaneId: string; toLaneId: string } | undefined,
+  laneNameById: Map<string, string>,
+): { fromLaneId: string; toLaneId: string } | undefined {
+  if (!anchor) return undefined
+  return {
+    fromLaneId: resolveDomainMapping(anchor.fromLaneId, laneNameById.get(anchor.fromLaneId)).executionDomainId,
+    toLaneId: resolveDomainMapping(anchor.toLaneId, laneNameById.get(anchor.toLaneId)).executionDomainId,
+  }
+}
+
+/** zone.laneIds → 도메인 remap(+dedupe). 값 변화가 없으면 원본 참조를 그대로 반환(idempotent 안정). */
+function remapZones<Z extends ZoneLike>(zones: Z[] | undefined, laneNameById: Map<string, string>): Z[] | undefined {
+  if (!zones) return undefined
+  let changed = false
+  const next = zones.map((zone) => {
+    if (!zone.laneIds) return zone
+    const mapped = [...new Set(zone.laneIds.map((id) => resolveDomainMapping(id, laneNameById.get(id)).executionDomainId))]
+    if (mapped.length === zone.laneIds.length && mapped.every((v, i) => v === zone.laneIds![i])) return zone
+    changed = true
+    return { ...zone, laneIds: mapped }
+  })
+  return changed ? next : zones
+}
+
+/**
+ * legacy commonMasters.lanes(조직/혼합 스킴) → Execution Domain 마스터 + Organization 마스터.
+ * canonical 5 도메인은 항상 포함(Overview 안정), synthetic은 append.
+ */
+function buildDomainMasters(
+  syntheticDomains: Map<string, ExecutionDomain>,
+  syntheticOrgs: Map<string, Organization>,
+): { executionDomains: ExecutionDomain[]; organizations: Organization[] } {
+  return {
+    executionDomains: [...CANONICAL_EXECUTION_DOMAINS.map((d) => ({ ...d })), ...syntheticDomains.values()],
+    organizations: [...CANONICAL_ORGANIZATIONS.map((o) => ({ ...o })), ...syntheticOrgs.values()],
+  }
+}
+
+/**
+ * V2 → V3 순수 변환 (WP3). idempotent 안전: 이미 canonical 도메인이면 remap은 no-op이고,
+ * group.domainAssignments가 이미 있으면 재추출로 덮어쓰지 않는다.
+ * - node.laneId(legacy) → canonical Execution Domain id
+ * - DetailProcessGroup.domainAssignments 생성(없을 때만) + conflict node.organizationId override
+ * - unknown lane → synthetic domain, anchor/zone lane 참조 변환
+ * - commonMasters.lanes → Execution Domain 마스터, organizations 신설
+ */
+export function migrateExecutionDomains<
+  P extends ProcessLike,
+  G extends GroupLike,
+  C extends CommonMastersLike,
+>(input: { commonMasters: C; processes: P[]; detailProcessGroups?: G[] }): {
+  commonMasters: C & { lanes: ExecutionDomain[]; organizations: Organization[] }
+  processes: P[]
+  detailProcessGroups: G[]
+  warnings: MigrationWarning[]
+  stats: ExecutionDomainMigrationStats
+} {
+  const laneNameById = new Map(input.commonMasters.lanes.map((l) => [l.id, l.name ?? l.id]))
+  const groups = (input.detailProcessGroups ?? []).map((g) => ({ ...g }))
+  const groupByProcessId = new Map(groups.map((g) => [g.detailProcessId, g]))
+  const warnings: MigrationWarning[] = []
+  const syntheticDomains = new Map<string, ExecutionDomain>()
+  const syntheticOrgs = new Map<string, Organization>()
+  const stats: ExecutionDomainMigrationStats = {
+    processes: 0,
+    nodesRemapped: 0,
+    assignmentsCreated: 0,
+    nodeOverrides: 0,
+    syntheticDomains: 0,
+  }
+
+  const processes = input.processes.map((process) => {
+    stats.processes += 1
+    // (a) 배정 추출은 legacy laneId 기준 — remap 이전에 수행
+    const extraction = extractDomainAssignments(
+      process.nodes.map((n) => ({ id: n.id, laneId: n.laneId, laneName: laneNameById.get(n.laneId) })),
+    )
+    const overrideByNode = new Map(extraction.nodeOverrides.map((o) => [o.nodeId, o.organizationId]))
+    for (const w of extraction.warnings) warnings.push({ ...w, processId: process.id })
+
+    // (b) node.laneId remap + synthetic 수집 + anchor + override
+    const nodes = process.nodes.map((node) => {
+      const r = resolveDomainMapping(node.laneId, laneNameById.get(node.laneId))
+      collectSynthetic(laneNameById, syntheticDomains, syntheticOrgs, r, node.laneId)
+      if (node.laneId !== r.executionDomainId) stats.nodesRemapped += 1
+      const override = overrideByNode.get(node.id)
+      return {
+        ...node,
+        laneId: r.executionDomainId,
+        ...(override ? { organizationId: override } : {}),
+        ...(node.interfaceRuleAnchor ? { interfaceRuleAnchor: remapAnchor(node.interfaceRuleAnchor, laneNameById) } : {}),
+      }
+    })
+    stats.nodeOverrides += extraction.nodeOverrides.length
+
+    // (c) 배정을 group에 부착 — 없을 때만(idempotent). group 없으면 warning(Process fallback은 후속)
+    if (extraction.assignments.length > 0) {
+      const group = groupByProcessId.get(process.id)
+      if (group) {
+        if (!group.domainAssignments || group.domainAssignments.length === 0) {
+          group.domainAssignments = extraction.assignments
+          stats.assignmentsCreated += extraction.assignments.length
+        }
+      } else if (process.type !== 'overview') {
+        warnings.push({
+          code: 'MISSING_ORG_FOR_LANE',
+          processId: process.id,
+          detail: 'group 없는 detail process — Process-level fallback assignment 필요(후속 WP)',
+        })
+      }
+    }
+
+    return { ...process, nodes, zones: remapZones(process.zones, laneNameById) }
+  })
+
+  stats.syntheticDomains = syntheticDomains.size
+  const { executionDomains, organizations } = buildDomainMasters(syntheticDomains, syntheticOrgs)
+  const commonMasters = { ...input.commonMasters, lanes: executionDomains, organizations }
+
+  return { commonMasters, processes, detailProcessGroups: groups, warnings, stats }
+}
+
+/**
+ * hydrate(registry sync) 직후 idempotent 정규화 — registry가 legacy laneId를 재주입해도
+ * node.laneId를 canonical 도메인으로 다시 수렴시킨다(WP3 §8). 배정은 group 소유라 건드리지 않는다.
+ */
+export function normalizeExecutionDomains<P extends ProcessLike>(
+  processes: P[],
+  laneNameById: Map<string, string> = new Map(),
+): { processes: P[]; changed: boolean } {
+  let changed = false
+  const next = processes.map((process) => {
+    let procChanged = false
+    const nodes = process.nodes.map((node) => {
+      const domainId = resolveDomainMapping(node.laneId, laneNameById.get(node.laneId)).executionDomainId
+      // anchor는 값 기준으로만 변경 판단(참조 새로 생겨도 값 같으면 no-op)
+      let anchor = node.interfaceRuleAnchor
+      let anchorChanged = false
+      if (anchor) {
+        const remapped = remapAnchor(anchor, laneNameById)!
+        if (remapped.fromLaneId !== anchor.fromLaneId || remapped.toLaneId !== anchor.toLaneId) {
+          anchor = remapped
+          anchorChanged = true
+        }
+      }
+      if (domainId === node.laneId && !anchorChanged) return node
+      procChanged = true
+      return { ...node, laneId: domainId, ...(anchorChanged ? { interfaceRuleAnchor: anchor } : {}) }
+    })
+    const zones = remapZones(process.zones, laneNameById)
+    if (!procChanged && zones === process.zones) return process
+    changed = true
+    return { ...process, nodes, zones }
+  })
+  return { processes: next, changed }
+}
+
+// ── 참조 무결성 검증 (WP3 §11) ──────────────────────────────────────────────────
+
+export type IntegrityResult = {
+  ok: boolean
+  danglingDomainRefs: string[]
+  danglingOrgRefs: string[]
+}
+
+export function validateExecutionDomainIntegrity(input: {
+  commonMasters: CommonMastersLike
+  processes: ProcessLike[]
+  detailProcessGroups?: GroupLike[]
+}): IntegrityResult {
+  const domainIds = new Set(input.commonMasters.lanes.map((l) => l.id))
+  const orgIds = new Set((input.commonMasters.organizations ?? []).map((o) => o.id))
+  const danglingDomainRefs: string[] = []
+  const danglingOrgRefs: string[] = []
+
+  for (const process of input.processes) {
+    for (const node of process.nodes) {
+      if (!domainIds.has(node.laneId)) danglingDomainRefs.push(`${process.id}:${node.id}:${node.laneId}`)
+      if (node.organizationId && !orgIds.has(node.organizationId)) {
+        danglingOrgRefs.push(`${process.id}:${node.id}:${node.organizationId}`)
+      }
+      if (node.interfaceRuleAnchor) {
+        for (const ref of [node.interfaceRuleAnchor.fromLaneId, node.interfaceRuleAnchor.toLaneId]) {
+          if (!domainIds.has(ref)) danglingDomainRefs.push(`${process.id}:${node.id}:anchor:${ref}`)
+        }
+      }
+    }
+    for (const zone of process.zones ?? []) {
+      for (const ref of zone.laneIds ?? []) {
+        if (!domainIds.has(ref)) danglingDomainRefs.push(`${process.id}:zone:${ref}`)
+      }
+    }
+  }
+  for (const group of input.detailProcessGroups ?? []) {
+    for (const a of group.domainAssignments ?? []) {
+      if (!domainIds.has(a.executionDomainId)) danglingDomainRefs.push(`${group.id}:assign:${a.executionDomainId}`)
+      if (!orgIds.has(a.organizationId)) danglingOrgRefs.push(`${group.id}:assign:${a.organizationId}`)
+    }
+  }
+
+  return {
+    ok: danglingDomainRefs.length === 0 && danglingOrgRefs.length === 0,
+    danglingDomainRefs,
+    danglingOrgRefs,
+  }
 }

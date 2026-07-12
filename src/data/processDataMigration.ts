@@ -18,6 +18,7 @@ import {
 } from './toBeOverview/overviewEdgeRegistry'
 import { filterEdgesByExistingEndpoints } from './processExport'
 import { normalizeEdgeForStorage } from '../lib/editor/edgeUpdate'
+import { EXECUTION_DOMAIN_SCHEMA_VERSION, migrateExecutionDomains } from './executionDomainMigration'
 
 export type ProcessDataFilePayloadV1 = {
   kind: 'copan-process-navigator-state'
@@ -32,8 +33,9 @@ export type ProcessDataFilePayloadV2 = {
   /**
    * 직렬화 스키마 버전 (ADR-005 §D3 — migration 판단용). 신규 canonical 필드.
    * legacy 파일에서는 이 값이 없고 top-level `version:2`가 스키마 버전 역할을 했다 → 로드 시 back-compat.
+   * WP3: Execution Domain 도입으로 3까지 확장(schemaVersion<3 이면 도메인 마이그레이션 적용).
    */
-  schemaVersion?: 2
+  schemaVersion?: number
   /**
    * schemaVersion 도입 이후: Runtime Entities content 버전.
    * legacy 파일(schemaVersion 미존재)에서는 스키마 버전(=2)이었으므로 content 버전은 로드 시 초기값으로 해석한다.
@@ -63,7 +65,8 @@ export function resolveSchemaVersion(payload: ProcessDataFilePayload): number {
 export function isV2Payload(
   payload: ProcessDataFilePayload,
 ): payload is ProcessDataFilePayloadV2 {
-  return resolveSchemaVersion(payload) === 2
+  // V2 이상(=processes[] 구조)이면 true. V3는 V2와 구조 동일이므로 포함(WP3).
+  return resolveSchemaVersion(payload) >= 2
 }
 
 /**
@@ -146,7 +149,31 @@ export function buildProcessDataFromPayload(
   payload: ProcessDataFilePayload,
   dataSource: ProcessData['dataSource'],
 ): ProcessData {
-  const v2 = isV2Payload(payload) ? payload : migrateV1ToV2(payload)
+  // V1(schemaVersion<2)만 V1→V2 승격. V2/V3는 구조가 동일하므로 그대로 사용.
+  let v2: ProcessDataFilePayloadV2 =
+    resolveSchemaVersion(payload) < 2 ? migrateV1ToV2(payload as ProcessDataFilePayloadV1) : (payload as ProcessDataFilePayloadV2)
+
+  // WP3 — Execution Domain 마이그레이션(schemaVersion<3 에서만). idempotent·무손실.
+  if (resolveSchemaVersion(payload) < EXECUTION_DOMAIN_SCHEMA_VERSION) {
+    const migrated = migrateExecutionDomains({
+      commonMasters: v2.commonMasters,
+      processes: v2.processes,
+      detailProcessGroups: v2.detailProcessGroups,
+    })
+    if (migrated.warnings.length > 0) {
+      console.warn(
+        `[ProcessNavigator] Execution Domain migration: ${migrated.warnings.length} warning(s)`,
+        migrated.warnings.slice(0, 8),
+      )
+    }
+    v2 = {
+      ...v2,
+      commonMasters: migrated.commonMasters,
+      processes: migrated.processes,
+      detailProcessGroups: migrated.detailProcessGroups,
+    }
+  }
+
   const processes = v2.processes.map(normalizeProcessInstanceEdges)
   const commonMasters = structuredClone(v2.commonMasters)
   const summary = {
@@ -207,7 +234,8 @@ export function processDataToFilePayload(data: ProcessData): ProcessDataFilePayl
   const normalized = ensureProcessGroupFields(data)
   return {
     kind: 'copan-process-navigator-state',
-    schemaVersion: 2,
+    // WP3 — Execution Domain 도입 후 저장 파일은 schemaVersion 3. reload 시 재마이그레이션 skip.
+    schemaVersion: EXECUTION_DOMAIN_SCHEMA_VERSION,
     // content 버전은 Runtime에서 관리(WP1: 보존). dirty는 직렬화하지 않는다(ADR-005 §D3).
     version: normalized.version,
     exportedAt: normalized.updatedAt,

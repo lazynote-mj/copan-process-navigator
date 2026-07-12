@@ -19,6 +19,7 @@ import {
 } from '../types/processData'
 import { canEdit, canSave, isPreviewMode, PREVIEW_NOTICE } from '../config/deploymentConfig'
 import { mergeMissingDetailProcesses, syncDetailProcessesFromRegistry } from './activeProcessData'
+import { normalizeExecutionDomains } from './executionDomainMigration'
 import {
   connectEdge,
   cloneDetailProcess,
@@ -96,7 +97,12 @@ function hydrateProcessData(
 ): ProcessData {
   const base = cloneProcessData(source)
   const merged = mergeMissingDetailProcesses(base, registryDetailProcesses)
-  return syncDetailProcessesFromRegistry(merged, registryDetailProcesses)
+  const synced = syncDetailProcessesFromRegistry(merged, registryDetailProcesses)
+  // WP3 §8 — registry가 legacy laneId를 재주입하므로 hydrate 직후 Execution Domain으로 idempotent 정규화.
+  // 배정(group.domainAssignments)은 registry sync 대상이 아니라 보존된다.
+  const laneNameById = new Map(synced.commonMasters.lanes.map((lane) => [lane.id, lane.name]))
+  const normalized = normalizeExecutionDomains(synced.processes, laneNameById)
+  return normalized.changed ? { ...synced, processes: normalized.processes } : synced
 }
 
 function hydrateSavedProcessData(
