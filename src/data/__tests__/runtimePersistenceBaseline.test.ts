@@ -59,11 +59,11 @@ describe('WP1 persistence baseline — dirty persistence 제외', () => {
     expect('dirty' in payload).toBe(false)
   })
 
-  it('저장 payload는 schemaVersion:2를 명시하고 exportedAt을 포함한다', () => {
+  it('저장 payload는 schemaVersion:3을 명시하고 exportedAt을 포함한다 (WP3 Execution Domain)', () => {
     const data = filePayloadToProcessData(validateImportPayload(legacyPayload), 'server-json')
     const payload = processDataToFilePayload(data)
 
-    expect(payload.schemaVersion).toBe(2)
+    expect(payload.schemaVersion).toBe(3)
     expect(typeof payload.exportedAt).toBe('string')
     expect(payload.exportedAt.length).toBeGreaterThan(0)
   })

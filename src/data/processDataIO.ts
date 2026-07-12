@@ -151,7 +151,8 @@ export function validateImportPayload(payload: unknown): ProcessDataFilePayload 
   const schemaVersion =
     (parsed as { schemaVersion?: number }).schemaVersion ?? parsed.version
 
-  if (schemaVersion === 2) {
+  // V2 이상(schemaVersion 2·3)은 동일 구조 — V2 검증 경로 공유(WP3: 3 = Execution Domain 도입).
+  if ((schemaVersion ?? 0) >= 2) {
     validateV2Payload(parsed as Parameters<typeof validateV2Payload>[0])
     return parsed as ProcessDataFilePayload
   }
@@ -161,7 +162,7 @@ export function validateImportPayload(payload: unknown): ProcessDataFilePayload 
     return parsed as ProcessDataFilePayload
   }
 
-  throw new Error('지원하지 않는 JSON 스키마 버전입니다. (schemaVersion 2 또는 legacy version 1/2)')
+  throw new Error('지원하지 않는 JSON 스키마 버전입니다. (schemaVersion 2·3 또는 legacy version 1)')
 }
 
 export function parseProcessDataFile(content: string): ProcessDataFilePayload {

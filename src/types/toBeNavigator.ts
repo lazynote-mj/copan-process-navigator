@@ -1,5 +1,15 @@
-import type { Process } from './process'
+import type { ExecutionDomainId, Process } from './process'
 import type { ProcessLifecycleGroupId } from '../config/appConfig'
+
+/**
+ * Execution Domain → 담당 조직 배정 (Business Policy, ADR-012 Hybrid).
+ * DetailProcessGroup(Variant) 단위 기본 정책. registry sync(=data.processes만 교체) 영향 밖이라
+ * 배정이 유실되지 않는다. 노드 예외는 Node.organizationId override.
+ */
+export type DomainAssignment = {
+  executionDomainId: ExecutionDomainId
+  organizationId: string
+}
 
 /** Overview — 전체 맵에서 노드/연결선 강조용 (상세 프로세스와 1:1 아님) */
 export type OverviewProcessGroup = {
@@ -32,6 +42,11 @@ export type DetailProcessGroup = {
   variantId?: string
   /** Workflow 내 Variant 표시 순서 */
   variantOrder?: number
+  /**
+   * Execution Domain → 담당 조직 기본 배정 (ADR-012). 이 Variant의 프로세스/노드가 상속.
+   * additive·optional — 없으면 조직 미배정(레이아웃 무영향). registry sync 안전.
+   */
+  domainAssignments?: DomainAssignment[]
 }
 
 /** @deprecated OverviewProcessGroup | DetailProcessGroup 사용 */
