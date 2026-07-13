@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { projectLane, resolveLaneOrganizations } from '../executionDomainPresentation'
+import { projectLane, resolveLaneOrganizations, resolveNodePolicy } from '../executionDomainPresentation'
 import type { DetailProcessGroup, DomainAssignment } from '../../types/toBeNavigator'
 import type { Organization } from '../../types/commonMasters'
 
@@ -50,6 +50,30 @@ describe('resolveLaneOrganizations — 경계 조건 (WP4)', () => {
       ORGS,
     )
     expect(m.get('sales')).toBe('unknown-org')
+  })
+})
+
+describe('resolveNodePolicy — Node 담당 조직 정책 해석 (WP5-B)', () => {
+  const g = group([{ executionDomainId: 'procurement', organizationId: 'partner-cooperation' }])
+
+  it('node.organizationId 존재 → override (이 업무에서 재정의)', () => {
+    const r = resolveNodePolicy({ laneId: 'procurement', organizationId: 'finance-team' }, g, ORGS)
+    expect(r).toEqual({ organizationName: '재무팀', source: 'override' })
+  })
+  it('override 없음 + Variant assignment 존재 → inherited (Variant 기본값 상속)', () => {
+    const r = resolveNodePolicy({ laneId: 'procurement' }, g, ORGS)
+    expect(r).toEqual({ organizationName: '상생협력팀', source: 'inherited' })
+  })
+  it('둘 다 없음 → none (미지정)', () => {
+    const r = resolveNodePolicy({ laneId: 'sales' }, g, ORGS)
+    expect(r).toEqual({ source: 'none' })
+    expect(r.organizationName).toBeUndefined()
+  })
+  it('우선순위: override가 Variant 배정보다 우선', () => {
+    // procurement에 Variant=상생협력팀이지만 node override=재무팀 → override 우선
+    const r = resolveNodePolicy({ laneId: 'procurement', organizationId: 'finance-team' }, g, ORGS)
+    expect(r.source).toBe('override')
+    expect(r.organizationName).toBe('재무팀')
   })
 })
 
