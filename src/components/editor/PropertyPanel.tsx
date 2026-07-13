@@ -68,7 +68,7 @@ import {
   setDomainOrganization,
   DomainAssignmentError,
 } from '../../lib/executionDomainAssignmentEditing'
-import { resolveLaneOrganizations } from '../../lib/executionDomainPresentation'
+import { resolveNodePolicy } from '../../lib/executionDomainPresentation'
 import './property-panel.css'
 import './node-connections-panel.css'
 
@@ -387,11 +387,17 @@ function NodeForm({
   onChange: (node: Node) => void
 }) {
   const sortedLanes = [...process.lanes].sort((a, b) => a.order - b.order)
-  // WP5-A — 선택 노드의 실행 영역 담당 조직(read-only). 프로세스 기본 배정에서 해석(override 미구현).
+  // WP5-B — 업무 정책(canonical) read-only 해석. override → Variant 배정 → 미지정.
   const nodeGroup =
     viewMode === 'detail' ? detailProcessGroups?.find((group) => group.detailProcessId === process.id) : undefined
-  const nodeDomainName = sortedLanes.find((lane) => lane.id === node.laneId)?.name ?? node.laneId
-  const nodeAssignedOrg = nodeGroup ? resolveLaneOrganizations(nodeGroup, organizations).get(node.laneId) : undefined
+  const nodePolicy = resolveNodePolicy(node, nodeGroup, organizations)
+  const nodePolicyOrg = nodePolicy.organizationName ?? '미지정'
+  const nodePolicyLabel =
+    nodePolicy.source === 'override'
+      ? '이 업무에서 재정의'
+      : nodePolicy.source === 'inherited'
+        ? 'Variant 기본값에서 상속'
+        : '담당 조직 미지정'
   const cellSlotWarning = viewMode === 'overview' ? getCellSlotCollisionWarning(node, process) : null
   const isConnector = isConnectorNode(node)
   const connectorSubType = isConnector ? resolveConnectorSubType(node) : undefined
@@ -530,9 +536,10 @@ function NodeForm({
       </div>
 
       <div className="property-panel__section">
-        <h3 className="property-panel__section-title">담당/시스템</h3>
+        <h3 className="property-panel__section-title">업무 메타데이터</h3>
         <div className="property-panel__field">
-          <label className="property-panel__label">담당 조직</label>
+          {/* WP5-B — node.owner는 원문 freetext(레거시). canonical 담당 조직(업무 정책)과 구분한다. */}
+          <label className="property-panel__label">기존 담당 표기</label>
           <input
             className="property-panel__input"
             value={node.owner}
@@ -554,7 +561,8 @@ function NodeForm({
       <div className="property-panel__section">
         <h3 className="property-panel__section-title">위치</h3>
         <div className="property-panel__field">
-          <label className="property-panel__label">담당 영역</label>
+          {/* WP5-B — 이 select는 node.laneId(=Execution Domain)를 편집하므로 '실행 영역'. */}
+          <label className="property-panel__label">실행 영역</label>
           <select
             className="property-panel__select"
             value={node.laneId}
@@ -568,13 +576,6 @@ function NodeForm({
             ))}
           </select>
         </div>
-        {viewMode === 'detail' && (
-          <dl className="property-panel__readonly-dl edac-node-readonly">
-            <div className="property-panel__dl-row"><dt>실행 영역</dt><dd>{nodeDomainName}</dd></div>
-            <div className="property-panel__dl-row"><dt>담당 조직</dt><dd>{nodeAssignedOrg ?? '(미지정)'}</dd></div>
-            <div className="property-panel__dl-row"><dt>정책</dt><dd>Variant 기본값 (상속)</dd></div>
-          </dl>
-        )}
         {viewMode === 'overview' && (
           <div className="property-panel__field">
             <label className="property-panel__label">프로세스 구역</label>
@@ -687,6 +688,17 @@ function NodeForm({
           )}
         </div>
       </div>
+
+      {viewMode === 'detail' && (
+        <div className="property-panel__section">
+          {/* WP5-B — canonical Business Policy(담당 조직·정책 적용). node.owner(레거시)와 분리 read-only. */}
+          <h3 className="property-panel__section-title">업무 정책</h3>
+          <dl className="property-panel__readonly-dl edac-node-readonly">
+            <div className="property-panel__dl-row"><dt>담당 조직</dt><dd>{nodePolicyOrg}</dd></div>
+            <div className="property-panel__dl-row"><dt>정책 적용</dt><dd>{nodePolicyLabel}</dd></div>
+          </dl>
+        </div>
+      )}
 
       {connections}
 

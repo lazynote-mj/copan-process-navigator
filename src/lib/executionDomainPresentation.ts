@@ -34,6 +34,28 @@ export function projectLane(
  *
  * @returns Map<executionDomainId, organizationName> — 배정이 없으면 빈 Map.
  */
+/**
+ * Node의 담당 조직 정책 해석 (WP5-B, read-only). 우선순위:
+ *   node.organizationId(override) → DetailProcessGroup.domainAssignments(Variant 기본) → undefined
+ * 편집이 아니라 **상태 구분 표시**용. Business Policy(canonical)와 legacy owner를 분리 노출한다.
+ */
+export type NodePolicySource = 'override' | 'inherited' | 'none'
+export type NodePolicyResolution = { organizationName?: string; source: NodePolicySource }
+
+export function resolveNodePolicy(
+  node: { laneId: string; organizationId?: string },
+  group: DetailProcessGroup | undefined,
+  organizations: Organization[] | undefined,
+): NodePolicyResolution {
+  const orgName = new Map((organizations ?? []).map((o) => [o.id, o.name]))
+  if (node.organizationId) {
+    return { organizationName: orgName.get(node.organizationId) ?? node.organizationId, source: 'override' }
+  }
+  const inherited = resolveLaneOrganizations(group, organizations).get(node.laneId)
+  if (inherited) return { organizationName: inherited, source: 'inherited' }
+  return { source: 'none' }
+}
+
 export function resolveLaneOrganizations(
   group: DetailProcessGroup | undefined,
   organizations: Organization[] | undefined,
