@@ -270,9 +270,10 @@ function VerticalSwimlaneOverlay({
                       onLaneSelect?.(band.laneId)
                     }}
                   />
+                  {/* WP6 — subtitle 없으면(Overview) domain name을 헤더 높이 유지한 채 수직 중앙 정렬 */}
                   <text
                     x={band.x + band.width / 2}
-                    y={headerTop + headerHeight / 2 - 2}
+                    y={headerTop + headerHeight / 2 + (band.subtitle ? -2 : 4)}
                     fill={isInactive ? '#94a3b8' : '#0f172a'}
                     fontSize={12}
                     fontWeight={700}
@@ -280,15 +281,17 @@ function VerticalSwimlaneOverlay({
                   >
                     {band.laneName}
                   </text>
-                  <text
-                    x={band.x + band.width / 2}
-                    y={headerTop + headerHeight / 2 + 13}
-                    fill={isInactive ? '#cbd5e1' : '#64748b'}
-                    fontSize={9.5}
-                    textAnchor="middle"
-                  >
-                    {band.ownerDepartment}
-                  </text>
+                  {band.subtitle && (
+                    <text
+                      x={band.x + band.width / 2}
+                      y={headerTop + headerHeight / 2 + 13}
+                      fill={isInactive ? '#cbd5e1' : '#64748b'}
+                      fontSize={9.5}
+                      textAnchor="middle"
+                    >
+                      {band.subtitle}
+                    </text>
+                  )}
                 </>
               )}
               {index < laneBands.length - 1 && (
@@ -395,12 +398,15 @@ function HorizontalSwimlaneOverlay({
                   onLaneSelect?.(band.laneId)
                 }}
               />
-              <text x={14} y={band.y + band.height / 2 - 2} fill="#0f172a" fontSize={12} fontWeight={700}>
+              {/* WP6 — subtitle 없으면(Overview) domain name 수직 중앙 정렬, subtitle은 조건부 */}
+              <text x={14} y={band.y + band.height / 2 + (band.subtitle ? -2 : 4)} fill="#0f172a" fontSize={12} fontWeight={700}>
                 {band.laneName}
               </text>
-              <text x={14} y={band.y + band.height / 2 + 13} fill="#64748b" fontSize={9.5}>
-                {band.ownerDepartment}
-              </text>
+              {band.subtitle && (
+                <text x={14} y={band.y + band.height / 2 + 13} fill="#64748b" fontSize={9.5}>
+                  {band.subtitle}
+                </text>
+              )}
               {index < laneBands.length - 1 && (
                 <line
                   x1={0}

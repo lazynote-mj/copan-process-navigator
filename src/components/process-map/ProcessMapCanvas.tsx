@@ -80,6 +80,7 @@ import {
   SystemEdge,
 } from './edges/ProcessEdgeBase'
 import { EdgeEditContext } from './edges/EdgeEditContext'
+import { projectLane } from '../../lib/executionDomainPresentation'
 import { DetailViewport } from './DetailViewport'
 import { DetailScrollBridge } from './DetailScrollBridge'
 import { LayoutViewportSync } from './LayoutViewportSync'
@@ -512,19 +513,21 @@ export function ProcessMapCanvas({
   const detailScrollRef = useRef<HTMLDivElement>(null)
 
   const isOverview = viewMode === 'overview'
-  // WP4 — presentation-only adapter. Detail에서만 lane subtitle에 담당 조직명을 주입한다.
-  // ⚠ `LaneBand.ownerDepartment` 슬롯을 subtitle 표시 용도로 **재사용**할 뿐이며, 이 값은:
-  //   - layout(컬럼 위치/폭/node 배치)에 사용되지 않음 (레이아웃 키는 laneId=도메인)
-  //   - persistence에 저장되지 않음 (렌더 시점 파생값)
-  //   - canonical organization assignment가 아님 (canonical은 DetailProcessGroup.domainAssignments)
-  // Overview는 도메인만 표시하므로 원본 band(빈 subtitle)를 그대로 쓴다.
-  const displayLaneBands = useMemo(() => {
-    if (isOverview || !laneOrganizations || laneOrganizations.size === 0) return laneBands
-    return laneBands.map((band) => {
-      const org = laneOrganizations.get(band.laneId)
-      return org ? { ...band, ownerDepartment: org } : band
-    })
-  }, [isOverview, laneBands, laneOrganizations])
+  // WP6 — Overview/Detail lane presentation 정책을 projectLane으로 **명시 분리**.
+  //   - Overview: subtitle 항상 undefined(조직 미표시) — ownerDepartment 빈 값에 의존하지 않음.
+  //   - Detail  : subtitle = 해석된 담당 조직명(presentation-only, layout/persistence 무관).
+  const displayLaneBands = useMemo(
+    () =>
+      laneBands.map((band) => ({
+        ...band,
+        subtitle: projectLane(
+          { id: band.laneId, name: band.laneName },
+          isOverview ? 'overview' : 'detail',
+          laneOrganizations,
+        ).subtitle,
+      })),
+    [isOverview, laneBands, laneOrganizations],
+  )
   const useDetailHorizontal = !isOverview
   const isDetailVertical = !isOverview && !useDetailHorizontal
   const isEditingOverviewProcessGroup =
