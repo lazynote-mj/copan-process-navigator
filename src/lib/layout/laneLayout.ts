@@ -25,7 +25,10 @@ export type CanvasBounds = {
 export type LaneBand = {
   laneId: string
   laneName: string
+  /** @deprecated 레거시 조직명 슬롯. presentation은 subtitle을 쓴다(WP6). */
   ownerDepartment: string
+  /** WP6 — lane 헤더 보조 표시(Overview=undefined, Detail=담당 조직명). ownerDepartment 대체. */
+  subtitle?: string
   x: number
   y: number
   width: number

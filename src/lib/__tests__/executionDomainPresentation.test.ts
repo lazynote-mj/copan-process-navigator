@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveLaneOrganizations } from '../executionDomainPresentation'
+import { projectLane, resolveLaneOrganizations } from '../executionDomainPresentation'
 import type { DetailProcessGroup, DomainAssignment } from '../../types/toBeNavigator'
 import type { Organization } from '../../types/commonMasters'
 
@@ -50,5 +50,34 @@ describe('resolveLaneOrganizations — 경계 조건 (WP4)', () => {
       ORGS,
     )
     expect(m.get('sales')).toBe('unknown-org')
+  })
+})
+
+describe('projectLane — Overview/Detail lane presentation 정책 (WP6)', () => {
+  const domain = { id: 'procurement', name: '구매' }
+  const orgMap = new Map([['procurement', '상생협력팀']])
+
+  it('Overview projection: subtitle은 항상 undefined (조직 미표시)', () => {
+    expect(projectLane(domain, 'overview')).toEqual({ id: 'procurement', label: '구매', subtitle: undefined })
+    // 조직 맵이 있어도 Overview는 무시
+    expect(projectLane(domain, 'overview', orgMap).subtitle).toBeUndefined()
+  })
+
+  it('Detail projection: subtitle = 해석된 담당 조직명', () => {
+    expect(projectLane(domain, 'detail', orgMap)).toEqual({ id: 'procurement', label: '구매', subtitle: '상생협력팀' })
+    // 배정 없는 domain은 subtitle 없음
+    expect(projectLane({ id: 'finance', name: '재무' }, 'detail', orgMap).subtitle).toBeUndefined()
+  })
+
+  it('organization 변경 → Detail subtitle만 변경, Overview subtitle은 항상 비어 있음', () => {
+    const changed = new Map([['procurement', '경영혁신팀']])
+    expect(projectLane(domain, 'detail', changed).subtitle).toBe('경영혁신팀') // Detail 변경됨
+    expect(projectLane(domain, 'overview', changed).subtitle).toBeUndefined() // Overview 불변(빈값)
+  })
+
+  it('Overview presentation은 organization 맵과 무관 — label/id 동일(lane 구조 불변)', () => {
+    const a = projectLane(domain, 'overview', orgMap)
+    const b = projectLane(domain, 'overview', new Map([['procurement', '경영혁신팀']]))
+    expect(a).toEqual(b) // 조직이 바뀌어도 Overview projection 동일
   })
 })
