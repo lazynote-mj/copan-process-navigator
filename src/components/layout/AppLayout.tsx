@@ -898,6 +898,15 @@ export function AppLayout() {
     setIsRightOpen(true)
   }
 
+  // WP5-A — Execution Domain Assignment 저장. 선택 상태를 바꾸지 않는다(편집기가 프로세스 컨텍스트에
+  // 상주해야 하므로). domainAssignments만 갱신하고 그래프/선택엔 관여하지 않는다.
+  const handleUpdateDomainAssignments = useCallback(
+    (group: DetailProcessGroup) => {
+      store.saveDetailProcessGroup(group)
+    },
+    [store],
+  )
+
   const handleProcessGroupDraftChange = useCallback((group: OverviewProcessGroup) => {
     setSelectedElement(buildSelectedProcessGroup(group))
   }, [])
@@ -1421,6 +1430,8 @@ export function AppLayout() {
                   onSaveDetailProcessGroup={handleSaveDetailProcessGroup}
                   workflows={processData.workflows}
                   masterLanes={processData.commonMasters.lanes}
+                  organizations={processData.commonMasters.organizations}
+                  onUpdateDomainAssignments={handleUpdateDomainAssignments}
                   onSaveProcessLaneDisplay={handleSaveProcessLaneDisplay}
                   onProcessGroupDraftChange={handleProcessGroupDraftChange}
                   savedProcessGroup={savedSelectedOverviewGroup}

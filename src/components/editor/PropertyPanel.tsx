@@ -61,6 +61,14 @@ import { EdgeConnectionFields } from './EdgeConnectionFields'
 import { NodeConnectionsPanel } from './NodeConnectionsPanel'
 import { DetailProcessLinks } from './DetailProcessLinks'
 import { ListEditor } from './ListEditor'
+import type { Organization } from '../../types/commonMasters'
+import { ExecutionDomainAssignmentEditor } from './ExecutionDomainAssignmentEditor'
+import {
+  resolveEditableDomains,
+  setDomainOrganization,
+  DomainAssignmentError,
+} from '../../lib/executionDomainAssignmentEditing'
+import { resolveLaneOrganizations } from '../../lib/executionDomainPresentation'
 import './property-panel.css'
 import './node-connections-panel.css'
 
@@ -246,6 +254,10 @@ type PropertyPanelProps = {
   workflows?: Workflow[]
   /** Lane Master 전체 목록 — 프로세스별 표시 레인 선택 UI용 */
   masterLanes?: Lane[]
+  /** Organization 마스터 — 실행 영역별 담당 조직 편집(WP5-A)용 */
+  organizations?: Organization[]
+  /** Execution Domain Assignment 저장(선택 상태 미변경) — WP5-A 프로세스 설정 편집기용 */
+  onUpdateDomainAssignments?: (group: DetailProcessGroup) => void
   onSaveProcessLaneDisplay?: (
     processId: string,
     settings: { laneIds?: string[]; autoHideEmptyLanes?: boolean },
@@ -359,6 +371,7 @@ function NodeForm({
   connections,
   overviewProcessGroups,
   detailProcessGroups,
+  organizations,
   reviewMode = false,
   onChange,
 }: {
@@ -369,10 +382,16 @@ function NodeForm({
   connections?: ReactNode
   overviewProcessGroups?: OverviewProcessGroup[]
   detailProcessGroups?: DetailProcessGroup[]
+  organizations?: Organization[]
   reviewMode?: boolean
   onChange: (node: Node) => void
 }) {
   const sortedLanes = [...process.lanes].sort((a, b) => a.order - b.order)
+  // WP5-A — 선택 노드의 실행 영역 담당 조직(read-only). 프로세스 기본 배정에서 해석(override 미구현).
+  const nodeGroup =
+    viewMode === 'detail' ? detailProcessGroups?.find((group) => group.detailProcessId === process.id) : undefined
+  const nodeDomainName = sortedLanes.find((lane) => lane.id === node.laneId)?.name ?? node.laneId
+  const nodeAssignedOrg = nodeGroup ? resolveLaneOrganizations(nodeGroup, organizations).get(node.laneId) : undefined
   const cellSlotWarning = viewMode === 'overview' ? getCellSlotCollisionWarning(node, process) : null
   const isConnector = isConnectorNode(node)
   const connectorSubType = isConnector ? resolveConnectorSubType(node) : undefined
@@ -549,6 +568,13 @@ function NodeForm({
             ))}
           </select>
         </div>
+        {viewMode === 'detail' && (
+          <dl className="property-panel__readonly-dl edac-node-readonly">
+            <div className="property-panel__dl-row"><dt>실행 영역</dt><dd>{nodeDomainName}</dd></div>
+            <div className="property-panel__dl-row"><dt>담당 조직</dt><dd>{nodeAssignedOrg ?? '(미지정)'}</dd></div>
+            <div className="property-panel__dl-row"><dt>정책</dt><dd>Variant 기본값 (상속)</dd></div>
+          </dl>
+        )}
         {viewMode === 'overview' && (
           <div className="property-panel__field">
             <label className="property-panel__label">프로세스 구역</label>
@@ -1978,6 +2004,7 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
               viewMode={viewMode}
               overviewProcessGroups={props.overviewProcessGroups}
               detailProcessGroups={props.detailProcessGroups}
+              organizations={props.organizations}
               reviewMode={reviewMode}
               connections={
                 isEditMode && !isNewNode ? (
@@ -2280,11 +2307,47 @@ function PropertyPanelEditor(props: PropertyPanelEditorProps) {
 }
 
 export function PropertyPanel(props: PropertyPanelProps) {
-  const { appMode, selectedElement, process, onSelectZone } = props
+  const {
+    appMode,
+    selectedElement,
+    process,
+    viewMode,
+    onSelectZone,
+    detailProcessGroups,
+    organizations,
+    masterLanes,
+    onUpdateDomainAssignments,
+  } = props
   const isEditMode = appMode === 'edit'
   const processZones = process.zones ?? []
 
   if (!selectedElement) {
+    // WP5-A — Detail 프로세스 컨텍스트: 실행 영역별 담당 조직(Business Policy) 편집.
+    // DetailProcessGroup.domainAssignments만 편집한다(node.laneId·layout 무관).
+    const settingsGroup =
+      viewMode === 'detail'
+        ? detailProcessGroups?.find((group) => group.detailProcessId === process.id)
+        : undefined
+    const editableDomains = settingsGroup
+      ? resolveEditableDomains(
+          process.nodes.map((node) => node.laneId),
+          settingsGroup.domainAssignments,
+          masterLanes ?? process.lanes,
+        )
+      : []
+    const handleAssignmentChange = (executionDomainId: string, organizationId: string) => {
+      if (!settingsGroup || !onUpdateDomainAssignments) return
+      try {
+        const next = setDomainOrganization(settingsGroup.domainAssignments, executionDomainId, organizationId, {
+          organizations,
+          executionDomains: masterLanes ?? process.lanes,
+        })
+        onUpdateDomainAssignments({ ...settingsGroup, domainAssignments: next })
+      } catch (error) {
+        if (!(error instanceof DomainAssignmentError)) throw error
+        // 마스터에 없는 값 등 — 저장하지 않음(성공 상태를 남기지 않음).
+      }
+    }
     return (
       <div className="property-panel node-detail-panel" {...panelEventShieldProps}>
         <p className="property-panel__empty">
@@ -2292,6 +2355,15 @@ export function PropertyPanel(props: PropertyPanelProps) {
             ? '편집할 항목을 선택하세요. 업무·연결선·담당 영역·프로세스 구역을 클릭하거나 상단 + 버튼으로 추가할 수 있습니다.'
             : '프로세스맵에서 업무 또는 프로세스 구역을 클릭하면 상세 정보가 표시됩니다.'}
         </p>
+        {settingsGroup && editableDomains.length > 0 && (
+          <ExecutionDomainAssignmentEditor
+            domains={editableDomains}
+            assignments={settingsGroup.domainAssignments ?? []}
+            organizations={organizations ?? []}
+            disabled={!isEditMode}
+            onChange={handleAssignmentChange}
+          />
+        )}
         {onSelectZone && processZones.length > 0 && (
           <ProcessZoneList zones={processZones} onSelect={onSelectZone} />
         )}

@@ -15,6 +15,7 @@ import {
 } from '../processDataMigration'
 import { filePayloadToProcessData } from '../processDataIO'
 import { resolveLaneOrganizations } from '../../lib/executionDomainPresentation'
+import { setDomainOrganization, DomainAssignmentError } from '../../lib/executionDomainAssignmentEditing'
 
 /**
  * WP3 Golden Scenario — 실제 대표 프로세스(구매/발주)로 전체 파이프라인을 검증한다.
@@ -229,5 +230,70 @@ describe('Golden Scenario — 추가 무결성 검증', () => {
         groups: (p as { detailProcessGroups?: unknown[] }).detailProcessGroups,
       })
     expect(shape(r2)).toEqual(shape(r1))
+  })
+})
+
+// ── WP5-A: Variant assignment editing (구매 상생협력팀 → 경영혁신팀) ───────────────
+
+describe('Golden Scenario — WP5-A Assignment Editing', () => {
+  const load = () => buildProcessDataFromPayload(fixturePayload, 'server-json')
+  const P = 'purchase-to-ap-invoice'
+  const editCtx = (data: ReturnType<typeof load>) => ({
+    organizations: data.commonMasters.organizations,
+    executionDomains: data.commonMasters.lanes,
+  })
+  const invariants = (data: ReturnType<typeof load>) => ({
+    laneIds: data.processes.flatMap((p) => p.nodes.map((n) => n.laneId)).sort(),
+    laneMaster: data.commonMasters.lanes.map((l) => `${l.id}:${l.order}`),
+    edges: data.processes.flatMap((p) => p.edges.map((e) => `${e.source}->${e.target}`)).sort(),
+  })
+
+  it('구매 담당 조직 상생협력팀 → 경영혁신팀: subtitle·resolve 변경, 그래프 불변, save/reload 유지', () => {
+    const data = load()
+    const group = data.detailProcessGroups!.find((g) => g.detailProcessId === P)!
+    const before = invariants(data)
+    // 편집 전: 구매 = 상생협력팀
+    expect(resolveLaneOrganizations(group, data.commonMasters.organizations).get('procurement')).toBe('상생협력팀')
+
+    // 편집: DetailProcessGroup.domainAssignments만 변경
+    group.domainAssignments = setDomainOrganization(
+      group.domainAssignments,
+      'procurement',
+      'business-innovation',
+      editCtx(data),
+    )
+
+    // 즉시 반영: resolve 결과 변경
+    expect(resolveLaneOrganizations(group, data.commonMasters.organizations).get('procurement')).toBe('경영혁신팀')
+    // 그래프 불변: node.laneId·lane master·edge topology
+    const after = invariants(data)
+    expect(after.laneIds).toEqual(before.laneIds)
+    expect(after.laneMaster).toEqual(before.laneMaster)
+    expect(after.edges).toEqual(before.edges)
+
+    // save → reload 후 경영혁신팀 유지
+    const reloaded = buildProcessDataFromPayload(processDataToFilePayload(data), 'server-json')
+    const rg = reloaded.detailProcessGroups!.find((g) => g.detailProcessId === P)!
+    expect(resolveLaneOrganizations(rg, reloaded.commonMasters.organizations).get('procurement')).toBe('경영혁신팀')
+    // reload 후에도 node.laneId 불변
+    expect(reloaded.processes.flatMap((p) => p.nodes.map((n) => n.laneId)).sort()).toEqual(before.laneIds)
+  })
+
+  it('organization master에 없는 id 저장 거부', () => {
+    const data = load()
+    const group = data.detailProcessGroups!.find((g) => g.detailProcessId === P)!
+    expect(() => setDomainOrganization(group.domainAssignments, 'procurement', '임의문자열', editCtx(data))).toThrow(
+      DomainAssignmentError,
+    )
+  })
+
+  it('동일 domain 중복 assignment 생성 방지, 동일 조직 여러 domain 허용', () => {
+    const data = load()
+    const group = data.detailProcessGroups!.find((g) => g.detailProcessId === P)!
+    let a = setDomainOrganization(group.domainAssignments, 'procurement', 'business-innovation', editCtx(data))
+    expect(a.filter((x) => x.executionDomainId === 'procurement')).toHaveLength(1) // 중복 없음
+    a = setDomainOrganization(a, 'business', 'finance-team', editCtx(data)) // 같은 조직 다른 domain
+    a = setDomainOrganization(a, 'finance', 'finance-team', editCtx(data))
+    expect(a.filter((x) => x.organizationId === 'finance-team')).toHaveLength(2) // 허용
   })
 })
