@@ -350,9 +350,9 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -375,7 +375,7 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-order-to-sales-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 423,
@@ -407,7 +407,7 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-order-to-sales-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 423,
@@ -415,7 +415,7 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-order-to-sales-step-08",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 423,
@@ -423,7 +423,7 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-order-to-sales-step-09",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 423,
@@ -431,7 +431,7 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-order-to-sales-step-10",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 423,
@@ -823,9 +823,9 @@ exports[`layout engine snapshots > 'b2b-domestic-return' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -848,7 +848,7 @@ exports[`layout engine snapshots > 'b2b-domestic-return' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-return-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 423,
@@ -880,7 +880,7 @@ exports[`layout engine snapshots > 'b2b-domestic-return' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-return-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 423,
@@ -888,7 +888,7 @@ exports[`layout engine snapshots > 'b2b-domestic-return' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-return-step-08",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 423,
@@ -896,7 +896,7 @@ exports[`layout engine snapshots > 'b2b-domestic-return' 1`] = `
     {
       "h": 46,
       "id": "b2b-domestic-return-step-09",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 423,
@@ -1440,9 +1440,9 @@ exports[`layout engine snapshots > 'b2b-export-order-to-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -1481,7 +1481,7 @@ exports[`layout engine snapshots > 'b2b-export-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-export-order-to-sales-step-05",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 423,
@@ -1489,7 +1489,7 @@ exports[`layout engine snapshots > 'b2b-export-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-export-order-to-sales-step-06",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 423,
@@ -1497,7 +1497,7 @@ exports[`layout engine snapshots > 'b2b-export-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2b-export-order-to-sales-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1316,
       "y": 423,
@@ -2029,9 +2029,9 @@ exports[`layout engine snapshots > 'b2c-order-to-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -2054,7 +2054,7 @@ exports[`layout engine snapshots > 'b2c-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2c-order-to-sales-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 491,
@@ -2062,7 +2062,7 @@ exports[`layout engine snapshots > 'b2c-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2c-order-to-sales-step-04",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 491,
@@ -2110,7 +2110,7 @@ exports[`layout engine snapshots > 'b2c-order-to-sales' 1`] = `
     {
       "h": 46,
       "id": "b2c-order-to-sales-step-10",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1756,
       "y": 491,
@@ -2586,9 +2586,9 @@ exports[`layout engine snapshots > 'b2c-return' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -2611,7 +2611,7 @@ exports[`layout engine snapshots > 'b2c-return' 1`] = `
     {
       "h": 46,
       "id": "b2c-return-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 627,
@@ -2619,7 +2619,7 @@ exports[`layout engine snapshots > 'b2c-return' 1`] = `
     {
       "h": 46,
       "id": "b2c-return-step-04",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 627,
@@ -2723,7 +2723,7 @@ exports[`layout engine snapshots > 'b2c-return' 1`] = `
     {
       "h": 46,
       "id": "node-mquqv9uk-sc4k6",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 559,
@@ -2731,7 +2731,7 @@ exports[`layout engine snapshots > 'b2c-return' 1`] = `
     {
       "h": 46,
       "id": "node-mquqviff-bz9qo",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 627,
@@ -3363,9 +3363,9 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -3412,7 +3412,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "inbound-check",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 611,
@@ -3420,7 +3420,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "inbound-confirm",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 679,
@@ -3428,7 +3428,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "inbound-info",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 436,
       "y": 367,
@@ -3444,7 +3444,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "po-approval",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 216,
       "y": 435,
@@ -3460,7 +3460,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "product-register-approval",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 216,
       "y": 299,
@@ -3468,7 +3468,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "product-register-request",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 216,
       "y": 367,
@@ -3492,7 +3492,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "purchase-order",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 216,
       "y": 503,
@@ -3508,7 +3508,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
     {
       "h": 46,
       "id": "stock-plus",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 747,
@@ -3545,7 +3545,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
 exports[`layout engine snapshots > 'business-to-purchase-request' 1`] = `
 {
   "canvasBounds": {
-    "height": 428,
+    "height": 924,
     "width": 2536,
   },
   "edges": [
@@ -4000,6 +4000,10 @@ exports[`layout engine snapshots > 'business-to-purchase-request' 1`] = `
   ],
   "lanes": [
     "business",
+    "procurement",
+    "logistics",
+    "sales",
+    "finance",
   ],
   "nodes": [
     {
@@ -4301,9 +4305,9 @@ exports[`layout engine snapshots > 'consignment-settlement' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -5110,9 +5114,9 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -5127,7 +5131,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-02",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 559,
@@ -5135,7 +5139,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-04",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 559,
@@ -5151,7 +5155,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-09",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 627,
@@ -5167,7 +5171,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-11",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1316,
       "y": 627,
@@ -5175,7 +5179,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-12",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 763,
@@ -5183,7 +5187,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-14",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 831,
@@ -5191,7 +5195,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "event-sales-step-15",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 831,
@@ -5239,7 +5243,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "node-mqt61mig-33h91",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 627,
@@ -5255,7 +5259,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "node-mqt8fajx-617ov",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 559,
@@ -5351,7 +5355,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
     {
       "h": 46,
       "id": "node-mqzvw8dh-45des",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 695,
@@ -5679,16 +5683,16 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
     {
       "h": 46,
       "id": "other-issue-step-01",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 423,
@@ -5704,7 +5708,7 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
     {
       "h": 46,
       "id": "other-issue-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 423,
@@ -5720,7 +5724,7 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
     {
       "h": 46,
       "id": "other-issue-step-05",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 423,
@@ -5728,7 +5732,7 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
     {
       "h": 46,
       "id": "other-issue-step-06",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 423,
@@ -5736,7 +5740,7 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
     {
       "h": 46,
       "id": "other-issue-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 423,
@@ -5744,7 +5748,7 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
     {
       "h": 46,
       "id": "other-issue-step-08",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1316,
       "y": 423,
@@ -5752,7 +5756,7 @@ exports[`layout engine snapshots > 'other-issue' 1`] = `
     {
       "h": 46,
       "id": "other-issue-step-09",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1536,
       "y": 423,
@@ -5952,9 +5956,9 @@ exports[`layout engine snapshots > 'other-receipt' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -5977,7 +5981,7 @@ exports[`layout engine snapshots > 'other-receipt' 1`] = `
     {
       "h": 46,
       "id": "other-receipt-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 491,
@@ -6001,7 +6005,7 @@ exports[`layout engine snapshots > 'other-receipt' 1`] = `
     {
       "h": 46,
       "id": "other-receipt-step-06",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 491,
@@ -8314,9 +8318,9 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -8331,7 +8335,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "node-mqu7tqrc-h4amm",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 1536,
       "y": 803,
@@ -8403,7 +8407,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 627,
@@ -8411,7 +8415,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-08",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 216,
       "y": 627,
@@ -8419,7 +8423,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-09",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 876,
       "y": 803,
@@ -8451,7 +8455,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-13",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 695,
@@ -8475,7 +8479,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-16",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 1536,
       "y": 871,
@@ -8523,7 +8527,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-22",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 1756,
       "y": 871,
@@ -8531,7 +8535,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
     {
       "h": 46,
       "id": "popup-concert-stock-sales-sync-step-23",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 1536,
       "y": 939,
@@ -9107,16 +9111,16 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
     {
       "h": 46,
       "id": "node-mquqgxo5-j0tk9",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 559,
@@ -9124,7 +9128,7 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
     {
       "h": 46,
       "id": "node-mquqh3db-aw6k4",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 627,
@@ -9156,7 +9160,7 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
     {
       "h": 46,
       "id": "preorder-to-sales-step-04",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 627,
@@ -9164,7 +9168,7 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
     {
       "h": 46,
       "id": "preorder-to-sales-step-05",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 627,
@@ -9212,7 +9216,7 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
     {
       "h": 46,
       "id": "preorder-to-sales-step-11",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 695,
@@ -9620,9 +9624,9 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -9645,7 +9649,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-03",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 656,
       "y": 299,
@@ -9653,7 +9657,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-04",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 876,
       "y": 299,
@@ -9661,7 +9665,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-05",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 299,
@@ -9669,7 +9673,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-06",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1316,
       "y": 299,
@@ -9677,7 +9681,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1316,
       "y": 611,
@@ -9685,7 +9689,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-08",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1536,
       "y": 299,
@@ -9693,7 +9697,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-09",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1756,
       "y": 299,
@@ -9725,7 +9729,7 @@ exports[`layout engine snapshots > 'purchase-return' 1`] = `
     {
       "h": 46,
       "id": "purchase-return-step-13",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1536,
       "y": 679,
@@ -10209,9 +10213,9 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -10234,7 +10238,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-03",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 216,
       "y": 299,
@@ -10242,7 +10246,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 44,
       "id": "purchase-to-ap-invoice-step-04",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 216,
       "y": 368,
@@ -10250,7 +10254,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-05",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 436,
       "y": 299,
@@ -10258,7 +10262,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-06",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 436,
       "y": 367,
@@ -10266,7 +10270,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 611,
@@ -10274,7 +10278,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-08",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 747,
@@ -10282,7 +10286,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-09",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 436,
       "y": 679,
@@ -10290,7 +10294,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-10",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 747,
@@ -10298,7 +10302,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-11",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 611,
@@ -10306,7 +10310,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-12",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1316,
       "y": 611,
@@ -10314,7 +10318,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-13",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 367,
@@ -10322,7 +10326,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-14",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 435,
@@ -10330,7 +10334,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-15",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 503,
@@ -10338,7 +10342,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 44,
       "id": "purchase-to-ap-invoice-step-16",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 876,
       "y": 300,
@@ -10346,7 +10350,7 @@ exports[`layout engine snapshots > 'purchase-to-ap-invoice' 1`] = `
     {
       "h": 46,
       "id": "purchase-to-ap-invoice-step-17",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 876,
       "y": 503,
@@ -10630,9 +10634,9 @@ exports[`layout engine snapshots > 'revenue-share-settlement' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -10999,9 +11003,9 @@ exports[`layout engine snapshots > 'royalty-mg-settlement' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -11101,7 +11105,7 @@ exports[`layout engine snapshots > 'royalty-mg-settlement' 1`] = `
 exports[`layout engine snapshots > 'service-business-to-expense' 1`] = `
 {
   "canvasBounds": {
-    "height": 428,
+    "height": 924,
     "width": 2316,
   },
   "edges": [
@@ -11548,6 +11552,10 @@ exports[`layout engine snapshots > 'service-business-to-expense' 1`] = `
   ],
   "lanes": [
     "business",
+    "procurement",
+    "logistics",
+    "sales",
+    "finance",
   ],
   "nodes": [
     {
@@ -11686,7 +11694,7 @@ exports[`layout engine snapshots > 'service-business-to-expense' 1`] = `
 exports[`layout engine snapshots > 'service-order-to-sales' 1`] = `
 {
   "canvasBounds": {
-    "height": 292,
+    "height": 788,
     "width": 1880,
   },
   "edges": [
@@ -11821,6 +11829,10 @@ exports[`layout engine snapshots > 'service-order-to-sales' 1`] = `
   ],
   "lanes": [
     "business",
+    "procurement",
+    "logistics",
+    "sales",
+    "finance",
   ],
   "nodes": [
     {
@@ -12150,9 +12162,9 @@ exports[`layout engine snapshots > 'service-project-settlement' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -12563,9 +12575,9 @@ exports[`layout engine snapshots > 'service-purchase-to-ap' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -12596,7 +12608,7 @@ exports[`layout engine snapshots > 'service-purchase-to-ap' 1`] = `
     {
       "h": 46,
       "id": "service-purchase-to-ap-step-04",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 656,
       "y": 435,
@@ -12604,7 +12616,7 @@ exports[`layout engine snapshots > 'service-purchase-to-ap' 1`] = `
     {
       "h": 46,
       "id": "service-purchase-to-ap-step-05",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 656,
       "y": 503,
@@ -12628,7 +12640,7 @@ exports[`layout engine snapshots > 'service-purchase-to-ap' 1`] = `
     {
       "h": 46,
       "id": "service-purchase-to-ap-step-08",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 367,
@@ -12636,7 +12648,7 @@ exports[`layout engine snapshots > 'service-purchase-to-ap' 1`] = `
     {
       "h": 46,
       "id": "service-purchase-to-ap-step-09",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 435,
@@ -12644,7 +12656,7 @@ exports[`layout engine snapshots > 'service-purchase-to-ap' 1`] = `
     {
       "h": 46,
       "id": "service-purchase-to-ap-step-10",
-      "lane": "partnership",
+      "lane": "procurement",
       "w": 170,
       "x": 1096,
       "y": 503,
@@ -12872,9 +12884,9 @@ exports[`layout engine snapshots > 'stock-movement' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
@@ -12897,7 +12909,7 @@ exports[`layout engine snapshots > 'stock-movement' 1`] = `
     {
       "h": 46,
       "id": "stock-movement-step-03",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 656,
       "y": 491,
@@ -12921,7 +12933,7 @@ exports[`layout engine snapshots > 'stock-movement' 1`] = `
     {
       "h": 46,
       "id": "stock-movement-step-06",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 1096,
       "y": 491,
@@ -13173,16 +13185,16 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
     {
       "h": 46,
       "id": "stock-transfer-step-01",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 216,
       "y": 547,
@@ -13190,7 +13202,7 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
     {
       "h": 46,
       "id": "stock-transfer-step-02",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 436,
       "y": 547,
@@ -13198,7 +13210,7 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
     {
       "h": 46,
       "id": "stock-transfer-step-03",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 656,
       "y": 547,
@@ -13230,7 +13242,7 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
     {
       "h": 46,
       "id": "stock-transfer-step-07",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 876,
       "y": 547,
@@ -13238,7 +13250,7 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
     {
       "h": 46,
       "id": "stock-transfer-step-08",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 1096,
       "y": 547,
@@ -13251,7 +13263,7 @@ exports[`layout engine snapshots > 'stock-transfer' 1`] = `
 exports[`layout engine snapshots > 'storage-location-master' 1`] = `
 {
   "canvasBounds": {
-    "height": 292,
+    "height": 788,
     "width": 1880,
   },
   "edges": [
@@ -13318,6 +13330,10 @@ exports[`layout engine snapshots > 'storage-location-master' 1`] = `
   ],
   "lanes": [
     "business",
+    "procurement",
+    "logistics",
+    "sales",
+    "finance",
   ],
   "nodes": [
     {
@@ -13755,16 +13771,16 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
   ],
   "lanes": [
     "business",
-    "partnership",
-    "warehouse-easyadmin",
-    "retail-easychain",
+    "procurement",
+    "logistics",
+    "sales",
     "finance",
   ],
   "nodes": [
     {
       "h": 46,
       "id": "node-mqt0pojw-g74j0",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 436,
       "y": 803,
@@ -13772,7 +13788,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-01",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 216,
       "y": 667,
@@ -13780,7 +13796,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-02",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 216,
       "y": 803,
@@ -13788,7 +13804,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-03",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 216,
       "y": 735,
@@ -13796,7 +13812,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-04",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 436,
       "y": 667,
@@ -13804,7 +13820,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-05",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 656,
       "y": 735,
@@ -13812,7 +13828,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-06",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 876,
       "y": 667,
@@ -13820,7 +13836,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-07",
-      "lane": "warehouse-easyadmin",
+      "lane": "logistics",
       "w": 170,
       "x": 876,
       "y": 491,
@@ -13844,7 +13860,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-10",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 876,
       "y": 803,
@@ -13852,7 +13868,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-11",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 876,
       "y": 871,
@@ -13860,7 +13876,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
     {
       "h": 46,
       "id": "store-sales-step-12",
-      "lane": "retail-easychain",
+      "lane": "sales",
       "w": 170,
       "x": 1096,
       "y": 871,

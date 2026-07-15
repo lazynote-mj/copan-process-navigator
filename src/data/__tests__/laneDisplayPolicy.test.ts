@@ -13,16 +13,21 @@ const baseData = () =>
 const SINGLE_LANE_ID = 'service-business-to-expense'
 const MULTI_LANE_ID = 'purchase-to-ap-invoice'
 
-describe('이슈1 — 단일 레인 collapse는 명시 설정 시 우회', () => {
-  it('laneIds 미설정 단일 레인 프로세스는 collapse(1개 레인)된다', () => {
+describe('Workshop Swimlane 정책 — Detail 기본 lane projection', () => {
+  it('laneIds 미설정 단일 레인 프로세스도 기본 5개 lane을 표시한다', () => {
     const data = baseData()
     const process = getProcessByScope(data, SINGLE_LANE_ID)!
     const lanes = resolveDetailLayoutLanes(process, process.nodes)
-    expect(lanes).toHaveLength(1)
-    expect(lanes[0].id).toBe('business')
+    expect(lanes.map((lane) => lane.id)).toEqual([
+      'business',
+      'procurement',
+      'logistics',
+      'sales',
+      'finance',
+    ])
   })
 
-  it('빈 레인을 포함해 명시 설정하면 collapse하지 않고 설정한 레인을 모두 표시한다', () => {
+  it('명시 laneIds가 일부 lane만 포함해도 일반 Detail Process는 기본 5개 lane을 표시한다', () => {
     // 사업부(노드 있음) + 재무팀(노드 없음) 설정
     const data = saveProcessLaneDisplay(baseData(), SINGLE_LANE_ID, {
       laneIds: ['business', 'finance'],
@@ -30,15 +35,26 @@ describe('이슈1 — 단일 레인 collapse는 명시 설정 시 우회', () =>
     const process = getProcessByScope(data, SINGLE_LANE_ID)!
     expect(process.laneIds).toEqual(['business', 'finance'])
     const lanes = resolveDetailLayoutLanes(process, process.nodes)
-    expect(lanes.map((lane) => lane.id)).toEqual(['business', 'finance'])
+    expect(lanes.map((lane) => lane.id)).toEqual([
+      'business',
+      'procurement',
+      'logistics',
+      'sales',
+      'finance',
+    ])
   })
 
-  it('설정이 노드 있는 레인만이면 여전히 collapse된다 (표시 변화 없음)', () => {
+  it('설정이 노드 있는 레인만이어도 projection은 기본 5개 lane을 유지한다', () => {
     const data = saveProcessLaneDisplay(baseData(), SINGLE_LANE_ID, { laneIds: ['business'] })
     const process = getProcessByScope(data, SINGLE_LANE_ID)!
     const lanes = resolveDetailLayoutLanes(process, process.nodes)
-    expect(lanes).toHaveLength(1)
-    expect(lanes[0].id).toBe('business')
+    expect(lanes.map((lane) => lane.id)).toEqual([
+      'business',
+      'procurement',
+      'logistics',
+      'sales',
+      'finance',
+    ])
   })
 })
 

@@ -7,6 +7,7 @@ import { resolveNodeLocalOrder } from './localOrder'
 import { DETAIL_DOCUMENT, DETAIL_GRID_METRICS, getDetailNodeSize } from './detailLayoutMetrics'
 import { isInterfaceRuleNode } from './interfaceRuleLayout'
 import type { GridLayoutMetrics } from './gridLayoutMetrics'
+import { buildVisibleDetailLanes } from './detailSwimlaneProjection'
 
 type SizedNode = Node & { width: number; height: number; localOrder: number }
 
@@ -69,6 +70,9 @@ export function isDetailSingleLaneProcess(nodes: Node[]): boolean {
  * 설정한 레인을 모두 보여준다.
  */
 export function resolveDetailLayoutLanes(process: Process, nodes: Node[]): Lane[] {
+  const policyLanes = buildVisibleDetailLanes(process)
+  if (policyLanes.length > 1) return policyLanes
+
   const usedLaneIds = getUsedLaneIds(nodes)
   const hasExplicitEmptyLane =
     process.laneIds != null && process.lanes.some((lane) => !usedLaneIds.has(lane.id))

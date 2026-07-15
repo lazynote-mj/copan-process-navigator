@@ -7,6 +7,7 @@ import { getDetailGridLayout, rebuildDetailLayoutEdges } from './detailGridLayou
 import { getDetailHorizontalLayout, rebuildDetailHorizontalLayoutEdges } from './detailHorizontalLayout'
 import { getOverviewVerticalLayout } from './overviewVerticalLayout'
 import { buildOverviewEdges } from './overviewEdgePipeline'
+import { projectDetailSwimlanes } from './detailSwimlaneProjection'
 import { OVERVIEW_GRID_METRICS } from './overviewGridMetrics'
 import {
   type CanvasBounds,
@@ -112,9 +113,9 @@ export function rebuildLayoutEdges(
     return buildOverviewEdges(process, placed, minContentX).flowEdges
   }
   if (options.detailHorizontal) {
-    return rebuildDetailHorizontalLayoutEdges(process, placed)
+    return rebuildDetailHorizontalLayoutEdges(projectDetailSwimlanes(process), placed)
   }
-  return rebuildDetailLayoutEdges(process, placed)
+  return rebuildDetailLayoutEdges(projectDetailSwimlanes(process), placed)
 }
 
 export function getLayoutedElements(process: Process, options?: LayoutOptions): LayoutResult {
@@ -130,9 +131,10 @@ export function getLayoutedElements(process: Process, options?: LayoutOptions): 
     }
   }
 
+  const detailProcess = projectDetailSwimlanes(process)
   const detail = options?.detailHorizontal
-    ? getDetailHorizontalLayout(process)
-    : getDetailGridLayout(process)
+    ? getDetailHorizontalLayout(detailProcess)
+    : getDetailGridLayout(detailProcess)
   return {
     nodes: detail.nodes,
     edges: detail.edges,

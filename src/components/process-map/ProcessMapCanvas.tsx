@@ -63,6 +63,7 @@ import {
 } from '../../lib/layout/swimlaneGridLayout'
 import { buildSwimlaneGridFromProcess } from '../../lib/layout/laneLayoutResolver'
 import { isDetailSingleLaneProcess, resolveDetailLayoutLanes } from '../../lib/layout/detailVerticalLayout'
+import { projectDetailSwimlanes } from '../../lib/layout/detailSwimlaneProjection'
 import ProcessNodeCard from './nodes/ProcessNodeCard'
 import DecisionNodeCard from './nodes/DecisionNodeCard'
 import DatabaseNodeCard from './nodes/DatabaseNodeCard'
@@ -474,12 +475,17 @@ export function ProcessMapCanvas({
       : null
   const selectedOverviewZoneId =
     selectedElement?.type === 'overview-zone' ? selectedElement.id : null
+  const isOverview = viewMode === 'overview'
+  const projectedProcess = useMemo(
+    () => (isOverview ? process : projectDetailSwimlanes(process)),
+    [isOverview, process],
+  )
   const layoutProcess = useMemo(() => {
     if (overviewHighlight?.mode === 'filter' && overviewHighlight.groupId) {
-      return filterProcessForHighlight(process, overviewHighlight)
+      return filterProcessForHighlight(projectedProcess, overviewHighlight)
     }
-    return process
-  }, [process, overviewHighlight])
+    return projectedProcess
+  }, [projectedProcess, overviewHighlight])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<ProcessNodeData>>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
@@ -512,7 +518,6 @@ export function ProcessMapCanvas({
   const overviewScrollRef = useRef<HTMLDivElement>(null)
   const detailScrollRef = useRef<HTMLDivElement>(null)
 
-  const isOverview = viewMode === 'overview'
   // WP6 — Overview/Detail lane presentation 정책을 projectLane으로 **명시 분리**.
   //   - Overview: subtitle 항상 undefined(조직 미표시) — ownerDepartment 빈 값에 의존하지 않음.
   //   - Detail  : subtitle = 해석된 담당 조직명(presentation-only, layout/persistence 무관).
@@ -1203,14 +1208,14 @@ export function ProcessMapCanvas({
     return { scaledHeight }
   }, [canvasBounds, detailScale, isOverview])
 
-  const isDetailSingleLane = isDetailVertical && isDetailSingleLaneProcess(process.nodes)
+  const isDetailSingleLane = isDetailVertical && isDetailSingleLaneProcess(layoutProcess.nodes)
 
   const layoutProcessForGrid = useMemo(
     () =>
       isDetailVertical
-        ? { ...process, lanes: resolveDetailLayoutLanes(process, process.nodes) }
-        : process,
-    [process, isDetailVertical],
+        ? { ...layoutProcess, lanes: resolveDetailLayoutLanes(layoutProcess, layoutProcess.nodes) }
+        : layoutProcess,
+    [layoutProcess, isDetailVertical],
   )
 
   const swimlaneGrid = useMemo(() => {
@@ -1534,7 +1539,7 @@ export function ProcessMapCanvas({
           >
             {isDetailVertical && (
               <OverviewStickyHeader
-                lanes={resolveDetailLayoutLanes(process, process.nodes)}
+                lanes={resolveDetailLayoutLanes(layoutProcess, layoutProcess.nodes)}
                 scale={detailScale}
                 contentWidth={scrollContentWidth}
                 gridConfig={swimlaneGrid}
