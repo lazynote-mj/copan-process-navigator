@@ -265,7 +265,7 @@
   gap: 10px;
   margin-top: 2px;
   padding-left: 10px;
-  border-left: 1px solid #e2e8f0;
+  border-left: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   margin-left: 8px;
 }
 
@@ -345,13 +345,13 @@
   bottom: 0;
   left: 0;
   width: 1px;
-  background: #dbe4ef;
+  background: color-mix(in srgb, var(--border) 68%, transparent);
 }
 
 /* Variant guide line */
 .process-group-menu__section .process-group-menu__list--variants::before {
-  width: 1.5px;
-  background: #d8e0ea;
+  width: 1px;
+  background: color-mix(in srgb, var(--border) 64%, transparent);
 }
 
 /* Flatten 목록은 guide line 제거 (Flow 계층이므로) */
@@ -464,18 +464,18 @@
 /* Active (v3) — Workflow보다 눈에 덜 띄게: 좌측 2px 액센트 + 옅은 배경, bold 없음 */
 .process-group-menu__section .process-group-menu__item--active {
   border-color: transparent;
-  box-shadow: inset 2px 0 0 var(--accent);
-  background: rgba(37, 99, 235, 0.05);
+  box-shadow: inset 3px 0 0 var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 78%, var(--surface));
 }
 
 .process-group-menu__section .process-group-menu__item--active .process-group-menu__title {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .process-group-menu__section .process-group-menu__list--variants .process-group-menu__item--active {
-  box-shadow: inset 2px 0 0 var(--accent);
-  background: rgba(37, 99, 235, 0.05);
+  box-shadow: inset 3px 0 0 var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 78%, var(--surface));
 }
 
 .process-group-menu__title-text {

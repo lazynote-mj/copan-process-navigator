@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCapabilitySections,
+  countCapabilityProcessLeaves,
+  getProcessLeafLabel,
   isSoleVariant,
+  resolveSelectedProcessPath,
   UNCLASSIFIED_CAPABILITY_KEY,
   type WorkflowSection,
 } from '../workflowSections'
@@ -80,6 +83,44 @@ describe('buildCapabilitySections — Business Capability → Workflow → Detai
     expect(fallback.workflowSections.some((s) => s.groups.some((g) => g.id === 'g-orphan'))).toBe(true)
     // 정상 데이터에서는 fallback이 없어야 하므로 마지막에 위치
     expect(capabilities[capabilities.length - 1].key).toBe(UNCLASSIFIED_CAPABILITY_KEY)
+  })
+
+  it('Capability count는 중간 그룹이 아니라 실제 Process leaf 수를 센다', () => {
+    const groups = [
+      grp('g-b2b', 'wf-order-to-sales', { variantLabel: 'B2B 국내' }),
+      grp('g-b2c', 'wf-order-to-sales', { variantLabel: 'B2C' }),
+      grp('g-service', 'wf-service-order-to-sales', { variantLabel: '서비스' }),
+    ]
+    const salesWorkflows = [
+      wf('wf-order-to-sales', '주문 → 출고 → 매출전표', 'sales', 1),
+      wf('wf-service-order-to-sales', '주문 → 매출전표(서비스)', 'sales', 2),
+    ]
+    const capabilities = buildCapabilitySections(groups, salesWorkflows)
+    const sales = capabilities.find((c) => c.categoryId === 'sales')!
+
+    expect(sales.workflowSections).toHaveLength(2)
+    expect(countCapabilityProcessLeaves(sales.workflowSections)).toBe(3)
+    expect(sales.totalGroups).toBe(3)
+  })
+
+  it('선택된 Process의 active path는 Capability와 Workflow key로 해석된다', () => {
+    const groups = [
+      grp('g-purchase', 'wf-purchase-to-ap'),
+      grp('g-service', 'wf-purchase-request-to-ap'),
+    ]
+    const capabilities = buildCapabilitySections(groups, workflows)
+
+    expect(resolveSelectedProcessPath(capabilities, 'g-service')).toEqual({
+      capabilityKey: 'purchase-inbound',
+      workflowKey: 'wf-purchase-request-to-ap',
+    })
+  })
+
+  it('leaf label은 빈 Variant/placeholder를 Process name으로 fallback하고 의미 있는 Variant만 노출한다', () => {
+    expect(getProcessLeafLabel(grp('g-empty', 'wf-order-to-sales', { variantLabel: '' }), '주문출고')).toBe('g-empty')
+    expect(getProcessLeafLabel(grp('g-single', 'wf-order-to-sales', { variantLabel: '단일' }), '주문출고')).toBe('g-single')
+    expect(getProcessLeafLabel(grp('g-default', 'wf-order-to-sales', { variantLabel: 'default' }), '주문출고')).toBe('g-default')
+    expect(getProcessLeafLabel(grp('g-b2b', 'wf-order-to-sales', { variantLabel: 'B2B 국내' }), '주문출고')).toBe('B2B 국내')
   })
 })
 

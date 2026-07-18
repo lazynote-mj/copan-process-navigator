@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { Process } from '../../types/process'
 import type { DetailProcessGroup, OverviewProcessGroup } from '../../types/toBeNavigator'
@@ -8,14 +8,14 @@ import {
   getLifecycleGroupForDetailProcess,
 } from '../../data/processLifecycleGroups'
 import {
-  buildCapabilitySections,
-  isSoleVariant,
-  UNCLASSIFIED_WORKFLOW_LABEL,
-  type CapabilitySection,
-  type WorkflowSection,
-} from '../../lib/sidebar/workflowSections'
-import { getWorkflowIcon } from '../../lib/sidebar/workflowIcon'
-import { getWorkflowDisplayName } from '../../lib/sidebar/navigationDisplay'
+  buildWorkshopMenuSections,
+  menuItemContainsGroup,
+  resolveSelectedWorkshopMenuPath,
+  type WorkshopMenuBranch,
+  type WorkshopMenuItem,
+  type WorkshopMenuLeaf,
+  type WorkshopMenuSection,
+} from '../../lib/sidebar/buildWorkshopMenu'
 import './process-group-menu.css'
 
 type OverviewMenuProps = {
@@ -83,58 +83,43 @@ function buildOverviewLifecycleSections(
 }
 
 function DetailProcessGroupMenu(props: DetailMenuProps) {
-  const { groups, workflows, selectedGroupId, onSelectGroup, onAddGroup, onEditGroup, onCloneGroup, cloneNotice } = props
+  const { groups, selectedGroupId, onSelectGroup, onAddGroup, onEditGroup, onCloneGroup, cloneNotice } = props
   const [cloneGroupId, setCloneGroupId] = useState<string | null>(null)
+  const [cloneEntryKey, setCloneEntryKey] = useState<string | null>(null)
   const [cloneName, setCloneName] = useState('')
   const [actionMenuGroupId, setActionMenuGroupId] = useState<string | null>(null)
+  const [selectedNavigationId, setSelectedNavigationId] = useState<string | null>(null)
   // Progressive Disclosure — 기본은 모두 접힘. 사용자가 수동으로 펼친 항목만 이 집합에 담긴다.
-  const [expandedCapabilityKeys, setExpandedCapabilityKeys] = useState<Set<string>>(new Set())
-  const [expandedWorkflowKeys, setExpandedWorkflowKeys] = useState<Set<string>>(new Set())
+  const [expandedLevel1Keys, setExpandedLevel1Keys] = useState<Set<string>>(new Set())
+  const [expandedBranchKeys, setExpandedBranchKeys] = useState<Set<string>>(new Set())
 
-  // Navigation Display Layer — Business Capability → Workflow → Detail Process 3계층.
-  // Workflow는 여전히 1차 내비게이션 정체성이고, Capability는 표시 grouping이다 (ADR-008/009).
-  const capabilities = buildCapabilitySections(groups, workflows)
+  // Workshop Navigation Projection — Runtime Process는 그대로 두고 발표용 탐색 라벨만 별도 구성한다.
+  const workshopSections = useMemo(() => buildWorkshopMenuSections(groups), [groups])
 
-  // 선택된 Detail Process가 속한 Capability/Workflow (자동 전개 대상)
-  const selectedCapability = selectedGroupId
-    ? capabilities.find((cap) =>
-        cap.workflowSections.some((s) => s.groups.some((g) => g.id === selectedGroupId)),
-      )
-    : undefined
-  const selectedCapabilityKey = selectedCapability?.key
-  const selectedSectionKey = selectedCapability?.workflowSections.find((s) =>
-    s.groups.some((g) => g.id === selectedGroupId),
-  )?.key
+  // 선택된 Detail Process가 속한 Workshop path (자동 전개 대상)
+  const selectedPath = useMemo(
+    () => resolveSelectedWorkshopMenuPath(workshopSections, selectedGroupId, selectedNavigationId),
+    [workshopSections, selectedGroupId, selectedNavigationId],
+  )
+  const selectedLevel1Key = selectedPath.level1Key
+  const selectedBranchKey = selectedPath.branchKey
 
-  // 현재 선택 경로만 자동 전개한다. 선택이 바뀌면 새 경로를 펼치되, 사용자가 수동으로 펼친 항목은
-  // 그대로 유지한다(집합에서 지우지 않음) — 위치를 잃지 않으면서 첫 화면 정보량을 최소화.
-  const selectedPath = `${selectedCapabilityKey ?? ''}|${selectedSectionKey ?? ''}`
-  const [prevSelectedPath, setPrevSelectedPath] = useState<string>('')
-  if (prevSelectedPath !== selectedPath) {
-    setPrevSelectedPath(selectedPath)
-    if (selectedCapabilityKey) {
-      setExpandedCapabilityKeys((current) => new Set(current).add(selectedCapabilityKey))
-    }
-    if (selectedSectionKey) {
-      setExpandedWorkflowKeys((current) => new Set(current).add(selectedSectionKey))
-    }
-  }
-
-  const isCapabilityExpanded = (key: string) => expandedCapabilityKeys.has(key)
-  const toggleCapability = (key: string) =>
-    setExpandedCapabilityKeys((current) => {
+  // Active path는 항상 열린 것으로 계산하고, 사용자의 수동 펼침 상태는 별도 Set에 보존한다.
+  const isLevel1Expanded = (key: string) => key === selectedLevel1Key || expandedLevel1Keys.has(key)
+  const toggleLevel1 = (key: string) =>
+    setExpandedLevel1Keys((current) => {
       const next = new Set(current)
       if (next.has(key)) next.delete(key)
       else next.add(key)
       return next
     })
 
-  const isWorkflowExpanded = (sectionKey: string) => expandedWorkflowKeys.has(sectionKey)
-  const toggleWorkflow = (sectionKey: string) =>
-    setExpandedWorkflowKeys((current) => {
+  const isBranchExpanded = (branchKey: string) => branchKey === selectedBranchKey || expandedBranchKeys.has(branchKey)
+  const toggleBranch = (branchKey: string) =>
+    setExpandedBranchKeys((current) => {
       const next = new Set(current)
-      if (next.has(sectionKey)) next.delete(sectionKey)
-      else next.add(sectionKey)
+      if (next.has(branchKey)) next.delete(branchKey)
+      else next.add(branchKey)
       return next
     })
 
@@ -142,45 +127,52 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
     group: DetailProcessGroup,
     badge: string,
     label: string,
-    options?: { flattened?: boolean; Icon?: typeof ChevronDown },
+    options?: {
+      flattened?: boolean
+      itemKey?: string
+      selected?: boolean
+      onSelect?: () => void
+    },
   ) => {
-    const Icon = options?.Icon
+    const itemKey = options?.itemKey ?? group.id
+    const selected = options?.selected ?? group.id === selectedGroupId
     return (
-    <li key={group.id}>
+    <li key={itemKey}>
       <div
         className={`process-group-menu__item ${
           options?.flattened ? 'process-group-menu__item--flattened' : ''
-        } ${group.id === selectedGroupId ? 'process-group-menu__item--active' : ''}`}
+        } ${selected ? 'process-group-menu__item--active' : ''}`}
       >
         <button
           type="button"
           className="process-group-menu__select process-group-menu__select--compact"
+          aria-current={selected ? 'page' : undefined}
           onClick={() => {
-            onSelectGroup(group.id)
+            if (options?.onSelect) options.onSelect()
+            else onSelectGroup(group.id)
             setActionMenuGroupId(null)
           }}
         >
           <span className="process-group-menu__title">
-            {Icon ? <Icon size={14} className="process-group-menu__workflow-icon" aria-hidden /> : null}
             {badge ? <span className="process-group-menu__index">{badge}</span> : null}
             <span className="process-group-menu__title-text">{label}</span>
           </span>
         </button>
-        {!cloneGroupId && (onEditGroup || onCloneGroup) ? (
+        {!cloneEntryKey && (onEditGroup || onCloneGroup) ? (
           <button
             type="button"
             className="process-group-menu__more-btn"
             aria-label={`${group.name} 관리 메뉴`}
-            aria-expanded={actionMenuGroupId === group.id}
+            aria-expanded={actionMenuGroupId === itemKey}
             onClick={(event) => {
               event.stopPropagation()
-              setActionMenuGroupId((current) => (current === group.id ? null : group.id))
+              setActionMenuGroupId((current) => (current === itemKey ? null : itemKey))
             }}
           >
             ⋯
           </button>
         ) : null}
-        {actionMenuGroupId === group.id ? (
+        {actionMenuGroupId === itemKey ? (
           <div className="process-group-menu__context-menu" role="menu">
             {onEditGroup ? (
               <button
@@ -201,6 +193,7 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
                 onClick={() => {
                   setActionMenuGroupId(null)
                   setCloneGroupId(group.id)
+                  setCloneEntryKey(itemKey)
                   setCloneName(`${group.name} 복제`)
                 }}
               >
@@ -209,13 +202,14 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
             ) : null}
           </div>
         ) : null}
-        {cloneGroupId === group.id && onCloneGroup ? (
+        {cloneEntryKey === itemKey && cloneGroupId === group.id && onCloneGroup ? (
           <form
             className="process-group-menu__clone-form"
             onSubmit={(event) => {
               event.preventDefault()
               if (onCloneGroup(group.id, cloneName)) {
                 setCloneGroupId(null)
+                setCloneEntryKey(null)
                 setCloneName('')
               }
             }}
@@ -242,6 +236,7 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
                 className="process-group-menu__action"
                 onClick={() => {
                   setCloneGroupId(null)
+                  setCloneEntryKey(null)
                   setCloneName('')
                   setActionMenuGroupId(null)
                 }}
@@ -256,95 +251,93 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
     )
   }
 
-  const renderWorkflowSection = (section: WorkflowSection) => {
-    const Icon = getWorkflowIcon(section.workflow)
-    // ADR-008 — Workflow는 항상 이름을 노출한다(내비게이션 정체성 유지).
-    // 표시 라벨은 짧은 workflowDisplayName을 쓰되 내부 정체성(workflowId)은 그대로다.
-    const name = getWorkflowDisplayName(section.workflow) || UNCLASSIFIED_WORKFLOW_LABEL
+  const renderWorkshopLeaf = (leaf: WorkshopMenuLeaf) =>
+    renderGroupItem(leaf.group, '', leaf.label, {
+      itemKey: leaf.navigationId,
+      selected: selectedPath.navigationId === leaf.navigationId,
+      onSelect: () => {
+        setSelectedNavigationId(leaf.navigationId)
+        onSelectGroup(leaf.group.id)
+      },
+    })
 
-    // 단일 Variant(ADR-010 Option A) → Workflow 자체를 선택 가능한 Leaf로 평탄화한다.
-    // 클릭 시 그 유일한 Detail Process를 선택(detailProcessId 불변) — 편집/복제 메뉴도 유지된다.
-    if (isSoleVariant(section)) {
-      return (
-        <section
-          key={section.key}
-          className="process-group-menu__section process-group-menu__section--workflow process-group-menu__section--leaf"
-        >
-          <ul className="process-group-menu__list process-group-menu__list--leaf">
-            {renderGroupItem(section.groups[0], '', name, { Icon })}
-          </ul>
-        </section>
-      )
-    }
-
-    const expanded = isWorkflowExpanded(section.key)
+  const renderWorkshopBranch = (branch: WorkshopMenuBranch) => {
+    const expanded = isBranchExpanded(branch.key)
     const Caret = expanded ? ChevronDown : ChevronRight
-    // G3 (ADR-010 P7) — 하위 Variant가 선택된 Workflow는 헤더도 Highlight해 선택 경로를 드러낸다.
-    const hasSelectedChild = section.groups.some((group) => group.id === selectedGroupId)
+    const hasSelectedChild = menuItemContainsGroup(branch, selectedGroupId)
     return (
       <section
-        key={section.key}
+        key={branch.key}
         className={`process-group-menu__section process-group-menu__section--workflow ${
-          section.fallback ? 'process-group-menu__section--fallback' : ''
-        } ${hasSelectedChild ? 'process-group-menu__section--selected' : ''}`}
+          hasSelectedChild ? 'process-group-menu__section--selected' : ''
+        }`}
       >
         <button
           type="button"
           className="process-group-menu__section-header"
           aria-expanded={expanded}
           aria-current={hasSelectedChild ? 'true' : undefined}
-          onClick={() => toggleWorkflow(section.key)}
+          onClick={() => toggleBranch(branch.key)}
         >
           <Caret size={14} className="process-group-menu__section-caret" aria-hidden />
-          <Icon size={14} className="process-group-menu__workflow-icon" aria-hidden />
-          <h3 className="process-group-menu__workflow-name">{name}</h3>
+          <h3 className="process-group-menu__workflow-name">{branch.label}</h3>
           <span
             className="process-group-menu__workflow-count"
-            title={`실행 유형 ${section.groups.length}개`}
+            title={`실행 프로세스 ${branch.totalLeaves}개`}
           >
-            {section.groups.length}
+            {branch.totalLeaves}
           </span>
         </button>
         {expanded ? (
           <ul className="process-group-menu__list process-group-menu__list--variants">
-            {section.groups.map((group) =>
-              // Variant = Detail Process: 라벨 중심 (선택 타깃 = group.id → detailProcessId 불변)
-              renderGroupItem(group, '', group.variantLabel ?? group.name),
-            )}
+            {branch.leaves.map(renderWorkshopLeaf)}
           </ul>
         ) : null}
       </section>
     )
   }
 
-  const renderCapabilitySection = (capability: CapabilitySection) => {
-    const expanded = isCapabilityExpanded(capability.key)
+  const renderWorkshopItem = (item: WorkshopMenuItem) => {
+    if (item.kind === 'branch') return renderWorkshopBranch(item)
+    return (
+      <section
+        key={item.navigationId}
+        className="process-group-menu__section process-group-menu__section--workflow process-group-menu__section--leaf"
+      >
+        <ul className="process-group-menu__list process-group-menu__list--leaf">
+          {renderWorkshopLeaf(item)}
+        </ul>
+      </section>
+    )
+  }
+
+  const renderWorkshopSection = (section: WorkshopMenuSection) => {
+    const expanded = isLevel1Expanded(section.key)
     const Caret = expanded ? ChevronDown : ChevronRight
     return (
       <section
-        key={capability.key}
-        className={`process-group-menu__capability ${
-          capability.fallback ? 'process-group-menu__capability--fallback' : ''
-        }`}
+        key={section.key}
+        className="process-group-menu__capability"
       >
         <button
           type="button"
           className="process-group-menu__capability-header"
           aria-expanded={expanded}
-          onClick={() => toggleCapability(capability.key)}
+          aria-current={section.key === selectedLevel1Key ? 'true' : undefined}
+          onClick={() => toggleLevel1(section.key)}
         >
           <Caret size={14} className="process-group-menu__section-caret" aria-hidden />
-          <h3 className="process-group-menu__capability-name">{capability.displayName}</h3>
+          <h3 className="process-group-menu__capability-name">{section.label}</h3>
           <span
             className="process-group-menu__capability-count"
-            title={`실행 프로세스 ${capability.totalGroups}개`}
+            title={`실행 프로세스 ${section.totalLeaves}개`}
           >
-            {capability.totalGroups}
+            {section.totalLeaves}
           </span>
         </button>
         {expanded ? (
           <div className="process-group-menu__capability-body">
-            {capability.workflowSections.map(renderWorkflowSection)}
+            {section.items.map(renderWorkshopItem)}
           </div>
         ) : null}
       </section>
@@ -362,10 +355,10 @@ function DetailProcessGroupMenu(props: DetailMenuProps) {
         </div>
       ) : null}
       <div className="process-group-menu__sections">
-        {capabilities.length === 0 ? (
+        {workshopSections.length === 0 ? (
           <p className="process-group-menu__empty">표시할 Workflow가 없습니다.</p>
         ) : (
-          capabilities.map(renderCapabilitySection)
+          workshopSections.map(renderWorkshopSection)
         )}
       </div>
     </nav>

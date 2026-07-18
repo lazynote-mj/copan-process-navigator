@@ -1,0 +1,32 @@
+{
+  "title": "Navigator Process Taxonomy v1 - Business Service Grouping",
+  "status": "Architecture Analysis / Candidate",
+  "generatedAt": "2026-07-14",
+  "processCount": 27,
+  "businessServiceCandidateCount": 16,
+  "capabilityCandidates": ["사업관리", "기준정보", "구매", "판매", "반품", "재고", "정산"],
+  "groups": [
+    {"businessService":"사업기회/계약관리","candidateCapability":"사업관리","processIds":["business-to-purchase-request"],"contexts":["제/상품","구매요청 선행"],"confidence":0.90},
+    {"businessService":"서비스사업비용관리","candidateCapability":"사업관리","processIds":["service-business-to-expense"],"contexts":["서비스","계약/프로젝트","비용전표"],"confidence":0.82},
+    {"businessService":"구매입고관리","candidateCapability":"구매","processIds":["purchase-to-ap-invoice"],"contexts":["제/상품","입고","매입전표"],"confidence":0.95},
+    {"businessService":"구매매입관리","candidateCapability":"구매","processIds":["service-purchase-to-ap","구매-요청-매입-전표-생성-f-b","구매-요청-매입-전표-생성-it-s-w","구매-요청-매입전표-생성-인사총무"],"contexts":["서비스","F&B","IT/S/W","인사/총무"],"confidence":0.78},
+    {"businessService":"주문관리","candidateCapability":"판매","processIds":["b2b-domestic-order-to-sales","b2b-export-order-to-sales","b2c-order-to-sales","preorder-to-sales","popup-concert-stock-sales-sync","event-sales","store-sales"],"contexts":["B2B 국내","B2B 해외","B2C","예약판매","공연장/팝업","이벤트","매장"],"confidence":0.88},
+    {"businessService":"서비스매출관리","candidateCapability":"판매","processIds":["service-order-to-sales"],"contexts":["서비스","비재고","플랫폼/콘텐츠"],"confidence":0.92},
+    {"businessService":"반품관리","candidateCapability":"반품","processIds":["b2b-domestic-return","b2c-return"],"contexts":["B2B 국내","B2C","온라인 반품"],"confidence":0.95},
+    {"businessService":"구매반품관리","candidateCapability":"반품","processIds":["purchase-return"],"contexts":["구매반품","구매송장"],"confidence":0.88},
+    {"businessService":"재고이동관리","candidateCapability":"재고","processIds":["stock-transfer","stock-movement"],"contexts":["매장간/창고간","일반","위탁여부"],"confidence":0.90},
+    {"businessService":"기타출고관리","candidateCapability":"재고","processIds":["other-issue"],"contexts":["무상증정","기타출고"],"confidence":0.93},
+    {"businessService":"기타입고관리","candidateCapability":"재고","processIds":["other-receipt"],"contexts":["기타입고","재고+"],"confidence":0.90},
+    {"businessService":"저장위치관리","candidateCapability":"기준정보","processIds":["storage-location-master"],"contexts":["기준정보","저장위치"],"confidence":0.90},
+    {"businessService":"로열티정산","candidateCapability":"정산","processIds":["royalty-mg-settlement"],"contexts":["기획사","로열티","MG 차감"],"confidence":0.96},
+    {"businessService":"위탁정산","candidateCapability":"정산","processIds":["consignment-settlement"],"contexts":["위탁","위탁매출"],"confidence":0.96},
+    {"businessService":"수익배분정산","candidateCapability":"정산","processIds":["revenue-share-settlement"],"contexts":["수익배분","매출/비용","MG"],"confidence":0.88},
+    {"businessService":"프로젝트정산","candidateCapability":"정산","processIds":["service-project-settlement"],"contexts":["서비스","프로젝트","매출/비용"],"confidence":0.88}
+  ],
+  "decisionRequired": [
+    {"topic":"popup-concert-stock-sales-sync","reason":"Mixes stock movement, field sale, shipment, and revenue close.","recommendedFollowUp":"Decide whether primary service is 주문관리 or 현장판매/재고운영."},
+    {"topic":"event-sales","reason":"Includes winner selection and delivery split.","recommendedFollowUp":"Decide whether event operations should be a separate Business Service."},
+    {"topic":"service-business-to-expense","reason":"Combines opportunity/contract/project and expense voucher.","recommendedFollowUp":"Decide whether to split service business management from expense management."},
+    {"topic":"local purchase variants","reason":"F&B, IT/S/W, HR-GA are runtime-local and not yet mapped to formal source documents.","recommendedFollowUp":"Add source mapping and clean variant metadata later."}
+  ]
+}

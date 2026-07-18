@@ -156,6 +156,13 @@ describe('canonical 마스터 시드', () => {
       'sales',
       'finance',
     ])
+    expect(CANONICAL_EXECUTION_DOMAINS.map((d) => d.name)).toEqual([
+      '사업',
+      '구매',
+      '물류',
+      '매장/POS',
+      '재무',
+    ])
     expect(CANONICAL_EXECUTION_DOMAINS.map((d) => d.order)).toEqual([1, 2, 3, 4, 5])
   })
 

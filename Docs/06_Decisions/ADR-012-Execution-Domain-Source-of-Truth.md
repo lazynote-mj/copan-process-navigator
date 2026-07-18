@@ -22,6 +22,8 @@
 
 **조직 해석 우선순위:** `node.organizationId ?? group.domainAssignments[laneId] ?? process.domainAssignments[laneId] ?? (미래 workflow) ?? undefined`
 
+**표시 용어 구분:** `판매`는 좌측 메뉴/Business Capability에서 B2B·B2C·매장·팝업·서비스 판매 Workflow를 묶는 상위 업무 분류다. Execution Domain `sales`는 현재 EasyChain/POS/매장·현장 판매 실행 영역을 뜻하므로 화면 표시는 **매장/POS**로 한다. B2B/B2C 주문·출고·매출 흐름은 판매 Capability 안에 있더라도 실행 Domain은 `business`·`logistics`·`finance`에 걸쳐 표현된다.
+
 **필드명:** `laneId` 유지, 의미만 Execution Domain ID로 전환. 전면 rename은 후속 ADR.
 
 ## Migration 원칙 (WP1)

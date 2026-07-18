@@ -208,6 +208,61 @@ export type CapabilitySection = {
   totalGroups: number
 }
 
+export type SelectedProcessPath = {
+  capabilityKey?: string
+  workflowKey?: string
+}
+
+const PLACEHOLDER_VARIANT_LABELS = new Set(['단일', '기본', 'default'])
+
+export function countWorkflowProcessLeaves(section: WorkflowSection): number {
+  return section.groups.length
+}
+
+export function countCapabilityProcessLeaves(sections: WorkflowSection[]): number {
+  return sections.reduce((total, section) => total + countWorkflowProcessLeaves(section), 0)
+}
+
+export function sectionContainsProcess(section: WorkflowSection, groupId: string | null): boolean {
+  return groupId != null && section.groups.some((group) => group.id === groupId)
+}
+
+export function capabilityContainsProcess(capability: CapabilitySection, groupId: string | null): boolean {
+  return groupId != null && capability.workflowSections.some((section) => sectionContainsProcess(section, groupId))
+}
+
+export function resolveSelectedProcessPath(
+  capabilities: CapabilitySection[],
+  selectedGroupId: string | null,
+): SelectedProcessPath {
+  if (!selectedGroupId) return {}
+  const capability = capabilities.find((entry) => capabilityContainsProcess(entry, selectedGroupId))
+  const workflow = capability?.workflowSections.find((section) => sectionContainsProcess(section, selectedGroupId))
+  return {
+    capabilityKey: capability?.key,
+    workflowKey: workflow?.key,
+  }
+}
+
+export function isPlaceholderVariantLabel(
+  variantLabel: string | undefined,
+  workflowDisplayName: string,
+): boolean {
+  const label = (variantLabel ?? '').trim()
+  if (!label) return true
+  return PLACEHOLDER_VARIANT_LABELS.has(label.toLowerCase()) || label === workflowDisplayName
+}
+
+export function getProcessLeafLabel(
+  group: DetailProcessGroup,
+  workflowDisplayName: string,
+): string {
+  const variantLabel = (group.variantLabel ?? '').trim()
+  if (!variantLabel) return group.name
+  if (isPlaceholderVariantLabel(variantLabel, workflowDisplayName)) return group.name
+  return variantLabel
+}
+
 export function buildCapabilitySections(
   groups: DetailProcessGroup[],
   workflows: Workflow[] | undefined,
@@ -227,9 +282,6 @@ export function buildCapabilitySections(
     byCapability.set(capabilityId, list)
   }
 
-  const countGroups = (sections: WorkflowSection[]) =>
-    sections.reduce((total, section) => total + section.groups.length, 0)
-
   const capabilities: CapabilitySection[] = []
   for (const lifecycle of PROCESS_LIFECYCLE_GROUPS) {
     const sections = byCapability.get(lifecycle.id)
@@ -240,7 +292,7 @@ export function buildCapabilitySections(
         displayName: getCategoryDisplayName(lifecycle.id),
         fallback: false,
         workflowSections: sections,
-        totalGroups: countGroups(sections),
+        totalGroups: countCapabilityProcessLeaves(sections),
       })
     }
   }
@@ -252,7 +304,7 @@ export function buildCapabilitySections(
       displayName: UNCLASSIFIED_CAPABILITY_LABEL,
       fallback: true,
       workflowSections: exceptions,
-      totalGroups: countGroups(exceptions),
+      totalGroups: countCapabilityProcessLeaves(exceptions),
     })
   }
 

@@ -12,7 +12,7 @@ const DOMAINS = [
   { id: 'business', name: '사업', order: 1 },
   { id: 'procurement', name: '구매', order: 2 },
   { id: 'logistics', name: '물류', order: 3 },
-  { id: 'sales', name: '판매', order: 4 },
+  { id: 'sales', name: '매장/POS', order: 4 },
   { id: 'finance', name: '재무', order: 5 },
 ]
 const ORGS: Organization[] = [

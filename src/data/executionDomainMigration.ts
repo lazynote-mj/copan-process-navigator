@@ -25,7 +25,7 @@ export const CANONICAL_EXECUTION_DOMAINS: ExecutionDomain[] = [
   { id: 'business', name: '사업', order: 1, ownerDepartment: '' },
   { id: 'procurement', name: '구매', order: 2, ownerDepartment: '' },
   { id: 'logistics', name: '물류', order: 3, ownerDepartment: '' },
-  { id: 'sales', name: '판매', order: 4, ownerDepartment: '' },
+  { id: 'sales', name: '매장/POS', order: 4, ownerDepartment: '' },
   { id: 'finance', name: '재무', order: 5, ownerDepartment: '' },
 ]
 
