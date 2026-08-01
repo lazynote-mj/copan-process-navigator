@@ -465,9 +465,13 @@ export function normalizeExecutionDomains<P extends ProcessLike>(
       return { ...node, laneId: domainId, ...(anchorChanged ? { interfaceRuleAnchor: anchor } : {}) }
     })
     const zones = remapZones(process.zones, laneNameById)
-    if (!procChanged && zones === process.zones) return process
+    // 레인 표시 설정도 node.laneId와 같은 스킴이어야 한다. schemaVersion 3으로 이미
+    // 저장된 파일은 마이그레이션 게이트(<3)를 건너뛰므로, 게이트 밖에서 도는 이
+    // 정규화가 보정하지 않으면 laneIds가 조직 스킴으로 영구히 남는다.
+    const laneIds = remapLaneIdList(process.laneIds, laneNameById)
+    if (!procChanged && zones === process.zones && laneIds === process.laneIds) return process
     changed = true
-    return { ...process, nodes, zones }
+    return { ...process, nodes, zones, ...(laneIds === process.laneIds ? {} : { laneIds }) }
   })
   return { processes: next, changed }
 }

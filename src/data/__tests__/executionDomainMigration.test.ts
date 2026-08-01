@@ -6,6 +6,7 @@ import {
   resolveDomainMapping,
   syntheticDomainId,
   migrateExecutionDomains,
+  normalizeExecutionDomains,
   syntheticOrganizationId,
   type NodeLaneRef,
 } from '../executionDomainMigration'
@@ -262,5 +263,49 @@ describe('process.laneIds remap', () => {
       ],
     })
     expect(result.processes[0]!.laneIds).toBeUndefined()
+  })
+})
+
+describe('normalizeExecutionDomains — 이미 저장된 파일 보정', () => {
+  /**
+   * schemaVersion 3으로 저장된 파일은 마이그레이션 게이트(<3)를 건너뛴다.
+   * laneIds remap 이전에 저장된 파일은 lanes만 도메인이고 laneIds는 조직 id로
+   * 남아 있다. 게이트 밖에서 idempotent하게 도는 normalize가 이를 보정해야
+   * 기존 사용자 파일이 복구된다.
+   */
+  it('lanes는 도메인인데 laneIds가 조직 id로 남은 파일을 보정한다', () => {
+    const { processes, changed } = normalizeExecutionDomains(
+      [
+        {
+          id: 'p1',
+          laneIds: ['business', 'partnership', 'warehouse-easyadmin'],
+          nodes: [
+            { id: 'n1', laneId: 'procurement' },
+            { id: 'n2', laneId: 'logistics' },
+          ],
+        },
+      ],
+      new Map([
+        ['business', '사업'],
+        ['procurement', '구매'],
+        ['logistics', '물류'],
+      ]),
+    )
+
+    expect(processes[0]!.laneIds).toEqual(['business', 'procurement', 'logistics'])
+    expect(changed).toBe(true)
+  })
+
+  it('이미 도메인인 laneIds는 건드리지 않는다 (idempotent)', () => {
+    const input = [
+      {
+        id: 'p1',
+        laneIds: ['business', 'procurement'],
+        nodes: [{ id: 'n1', laneId: 'business' }],
+      },
+    ]
+    const { processes, changed } = normalizeExecutionDomains(input, new Map())
+    expect(changed).toBe(false)
+    expect(processes[0]).toBe(input[0])
   })
 })
