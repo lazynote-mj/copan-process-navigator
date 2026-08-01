@@ -59,23 +59,20 @@ export const KNOWN_NODE_COLLISIONS: ReadonlySet<string> = new Set([
  * 더 있고 좌표·핸들도 저장된 값이 우선하므로 관통하는 edge 집합이 다르다.
  * **사용자가 화면에서 보는 것은 이쪽이다.**
  *
- * 주의: 이 목록은 레인 표시 설정 버그의 영향을 받는다. `migrateExecutionDomains`가
- * `process.laneIds`를 도메인으로 remap하지 않아 도메인 3종(procurement/logistics/
- * sales)의 레인 밴드가 만들어지지 않고, 그 도메인 노드 108개가 `validateNodes`에서
- * 탈락한다. 탈락 노드를 잇던 edge는 endpoint를 잃으므로 관통 판정 대상에서도
- * 빠진다. **그 버그를 고치면 이 목록은 늘어날 수 있다** — 사라졌던 노드와 경로가
- * 돌아오기 때문이다. 그때는 baseline을 다시 측정한다.
+ * 이 목록은 `process.laneIds` remap 수정 이후 기준이다. 그 전에는 도메인 3종
+ * (procurement/logistics/sales)의 레인 밴드가 만들어지지 않아 노드 108개가
+ * `validateNodes`에서 탈락했고, 그 노드를 잇던 edge는 endpoint를 잃어 관통 판정
+ * 대상에서도 빠져 있었다. 수정 후 노드가 전부 돌아오면서 edge가 318 → 425로
+ * 늘었는데, 관통은 오히려 11 → 8건으로 줄었다 — 레인 밴드가 정상이면 라우터가
+ * 경로를 더 잘 잡는다.
  */
 export const KNOWN_RUNTIME_COLLISIONS: ReadonlySet<string> = new Set([
   'to-be-overview/main:e2e:02',
   'business-to-project/e07b',
   'business-to-project/e08',
   'business-to-project/e08a',
+  'business-to-project/e08d',
   'business-to-project/e09',
-  'b2b-export-order-to-sales/edge-mqq58dx1-emfiy',
-  'other-issue/edge-mr2ueu2f-9c3p5',
-  'popup-concert-stock-sales-sync/popup-concert-stock-sales-sync-e03',
-  'popup-concert-stock-sales-sync/popup-concert-stock-sales-sync-e10',
   'event-sales/event-sales-e20',
   'store-sales/store-sales-e13',
 ])
