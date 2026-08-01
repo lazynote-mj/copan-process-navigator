@@ -751,6 +751,51 @@ function isLockedDecisionSameRowTopReturn(options: OrthogonalRouteOptions): bool
   return process != null && qualifiesForDecisionSameRowTopReturn(edge, source, target, process)
 }
 
+/**
+ * 경로를 **바꾸지 않고** 충돌 상태만 보고한다.
+ *
+ * `routeOrthogonalEdge`에는 `finishOrthogonalRoute`를 거치지 않고 반환하는
+ * 경로가 여럿 있다. `applyCollisionValidation`이 거기서만 호출되므로, 그 경로로
+ * 나간 edge는 충돌 검사를 아예 받지 못하고 `validationStatus`가 미설정으로 남아
+ * 화면에 정상으로 표시됐다.
+ *
+ * `applyCollisionValidation`을 그대로 부르면 기하까지 바뀌므로(u-turn 제거,
+ * pre-simplify 되돌리기, collision reroute) 보고 부분만 떼어냈다. 판정 기준은
+ * `applyCollisionValidation`과 동일하게 유지한다 — 두 곳이 갈라지면 같은 경로가
+ * 어느 문으로 나갔는지에 따라 다르게 보고된다.
+ */
+function reportCollisionValidation(
+  options: OrthogonalRouteOptions,
+  result: OrthogonalRouteResult,
+): OrthogonalRouteResult {
+  const { source, target, placed, process } = options
+  const excludeIds = new Set([source.id, target.id])
+  const nodeMargin = resolveRouteNodeMargin(options)
+
+  const suppressed = isLockedDecisionSameRowTopReturn(options)
+  const collided = suppressed
+    ? []
+    : getCollidedNodes(result.points, placed, excludeIds, nodeMargin, process)
+
+  const validation = resolveEdgeRouteValidation({
+    hasNodeCollision: collided.length > 0,
+    collidedNodes: collided,
+    routingStatus: result.routingStatus,
+    bendCount: countOrthogonalBends(result.points),
+    pathEmpty: result.points.length < 2,
+    manualRoute: isManualRouteEdge(options.edge),
+  })
+
+  return {
+    ...result,
+    ...(collided.length > 0 ? { collidedNodes: collided } : {}),
+    validationStatus: validation.validationStatus,
+    routeValidation: validation,
+    collisionError:
+      validation.validationStatus === 'error' && validation.routeIssue === 'node_collision',
+  }
+}
+
 function applyCollisionValidation(
   options: OrthogonalRouteOptions,
   result: OrthogonalRouteResult,
@@ -6407,7 +6452,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     process &&
     qualifiesForSameRowRightTargetShortRoute(edge, source, target, placed, excludeIdsEarly, process)
   ) {
-    return routeSameRowRightTargetEdge(options)
+    return reportCollisionValidation(options, routeSameRowRightTargetEdge(options))
   }
 
   if (
@@ -6514,7 +6559,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     nodesShareOverviewZoneDifferentLane(source, target, process) &&
     qualifiesForCrossLaneZoneAdjacentRows(source, target, process)
   ) {
-    return routeAdjacentHorizontalStraightEdge(options)
+    return reportCollisionValidation(options, routeAdjacentHorizontalStraightEdge(options))
   }
   if (
     qualifiesForAdjacentVerticalStraight(
@@ -6527,7 +6572,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
       process,
     )
   ) {
-    return routeAdjacentVerticalStraightEdge(options)
+    return reportCollisionValidation(options, routeAdjacentVerticalStraightEdge(options))
   }
   if (
     qualifiesForAdjacentHorizontalStraight(
@@ -6541,7 +6586,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
       edge,
     )
   ) {
-    return routeAdjacentHorizontalStraightEdge(options)
+    return reportCollisionValidation(options, routeAdjacentHorizontalStraightEdge(options))
   }
 
   const userSource = resolveEdgeSourceHandle(edge)
@@ -6676,7 +6721,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
   }
 
   if (downwardPair && !columnTransitionFlow) {
-    return routeDownwardBottomTopEdge(options, downwardPair[0], downwardPair[1])
+    return reportCollisionValidation(options, routeDownwardBottomTopEdge(options, downwardPair[0], downwardPair[1]))
   }
 
   let best: { points: Point[]; sourceHandle: EdgeHandleId; targetHandle: EdgeHandleId } | null = null
@@ -7032,7 +7077,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
 
   const exactEndpoints = true
 
-  return {
+  return reportCollisionValidation(options, {
     path: pointsToPath(finalized, minContentX),
     points: finalized,
     bendPoints: extractBendPoints(finalized),
@@ -7040,7 +7085,7 @@ export function routeOrthogonalEdge(options: OrthogonalRouteOptions): Orthogonal
     targetHandle: best.targetHandle,
     ...routeLabelFields(label),
     exactEndpoints: exactEndpoints || undefined,
-  }
+  })
 }
 
 /** manual bend point 드래그 — orthogonal 스냅 */

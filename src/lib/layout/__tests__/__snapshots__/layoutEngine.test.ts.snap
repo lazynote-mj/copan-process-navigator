@@ -304,7 +304,7 @@ exports[`layout engine snapshots > 'b2b-domestic-order-to-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "b2b-domestic-order-to-sales-step-10",
-      "status": "ok",
+      "status": "error",
       "target": "b2b-domestic-order-to-sales-step-11",
     },
     {
@@ -1006,7 +1006,7 @@ exports[`layout engine snapshots > 'b2b-export-order-to-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "b2b-export-order-to-sales-step-02",
-      "status": "ok",
+      "status": "error",
       "target": "b2b-export-order-to-sales-step-05",
     },
     {
@@ -2921,7 +2921,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "purchase-request",
-      "status": "ok",
+      "status": "error",
       "target": "vendor-check",
     },
     {
@@ -2957,7 +2957,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "product-check",
-      "status": "ok",
+      "status": "error",
       "target": "po-approval",
     },
     {
@@ -2993,7 +2993,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "product-check",
-      "status": "ok",
+      "status": "error",
       "target": "product-register-request",
     },
     {
@@ -3049,7 +3049,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "product-register-approval",
-      "status": "ok",
+      "status": "error",
       "target": "po-approval",
     },
     {
@@ -3085,7 +3085,7 @@ exports[`layout engine snapshots > 'business-to-project' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "vendor-check",
-      "status": "ok",
+      "status": "error",
       "target": "po-approval",
     },
     {
@@ -5104,7 +5104,7 @@ exports[`layout engine snapshots > 'event-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "event-sales-step-18",
-      "status": "ok",
+      "status": "error",
       "target": "event-sales-step-19",
     },
   ],
@@ -6595,7 +6595,7 @@ exports[`layout engine snapshots > 'overview' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "online-order",
-      "status": "ok",
+      "status": "error",
       "target": "order-sync",
     },
     {
@@ -6671,7 +6671,7 @@ exports[`layout engine snapshots > 'overview' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "shipment-request",
-      "status": "ok",
+      "status": "error",
       "target": "shipment-check",
     },
     {
@@ -6979,7 +6979,7 @@ exports[`layout engine snapshots > 'overview' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "exception-handling",
-      "status": "ok",
+      "status": "error",
       "target": "prepayment-process",
     },
     {
@@ -7788,7 +7788,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "popup-concert-stock-sales-sync-step-03",
-      "status": "ok",
+      "status": "error",
       "target": "popup-concert-stock-sales-sync-step-08",
     },
     {
@@ -8052,7 +8052,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "popup-concert-stock-sales-sync-step-12",
-      "status": "ok",
+      "status": "error",
       "target": "popup-concert-stock-sales-sync-step-13",
     },
     {
@@ -8288,7 +8288,7 @@ exports[`layout engine snapshots > 'popup-concert-stock-sales-sync' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "popup-concert-stock-sales-sync-step-24",
-      "status": "ok",
+      "status": "error",
       "target": "popup-concert-stock-sales-sync-step-25",
     },
     {
@@ -8733,7 +8733,7 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "preorder-to-sales-step-01",
-      "status": "ok",
+      "status": "error",
       "target": "preorder-to-sales-step-02",
     },
     {
@@ -8909,7 +8909,7 @@ exports[`layout engine snapshots > 'preorder-to-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "preorder-to-sales-step-10",
-      "status": "ok",
+      "status": "error",
       "target": "preorder-to-sales-step-11",
     },
     {
@@ -13381,7 +13381,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "store-sales-step-07",
-      "status": "ok",
+      "status": "error",
       "target": "store-sales-step-10",
     },
     {
@@ -13729,7 +13729,7 @@ exports[`layout engine snapshots > 'store-sales' 1`] = `
       ],
       "routing": "orthogonal",
       "source": "node-mqt0pojw-g74j0",
-      "status": "ok",
+      "status": "error",
       "target": "store-sales-step-13",
     },
     {
