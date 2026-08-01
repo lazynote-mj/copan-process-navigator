@@ -6,7 +6,7 @@
 |Purpose|Universal Process Modeling Platform과 Copan ERP Template/Data를 장기적으로 분리 가능한 구조로 만들기 위해 현재 하드코딩 요소, Layer Separation, export/import 방향, 데이터 경계 관리 기준을 점검한다.|
 |Status|Draft|
 |Owner|Project Team|
-|Last Updated|2026-06-27|
+|Last Updated|2026-08-01|
 |Related Docs|`universal-platform-template-layer-audit.md`, `../../01_Architecture/Architecture.md`, `../../01_Architecture/LocalDevelopment.md`, `../../01_Architecture/TemplatePackage.md`, `../../02_Master/SystemMappingMaster.md`, `../../06_Data/Samples/scm to-be process.pdf`|
 
 ## 1. 핵심 원칙
@@ -385,3 +385,69 @@ copan-erp-process-template/Docs/
 3. Core hardcoding audit 항목을 template config로 이동할 계획 수립
 4. export/import package format 정의
 5. 배포 정책과 business domain data 경계 확정
+
+## 10. 실측 (2026-08-01)
+
+§8의 우선순위가 실제로 어디까지 왔는지, 그리고 분리 비용이 얼마인지 측정했다.
+Copan 레지스트리를 3노드짜리 generic 템플릿으로 교체한 뒤 `tsc` / `test` / `build`를 돌린 결과다.
+
+### 10.1 우선순위별 현황
+
+|우선순위|항목|상태|근거|
+|---|---|---|---|
+|P1|Template Manifest / Active Template|**형식만 완료**|타입·`templateManager`·`templateRuntime`·`bootstrap` 체인은 존재. 그러나 `copanTemplateDefinition`에 `package` 필드가 없어 `activeTemplate.package`는 항상 undefined이고, 실제 데이터는 `App.tsx`가 `toBeNavigatorRegistry`를 컴파일타임 import해 주입한다. 런타임에서 소비되는 건 `storageAdapter` 하나뿐|
+|P2|Branding 분리|**구조 완료, 소유권 미분리**|Toolbar는 `APP_CONFIG.appName`을 읽는다. 그러나 `src/config/appConfig.ts`(Platform 위치)가 `'Copan ERP Process Navigator'`, `'SCM Process'`, lifecycle group 7개, detail process→group 매핑 24개를 보유|
+|P3|Copan Layout Rule 분리|**미착수**|`overviewProcessZones.ts` / `settlementGroupLayout.ts` / `returnMovementGroupLayout.ts` 원위치|
+|P4|System Mapping Master 분리|**미착수**|`nodeTypes.ts` / `overviewNodeTypes.ts` / `overviewEdgeLabels.ts` 원위치|
+|P5|Export / Import Package|**미착수**|`processExport.ts`는 단일 process만 내보낸다. template package 형식 없음|
+
+### 10.2 컴파일 결합은 거의 없다
+
+Copan 데이터를 전부 제거해도 **`tsc` 통과, `build` 성공**했다. Platform 코드가 Copan 값을 컴파일타임에 요구하는 지점은 없다. 결합은 데이터 진입점(`App.tsx`, `AppLayout.tsx`의 직접 import) 한 곳에 몰려 있다.
+
+### 10.3 진짜 장벽은 타입이다 — 이 감사가 놓쳤던 항목
+
+```ts
+// src/types/process.ts:100 — Core 타입
+export type ProcessZoneId =
+  | 'business-contract' | 'purchase-order' | 'inbound-inventory'
+  | 'sales-shipment' | 'return-movement' | 'settlement-close'
+```
+
+Platform 핵심 타입이 Copan의 6개 업무 분류를 union으로 고정하고 있고, `Node.processZone?: ProcessZoneId`가 이를 참조한다. **두 번째 템플릿은 자기 zone을 타입 수준에서 표현할 수 없다.** 값이 아니라 타입이므로 config 이동으로 해결되지 않는다.
+
+`Lane.ownerDepartment`가 필수 필드인 것도 같은 성격이다 — 조직 개념이 Core Lane에 강제돼 조직 없는 템플릿을 만들 수 없다.
+
+§2~§8은 "값을 config로 옮기기"만 다뤘다. **타입 일반화가 임계 경로이며, 이것 없이는 P3/P4가 파일 이동에 그친다.**
+
+### 10.4 번들의 26%가 Copan 데이터
+
+|항목|현재|Copan 제거 시|
+|---|---|---|
+|JS 번들|1,041 KB|**775 KB**|
+|gzip|259 KB|229 KB|
+
+266KB가 번들에 컴파일돼 있다. 템플릿 런타임을 거치지 않고 `import`로 들어오기 때문이다.
+
+### 10.5 테스트의 62%가 실은 템플릿 테스트
+
+24개 테스트 파일 중 **15개**가 Copan 데이터를 참조한다. Copan 제거 시 테스트가 264 → 192로 줄고(72개는 `it.each` 케이스가 아예 생성되지 않는다) 8개 파일 26개가 실패한다. 두 번째 템플릿이 생기면 platform/template 테스트 구분이 반드시 필요하다.
+
+### 10.6 가장 위험한 것 — 조용한 무력화
+
+`OVERVIEW_NODE_ZONES`는 nodeId→zone 매핑 51개다(`opportunity`, `business-review`, `contract-register` …). generic 템플릿에서는 매칭되는 nodeId가 없어 **아무 일도 일어나지 않는다. 에러도 경고도 없다.** 같은 성격이 `settlementGroupLayout`, `returnMovementGroupLayout`, `overviewEdgeLabels`, `interfaceRuleLayout`에 있다.
+
+두 번째 템플릿 작성자는 컴파일도 되고 테스트도 통과하므로 기능이 왜 안 도는지 알 수 없다.
+
+### 10.7 분리 비용
+
+|작업|규모|성격|
+|---|---|---|
+|데이터 이동|18,900줄 + `state.json` 539KB|기계적, 위험 낮음|
+|**타입 일반화**|`ProcessZoneId`, `Lane.ownerDepartment`|**임계 경로.** 스키마·마이그레이션·저장 데이터 전부 영향|
+|Platform 매핑 외부화|6개 파일, 리터럴 약 500개|타입 일반화 후에야 의미 있음|
+|테스트 재분류|15개 파일|platform/template 구분|
+
+### 10.8 현재 결정
+
+`Docs/00_Project/Roadmap.md`의 Current Priority에서 Platform 기능 확장은 5순위다. 두 번째 고객이 가시권에 없으므로 **지금은 분리를 완성하지 않고 결합을 더 늘리지 않는 데 집중한다.** 경계 규칙은 `CLAUDE.md`의 "Platform / Template 경계" 절에 있다.
