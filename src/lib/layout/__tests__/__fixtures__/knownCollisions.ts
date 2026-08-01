@@ -2,23 +2,26 @@
  * 노드 관통 부채 baseline.
  *
  * 아래 edge들은 라우팅 결과 경로가 source/target이 아닌 다른 노드의 bbox를
- * (라우터가 쓰는 마진 기준으로) 실제로 통과한다. 그런데 엔진은 이들을 전부
- * `validationStatus: 'ok'`로 보고한다 — `edgeRouteValidation.ts`에
- * `node_collision → error` 규칙이 있는데도 그렇다.
+ * (라우터가 쓰는 마진 기준으로) 실제로 통과한다. **관통은 아직 남아 있다.**
+ * 다만 이제 엔진이 이를 `validationStatus: 'error'`로 정직하게 보고하므로,
+ * 화면에서 빨간 점선과 '오류: 노드 관통' 라벨로 드러난다.
  *
- * 원인(계측으로 확인): `routeOrthogonalEdge`에는 `finishOrthogonalRoute`를
- * 거치지 않고 반환하는 경로가 6개 있다. `applyCollisionValidation`은 오직
- * `finishOrthogonalRoute`에서만 호출되고, 그것이 orthogonal 경로의
- * `validationStatus`를 세우는 유일한 지점이다. 따라서 우회 경로로 반환된
- * edge는 충돌 검사를 아예 받지 않고, status가 미설정으로 남아 `ok`가 된다.
+ * 왜 한때 `ok`로 보고됐는가(계측으로 확인): `routeOrthogonalEdge`에는
+ * `finishOrthogonalRoute`를 거치지 않고 반환하는 경로가 6개 있었다.
+ * `applyCollisionValidation`은 오직 `finishOrthogonalRoute`에서만 호출되고
+ * 그것이 orthogonal 경로의 `validationStatus`를 세우는 유일한 지점이므로,
+ * 우회 경로로 반환된 edge는 충돌 검사를 아예 받지 못했다.
  *
- * 아래 18건이 나가는 우회 경로:
+ * 아래 18건이 나가던 우회 경로:
  * - `routeDownwardBottomTopEdge` — 16건
  * - `routeAdjacentHorizontalStraightEdge` — 2건
  *
  * `business-to-project`의 4건은 라우터에 재진입하며 내부적으로
- * `finishOrthogonalRoute`를 호출해 `status: 'error'`까지 계산해내지만,
- * 바깥 호출이 우회 경로로 반환하면서 그 결과가 버려진다.
+ * `finishOrthogonalRoute`를 호출해 `status: 'error'`까지 계산해냈지만,
+ * 바깥 호출이 우회 경로로 반환하면서 그 결과가 버려졌다.
+ *
+ * 지금은 6개 우회 지점 전부가 `reportCollisionValidation`을 거친다 — 기하는
+ * 건드리지 않고 보고만 한다. 관통 자체를 없애는 것은 별도 작업이다.
  *
  * 기각된 가설: "라우팅 시점 `placed` 집합이 최종 배치와 다르다" — 아니다.
  * 계측 결과 `placed`는 최종 배치와 동일하다(detail 21, overview 53).

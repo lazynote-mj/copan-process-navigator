@@ -170,10 +170,12 @@ describe('router invariants — 노드 관통 baseline', () => {
 })
 
 describe('router invariants — 엔진 자기보고 정합성', () => {
-  it('기하상 관통인데 ok로 보고하는 edge는 baseline에만 존재한다', () => {
+  it('기하상 관통인 edge는 하나도 빠짐없이 ok가 아닌 상태로 보고된다', () => {
+    // baseline(관통 자체)과 보고는 별개 문제다. 관통은 남아 있어도 엔진이
+    // 그것을 ok라고 말해서는 안 된다. 관통이 있는 edge는 error 또는
+    // warning(manual route)으로 보고되어야 한다.
     const silent = collectCollisions()
       .filter(({ reportedStatus }) => reportedStatus === 'ok')
-      .filter(({ key }) => !KNOWN_NODE_COLLISIONS.has(key))
       .map(({ key, hit }) => `${key} [보고=ok] → [${hit.join(', ')}]`)
     expect(silent).toEqual([])
   })
