@@ -91,7 +91,14 @@ function countProcessDataNodes(data: ProcessData | null | undefined): number {
   return data?.processes.reduce((sum, process) => sum + process.nodes.length, 0) ?? 0
 }
 
-function hydrateProcessData(
+/**
+ * 저장된 상태를 앱이 렌더하는 형태로 만든다.
+ *
+ * 테스트가 "사용자가 실제로 보는 것"을 검증하려면 이 함수를 그대로 거쳐야 한다.
+ * 재구현하면 registry sync·Execution Domain 정규화가 빠져 앱과 갈라진다.
+ */
+// eslint-disable-next-line react-refresh/only-export-components -- provider 파일에 두는 로드 파이프라인 함수
+export function hydrateProcessData(
   source: ProcessData,
   registryDetailProcesses: Process[],
 ): ProcessData {
