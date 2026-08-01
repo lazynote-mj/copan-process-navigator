@@ -33,7 +33,7 @@ export const EDGE_WARNING_STROKE = {
 } as const
 
 /** Overview cross-zone gutter 등 — 4 bend까지는 정상 */
-const EXCESSIVE_BEND_WARNING = 5
+export const EXCESSIVE_BEND_WARNING = 5
 
 export function resolveEdgeRouteValidation(input: {
   broken?: boolean
