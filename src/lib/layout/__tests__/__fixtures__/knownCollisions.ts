@@ -52,15 +52,22 @@ export const KNOWN_NODE_COLLISIONS: ReadonlySet<string> = new Set([
 ])
 
 /**
- * 앱이 실제로 렌더하는 데이터(`public/process-data/state.json` + hydrate) 기준.
+ * 앱이 실제로 렌더하는 데이터 기준 — `state.json` → `buildProcessDataFromPayload`
+ * (WP3 Execution Domain 마이그레이션) → `hydrateProcessData`.
  *
  * registry 목록과 겹치지만 같지 않다 — state.json에는 편집기에서 만든 프로세스가
  * 더 있고 좌표·핸들도 저장된 값이 우선하므로 관통하는 edge 집합이 다르다.
  * **사용자가 화면에서 보는 것은 이쪽이다.**
+ *
+ * 주의: 이 목록은 레인 표시 설정 버그의 영향을 받는다. `migrateExecutionDomains`가
+ * `process.laneIds`를 도메인으로 remap하지 않아 도메인 3종(procurement/logistics/
+ * sales)의 레인 밴드가 만들어지지 않고, 그 도메인 노드 108개가 `validateNodes`에서
+ * 탈락한다. 탈락 노드를 잇던 edge는 endpoint를 잃으므로 관통 판정 대상에서도
+ * 빠진다. **그 버그를 고치면 이 목록은 늘어날 수 있다** — 사라졌던 노드와 경로가
+ * 돌아오기 때문이다. 그때는 baseline을 다시 측정한다.
  */
 export const KNOWN_RUNTIME_COLLISIONS: ReadonlySet<string> = new Set([
   'to-be-overview/main:e2e:02',
-  'to-be-overview/main:e2e:25',
   'business-to-project/e07b',
   'business-to-project/e08',
   'business-to-project/e08a',

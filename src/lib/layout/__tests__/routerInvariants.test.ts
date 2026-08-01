@@ -12,7 +12,11 @@ import { OVERVIEW_VERTICAL_METRICS } from '../overviewVerticalMetrics'
 import { EXCESSIVE_BEND_WARNING } from '../edgeRouteValidation'
 import { resolveEdgeType } from '../../../types/edgeTypes'
 import { layoutCases, toPlacedNodes, type LayoutCase } from './__fixtures__/layoutCases'
-import { runtimeLayoutCases, runtimeStateAvailable } from './__fixtures__/runtimeLayoutCases'
+import {
+  runtimeCommonMasters,
+  runtimeLayoutCases,
+  runtimeStateAvailable,
+} from './__fixtures__/runtimeLayoutCases'
 import {
   KNOWN_NODE_COLLISIONS,
   KNOWN_RUNTIME_COLLISIONS,
@@ -210,5 +214,15 @@ describeInvariantsFor('registry', layoutCases, KNOWN_NODE_COLLISIONS)
 
 // state.json이 없는 환경(클린 체크아웃 직후 등)에서는 건너뛴다.
 describe.skipIf(!runtimeStateAvailable)('runtime state', () => {
+  // 이 fixture의 존재 이유는 "앱이 보는 것"을 재는 것이다. 로드 경로가 한 단계라도
+  // 빠지면 앱과 다른 상태를 재면서 검증하는 척하게 된다. 실제로 한 번 그랬다.
+  it('앱과 동일한 로드 경로를 거쳤다 (Execution Domain 마이그레이션 적용)', () => {
+    const laneIds = (runtimeCommonMasters?.lanes ?? []).map((lane) => lane.id)
+    // 마이그레이션 후 lanes는 Execution Domain 마스터다(ADR-012). 마이그레이션이
+    // 빠지면 조직 스킴(partnership, warehouse-easyadmin 등)이 남는다.
+    expect(laneIds).toContain('procurement')
+    expect(laneIds).not.toContain('warehouse-easyadmin')
+  })
+
   describeInvariantsFor('runtime state', runtimeLayoutCases, KNOWN_RUNTIME_COLLISIONS)
 })
