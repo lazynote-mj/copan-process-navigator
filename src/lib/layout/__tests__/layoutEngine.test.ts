@@ -3,12 +3,11 @@ import type { Edge as FlowEdge, Node as FlowNode } from '@xyflow/react'
 import { toBeNavigator } from '../../../data/toBeNavigatorRegistry'
 import {
   getLayoutedElements,
-  type LayoutOptions,
   type LayoutResult,
   type ProcessEdgeData,
   type ProcessNodeData,
 } from '../elkLayout'
-import type { Process } from '../../../types/process'
+import { layoutCases } from './__fixtures__/layoutCases'
 
 /**
  * 레이아웃/라우팅 엔진 회귀 스냅샷.
@@ -20,16 +19,8 @@ import type { Process } from '../../../types/process'
 
 const round = (value: number) => Math.round(value * 10) / 10
 
-type LayoutCase = { name: string; process: Process; options: LayoutOptions }
-
-const cases: LayoutCase[] = [
-  { name: 'overview', process: toBeNavigator.overview, options: { overviewVertical: true } },
-  ...toBeNavigator.detailProcesses.map((process) => ({
-    name: process.id,
-    process,
-    options: { detailHorizontal: true } as LayoutOptions,
-  })),
-]
+/** case 목록은 `routerInvariants.test.ts`와 공유한다 — 두 테스트가 같은 입력을 봐야 한다. */
+const cases = layoutCases
 
 function summarizeNode(node: FlowNode<ProcessNodeData>) {
   return {
