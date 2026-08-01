@@ -247,7 +247,14 @@ type NodeLike = {
   interfaceRuleAnchor?: { fromLaneId: string; toLaneId: string }
 }
 type ZoneLike = { laneIds?: string[] }
-type ProcessLike = { id: string; type?: string; nodes: NodeLike[]; zones?: ZoneLike[] }
+type ProcessLike = {
+  id: string
+  type?: string
+  nodes: NodeLike[]
+  zones?: ZoneLike[]
+  /** 레인 표시 설정. node.laneId와 같은 스킴이어야 하므로 함께 remap한다. */
+  laneIds?: string[]
+}
 type GroupLike = { id: string; detailProcessId: string; domainAssignments?: DomainAssignment[] }
 type CommonMastersLike = { lanes: LaneMasterLike[]; organizations?: Organization[] }
 
@@ -296,14 +303,30 @@ function remapAnchor(
   }
 }
 
+/**
+ * laneId 목록 → 도메인 remap(+dedupe). 값 변화가 없으면 원본 배열을 그대로 반환한다
+ * (idempotent 안정 — 참조가 새로 생기면 상위에서 불필요한 변경으로 오인한다).
+ */
+function remapLaneIdList(
+  laneIds: string[] | undefined,
+  laneNameById: Map<string, string>,
+): string[] | undefined {
+  if (!laneIds) return undefined
+  const mapped = [
+    ...new Set(laneIds.map((id) => resolveDomainMapping(id, laneNameById.get(id)).executionDomainId)),
+  ]
+  const same = mapped.length === laneIds.length && mapped.every((v, i) => v === laneIds[i])
+  return same ? laneIds : mapped
+}
+
 /** zone.laneIds → 도메인 remap(+dedupe). 값 변화가 없으면 원본 참조를 그대로 반환(idempotent 안정). */
 function remapZones<Z extends ZoneLike>(zones: Z[] | undefined, laneNameById: Map<string, string>): Z[] | undefined {
   if (!zones) return undefined
   let changed = false
   const next = zones.map((zone) => {
     if (!zone.laneIds) return zone
-    const mapped = [...new Set(zone.laneIds.map((id) => resolveDomainMapping(id, laneNameById.get(id)).executionDomainId))]
-    if (mapped.length === zone.laneIds.length && mapped.every((v, i) => v === zone.laneIds![i])) return zone
+    const mapped = remapLaneIdList(zone.laneIds, laneNameById)!
+    if (mapped === zone.laneIds) return zone
     changed = true
     return { ...zone, laneIds: mapped }
   })
@@ -398,7 +421,13 @@ export function migrateExecutionDomains<
       }
     }
 
-    return { ...process, nodes, zones: remapZones(process.zones, laneNameById) }
+    const laneIds = remapLaneIdList(process.laneIds, laneNameById)
+    return {
+      ...process,
+      nodes,
+      zones: remapZones(process.zones, laneNameById),
+      ...(laneIds === process.laneIds ? {} : { laneIds }),
+    }
   })
 
   stats.syntheticDomains = syntheticDomains.size

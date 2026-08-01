@@ -224,5 +224,24 @@ describe.skipIf(!runtimeStateAvailable)('runtime state', () => {
     expect(laneIds).not.toContain('warehouse-easyadmin')
   })
 
+  /**
+   * `validateNodes`는 laneId가 `process.lanes`에 없는 노드를 렌더에서 제외한다 —
+   * 콘솔 경고만 남고 화면에서는 조용히 사라진다. 한때 108개가 그렇게 사라졌다
+   * (`migrateExecutionDomains`가 `process.laneIds`를 remap하지 않아 도메인 3종의
+   * 레인 밴드가 없었다). 사용자가 알아챌 방법이 없으므로 테스트로 고정한다.
+   */
+  it('레인 밴드가 없어 렌더에서 탈락하는 노드가 없다', () => {
+    const orphans: string[] = []
+    for (const { name, process } of runtimeLayoutCases) {
+      const laneIds = new Set(process.lanes.map((lane) => lane.id))
+      for (const node of process.nodes) {
+        if (!node.laneId || !laneIds.has(node.laneId)) {
+          orphans.push(`${name}/${node.id} (laneId=${node.laneId ?? '없음'})`)
+        }
+      }
+    }
+    expect(orphans).toEqual([])
+  })
+
   describeInvariantsFor('runtime state', runtimeLayoutCases, KNOWN_RUNTIME_COLLISIONS)
 })

@@ -5,6 +5,7 @@ import {
   extractDomainAssignments,
   resolveDomainMapping,
   syntheticDomainId,
+  migrateExecutionDomains,
   syntheticOrganizationId,
   type NodeLaneRef,
 } from '../executionDomainMigration'
@@ -165,5 +166,101 @@ describe('canonical 마스터 시드', () => {
     expect(ids).toContain('business-innovation')
     expect(ids).toContain('hr-ga')
     expect(CANONICAL_ORGANIZATIONS).toHaveLength(7)
+  })
+})
+
+// ── process.laneIds remap (레인 표시 설정) ────────────────────────────────────
+
+describe('process.laneIds remap', () => {
+  const legacyMasters = {
+    lanes: [
+      { id: 'business', name: '사업부 / ERP' },
+      { id: 'partnership', name: '상생협력팀 / ERP' },
+      { id: 'warehouse-easyadmin', name: '물류센터 / 이지어드민' },
+      { id: 'finance', name: '재무팀 / ERP' },
+    ],
+  }
+
+  /**
+   * `process.laneIds`는 "이 프로세스가 어떤 레인을 표시하는가" 설정이다.
+   * node.laneId를 도메인으로 remap하면서 이 목록을 legacy lane id로 남겨두면
+   * 레인 밴드가 만들어지지 않고, 그 도메인 노드가 `validateNodes`에서 조용히
+   * 탈락한다(콘솔 경고만 남는다).
+   */
+  it('legacy lane id로 저장된 laneIds를 Execution Domain으로 remap한다', () => {
+    const result = migrateExecutionDomains({
+      commonMasters: legacyMasters,
+      processes: [
+        {
+          id: 'p1',
+          laneIds: ['business', 'partnership', 'warehouse-easyadmin', 'finance'],
+          nodes: [
+            { id: 'n1', laneId: 'business' },
+            { id: 'n2', laneId: 'partnership' },
+            { id: 'n3', laneId: 'warehouse-easyadmin' },
+            { id: 'n4', laneId: 'finance' },
+          ],
+        },
+      ],
+    })
+
+    expect(result.processes[0]!.laneIds).toEqual([
+      'business',
+      'procurement',
+      'logistics',
+      'finance',
+    ])
+  })
+
+  it('remap 후 모든 노드의 laneId가 laneIds 안에 있다 (렌더 탈락 0)', () => {
+    const result = migrateExecutionDomains({
+      commonMasters: legacyMasters,
+      processes: [
+        {
+          id: 'p1',
+          laneIds: ['business', 'partnership', 'warehouse-easyadmin'],
+          nodes: [
+            { id: 'n1', laneId: 'partnership' },
+            { id: 'n2', laneId: 'warehouse-easyadmin' },
+          ],
+        },
+      ],
+    })
+
+    const p = result.processes[0]!
+    const shown = new Set(p.laneIds ?? [])
+    const dropped = p.nodes.filter((n) => !shown.has(n.laneId)).map((n) => n.id)
+    expect(dropped).toEqual([])
+  })
+
+  it('중복 도메인으로 접히면 dedupe한다', () => {
+    const result = migrateExecutionDomains({
+      commonMasters: {
+        lanes: [
+          { id: 'partnership', name: '상생협력팀 / ERP' },
+          { id: 'lane-mr8i71rk-rr7ki', name: '경영혁신팀 / 그룹웨어' },
+        ],
+      },
+      // 둘 다 procurement 도메인으로 접힌다
+      processes: [
+        {
+          id: 'p1',
+          laneIds: ['partnership', 'lane-mr8i71rk-rr7ki'],
+          nodes: [{ id: 'n1', laneId: 'partnership' }],
+        },
+      ],
+    })
+
+    expect(result.processes[0]!.laneIds).toEqual(['procurement'])
+  })
+
+  it('laneIds가 없는 process는 그대로 둔다', () => {
+    const result = migrateExecutionDomains({
+      commonMasters: legacyMasters,
+      processes: [
+        { id: 'p1', laneIds: undefined as string[] | undefined, nodes: [{ id: 'n1', laneId: 'partnership' }] },
+      ],
+    })
+    expect(result.processes[0]!.laneIds).toBeUndefined()
   })
 })
